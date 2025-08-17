@@ -1,0 +1,270 @@
+<?php
+
+use App\Http\Controllers\KepalaDapur\KepalaDapurController;
+use App\Http\Controllers\AdminGudang\AdminGudangController;
+use App\Http\Controllers\AhliGizi\AhliGiziController;
+use App\Http\Controllers\AhliGizi\MenuMakananController as AhliGiziMenuMakananController;
+use App\Http\Controllers\Api\WilayahController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\DashboardController;
+use App\Http\Controllers\KepalaDapur\MenuMakananController as KepalaDapurMenuMakananController;
+use App\Http\Controllers\KepalaDapur\TemplateItemController as KepalaDapurTemplateItemController;
+use App\Http\Controllers\KepalaDapur\UserController as KepalaDapurUserController;
+use App\Http\Controllers\SuperAdmin\ApprovalStockItemController;
+use App\Http\Controllers\SuperAdmin\BahanMenuController;
+use App\Http\Controllers\SuperAdmin\DapurController;
+use App\Http\Controllers\SuperAdmin\MenuMakananController;
+use App\Http\Controllers\SuperAdmin\StockItemController;
+use App\Http\Controllers\SuperAdmin\SuperAdminController;
+use App\Http\Controllers\SuperAdmin\TemplateItemController;
+use App\Http\Controllers\SuperAdmin\UserController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// Guest 
+Route::middleware('guest')->group(function () {
+    // Login 
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+
+    // Register
+    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+});
+
+// API
+Route::prefix('api/wilayah')->name('api.wilayah.')->group(function () {
+    Route::get('/provinces', [WilayahController::class, 'getProvinces'])->name('provinces');
+    Route::get('/regencies/{provinceId}', [WilayahController::class, 'getRegencies'])->name('regencies');
+    Route::get('/districts/{regencyId}', [WilayahController::class, 'getDistricts'])->name('districts');
+    Route::get('/villages/{districtId}', [WilayahController::class, 'getVillages'])->name('villages');
+    Route::post('/clear-cache', [WilayahController::class, 'clearCache'])->name('clear-cache');
+});
+
+// Authenticated
+Route::middleware('auth')->group(function () {
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Dashboard 
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/switch/{dapur}', [DashboardController::class, 'switchDapur'])->name('dashboard.switch-dapur');
+
+    // Redirect dashboard
+    Route::get('/', function () {
+        return redirect()->route('dashboard');
+    });
+
+    // Kepala Dapur Dashboard
+    // Route::middleware(['role:kepala_dapur', 'dapur.access:kepala_dapur'])
+    //     ->get('/kepala-dapur/dashboard/{dapur}', [KepalaDapurController::class, 'dashboard'])
+    //     ->name('kepala-dapur.dashboard');
+
+    // Admin Gudang Dashboard
+    // Route::middleware(['role:admin_gudang', 'dapur.access:admin_gudang'])
+    //     ->get('/admin-gudang/dashboard/{dapur}', [AdminGudangController::class, 'dashboard'])
+    //     ->name('admin-gudang.dashboard');
+
+    // Ahli Gizi Dashboard
+    // Route::middleware(['role:ahli_gizi', 'dapur.access:ahli_gizi'])
+    //     ->get('/ahli-gizi/dashboard/{dapur}', [AhliGiziController::class, 'dashboard'])
+    //     ->name('ahli-gizi.dashboard');
+});
+
+
+//========== Super Admin Only Routes ==========
+Route::middleware(['auth', 'super.admin.only'])
+    ->prefix('superadmin')
+    ->name('superadmin.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
+
+        // Dapur Management
+        Route::prefix('dapur')->name('dapur.')->group(function () {
+            Route::get('/', [DapurController::class, 'dapurIndex'])->name('index');
+            Route::get('/create', [DapurController::class, 'dapurCreate'])->name('create');
+            Route::post('/', [DapurController::class, 'dapurStore'])->name('store');
+            Route::get('/{dapur}', [DapurController::class, 'dapurShow'])->name('show');
+            Route::get('/{dapur}/edit', [DapurController::class, 'dapurEdit'])->name('edit');
+            Route::put('/{dapur}', [DapurController::class, 'dapurUpdate'])->name('update');
+            Route::delete('/{dapur}', [DapurController::class, 'dapurDestroy'])->name('destroy');
+        });
+
+        // User Management
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'userIndex'])->name('index');
+            Route::get('/create', [UserController::class, 'userCreate'])->name('create');
+            Route::post('/', [UserController::class, 'userStore'])->name('store');
+            Route::get('/{user}', [UserController::class, 'userShow'])->name('show');
+            Route::get('/{user}/edit', [UserController::class, 'userEdit'])->name('edit');
+            Route::put('/{user}', [UserController::class, 'userUpdate'])->name('update');
+            Route::delete('/{user}', [UserController::class, 'userDestroy'])->name('destroy');
+            // Role Assignment
+            Route::post('/{user}/assign-role', [SuperAdminController::class, 'assignRole'])->name('assign-role');
+            Route::delete('/{user}/remove-role', [SuperAdminController::class, 'removeRole'])->name('remove-role');
+        });
+
+        // Template Items
+        Route::prefix('template-items')->name('template-items.')->group(function () {
+            Route::get('/', [TemplateItemController::class, 'index'])->name('index');
+            Route::get('/create', [TemplateItemController::class, 'create'])->name('create');
+            Route::post('/', [TemplateItemController::class, 'store'])->name('store');
+            Route::get('/{templateItem}/edit', [TemplateItemController::class, 'edit'])->name('edit');
+            Route::put('/{templateItem}', [TemplateItemController::class, 'update'])->name('update');
+            Route::delete('/{templateItem}', [TemplateItemController::class, 'destroy'])->name('destroy');
+        });
+
+        // Menu Makanan
+        Route::prefix('menu-makanan')->name('menu-makanan.')->group(function () {
+            Route::get('/', [MenuMakananController::class, 'index'])->name('index');
+            Route::get('/create', [MenuMakananController::class, 'create'])->name('create');
+            Route::post('/', [MenuMakananController::class, 'store'])->name('store');
+            Route::get('/{menuMakanan}/edit', [MenuMakananController::class, 'edit'])->name('edit');
+            Route::put('/{menuMakanan}', [MenuMakananController::class, 'update'])->name('update');
+            Route::delete('/{menuMakanan}', [MenuMakananController::class, 'destroy'])->name('destroy');
+            Route::patch('/{menuMakanan}/toggle-status', [MenuMakananController::class, 'toggleStatus'])->name('toggle-status');
+        });
+
+        Route::prefix('bahan-menu')->name('bahan-menu.')->group(function () {
+            Route::get('/create', [BahanMenuController::class, 'create'])->name('create');
+            Route::post('/', [BahanMenuController::class, 'store'])->name('store');
+            Route::get('/{bahanMenu}/edit', [BahanMenuController::class, 'edit'])->name('edit');
+            Route::put('/{bahanMenu}', [BahanMenuController::class, 'update'])->name('update');
+            Route::delete('/{bahanMenu}', [BahanMenuController::class, 'destroy'])->name('destroy');
+            Route::put('/menu/{menu}/bulk-update', [BahanMenuController::class, 'bulkUpdate'])->name('bulk-update');
+        });
+
+        Route::prefix('stock-items')->name('stock-items.')->group(function () {
+            Route::get('/', [StockItemController::class, 'index'])->name('index');
+            Route::get('/create', [StockItemController::class, 'create'])->name('create');
+            Route::post('/', [StockItemController::class, 'store'])->name('store');
+            Route::get('/{stockItem}', [StockItemController::class, 'show'])->name('show');
+            Route::get('/{stockItem}/edit', [StockItemController::class, 'edit'])->name('edit');
+            Route::put('/{stockItem}', [StockItemController::class, 'update'])->name('update');
+            Route::delete('/{stockItem}', [StockItemController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('approval')->name('approvals.')->group(function () {
+            Route::get('/', [ApprovalStockItemController::class, 'index'])->name('index');
+            Route::get('/create', [ApprovalStockItemController::class, 'create'])->name('create');
+            Route::post('/', [ApprovalStockItemController::class, 'store'])->name('store');
+            Route::get('/{approvalStockItem}', [ApprovalStockItemController::class, 'show'])->name('show');
+            Route::get('/{approvalStockItem}/edit', [ApprovalStockItemController::class, 'edit'])->name('edit');
+            Route::put('/{approvalStockItem}', [ApprovalStockItemController::class, 'update'])->name('update');
+            Route::delete('/{approvalStockItem}', [ApprovalStockItemController::class, 'destroy'])->name('destroy');
+            Route::post('/{approvalStockItem}/approve', [ApprovalStockItemController::class, 'approve'])->name('approve');
+            Route::post('/{approvalStockItem}/reject', [ApprovalStockItemController::class, 'reject'])->name('reject');
+        });
+    });
+
+
+//========== Kepala Dapur Dengan ID Dapur Routes ==========
+Route::middleware(['auth', 'dapur.access:kepala_dapur'])
+    ->prefix('kepala-dapur/dapur/{dapur}')
+    ->name('kepala-dapur.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', [KepalaDapurController::class, 'dashboard'])->name('dashboard');
+
+        // Users Management
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [KepalaDapurUserController::class, 'index'])->name('index');
+            Route::get('/create', [KepalaDapurUserController::class, 'create'])->name('create');
+            Route::post('/', [KepalaDapurUserController::class, 'store'])->name('store');
+            Route::get('/{user}', [KepalaDapurUserController::class, 'show'])->name('show');
+            Route::get('/{user}/edit', [KepalaDapurUserController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [KepalaDapurUserController::class, 'update'])->name('update');
+            Route::delete('/{user}', [KepalaDapurUserController::class, 'destroy'])->name('destroy');
+        });
+    });
+
+
+
+//========== Admin Gudang Dengan ID Dapur Routes ==========
+Route::middleware(['auth', 'dapur.access:admin_gudang'])
+    ->prefix('dapur/{dapur}')
+    ->name('admin-gudang.')
+    ->group(function () {
+        Route::get('/dashboard', [AdminGudangController::class, 'dashboard'])->name('dashboard');
+    });
+
+
+
+//========== Ahli Gizi Dengan ID Dapur Routes ==========
+Route::middleware(['auth', 'dapur.access:ahli_gizi'])
+    ->prefix('dapur/{dapur}')
+    ->name('ahli-gizi.')
+    ->group(function () {});
+
+
+//========== General Role Check Kepala Dapur Routes  ==========
+Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('kepala-dapur.')->group(function () {
+    // Template Items
+    Route::prefix('template-items')->name('template-items.')->group(function () {
+        Route::get('/', [KepalaDapurTemplateItemController::class, 'index'])->name('index');
+        Route::get('/create', [KepalaDapurTemplateItemController::class, 'create'])->name('create');
+        Route::post('/', [KepalaDapurTemplateItemController::class, 'store'])->name('store');
+        Route::get('/{templateItem}', [KepalaDapurTemplateItemController::class, 'show'])->name('show');
+        Route::get('/{templateItem}/edit', [KepalaDapurTemplateItemController::class, 'edit'])->name('edit');
+        Route::put('/{templateItem}', [KepalaDapurTemplateItemController::class, 'update'])->name('update');
+        Route::delete('/{templateItem}', [KepalaDapurTemplateItemController::class, 'destroy'])->name('destroy');
+        Route::get('/search', [KepalaDapurTemplateItemController::class, 'getTemplateItems'])->name('search');
+    });
+    // Menu Makanan
+    Route::prefix('menu-makanan')->name('menu-makanan.')->group(function () {
+        Route::get('/', [KepalaDapurMenuMakananController::class, 'index'])->name('index');
+        Route::get('/{menuMakanan}', [KepalaDapurMenuMakananController::class, 'show'])->name('show');
+        Route::get('/active-menus', [KepalaDapurMenuMakananController::class, 'getActiveMenus'])->name('active-menus');
+        Route::post('/{menuMakanan}/check-stock', [KepalaDapurMenuMakananController::class, 'checkStock'])->name('check-stock');
+    });
+});
+
+//========== General Role Check Routes ==========
+Route::middleware(['auth', 'role:admin_gudang'])->group(function () {
+    // Route::get('/admin-gudang/dashboard', [AdminGudangController::class, 'dashboard']);
+});
+
+
+//========== General Role Check Routes ==========
+Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-gizi.')->group(function () {
+
+    Route::get('/dashboard', [AhliGiziController::class, 'dashboard'])->name('dashboard');
+
+    // Menu Makanan
+    Route::prefix('menu-makanan')->name('menu-makanan.')->group(function () {
+        Route::get('/', [AhliGiziMenuMakananController::class, 'index'])->name('index');
+        Route::get('/create', [AhliGiziMenuMakananController::class, 'create'])->name('create');
+        Route::post('/', [AhliGiziMenuMakananController::class, 'store'])->name('store');
+        Route::get('/{menuMakanan}', [AhliGiziMenuMakananController::class, 'show'])->name('show');
+        Route::get('/{menuMakanan}/edit', [AhliGiziMenuMakananController::class, 'edit'])->name('edit');
+        Route::put('/{menuMakanan}', [AhliGiziMenuMakananController::class, 'update'])->name('update');
+        Route::delete('/{menuMakanan}', [AhliGiziMenuMakananController::class, 'destroy'])->name('destroy');
+        Route::patch('/{menuMakanan}/toggle-status', [AhliGiziMenuMakananController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/{menuMakanan}/check-stock', [AhliGiziMenuMakananController::class, 'checkStock'])->name('check-stock');
+        Route::get('/active-menus', [AhliGiziMenuMakananController::class, 'getActiveMenus'])->name('active-menus');
+    });
+});
+
+
+
+Route::middleware(['auth', 'role:kepala_dapur,admin_gudang,ahli_gizi'])->group(function () {
+    // Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
+    // Route::get('/menu/{menu}', [MenuController::class, 'show'])->name('menu.show');
+});
