@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\KepalaDapur\KepalaDapurController;
 use App\Http\Controllers\AdminGudang\AdminGudangController;
+use App\Http\Controllers\AdminGudang\StockItemController as AdminGudangStockItemController;
 use App\Http\Controllers\AhliGizi\AhliGiziController;
 use App\Http\Controllers\AhliGizi\MenuMakananController as AhliGiziMenuMakananController;
 use App\Http\Controllers\Api\WilayahController;
@@ -193,6 +194,15 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur'])
             Route::put('/{user}', [KepalaDapurUserController::class, 'update'])->name('update');
             Route::delete('/{user}', [KepalaDapurUserController::class, 'destroy'])->name('destroy');
         });
+
+        // Approval Stock Item
+        Route::prefix('approvals')->name('approvals.')->group(function () {
+            Route::get('/', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'index'])->name('index');
+            Route::get('/{approval}', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'show'])->name('show');
+            Route::post('/{approval}/approve', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'approve'])->name('approve');
+            Route::post('/{approval}/reject', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'reject'])->name('reject');
+            Route::post('/bulk-action', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'bulkAction'])->name('bulk-action');
+        });
     });
 
 
@@ -202,7 +212,16 @@ Route::middleware(['auth', 'dapur.access:admin_gudang'])
     ->prefix('dapur/{dapur}')
     ->name('admin-gudang.')
     ->group(function () {
+
+        // Dashboard
         Route::get('/dashboard', [AdminGudangController::class, 'dashboard'])->name('dashboard');
+        // Stock
+        Route::prefix('stock')->name('stock.')->group(function () {
+            Route::get('/', [AdminGudangStockItemController::class, 'index'])->name('index');
+            Route::get('/{stockItem}', [AdminGudangStockItemController::class, 'show'])->name('show');
+            Route::post('/{stockItem}/request', [AdminGudangStockItemController::class, 'requestStock'])->name('request');
+            Route::get('/export/csv', [AdminGudangStockItemController::class, 'export'])->name('export');
+        });
     });
 
 

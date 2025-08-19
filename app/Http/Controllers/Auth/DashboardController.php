@@ -20,12 +20,10 @@ class DashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // Cek role pengguna
         if ($user->isSuperAdmin()) {
             return redirect()->route('superadmin.dashboard');
         }
 
-        // Ambil daftar dapur yang dapat diakses
         $accessibleDapur = $this->getUserAccessibleDapur($user);
 
         if ($accessibleDapur->isEmpty()) {
@@ -34,13 +32,11 @@ class DashboardController extends Controller
             ]);
         }
 
-        // Jika hanya satu dapur, arahkan langsung ke dashboard role yang sesuai
         if ($accessibleDapur->count() === 1) {
             $dapur = $accessibleDapur->first();
             return $this->redirectToRoleDashboard($user, $dapur);
         }
 
-        // Jika lebih dari satu dapur, tampilkan halaman pemilihan dapur
         return view('dashboard.select-dapur', [
             'user' => $user,
             'dapurList' => $accessibleDapur,

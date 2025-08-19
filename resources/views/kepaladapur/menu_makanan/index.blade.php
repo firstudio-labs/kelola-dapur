@@ -16,17 +16,13 @@
                                 Dashboard
                             </a>
                             <i class="bx bx-chevron-right me-2"></i>
-                            <span class="text-dark">Lihat Menu Makanan</span>
+                            <span class="text-dark">Kelola Menu Makanan</span>
                         </nav>
-                        <h4 class="mb-1">Menu Makanan</h4>
+                        <h4 class="mb-1">Kelola Menu Makanan</h4>
                         <p class="mb-0 text-muted">
-                            Lihat semua menu makanan yang tersedia
+                            Kelola semua menu makanan dalam sistem
                         </p>
                     </div>
-                    <span class="badge bg-info">
-                        <i class="bx bx-info-circle me-1"></i>
-                        Mode Lihat Saja
-                    </span>
                 </div>
             </div>
         </div>
@@ -202,6 +198,7 @@
                                     <th>Deskripsi</th>
                                     <th>Bahan</th>
                                     <th>Status</th>
+                                    <th>Dibuat Oleh Dapur</th>
                                     <th>Dibuat</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -238,6 +235,9 @@
                                             >
                                                 {{ $menu->is_active ? "Active" : "Inactive" }}
                                             </span>
+                                        </td>
+                                        <td>
+                                            {{ $menu->createdByDapur->nama_dapur ?? "Tidak ada dapur terkait" }}
                                         </td>
                                         <td>
                                             {{ $menu->created_at->format("d M Y") }}
@@ -287,8 +287,17 @@
                             ></i>
                             <h5 class="mb-1">Belum ada menu</h5>
                             <p class="text-muted mb-3">
-                                Belum ada menu makanan yang tersedia.
+                                Mulai dengan membuat menu pertama.
                             </p>
+                            {{--
+                                <a
+                                href="{{ route("kepala-dapur.menu-makanan.create") }}"
+                                class="btn btn-primary"
+                                >
+                                <i class="bx bx-plus me-1"></i>
+                                Tambah Menu Pertama
+                                </a>
+                            --}}
                         @endif
                     </div>
                 @endif

@@ -6,15 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\MenuMakanan;
 use App\Models\TemplateItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class MenuMakananController extends Controller
 {
     public function index()
     {
-        $menus = MenuMakanan::with(['bahanMenu.templateItem'])
+        $menus = MenuMakanan::with(['bahanMenu.templateItem', 'createdByDapur'])
             ->orderBy('nama_menu', 'asc')
             ->paginate(15);
 
@@ -24,8 +26,9 @@ class MenuMakananController extends Controller
     public function create()
     {
         $templateItems = TemplateItem::orderBy('nama_bahan', 'asc')->get();
+        $currentDapur = Auth::user()->userRole->dapur ?? null;
 
-        return view('ahligizi.menu_makanan.create', compact('templateItems'));
+        return view('ahligizi.menu_makanan.create', compact('templateItems', 'currentDapur'));
     }
 
     public function store(Request $request)
@@ -63,11 +66,21 @@ class MenuMakananController extends Controller
             $gambarMenu = $filename;
         }
 
+        $createdByDapurId = Auth::user()->userRole->id_dapur ?? null;
+        Log::info('Store Menu: created_by_dapur_id', ['id' => $createdByDapurId]);
+
+        if (!$createdByDapurId) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Dapur tidak ditemukan untuk pengguna ini'])
+                ->withInput();
+        }
+
         $menu = MenuMakanan::create([
             'nama_menu' => $request->nama_menu,
             'deskripsi' => $request->deskripsi,
             'gambar_menu' => $gambarMenu,
-            'is_active' => $request->is_active
+            'is_active' => $request->is_active,
+            'created_by_dapur_id' => $createdByDapurId,
         ]);
 
         foreach ($request->bahan_menu as $bahan) {
@@ -83,7 +96,7 @@ class MenuMakananController extends Controller
 
     public function show(MenuMakanan $menuMakanan)
     {
-        $menuMakanan->load(['bahanMenu.templateItem', 'detailTransaksiDapur.transaksiDapur']);
+        $menuMakanan->load(['bahanMenu.templateItem', 'detailTransaksiDapur.transaksiDapur.dapur', 'createdByDapur']);
 
         return view('ahligizi.menu_makanan.show', compact('menuMakanan'));
     }
@@ -92,8 +105,9 @@ class MenuMakananController extends Controller
     {
         $menuMakanan->load(['bahanMenu.templateItem']);
         $templateItems = TemplateItem::orderBy('nama_bahan', 'asc')->get();
+        $currentDapur = Auth::user()->userRole->dapur ?? null;
 
-        return view('ahligizi.menu_makanan.edit', compact('menuMakanan', 'templateItems'));
+        return view('ahligizi.menu_makanan.edit', compact('menuMakanan', 'templateItems', 'currentDapur'));
     }
 
     public function update(Request $request, MenuMakanan $menuMakanan)
@@ -135,11 +149,21 @@ class MenuMakananController extends Controller
             $gambarMenu = $filename;
         }
 
+        $createdByDapurId = Auth::user()->userRole->id_dapur ?? null;
+        Log::info('Update Menu: created_by_dapur_id', ['id' => $createdByDapurId]);
+
+        if (!$createdByDapurId) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Dapur tidak ditemukan untuk pengguna ini'])
+                ->withInput();
+        }
+
         $menuMakanan->update([
             'nama_menu' => $request->nama_menu,
             'deskripsi' => $request->deskripsi,
             'gambar_menu' => $gambarMenu,
-            'is_active' => $request->is_active
+            'is_active' => $request->is_active,
+            'created_by_dapur_id' => $createdByDapurId,
         ]);
 
         $menuMakanan->bahanMenu()->delete();

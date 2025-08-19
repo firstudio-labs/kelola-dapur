@@ -94,6 +94,14 @@
                                         {{ $menuMakanan->deskripsi ?: "Tidak ada deskripsi" }}
                                     </p>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        Dibuat Oleh Dapur:
+                                    </label>
+                                    <p class="mb-0">
+                                        {{ $menuMakanan->createdByDapur->nama_dapur ?? "Tidak ada dapur terkait" }}
+                                    </p>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">
@@ -201,6 +209,15 @@
 
             <!-- Action Panel -->
             <div class="col-md-4">
+                {{--
+                    <div class="card mb-4">
+                    <div class="card-header">
+                    <h5 class="card-title mb-0">Aksi</h5>
+                    </div>
+                    <div class="card-body"></div>
+                    </div>
+                --}}
+
                 <!-- Statistics -->
                 <div class="card">
                     <div class="card-header">

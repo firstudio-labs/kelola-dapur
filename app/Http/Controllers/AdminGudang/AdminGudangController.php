@@ -41,21 +41,21 @@ class AdminGudangController extends Controller
             'recentStockMovements' => $this->getRecentStockMovementsForDapur($dapur),
         ];
 
-        return view('admin-gudang.dashboard', $dashboardData);
+        return view('admingudang.dashboard.index', $dashboardData);
     }
 
     private function getTotalStockForDapur(Dapur $dapur)
     {
-        return 0; // Placeholder
+        return 0;
     }
 
     private function getLowStockItemsForDapur(Dapur $dapur)
     {
-        return collect(); // Placeholder
+        return collect();
     }
 
     private function getRecentStockMovementsForDapur(Dapur $dapur)
     {
-        return collect(); // Placeholder
+        return collect();
     }
 }

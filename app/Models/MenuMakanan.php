@@ -18,7 +18,8 @@ class MenuMakanan extends Model
         'nama_menu',
         'gambar_menu',
         'deskripsi',
-        'is_active'
+        'is_active',
+        'created_by_dapur_id'
     ];
 
     protected $casts = [
@@ -27,6 +28,10 @@ class MenuMakanan extends Model
 
     protected $appends = ['gambar_url', 'gambar_full_path'];
 
+    public function createdByDapur()
+    {
+        return $this->belongsTo(Dapur::class, 'created_by_dapur_id', 'id_dapur');
+    }
     public function bahanMenu(): HasMany
     {
         return $this->hasMany(BahanMenu::class, 'id_menu');

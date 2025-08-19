@@ -101,6 +101,14 @@
                                         {{ $menuMakanan->deskripsi ?: "Tidak ada deskripsi" }}
                                     </p>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        Dibuat Oleh Dapur:
+                                    </label>
+                                    <p class="mb-0">
+                                        {{ $menuMakanan->createdByDapur->nama_dapur ?? "Tidak ada dapur terkait" }}
+                                    </p>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">
@@ -167,30 +175,24 @@
                                         @foreach ($menuMakanan->bahanMenu as $bahan)
                                             <tr>
                                                 <td>
-                                                    <span>
-                                                        {{ $bahan->templateItem->nama_bahan ?? "Bahan Tidak Diketahui" }}
-                                                    </span>
+                                                    {{ $bahan->templateItem->nama_bahan ?? "Bahan Tidak Diketahui" }}
                                                 </td>
                                                 <td>
-                                                    <span>
-                                                        @php
-                                                            $satuan = isset($bahan->templateItem->satuan) ? strtolower($bahan->templateItem->satuan) : "";
-                                                            $jumlah = $bahan->jumlah_per_porsi ?? 0;
-                                                            if ($satuan === "kg") {
-                                                                $jumlah = $jumlah * 1000;
-                                                                $satuan = "gram";
-                                                            } elseif ($satuan === "liter") {
-                                                                $jumlah = $jumlah * 1000;
-                                                                $satuan = "ml";
-                                                            }
-                                                            echo rtrim(rtrim(number_format($jumlah, 4, ".", ""), "0"), ".");
-                                                        @endphp
-                                                    </span>
+                                                    @php
+                                                        $satuan = isset($bahan->templateItem->satuan) ? strtolower($bahan->templateItem->satuan) : "";
+                                                        $jumlah = $bahan->jumlah_per_porsi ?? 0;
+                                                        if ($satuan === "kg") {
+                                                            $jumlah = $jumlah * 1000;
+                                                            $satuan = "gram";
+                                                        } elseif ($satuan === "liter") {
+                                                            $jumlah = $jumlah * 1000;
+                                                            $satuan = "ml";
+                                                        }
+                                                        echo rtrim(rtrim(number_format($jumlah, 4, ".", ""), "0"), ".");
+                                                    @endphp
                                                 </td>
                                                 <td>
-                                                    <span>
-                                                        {{ $satuan ?: "tidak ada satuan" }}
-                                                    </span>
+                                                    {{ $satuan ?: "tidak ada satuan" }}
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -216,53 +218,47 @@
             <div class="col-md-4">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Aksi Menu</h5>
+                        <h5 class="card-title mb-0">Aksi</h5>
                     </div>
                     <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a
-                                href="{{ route("ahli-gizi.menu-makanan.edit", $menuMakanan->id_menu) }}"
-                                class="btn btn-primary"
+                        <a
+                            href="{{ route("ahli-gizi.menu-makanan.edit", $menuMakanan->id_menu) }}"
+                            class="btn btn-primary w-100 mb-2"
+                        >
+                            <i class="bx bx-edit me-2"></i>
+                            Edit Menu
+                        </a>
+                        <form
+                            action="{{ route("ahli-gizi.menu-makanan.toggle-status", $menuMakanan->id_menu) }}"
+                            method="POST"
+                            class="d-inline"
+                        >
+                            @csrf
+                            @method("PATCH")
+                            <button
+                                type="submit"
+                                class="btn {{ $menuMakanan->is_active ? "btn-warning" : "btn-success" }} w-100 mb-2"
                             >
-                                <i class="bx bx-edit me-2"></i>
-                                Edit Menu
-                            </a>
-                            <form
-                                action="{{ route("ahli-gizi.menu-makanan.toggle-status", $menuMakanan->id_menu) }}"
-                                method="POST"
-                                class="d-inline"
-                            >
-                                @csrf
-                                @method("PATCH")
-                                <button
-                                    type="submit"
-                                    class="btn {{ $menuMakanan->is_active ? "btn-warning" : "btn-success" }} w-100"
-                                    onclick="return confirm('Yakin ingin {{ $menuMakanan->is_active ? "menonaktifkan" : "mengaktifkan" }} menu ini?')"
-                                >
-                                    <i
-                                        class="bx {{ $menuMakanan->is_active ? "bx-pause" : "bx-play" }} me-2"
-                                    ></i>
-                                    {{ $menuMakanan->is_active ? "Nonaktifkan" : "Aktifkan" }}
-                                    Menu
-                                </button>
-                            </form>
-                            <hr class="my-3" />
-                            <form
-                                action="{{ route("ahli-gizi.menu-makanan.destroy", $menuMakanan->id_menu) }}"
-                                method="POST"
-                                onsubmit="return confirm('Yakin ingin menghapus menu ini? Tindakan ini tidak dapat dibatalkan!')"
-                            >
-                                @csrf
-                                @method("DELETE")
-                                <button
-                                    type="submit"
-                                    class="btn btn-danger w-100"
-                                >
-                                    <i class="bx bx-trash me-2"></i>
-                                    Hapus Menu
-                                </button>
-                            </form>
-                        </div>
+                                <i
+                                    class="bx {{ $menuMakanan->is_active ? "bx-lock" : "bx-lock-open" }} me-2"
+                                ></i>
+                                {{ $menuMakanan->is_active ? "Nonaktifkan" : "Aktifkan" }}
+                                Menu
+                            </button>
+                        </form>
+                        <form
+                            action="{{ route("ahli-gizi.menu-makanan.destroy", $menuMakanan->id_menu) }}"
+                            method="POST"
+                            class="d-inline"
+                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus menu ini?');"
+                        >
+                            @csrf
+                            @method("DELETE")
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="bx bx-trash me-2"></i>
+                                Hapus Menu
+                            </button>
+                        </form>
                     </div>
                 </div>
 

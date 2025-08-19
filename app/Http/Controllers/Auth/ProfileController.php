@@ -15,18 +15,12 @@ class ProfileController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Show the profile edit form.
-     */
     public function edit()
     {
         $user = auth()->user();
         return view('profile.edit', compact('user'));
     }
 
-    /**
-     * Update the user's profile information.
-     */
     public function update(Request $request)
     {
         $user = auth()->user();
@@ -60,7 +54,6 @@ class ProfileController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak cocok',
         ]);
 
-        // Additional validation for password change
         if ($request->filled('password')) {
             if (!$request->filled('current_password')) {
                 $validator->errors()->add('current_password', 'Password saat ini harus diisi untuk mengubah password');
@@ -75,14 +68,12 @@ class ProfileController extends Controller
                 ->withInput();
         }
 
-        // Update user data
         $updateData = [
             'nama' => $request->nama,
             'username' => $request->username,
             'email' => $request->email,
         ];
 
-        // Update password if provided
         if ($request->filled('password')) {
             $updateData['password'] = Hash::make($request->password);
         }
@@ -92,14 +83,10 @@ class ProfileController extends Controller
         return redirect()->route('profile.edit')->with('success', 'Profil berhasil diperbarui');
     }
 
-    /**
-     * Delete the user's account.
-     */
     public function destroy(Request $request)
     {
         $user = auth()->user();
 
-        // Prevent super admin from deleting themselves if they're the only super admin
         if ($user->isSuperAdmin()) {
             $superAdminCount = \App\Models\SuperAdmin::count();
             if ($superAdminCount <= 1) {
@@ -121,7 +108,6 @@ class ProfileController extends Controller
             return redirect()->back()->withErrors(['password' => 'Password tidak benar']);
         }
 
-        // Logout and delete user
         auth()->logout();
         $user->delete();
 

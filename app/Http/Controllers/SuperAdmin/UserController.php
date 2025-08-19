@@ -64,7 +64,6 @@ class UserController extends Controller
             'is_active' => $request->is_active,
         ]);
 
-        // Assign role
         $this->assignUserRole($user, $request->role, $request->id_dapur);
 
         return redirect()->route('superadmin.users.index')

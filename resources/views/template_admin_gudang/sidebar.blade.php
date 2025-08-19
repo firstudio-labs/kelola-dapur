@@ -99,7 +99,7 @@
                 </svg>
             </span>
             <span class="app-brand-text demo menu-text fw-bolder ms-2">
-                Kepala Dapur
+                Admin Gudang
             </span>
         </a>
 
@@ -114,127 +114,32 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
-        <!-- Dashboard -->
-        <li
-            class="menu-item {{ request()->routeIs("dashboard") ? "active" : "" }}"
-        >
-            <a
-                href="{{ route("dashboard", request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
-                class="menu-link"
-            >
-                <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Dashboard">Dashboard</div>
-            </a>
-        </li>
-
-        <!-- Kepala Dapur Header -->
+        <!-- Admin Gudang Header -->
         <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Kepala Dapur</span>
+            <span class="menu-header-text">Admin Gudang</span>
         </li>
 
-        <!-- Approval Permintaan Stok - BARU -->
         <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.approvals.*") ? "active" : "" }}"
-        >
-            <a
-                href="{{ route("kepala-dapur.approvals.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                class="menu-link"
-            >
-                <i class="menu-icon tf-icons bx bx-check-circle"></i>
-                <div data-i18n="Approval Stok">Approval Stok</div>
-                @if (isset($pendingApprovalsCount) && $pendingApprovalsCount > 0)
-                    <span class="badge bg-danger ms-2">
-                        {{ $pendingApprovalsCount }}
-                    </span>
-                @endif
-            </a>
-        </li>
-
-        <!-- Konten -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Konten</span>
-        </li>
-
-        <!-- Template Bahan -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.template-items.*") ? "active open" : "" }}"
+            class="menu-item {{ request()->routeIs("admin-gudang.stock.*") ? "active open" : "" }}"
         >
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-package"></i>
-                <div data-i18n="Template Bahan">Template Bahan</div>
+                <div data-i18n="Kelola Stok">Kelola Stok</div>
             </a>
             <ul class="menu-sub">
                 <li
-                    class="menu-item {{ request()->routeIs("kepala-dapur.template-items.index") ? "active" : "" }}"
+                    class="menu-item {{ request()->routeIs("admin-gudang.stock.index") ? "active" : "" }}"
                 >
                     <a
-                        href="{{ route("kepala-dapur.template-items.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                        href="{{ route("admin-gudang.stock.index", ["dapur" => request()->route("dapur")]) }}"
                         class="menu-link"
                     >
-                        <div data-i18n="Daftar Template Bahan">
-                            Daftar Template Bahan
-                        </div>
-                    </a>
-                </li>
-                <li
-                    class="menu-item {{ request()->routeIs("kepala-dapur.template-items.create") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("kepala-dapur.template-items.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                        class="menu-link"
-                    >
-                        <div data-i18n="Tambah Template Bahan">
-                            Tambah Template Bahan
-                        </div>
+                        <div data-i18n="Daftar Stok">Daftar Stok</div>
                     </a>
                 </li>
             </ul>
         </li>
-
-        <!-- Kelola Menu Makanan -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.menu-makanan.*") ? "active" : "" }}"
-        >
-            <a
-                href="{{ route("kepala-dapur.menu-makanan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                class="menu-link"
-            >
-                <i class="menu-icon tf-icons bx bx-food-menu"></i>
-                <div data-i18n="Kelola Menu Makanan">Kelola Menu Makanan</div>
-            </a>
-        </li>
-
-        <!-- Kelola User -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.users.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Kelola User">Kelola User</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("kepala-dapur.users.index") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("kepala-dapur.users.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                        class="menu-link"
-                    >
-                        <div data-i18n="Daftar User">Daftar User</div>
-                    </a>
-                </li>
-                <li
-                    class="menu-item {{ request()->routeIs("kepala-dapur.users.create") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("kepala-dapur.users.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                        class="menu-link"
-                    >
-                        <div data-i18n="Tambah User">Tambah User</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+        <!-- Transaksi Dapur -->
     </ul>
 
     <!-- User -->

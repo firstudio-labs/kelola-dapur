@@ -58,7 +58,6 @@ class BahanMenuController extends Controller
             'jumlah_per_porsi.min' => 'Jumlah per porsi minimal 0.0001',
         ]);
 
-        // Check if combination already exists
         $exists = BahanMenu::where('id_menu', $request->id_menu)
             ->where('id_template_item', $request->id_template_item)
             ->exists();
