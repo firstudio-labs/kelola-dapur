@@ -36,14 +36,18 @@ class MenuMakananController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_menu' => 'required|string|max:100|unique:menu_makanan,nama_menu',
             'deskripsi' => 'nullable|string|max:1000',
+            'kategori' => 'required|in:Karbohidrat,Lauk,Sayur,Tambahan',
             'gambar_menu' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
             'is_active' => 'required|boolean',
             'bahan_menu' => 'required|array|min:1',
             'bahan_menu.*.id_template_item' => 'required|exists:template_items,id_template_item',
             'bahan_menu.*.jumlah_per_porsi' => 'required|numeric|min:0.0001|max:999999.9999',
+            'bahan_menu.*.is_bahan_basah' => 'nullable|boolean',
         ], [
             'nama_menu.required' => 'Nama menu harus diisi',
             'nama_menu.unique' => 'Nama menu sudah ada',
+            'kategori.required' => 'Kategori harus dipilih',
+            'kategori.in' => 'Kategori tidak valid',
             'gambar_menu.image' => 'File harus berupa gambar',
             'gambar_menu.max' => 'Ukuran gambar maksimal 2MB',
             'bahan_menu.required' => 'Minimal harus ada 1 bahan menu',
@@ -78,6 +82,7 @@ class MenuMakananController extends Controller
         $menu = MenuMakanan::create([
             'nama_menu' => $request->nama_menu,
             'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
             'gambar_menu' => $gambarMenu,
             'is_active' => $request->is_active,
             'created_by_dapur_id' => $createdByDapurId,
@@ -86,7 +91,8 @@ class MenuMakananController extends Controller
         foreach ($request->bahan_menu as $bahan) {
             $menu->bahanMenu()->create([
                 'id_template_item' => $bahan['id_template_item'],
-                'jumlah_per_porsi' => $bahan['jumlah_per_porsi']
+                'jumlah_per_porsi' => $bahan['jumlah_per_porsi'],
+                'is_bahan_basah' => isset($bahan['is_bahan_basah']) ? (bool)$bahan['is_bahan_basah'] : false
             ]);
         }
 
@@ -115,14 +121,18 @@ class MenuMakananController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_menu' => 'required|string|max:100|unique:menu_makanan,nama_menu,' . $menuMakanan->id_menu . ',id_menu',
             'deskripsi' => 'nullable|string|max:1000',
+            'kategori' => 'required|in:Karbohidrat,Lauk,Sayur,Tambahan',
             'gambar_menu' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
             'is_active' => 'required|boolean',
             'bahan_menu' => 'required|array|min:1',
             'bahan_menu.*.id_template_item' => 'required|exists:template_items,id_template_item',
             'bahan_menu.*.jumlah_per_porsi' => 'required|numeric|min:0.0001|max:999999.9999',
+            'bahan_menu.*.is_bahan_basah' => 'nullable|boolean',
         ], [
             'nama_menu.required' => 'Nama menu harus diisi',
             'nama_menu.unique' => 'Nama menu sudah ada',
+            'kategori.required' => 'Kategori harus dipilih',
+            'kategori.in' => 'Kategori tidak valid',
             'gambar_menu.image' => 'File harus berupa gambar',
             'gambar_menu.max' => 'Ukuran gambar maksimal 2MB',
             'bahan_menu.required' => 'Minimal harus ada 1 bahan menu',
@@ -161,6 +171,7 @@ class MenuMakananController extends Controller
         $menuMakanan->update([
             'nama_menu' => $request->nama_menu,
             'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
             'gambar_menu' => $gambarMenu,
             'is_active' => $request->is_active,
             'created_by_dapur_id' => $createdByDapurId,
@@ -170,7 +181,8 @@ class MenuMakananController extends Controller
         foreach ($request->bahan_menu as $bahan) {
             $menuMakanan->bahanMenu()->create([
                 'id_template_item' => $bahan['id_template_item'],
-                'jumlah_per_porsi' => $bahan['jumlah_per_porsi']
+                'jumlah_per_porsi' => $bahan['jumlah_per_porsi'],
+                'is_bahan_basah' => isset($bahan['is_bahan_basah']) ? (bool)$bahan['is_bahan_basah'] : false
             ]);
         }
 

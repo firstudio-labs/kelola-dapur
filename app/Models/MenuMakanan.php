@@ -18,6 +18,7 @@ class MenuMakanan extends Model
         'nama_menu',
         'gambar_menu',
         'deskripsi',
+        'kategori',
         'is_active',
         'created_by_dapur_id'
     ];
@@ -28,10 +29,18 @@ class MenuMakanan extends Model
 
     protected $appends = ['gambar_url', 'gambar_full_path'];
 
+    public const KATEGORI_OPTIONS = [
+        'Karbohidrat' => 'Karbohidrat',
+        'Lauk' => 'Lauk',
+        'Sayur' => 'Sayur',
+        'Tambahan' => 'Tambahan'
+    ];
+
     public function createdByDapur()
     {
         return $this->belongsTo(Dapur::class, 'created_by_dapur_id', 'id_dapur');
     }
+
     public function bahanMenu(): HasMany
     {
         return $this->hasMany(BahanMenu::class, 'id_menu');
@@ -108,18 +117,33 @@ class MenuMakanan extends Model
         return $deleted;
     }
 
+    public function getKategoriBadgeClass(): string
+    {
+        return match ($this->kategori) {
+            'Karbohidrat' => 'bg-label-primary',
+            'Lauk' => 'bg-label-success',
+            'Sayur' => 'bg-label-info',
+            'Tambahan' => 'bg-label-warning',
+            default => 'bg-label-secondary'
+        };
+    }
+
     // Helper methods 
     public function calculateRequiredIngredients(int $porsi): array
     {
         $ingredients = [];
 
         foreach ($this->bahanMenu as $bahan) {
+            $jumlahPerPorsi = $bahan->getBeratBasah();
+
             $ingredients[] = [
                 'id_template_item' => $bahan->id_template_item,
                 'nama_bahan' => $bahan->templateItem->nama_bahan,
                 'satuan' => $bahan->templateItem->satuan,
                 'jumlah_per_porsi' => $bahan->jumlah_per_porsi,
-                'total_needed' => $bahan->jumlah_per_porsi * $porsi,
+                'is_bahan_basah' => $bahan->is_bahan_basah,
+                'berat_basah_per_porsi' => $jumlahPerPorsi,
+                'total_needed' => $jumlahPerPorsi * $porsi,
                 'template_item' => $bahan->templateItem
             ];
         }
@@ -150,7 +174,10 @@ class MenuMakanan extends Model
                 'satuan' => $ingredient['satuan'],
                 'needed' => $needed,
                 'available' => $available,
-                'sufficient' => $available >= $needed
+                'sufficient' => $available >= $needed,
+                'is_bahan_basah' => $ingredient['is_bahan_basah'],
+                'berat_asli' => $ingredient['jumlah_per_porsi'] * $porsi,
+                'berat_basah' => $ingredient['total_needed']
             ];
 
             if ($available < $needed) {
@@ -160,7 +187,8 @@ class MenuMakanan extends Model
                     'satuan' => $ingredient['satuan'],
                     'needed' => $needed,
                     'available' => $available,
-                    'shortage' => $needed - $available
+                    'shortage' => $needed - $available,
+                    'is_bahan_basah' => $ingredient['is_bahan_basah']
                 ];
             }
 
@@ -183,6 +211,11 @@ class MenuMakanan extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeByKategori($query, $kategori)
+    {
+        return $query->where('kategori', $kategori);
     }
 
     public function scopeWithGambar($query)

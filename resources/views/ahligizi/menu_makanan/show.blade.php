@@ -90,9 +90,16 @@
                                 />
                             </div>
                             <div class="col-md-8">
-                                <h4 class="mb-3">
-                                    {{ $menuMakanan->nama_menu }}
-                                </h4>
+                                <div class="d-flex align-items-center mb-3">
+                                    <h4 class="me-3">
+                                        {{ $menuMakanan->nama_menu }}
+                                    </h4>
+                                    <span
+                                        class="badge {{ $menuMakanan->getKategoriBadgeClass() }}"
+                                    >
+                                        {{ $menuMakanan->kategori ?? "Kategori" }}
+                                    </span>
+                                </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">
                                         Deskripsi:
@@ -162,43 +169,53 @@
                     </div>
                     <div class="card-body">
                         @if ($menuMakanan->bahanMenu && $menuMakanan->bahanMenu->count() > 0)
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Bahan</th>
-                                            <th>Jumlah per Porsi</th>
-                                            <th>Satuan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($menuMakanan->bahanMenu as $bahan)
-                                            <tr>
-                                                <td>
-                                                    {{ $bahan->templateItem->nama_bahan ?? "Bahan Tidak Diketahui" }}
-                                                </td>
-                                                <td>
-                                                    @php
-                                                        $satuan = isset($bahan->templateItem->satuan) ? strtolower($bahan->templateItem->satuan) : "";
-                                                        $jumlah = $bahan->jumlah_per_porsi ?? 0;
-                                                        if ($satuan === "kg") {
-                                                            $jumlah = $jumlah * 1000;
-                                                            $satuan = "gram";
-                                                        } elseif ($satuan === "liter") {
-                                                            $jumlah = $jumlah * 1000;
-                                                            $satuan = "ml";
-                                                        }
-                                                        echo rtrim(rtrim(number_format($jumlah, 4, ".", ""), "0"), ".");
-                                                    @endphp
-                                                </td>
-                                                <td>
-                                                    {{ $satuan ?: "tidak ada satuan" }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                            <ul class="list-group list-group-flush">
+                                @foreach ($menuMakanan->bahanMenu as $bahan)
+                                    <li
+                                        class="list-group-item d-flex justify-content-between align-items-center"
+                                    >
+                                        <div>
+                                            <h6 class="mb-1">
+                                                {{ $bahan->templateItem->nama_bahan ?? "Bahan Tidak Diketahui" }}
+                                            </h6>
+                                            <p class="mb-0 text-muted">
+                                                @php
+                                                    $satuan = isset($bahan->templateItem->satuan) ? strtolower($bahan->templateItem->satuan) : "";
+                                                    $jumlah = $bahan->jumlah_per_porsi ?? 0;
+                                                    $displayUnit = $satuan;
+
+                                                    // Convert to display unit
+                                                    if ($satuan === "kg") {
+                                                        $jumlah = $jumlah * 1000;
+                                                        $displayUnit = "gram";
+                                                    } elseif ($satuan === "liter" || $satuan === "l") {
+                                                        $jumlah = $jumlah * 1000;
+                                                        $displayUnit = "ml";
+                                                    }
+
+                                                    // Format jumlah
+                                                    $formattedJumlah = rtrim(rtrim(number_format($jumlah, 4, ".", ""), "0"), ".");
+
+                                                    if ($bahan->is_bahan_basah) {
+                                                        // Calculate final weight with 7% increase
+                                                        $finalJumlah = $jumlah * 1.07;
+                                                        $formattedFinalJumlah = rtrim(rtrim(number_format($finalJumlah, 4, ".", ""), "0"), ".");
+
+                                                        echo $formattedJumlah . " " . $displayUnit . " Bahan Matang - " . $formattedFinalJumlah . " " . $displayUnit . " per porsi";
+                                                    } else {
+                                                        echo $formattedJumlah . " " . $displayUnit . " per porsi ";
+                                                    }
+                                                @endphp
+                                            </p>
+                                        </div>
+                                        @if ($bahan->is_bahan_basah)
+                                            <span class="badge bg-label-info">
+                                                Bahan Basah +7%
+                                            </span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
                         @else
                             <div class="text-center py-4">
                                 <i

@@ -70,7 +70,7 @@
                     action="{{ route("ahli-gizi.menu-makanan.index") }}"
                     class="row g-3"
                 >
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="search-input" class="form-label">
                             Cari Menu
                         </label>
@@ -92,7 +92,32 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <label for="kategori-filter" class="form-label">
+                            Filter Kategori
+                        </label>
+                        <select
+                            name="kategori"
+                            id="kategori-filter"
+                            class="choices-select form-select"
+                        >
+                            <option
+                                value="all"
+                                {{ request("kategori") === "all" ? "selected" : "" }}
+                            >
+                                Semua Kategori
+                            </option>
+                            @foreach (App\Models\MenuMakanan::KATEGORI_OPTIONS as $value => $label)
+                                <option
+                                    value="{{ $value }}"
+                                    {{ request("kategori") === $value ? "selected" : "" }}
+                                >
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <label for="status-filter" class="form-label">
                             Filter Status
                         </label>
@@ -121,8 +146,37 @@
                             </option>
                         </select>
                     </div>
+                    <div class="col-md-3">
+                        <label for="bahan-basah-filter" class="form-label">
+                            Filter Bahan Basah
+                        </label>
+                        <select
+                            name="bahan_basah"
+                            id="bahan-basah-filter"
+                            class="choices-select form-select"
+                        >
+                            <option
+                                value="all"
+                                {{ request("bahan_basah") === "all" ? "selected" : "" }}
+                            >
+                                Semua Menu
+                            </option>
+                            <option
+                                value="1"
+                                {{ request("bahan_basah") === "1" ? "selected" : "" }}
+                            >
+                                Ada Bahan Basah
+                            </option>
+                            <option
+                                value="0"
+                                {{ request("bahan_basah") === "0" ? "selected" : "" }}
+                            >
+                                Tidak Ada Bahan Basah
+                            </option>
+                        </select>
+                    </div>
                     <div class="col-12 d-flex justify-content-end gap-2 mt-3">
-                        @if (request()->has("search") || request()->has("status"))
+                        @if (request()->hasAny(["search", "status", "kategori", "bahan_basah"]))
                             <a
                                 href="{{ route("ahli-gizi.menu-makanan.index") }}"
                                 class="btn btn-outline-secondary"
@@ -144,7 +198,7 @@
             <div class="card mb-4">
                 <div class="card-body py-2 px-4">
                     <div class="row justify-content-center g-3">
-                        <div class="col-md-4 text-center">
+                        <div class="col-md-2 text-center">
                             <div
                                 class="d-flex align-items-center justify-content-center"
                             >
@@ -157,7 +211,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 text-center">
+                        <div class="col-md-2 text-center">
                             <div
                                 class="d-flex align-items-center justify-content-center"
                             >
@@ -172,7 +226,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 text-center">
+                        <div class="col-md-2 text-center">
                             <div
                                 class="d-flex align-items-center justify-content-center"
                             >
@@ -183,6 +237,44 @@
                                     <small class="text-muted">Inactive</small>
                                     <h6 class="mb-0">
                                         {{ $menus->where("is_active", false)->count() }}
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div
+                                class="d-flex align-items-center justify-content-center"
+                            >
+                                <span class="badge bg-label-info me-2">
+                                    <i class="bx bx-droplet"></i>
+                                </span>
+                                <div>
+                                    <small class="text-muted">
+                                        Bahan Basah
+                                    </small>
+                                    <h6 class="mb-0">
+                                        {{
+                                            $menus
+                                                ->filter(function ($menu) {
+                                                    return $menu->bahanMenu->where("is_bahan_basah", true)->count() > 0;
+                                                })
+                                                ->count()
+                                        }}
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div
+                                class="d-flex align-items-center justify-content-center"
+                            >
+                                <span class="badge bg-label-warning me-2">
+                                    <i class="bx bx-category"></i>
+                                </span>
+                                <div>
+                                    <small class="text-muted">Kategori</small>
+                                    <h6 class="mb-0">
+                                        {{ $menus->groupBy("kategori")->count() }}
                                     </h6>
                                 </div>
                             </div>
@@ -202,8 +294,10 @@
                                 <tr>
                                     <th>Gambar</th>
                                     <th>Nama Menu</th>
+                                    <th>Kategori</th>
                                     <th>Deskripsi</th>
                                     <th>Bahan</th>
+                                    <th>Bahan Basah</th>
                                     <th>Status</th>
                                     <th>Dibuat Oleh Dapur</th>
                                     <th>Dibuat</th>
@@ -212,9 +306,21 @@
                             </thead>
                             <tbody id="menu-table-body">
                                 @foreach ($menus as $menu)
+                                    @php
+                                        $hasBahanBasah = $menu->bahanMenu->where("is_bahan_basah", true)->count() > 0;
+                                        $kategoriClasses = [
+                                            "Karbohidrat" => "bg-label-primary",
+                                            "Lauk" => "bg-label-success",
+                                            "Sayur" => "bg-label-info",
+                                            "Tambahan" => "bg-label-warning",
+                                        ];
+                                    @endphp
+
                                     <tr
-                                        data-search="{{ strtolower($menu->nama_menu . " " . $menu->deskripsi) }}"
+                                        data-search="{{ strtolower($menu->nama_menu . " " . $menu->deskripsi . " " . $menu->kategori) }}"
                                         data-status="{{ $menu->is_active ? "1" : "0" }}"
+                                        data-kategori="{{ $menu->kategori }}"
+                                        data-bahan-basah="{{ $hasBahanBasah ? "1" : "0" }}"
                                     >
                                         <td>
                                             <img
@@ -228,13 +334,62 @@
                                                 "
                                             />
                                         </td>
-                                        <td>{{ $menu->nama_menu }}</td>
                                         <td>
-                                            {{ Str::limit($menu->deskripsi, 50) }}
+                                            <div class="fw-semibold">
+                                                {{ $menu->nama_menu }}
+                                            </div>
                                         </td>
                                         <td>
-                                            {{ $menu->bahanMenu->count() }}
-                                            bahan
+                                            <span
+                                                class="badge {{ $kategoriClasses[$menu->kategori] ?? "bg-label-secondary" }}"
+                                            >
+                                                {{ $menu->kategori }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">
+                                                {{ Str::limit($menu->deskripsi, 40) ?: "Tidak ada deskripsi" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div
+                                                class="d-flex align-items-center"
+                                            >
+                                                <i
+                                                    class="bx bx-package me-1"
+                                                ></i>
+                                                <span class="fw-semibold">
+                                                    {{ $menu->bahanMenu->count() }}
+                                                </span>
+                                                <small class="text-muted ms-1">
+                                                    bahan
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if ($hasBahanBasah)
+                                                <div
+                                                    class="d-flex align-items-center"
+                                                >
+                                                    <span
+                                                        class="badge bg-label-info"
+                                                    >
+                                                        <i
+                                                            class="bx bx-droplet me-1"
+                                                        ></i>
+                                                        {{ $menu->bahanMenu->where("is_bahan_basah", true)->count() }}
+                                                    </span>
+                                                    <small
+                                                        class="text-muted ms-1"
+                                                    >
+                                                        +7%
+                                                    </small>
+                                                </div>
+                                            @else
+                                                <span class="text-muted">
+                                                    -
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>
                                             <span
@@ -244,10 +399,14 @@
                                             </span>
                                         </td>
                                         <td>
-                                            {{ $menu->createdByDapur->nama_dapur ?? "Tidak ada dapur terkait" }}
+                                            <small class="text-muted">
+                                                {{ $menu->createdByDapur->nama_dapur ?? "Tidak ada dapur terkait" }}
+                                            </small>
                                         </td>
                                         <td>
-                                            {{ $menu->created_at->format("d M Y") }}
+                                            <small class="text-muted">
+                                                {{ $menu->created_at->format("d M Y") }}
+                                            </small>
                                         </td>
                                         <td>
                                             <div class="d-flex gap-1">
@@ -302,7 +461,7 @@
                 @else
                     <!-- Empty State -->
                     <div class="text-center py-6">
-                        @if (request()->hasAny(["search", "status"]))
+                        @if (request()->hasAny(["search", "status", "kategori", "bahan_basah"]))
                             <i class="bx bx-search bx-lg text-muted mb-3"></i>
                             <h5 class="mb-1">Tidak ada hasil</h5>
                             <p class="text-muted mb-3">
@@ -379,6 +538,18 @@
             transform: scale(1.1);
             opacity: 0.9;
         }
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-top: none;
+            white-space: nowrap;
+        }
+        .badge {
+            font-size: 0.75rem;
+        }
+        .badge i {
+            font-size: 0.7rem;
+        }
     </style>
 
     <!-- Choices.js JS -->
@@ -388,6 +559,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const statusFilter = document.getElementById('status-filter');
+            const kategoriFilter = document.getElementById('kategori-filter');
+            const bahanBasahFilter =
+                document.getElementById('bahan-basah-filter');
             const searchInput = document.getElementById('search-input');
             const tableBody = document.getElementById('menu-table-body');
             const rows = tableBody ? tableBody.getElementsByTagName('tr') : [];
@@ -399,27 +573,58 @@
                 placeholderValue: 'Semua Status',
             });
 
+            const kategoriChoices = new Choices(kategoriFilter, {
+                searchEnabled: false,
+                itemSelectText: '',
+                placeholder: true,
+                placeholderValue: 'Semua Kategori',
+            });
+
+            const bahanBasahChoices = new Choices(bahanBasahFilter, {
+                searchEnabled: false,
+                itemSelectText: '',
+                placeholder: true,
+                placeholderValue: 'Semua Menu',
+            });
+
             function filterTable() {
                 const searchText = searchInput.value.toLowerCase();
                 const statusValue = statusChoices.getValue(true);
+                const kategoriValue = kategoriChoices.getValue(true);
+                const bahanBasahValue = bahanBasahChoices.getValue(true);
 
                 Array.from(rows).forEach((row) => {
                     const searchData = row.getAttribute('data-search');
                     const statusData = row.getAttribute('data-status');
+                    const kategoriData = row.getAttribute('data-kategori');
+                    const bahanBasahData = row.getAttribute('data-bahan-basah');
 
                     const matchesSearch = searchText
                         ? searchData.includes(searchText)
                         : true;
                     const matchesStatus =
                         statusValue === 'all' || statusData === statusValue;
+                    const matchesKategori =
+                        kategoriValue === 'all' ||
+                        kategoriData === kategoriValue;
+                    const matchesBahanBasah =
+                        bahanBasahValue === 'all' ||
+                        bahanBasahData === bahanBasahValue;
 
                     row.style.display =
-                        matchesSearch && matchesStatus ? '' : 'none';
+                        matchesSearch &&
+                        matchesStatus &&
+                        matchesKategori &&
+                        matchesBahanBasah
+                            ? ''
+                            : 'none';
                 });
             }
 
             searchInput.addEventListener('input', filterTable);
             statusFilter.addEventListener('change', filterTable);
+            kategoriFilter.addEventListener('change', filterTable);
+            bahanBasahFilter.addEventListener('change', filterTable);
 
             // Initialize Bootstrap tooltips
             const tooltipTriggerList = document.querySelectorAll(
