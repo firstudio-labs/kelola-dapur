@@ -15,7 +15,8 @@ class DetailTransaksiDapur extends Model
     protected $fillable = [
         'id_transaksi',
         'id_menu',
-        'jumlah_porsi'
+        'jumlah_porsi',
+        'tipe_porsi'
     ];
 
     protected $casts = [
@@ -60,7 +61,35 @@ class DetailTransaksiDapur extends Model
         return $this->menuMakanan->calculateRequiredIngredients($this->jumlah_porsi);
     }
 
-    // Auto update total porsi when detail is saved
+    // Helper methods 
+    public function isPorsiBesar(): bool
+    {
+        return $this->tipe_porsi === 'besar';
+    }
+
+    public function isPorsiKecil(): bool
+    {
+        return $this->tipe_porsi === 'kecil';
+    }
+
+    public function getTipePorsiText(): string
+    {
+        return match ($this->tipe_porsi) {
+            'besar' => 'Porsi Besar',
+            'kecil' => 'Porsi Kecil',
+            default => 'Unknown'
+        };
+    }
+
+    public function getTipePorsiBadgeClass(): string
+    {
+        return match ($this->tipe_porsi) {
+            'besar' => 'bg-label-primary',
+            'kecil' => 'bg-label-info',
+            default => 'bg-label-secondary'
+        };
+    }
+
     protected static function booted()
     {
         static::saved(function ($detail) {

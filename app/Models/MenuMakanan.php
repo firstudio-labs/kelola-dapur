@@ -166,10 +166,11 @@ class MenuMakanan extends Model
                 ->where('id_template_item', $ingredient['id_template_item'])
                 ->first();
 
-            $available = $stockItem ? $stockItem->jumlah : 0;
+            $available = $stockItem ? (float)$stockItem->jumlah : 0;
             $needed = $ingredient['total_needed'];
 
             $ingredientData = [
+                'id_template_item' => $ingredient['id_template_item'],
                 'nama_bahan' => $ingredient['nama_bahan'],
                 'satuan' => $ingredient['satuan'],
                 'needed' => $needed,
@@ -183,6 +184,7 @@ class MenuMakanan extends Model
             if ($available < $needed) {
                 $result['can_produce'] = false;
                 $result['shortage'][] = [
+                    'id_template_item' => $ingredient['id_template_item'],
                     'nama_bahan' => $ingredient['nama_bahan'],
                     'satuan' => $ingredient['satuan'],
                     'needed' => $needed,
@@ -197,7 +199,6 @@ class MenuMakanan extends Model
 
         return $result;
     }
-
     public function getTotalProductionCount(): int
     {
         return $this->detailTransaksiDapur()

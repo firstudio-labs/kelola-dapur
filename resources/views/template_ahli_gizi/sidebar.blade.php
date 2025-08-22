@@ -1,7 +1,7 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
         <a
-            href="{{ route('dashboard', request()->current_dapur->id_dapur ?? auth()->user()->userRole->id_dapur ?? null) }}"
+            href="{{ route("dashboard", request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
             class="app-brand-link"
         >
             <span class="app-brand-logo demo">
@@ -98,9 +98,9 @@
                     </g>
                 </svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bolder ms-2"
-                >Ahli Gizi</span
-            >
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">
+                Ahli Gizi
+            </span>
         </a>
 
         <a
@@ -121,7 +121,7 @@
 
         <!-- Menu Makanan -->
         <li
-            class="menu-item {{ request()->routeIs('ahli-gizi.menu-makanan.*') ? 'active open' : '' }}"
+            class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.*") ? "active open" : "" }}"
         >
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-food-menu"></i>
@@ -129,10 +129,10 @@
             </a>
             <ul class="menu-sub">
                 <li
-                    class="menu-item {{ request()->routeIs('ahli-gizi.menu-makanan.index') ? 'active' : '' }}"
+                    class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.index") ? "active" : "" }}"
                 >
                     <a
-                        href="{{ route('ahli-gizi.menu-makanan.index', ['dapur' => request()->current_dapur->id_dapur ?? auth()->user()->userRole->id_dapur ?? null]) }}"
+                        href="{{ route("ahli-gizi.menu-makanan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
                         class="menu-link"
                     >
                         <div data-i18n="Daftar Menu Makanan">
@@ -141,10 +141,10 @@
                     </a>
                 </li>
                 <li
-                    class="menu-item {{ request()->routeIs('ahli-gizi.menu-makanan.create') ? 'active' : '' }}"
+                    class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.create") ? "active" : "" }}"
                 >
                     <a
-                        href="{{ route('ahli-gizi.menu-makanan.create', ['dapur' => request()->current_dapur->id_dapur ?? auth()->user()->userRole->id_dapur ?? null]) }}"
+                        href="{{ route("ahli-gizi.menu-makanan.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
                         class="menu-link"
                     >
                         <div data-i18n="Tambah Menu Makanan">
@@ -156,6 +156,36 @@
         </li>
 
         <!-- Transaksi Dapur -->
+        <li
+            class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.*") ? "active open" : "" }}"
+        >
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-cart"></i>
+                <div data-i18n="Transaksi Dapur">Transaksi Dapur</div>
+            </a>
+            <ul class="menu-sub">
+                <li
+                    class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.index") ? "active" : "" }}"
+                >
+                    <a
+                        href="{{ route("ahli-gizi.transaksi.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                        class="menu-link"
+                    >
+                        <div data-i18n="Daftar Transaksi">Daftar Transaksi</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.create") ? "active" : "" }}"
+                >
+                    <a
+                        href="{{ route("ahli-gizi.transaksi.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                        class="menu-link"
+                    >
+                        <div data-i18n="Buat Transaksi">Buat Transaksi</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
     </ul>
 
     <!-- User -->
@@ -167,7 +197,7 @@
         >
             <div class="avatar avatar-online">
                 <img
-                    src="{{ asset('admin/assets/img/avatars/1.png') }}"
+                    src="{{ asset("admin/assets/img/avatars/1.png") }}"
                     alt
                     class="w-px-40 h-auto rounded-circle"
                 />
@@ -180,19 +210,16 @@
                         <div class="flex-shrink-0 me-3">
                             <div class="avatar avatar-online">
                                 <img
-                                    src="{{
-                                        asset('admin/assets/img/avatars/1.png')
-                                    }}"
+                                    src="{{ asset("admin/assets/img/avatars/1.png") }}"
                                     alt
                                     class="w-px-40 h-auto rounded-circle"
                                 />
                             </div>
                         </div>
                         <div class="flex-grow-1">
-                            <span
-                                class="fw-semibold d-block"
-                                >{{ auth()->user()->nama }}</span
-                            >
+                            <span class="fw-semibold d-block">
+                                {{ auth()->user()->nama }}
+                            </span>
                         </div>
                     </div>
                 </a>
@@ -201,7 +228,7 @@
                 <div class="dropdown-divider"></div>
             </li>
             <li>
-                <form action="{{ route('logout') }}" method="POST">
+                <form action="{{ route("logout") }}" method="POST">
                     @csrf
                     <button type="submit" class="dropdown-item">
                         <i class="bx bx-power-off me-2"></i>

@@ -5,6 +5,8 @@ use App\Http\Controllers\AdminGudang\AdminGudangController;
 use App\Http\Controllers\AdminGudang\StockItemController as AdminGudangStockItemController;
 use App\Http\Controllers\AhliGizi\AhliGiziController;
 use App\Http\Controllers\AhliGizi\MenuMakananController as AhliGiziMenuMakananController;
+use App\Http\Controllers\AhliGizi\TransaksiDapurController as AhliGiziTransaksiDapurController;
+use App\Http\Controllers\AhliGizi\LaporanController as AhliGiziLaporanController;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\DashboardController;
@@ -19,6 +21,7 @@ use App\Http\Controllers\SuperAdmin\StockItemController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\TemplateItemController;
 use App\Http\Controllers\SuperAdmin\UserController;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -69,6 +72,31 @@ Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return redirect()->route('dashboard');
     });
+
+    Route::get('/api/template-items/search', function (Request $request) {
+        $search = $request->get('search', '');
+        $templates = \App\Models\TemplateItem::where('nama_bahan', 'like', '%' . $search . '%')
+            ->where('is_active', true)
+            ->select('id_template_item', 'nama_bahan', 'satuan')
+            ->limit(10)
+            ->get();
+
+        return response()->json($templates);
+    })->name('api.template-items.search');
+
+    // Route untuk mendapatkan stock info
+    Route::get('/api/stock-info/{dapur}/{templateItem}', function ($dapurId, $templateItemId) {
+        $stockItem = \App\Models\StockItem::where('id_dapur', $dapurId)
+            ->where('id_template_item', $templateItemId)
+            ->first();
+
+        return response()->json([
+            'stock_tersedia' => $stockItem ? $stockItem->jumlah_stock : 0,
+            'satuan' => $stockItem ? $stockItem->templateItem->satuan : '-',
+            'status' => $stockItem ? 'available' : 'not_found'
+        ]);
+    })->name('api.stock-info');
+
 
     // Kepala Dapur Dashboard
     // Route::middleware(['role:kepala_dapur', 'dapur.access:kepala_dapur'])
@@ -235,6 +263,8 @@ Route::middleware(['auth', 'dapur.access:ahli_gizi'])
 
 //========== General Role Check Kepala Dapur Routes  ==========
 Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('kepala-dapur.')->group(function () {
+
+
     // Template Items
     Route::prefix('template-items')->name('template-items.')->group(function () {
         Route::get('/', [KepalaDapurTemplateItemController::class, 'index'])->name('index');
@@ -253,6 +283,28 @@ Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('
         Route::get('/active-menus', [KepalaDapurMenuMakananController::class, 'getActiveMenus'])->name('active-menus');
         Route::post('/{menuMakanan}/check-stock', [KepalaDapurMenuMakananController::class, 'checkStock'])->name('check-stock');
     });
+
+    // Approval Input Paket Menu (Kepala Dapur)
+    Route::prefix('approval-paket-menu')->name('approval-transaksi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'index'])->name('index');
+        Route::get('/{approval}', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'show'])->name('show');
+        Route::post('/{approval}/setujui', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'approve'])->name('approve');
+        Route::post('/{approval}/tolak', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'reject'])->name('reject');
+        Route::post('/bulk-action', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'bulkAction'])->name('bulk-action');
+    });
+
+    // Laporan Kekurangan Stock 
+    Route::prefix('laporan-kekurangan')->name('laporan-kekurangan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'index'])->name('index');
+        Route::get('/{laporan}', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'show'])->name('show');
+        Route::post('/{laporan}/selesaikan', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'resolve'])->name('resolve');
+        Route::post('/bulk-selesaikan', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'bulkResolve'])->name('bulk-resolve');
+        Route::get('/ringkasan/bulanan', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'summary'])->name('summary');
+        Route::get('/export/csv', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'export'])->name('export');
+    });
+
+    Route::get('/shortage-reports', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'shortageReports'])->name('shortage-reports');
+    Route::post('/shortage-reports/{report}/resolve', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'resolveShortage'])->name('resolve-shortage');
 });
 
 //========== General Role Check Routes ==========
@@ -266,7 +318,7 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
 
     Route::get('/dashboard', [AhliGiziController::class, 'dashboard'])->name('dashboard');
 
-    // Menu Makanan
+    // Menu Makanan 
     Route::prefix('menu-makanan')->name('menu-makanan.')->group(function () {
         Route::get('/', [AhliGiziMenuMakananController::class, 'index'])->name('index');
         Route::get('/create', [AhliGiziMenuMakananController::class, 'create'])->name('create');
@@ -277,13 +329,53 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
         Route::delete('/{menuMakanan}', [AhliGiziMenuMakananController::class, 'destroy'])->name('destroy');
         Route::patch('/{menuMakanan}/toggle-status', [AhliGiziMenuMakananController::class, 'toggleStatus'])->name('toggle-status');
         Route::post('/{menuMakanan}/check-stock', [AhliGiziMenuMakananController::class, 'checkStock'])->name('check-stock');
-        Route::get('/active-menus', [AhliGiziMenuMakananController::class, 'getActiveMenus'])->name('active-menus');
+        Route::get('/menu/{menuMakanan}/detail', [AhliGiziMenuMakananController::class, 'detail'])->name('menu.detail');
+
+        // API Routes untuk AJAX
+        Route::get('/api/active-menus', [AhliGiziMenuMakananController::class, 'getActiveMenus'])->name('active-menus');
+        Route::get('/api/search', [AhliGiziMenuMakananController::class, 'searchMenus'])->name('search-api');
+        Route::get('/api/menu/{menuMakanan}/detail', [AhliGiziTransaksiDapurController::class, 'getMenuDetail'])->name('get-menu-detail');
+        Route::get('/menu/{menuMakanan}/detail', [AhliGiziMenuMakananController::class, 'detail'])->name('menu.detail');
+        Route::get('/api/menu/{menu}/bahan', [AhliGiziMenuMakananController::class, 'getIngredientDetails'])->name('api.menu.ingredients');
     });
+
+    // Input Paket Menu 
+    Route::prefix('input-paket-menu')->name('transaksi.')->group(function () {
+        Route::get('/', [AhliGiziTransaksiDapurController::class, 'index'])->name('index');
+        Route::get('/buat-paket-baru', [AhliGiziTransaksiDapurController::class, 'create'])->name('create');
+        Route::post('/simpan-paket-baru', [AhliGiziTransaksiDapurController::class, 'store'])->name('store');
+        Route::get('/{transaksi}/input-porsi-besar', [AhliGiziTransaksiDapurController::class, 'editPorsiBesar'])->name('edit-porsi-besar');
+        Route::post('/{transaksi}/simpan-porsi-besar', [AhliGiziTransaksiDapurController::class, 'updatePorsiBesar'])->name('update-porsi-besar');
+        Route::get('/{transaksi}/input-porsi-kecil', [AhliGiziTransaksiDapurController::class, 'editPorsiKecil'])->name('edit-porsi-kecil');
+        Route::post('/{transaksi}/simpan-porsi-kecil', [AhliGiziTransaksiDapurController::class, 'updatePorsiKecil'])->name('update-porsi-kecil');
+        Route::get('/{transaksi}/preview-paket', [AhliGiziTransaksiDapurController::class, 'preview'])->name('preview');
+
+
+        Route::post('/{transaksi}/ajukan-persetujuan', [AhliGiziTransaksiDapurController::class, 'submitApproval'])->name('submit-approval');
+        Route::post('/{transaksi}/laporkan-kekurangan', [AhliGiziTransaksiDapurController::class, 'createShortageReport'])->name('create-shortage-report');
+
+        Route::get('/{transaksi}/detail', [AhliGiziTransaksiDapurController::class, 'show'])->name('show');
+        Route::delete('/{transaksi}/hapus', [AhliGiziTransaksiDapurController::class, 'destroy'])->name('destroy');
+        Route::post('/{transaksi}/api/check-stock', [AhliGiziTransaksiDapurController::class, 'checkStockAvailability'])->name('check-stock-api');
+    });
+
+
+    // Laporan Kekurangan Stock - untuk melihat laporan yang sudah dibuat
+    Route::prefix('laporan-saya')->name('laporan.')->group(function () {
+        Route::get('/', [AhliGiziLaporanController::class, 'index'])->name('index');
+        Route::get('/{laporan}/detail', [AhliGiziLaporanController::class, 'show'])->name('show');
+        Route::get('/transaksi-dengan-kekurangan', [AhliGiziLaporanController::class, 'transaksiWithShortage'])->name('transaksi-with-shortage');
+        Route::get('/export/csv', [AhliGiziLaporanController::class, 'export'])->name('export');
+        Route::get('/api/dashboard-summary', [AhliGiziLaporanController::class, 'getSummaryJson'])->name('dashboard-summary-api');
+        Route::get('/api/monthly-trend', [AhliGiziLaporanController::class, 'getMonthlyTrend'])->name('monthly-trend-api');
+        Route::get('/ringkasan-dashboard', [AhliGiziLaporanController::class, 'dashboardSummary'])->name('dashboard-summary');
+    });
+
+    // ===== MONITORING DAN TRACKING =====
+    Route::get('/tracking-paket', [AhliGiziTransaksiDapurController::class, 'trackingStatus'])->name('tracking-status');
+    Route::get('/statistik-performa', [AhliGiziLaporanController::class, 'performanceStats'])->name('performance-stats');
 });
 
 
 
-Route::middleware(['auth', 'role:kepala_dapur,admin_gudang,ahli_gizi'])->group(function () {
-    // Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-    // Route::get('/menu/{menu}', [MenuController::class, 'show'])->name('menu.show');
-});
+Route::middleware(['auth', 'role:kepala_dapur,admin_gudang,ahli_gizi'])->group(function () {});

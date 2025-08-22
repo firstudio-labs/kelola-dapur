@@ -41,4 +41,19 @@ class KepalaDapur extends Model
     {
         return $this->hasMany(ApprovalStockItem::class, 'id_kepala_dapur');
     }
+
+    public function approvalTransaksi()
+    {
+        return $this->hasMany(ApprovalTransaksi::class, 'id_kepala_dapur');
+    }
+
+    public function getPendingApprovals()
+    {
+        return $this->approvalTransaksi()->where('status', 'pending')->get();
+    }
+
+    public function getApprovalHistory()
+    {
+        return $this->approvalTransaksi()->whereIn('status', ['approved', 'rejected'])->get();
+    }
 }

@@ -35,4 +35,14 @@ class AhliGizi extends Model
     {
         return $this->belongsTo(Dapur::class, 'id_dapur');
     }
+
+    public function approvalTransaksi()
+    {
+        return $this->hasMany(ApprovalTransaksi::class, 'id_ahli_gizi');
+    }
+
+    public function transaksiDapur()
+    {
+        return $this->hasMany(TransaksiDapur::class, 'created_by', 'id_user');
+    }
 }

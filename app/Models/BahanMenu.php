@@ -24,19 +24,21 @@ class BahanMenu extends Model
         'is_bahan_basah' => 'boolean',
     ];
 
+    // Relationships
     public function menuMakanan()
     {
-        return $this->belongsTo(MenuMakanan::class, 'id_menu');
+        return $this->belongsTo(MenuMakanan::class, 'id_menu', 'id_menu');
     }
 
     public function templateItem()
     {
-        return $this->belongsTo(TemplateItem::class, 'id_template_item');
+        return $this->belongsTo(TemplateItem::class, 'id_template_item', 'id_template_item');
     }
 
-    public function dapur()
+    // Accessor untuk mendapatkan satuan dari template item
+    public function getSatuanAttribute()
     {
-        return $this->belongsTo(Dapur::class, 'id_dapur');
+        return $this->templateItem ? $this->templateItem->satuan : '';
     }
 
     /**
@@ -69,5 +71,28 @@ class BahanMenu extends Model
         $satuan = $this->templateItem->satuan ?? '';
 
         return number_format($beratBasah, 2) . ' ' . $satuan;
+    }
+
+    /**
+     * Calculate total needed amount for given portion
+     * @param int $porsi
+     * @return float
+     */
+    public function getTotalKebutuhan(int $porsi): float
+    {
+        return (float) $this->jumlah_per_porsi * $porsi;
+    }
+
+    /**
+     * Get formatted total needed for display
+     * @param int $porsi
+     * @return string
+     */
+    public function getFormattedTotalKebutuhan(int $porsi): string
+    {
+        $total = $this->getTotalKebutuhan($porsi);
+        $satuan = $this->templateItem->satuan ?? '';
+
+        return number_format($total, 4) . ' ' . $satuan;
     }
 }

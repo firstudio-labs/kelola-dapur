@@ -246,11 +246,113 @@ class MenuMakananController extends Controller
             ->when($search, function ($query, $search) {
                 return $query->where('nama_menu', 'like', "%{$search}%");
             })
-            ->select('id_menu', 'nama_menu', 'gambar_url')
+            ->select('id_menu', 'nama_menu', 'gambar_menu', 'deskripsi')
             ->orderBy('nama_menu', 'asc')
             ->limit(20)
             ->get();
 
-        return response()->json($menus);
+        $formattedMenus = $menus->map(function ($menu) {
+            return [
+                'id_menu' => $menu->id_menu,
+                'nama_menu' => $menu->nama_menu,
+                'gambar_url' => $menu->gambar_url,
+                'deskripsi' => $menu->deskripsi
+            ];
+        });
+
+        return response()->json($formattedMenus);
+    }
+
+    public function detail($id)
+    {
+        try {
+            $menu = MenuMakanan::with(['bahanMenu.templateItem'])
+                ->find($id);
+
+            if (!$menu) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Menu tidak ditemukan'
+                ], 404);
+            }
+
+            if (!$menu->is_active) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Menu tidak aktif'
+                ], 400);
+            }
+
+            $menuData = [
+                'id_menu' => $menu->id_menu,
+                'nama_menu' => $menu->nama_menu,
+                'gambar' => $menu->gambar_url,
+                'deskripsi' => $menu->deskripsi,
+                'kategori' => $menu->kategori,
+                'is_active' => $menu->is_active,
+                'bahan_menu' => $menu->bahanMenu->map(function ($bahan) {
+                    return [
+                        'id_bahan_menu' => $bahan->id_bahan_menu,
+                        'id_template_item' => $bahan->id_template_item,
+                        'nama_bahan' => $bahan->templateItem->nama_bahan,
+                        'jumlah_per_porsi' => $bahan->jumlah_per_porsi,
+                        'satuan' => $bahan->templateItem->satuan,
+                        'is_bahan_basah' => $bahan->is_bahan_basah,
+                        'template_item' => [
+                            'id_template_item' => $bahan->templateItem->id_template_item,
+                            'nama_bahan' => $bahan->templateItem->nama_bahan,
+                            'satuan' => $bahan->templateItem->satuan,
+                            'keterangan' => $bahan->templateItem->keterangan
+                        ]
+                    ];
+                })
+            ];
+
+            return response()->json([
+                'success' => true,
+                'menu' => $menuData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getIngredientDetails(MenuMakanan $menu)
+    {
+        try {
+            $menu->load(['bahanMenu.templateItem']);
+
+            if (!$menu->is_active) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Menu tidak aktif'
+                ], 400);
+            }
+
+            $bahanMenu = $menu->bahanMenu->map(function ($bahan) {
+                return [
+                    'id_bahan_menu' => $bahan->id_bahan_menu,
+                    'id_template_item' => $bahan->id_template_item,
+                    'nama_bahan' => $bahan->templateItem ? $bahan->templateItem->nama_bahan : 'Unknown',
+                    'jumlah_per_porsi' => (float) $bahan->jumlah_per_porsi,
+                    'satuan' => $bahan->templateItem ? $bahan->templateItem->satuan : '',
+                    'is_bahan_basah' => $bahan->is_bahan_basah
+                ];
+            })->toArray();
+
+            return response()->json([
+                'success' => true,
+                'bahan_menu' => $bahanMenu
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getIngredientDetails: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
