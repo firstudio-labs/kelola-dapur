@@ -34,6 +34,7 @@ class LaporanKekuranganStock extends Model
         return $this->belongsTo(TransaksiDapur::class, 'id_transaksi');
     }
 
+
     public function templateItem()
     {
         return $this->belongsTo(TemplateItem::class, 'id_template_item');

@@ -1,4 +1,3 @@
-{{-- resources/views/ahligizi/transaksi/create.blade.php --}}
 @extends("template_ahli_gizi.layout")
 
 @section("content")
@@ -57,32 +56,11 @@
                                         class="form-control @error("tanggal_transaksi") is-invalid @enderror"
                                         id="tanggal_transaksi"
                                         name="tanggal_transaksi"
-                                        value="{{ old("tanggal_transaksi", date("Y-m-d")) }}"
-                                        min="{{ date("Y-m-d") }}"
+                                        value="{{ date("Y-m-d") }}"
+                                        readonly
                                         required
                                     />
                                     @error("tanggal_transaksi")
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="nama_paket" class="form-label">
-                                        Nama Paket Menu
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        class="form-control @error("nama_paket") is-invalid @enderror"
-                                        id="nama_paket"
-                                        name="nama_paket"
-                                        value="{{ old("nama_paket") }}"
-                                        placeholder="Contoh: Paket Menu Hari Senin"
-                                        required
-                                    />
-                                    @error("nama_paket")
                                         <div class="invalid-feedback">
                                             {{ $message }}
                                         </div>
@@ -148,11 +126,8 @@
 @push("scripts")
     <script>
         $(document).ready(function () {
-            // Set minimum date to today
-            $('#tanggal_transaksi').attr(
-                'min',
-                new Date().toISOString().split('T')[0],
-            );
+            // Set input to readonly to prevent user changes
+            $('#tanggal_transaksi').prop('readonly', true);
         });
     </script>
 @endpush

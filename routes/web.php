@@ -13,6 +13,9 @@ use App\Http\Controllers\Auth\DashboardController;
 use App\Http\Controllers\KepalaDapur\MenuMakananController as KepalaDapurMenuMakananController;
 use App\Http\Controllers\KepalaDapur\TemplateItemController as KepalaDapurTemplateItemController;
 use App\Http\Controllers\KepalaDapur\UserController as KepalaDapurUserController;
+use App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController as KepalaDapurLaporanKekuranganStockController;
+use App\Http\Controllers\KepalaDapur\ApprovalStockItemController as KepalaDapurApprovalStockItemController;
+use App\Http\Controllers\KepalaDapur\ApprovalTransaksiController as KepalaDapurApprovalTransaksiController;
 use App\Http\Controllers\SuperAdmin\ApprovalStockItemController;
 use App\Http\Controllers\SuperAdmin\BahanMenuController;
 use App\Http\Controllers\SuperAdmin\DapurController;
@@ -225,11 +228,11 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur'])
 
         // Approval Stock Item
         Route::prefix('approvals')->name('approvals.')->group(function () {
-            Route::get('/', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'index'])->name('index');
-            Route::get('/{approval}', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'show'])->name('show');
-            Route::post('/{approval}/approve', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'approve'])->name('approve');
-            Route::post('/{approval}/reject', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'reject'])->name('reject');
-            Route::post('/bulk-action', [App\Http\Controllers\KepalaDapur\ApprovalStockItemController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/', [KepalaDapurApprovalStockItemController::class, 'index'])->name('index');
+            Route::get('/{approval}', [KepalaDapurApprovalStockItemController::class, 'show'])->name('show');
+            Route::post('/{approval}/approve', [KepalaDapurApprovalStockItemController::class, 'approve'])->name('approve');
+            Route::post('/{approval}/reject', [KepalaDapurApprovalStockItemController::class, 'reject'])->name('reject');
+            Route::post('/bulk-action', [KepalaDapurApprovalStockItemController::class, 'bulkAction'])->name('bulk-action');
         });
     });
 
@@ -284,27 +287,29 @@ Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('
         Route::post('/{menuMakanan}/check-stock', [KepalaDapurMenuMakananController::class, 'checkStock'])->name('check-stock');
     });
 
-    // Approval Input Paket Menu (Kepala Dapur)
-    Route::prefix('approval-paket-menu')->name('approval-transaksi.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'index'])->name('index');
-        Route::get('/{approval}', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'show'])->name('show');
-        Route::post('/{approval}/setujui', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'approve'])->name('approve');
-        Route::post('/{approval}/tolak', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'reject'])->name('reject');
-        Route::post('/bulk-action', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'bulkAction'])->name('bulk-action');
+    // Approval Paket Menu
+    Route::prefix('approval-transaksi')->name('approval-transaksi.')->group(function () {
+        Route::get('/', [KepalaDapurApprovalTransaksiController::class, 'index'])->name('index');
+        Route::get('/{approval}', [KepalaDapurApprovalTransaksiController::class, 'show'])->name('show');
+        Route::post('/{approval}/setujui', [KepalaDapurApprovalTransaksiController::class, 'approve'])->name('approve');
+        Route::post('/{approval}/tolak', [KepalaDapurApprovalTransaksiController::class, 'reject'])->name('reject');
+        Route::post('/bulk-action', [KepalaDapurApprovalTransaksiController::class, 'bulkAction'])->name('bulk-action');
     });
 
     // Laporan Kekurangan Stock 
     Route::prefix('laporan-kekurangan')->name('laporan-kekurangan.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'index'])->name('index');
-        Route::get('/{laporan}', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'show'])->name('show');
-        Route::post('/{laporan}/selesaikan', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'resolve'])->name('resolve');
-        Route::post('/bulk-selesaikan', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'bulkResolve'])->name('bulk-resolve');
-        Route::get('/ringkasan/bulanan', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'summary'])->name('summary');
-        Route::get('/export/csv', [\App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController::class, 'export'])->name('export');
+        Route::get('/', [KepalaDapurLaporanKekuranganStockController::class, 'index'])->name('index');
+        Route::get('/{transaksi}', [KepalaDapurLaporanKekuranganStockController::class, 'show'])->name('show');
+        Route::post('/{transaksi}/selesaikan', [KepalaDapurLaporanKekuranganStockController::class, 'resolve'])->name('resolve');
+        Route::post('/bulk-selesaikan', [KepalaDapurLaporanKekuranganStockController::class, 'bulkResolve'])->name('bulk-resolve');
+        Route::get('/ringkasan/bulanan', [KepalaDapurLaporanKekuranganStockController::class, 'summary'])->name('summary');
+        // Route::get('/export/csv', [KepalaDapurLaporanKekuranganStockController::class, 'export'])->name('export');
+        Route::get('/laporan-kekurangan/{transaksi}/export-pdf', [KepalaDapurLaporanKekuranganStockController::class, 'exportKekuranganPdf'])->name('export-pdf');
+        Route::get('/laporan-kekurangan/{transaksi}/export-csv', [KepalaDapurLaporanKekuranganStockController::class, 'exportKekuranganCsv'])->name('export-csv');
     });
 
-    Route::get('/shortage-reports', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'shortageReports'])->name('shortage-reports');
-    Route::post('/shortage-reports/{report}/resolve', [\App\Http\Controllers\KepalaDapur\ApprovalTransaksiController::class, 'resolveShortage'])->name('resolve-shortage');
+    // Route::get('/shortage-reports', [KepalaDapurApprovalTransaksiController::class, 'shortageReports'])->name('shortage-reports');
+    // Route::post('/shortage-reports/{report}/resolve', [KepalaDapurApprovalTransaksiController::class, 'resolveShortage'])->name('resolve-shortage');
 });
 
 //========== General Role Check Routes ==========
@@ -345,9 +350,9 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
         Route::get('/buat-paket-baru', [AhliGiziTransaksiDapurController::class, 'create'])->name('create');
         Route::post('/simpan-paket-baru', [AhliGiziTransaksiDapurController::class, 'store'])->name('store');
         Route::get('/{transaksi}/input-porsi-besar', [AhliGiziTransaksiDapurController::class, 'editPorsiBesar'])->name('edit-porsi-besar');
-        Route::post('/{transaksi}/simpan-porsi-besar', [AhliGiziTransaksiDapurController::class, 'updatePorsiBesar'])->name('update-porsi-besar');
+        Route::put('/{transaksi}/simpan-porsi-besar', [AhliGiziTransaksiDapurController::class, 'updatePorsiBesar'])->name('update-porsi-besar');
         Route::get('/{transaksi}/input-porsi-kecil', [AhliGiziTransaksiDapurController::class, 'editPorsiKecil'])->name('edit-porsi-kecil');
-        Route::post('/{transaksi}/simpan-porsi-kecil', [AhliGiziTransaksiDapurController::class, 'updatePorsiKecil'])->name('update-porsi-kecil');
+        Route::put('/{transaksi}/simpan-porsi-kecil', [AhliGiziTransaksiDapurController::class, 'updatePorsiKecil'])->name('update-porsi-kecil');
         Route::get('/{transaksi}/preview-paket', [AhliGiziTransaksiDapurController::class, 'preview'])->name('preview');
 
 
@@ -356,7 +361,7 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
 
         Route::get('/{transaksi}/detail', [AhliGiziTransaksiDapurController::class, 'show'])->name('show');
         Route::delete('/{transaksi}/hapus', [AhliGiziTransaksiDapurController::class, 'destroy'])->name('destroy');
-        Route::post('/{transaksi}/api/check-stock', [AhliGiziTransaksiDapurController::class, 'checkStockAvailability'])->name('check-stock-api');
+        Route::post('/{transaksi}/check-stock', [AhliGiziTransaksiDapurController::class, 'checkStockAvailability'])->name('check-stock-api');
     });
 
 

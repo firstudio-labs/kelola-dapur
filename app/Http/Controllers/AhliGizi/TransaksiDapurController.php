@@ -10,9 +10,11 @@ use App\Models\Dapur;
 use App\Models\AhliGizi;
 use App\Models\KepalaDapur;
 use App\Models\ApprovalTransaksi;
+use App\Models\StockItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class TransaksiDapurController extends Controller
@@ -79,7 +81,7 @@ class TransaksiDapurController extends Controller
 
         $request->validate([
             'tanggal_transaksi' => 'required|date|after_or_equal:today',
-            'nama_paket' => 'required|string|max:255',
+            // 'nama_paket' => 'required|string|max:255',
             'keterangan' => 'nullable|string|max:500'
         ]);
 
@@ -554,7 +556,7 @@ class TransaksiDapurController extends Controller
                 if (!isset($kebutuhan[$idTemplate])) {
                     $kebutuhan[$idTemplate] = [
                         'nama_bahan' => $bahanMenu->templateItem->nama_bahan,
-                        'satuan' => $bahanMenu->satuan,
+                        'satuan' => $bahanMenu->templateItem->satuan,
                         'total_kebutuhan' => 0,
                         'detail_penggunaan' => []
                     ];
@@ -635,29 +637,126 @@ class TransaksiDapurController extends Controller
 
     public function checkStockAvailability(TransaksiDapur $transaksi)
     {
-        $user = Auth::user();
-        $ahliGizi = AhliGizi::whereHas('userRole', function ($query) use ($user) {
-            $query->where('id_user', $user->id_user);
-        })->first();
+        try {
+            $user = Auth::user();
+            $ahliGizi = AhliGizi::whereHas('userRole', function ($query) use ($user) {
+                $query->where('id_user', $user->id_user);
+            })->first();
 
-        if (!$ahliGizi || $transaksi->created_by !== $user->id_user || $transaksi->id_dapur !== $ahliGizi->id_dapur) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            if (!$ahliGizi || $transaksi->created_by !== $user->id_user || $transaksi->id_dapur !== $ahliGizi->id_dapur) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $bahanKebutuhan = $this->calculateIngredientNeeds($transaksi);
+
+            $stockData = [];
+            $shortages = [];
+            $canProduce = true;
+
+            foreach ($bahanKebutuhan as $idTemplate => $bahan) {
+                Log::debug('Checking StockItem', [
+                    'id_dapur' => $transaksi->id_dapur,
+                    'id_template_item' => $idTemplate,
+                    'nama_bahan' => $bahan['nama_bahan']
+                ]);
+
+                $stockItem = StockItem::where('id_dapur', $transaksi->id_dapur)
+                    ->where('id_template_item', $idTemplate)
+                    ->first();
+
+                if (!$stockItem) {
+                    Log::warning('StockItem not found', [
+                        'id_dapur' => $transaksi->id_dapur,
+                        'id_template_item' => $idTemplate,
+                        'nama_bahan' => $bahan['nama_bahan']
+                    ]);
+                    $stockTersedia = 0.0;
+                    $debugStatus = 'not_found';
+                } else {
+                    Log::debug('StockItem found', [
+                        'id_dapur' => $transaksi->id_dapur,
+                        'id_template_item' => $idTemplate,
+                        'nama_bahan' => $bahan['nama_bahan'],
+                        'jumlah_raw' => $stockItem->jumlah,
+                        'jumlah_type' => gettype($stockItem->jumlah),
+                        'satuan' => $stockItem->satuan
+                    ]);
+                    $stockTersedia = is_numeric($stockItem->jumlah)
+                        ? (float) $stockItem->jumlah
+                        : 0.0;
+                    $debugStatus = 'found';
+                }
+
+                $kebutuhan = $bahan['total_kebutuhan'];
+
+                $stockData[$idTemplate] = [
+                    'nama_bahan' => $bahan['nama_bahan'],
+                    'satuan' => $bahan['satuan'],
+                    'kebutuhan' => $kebutuhan,
+                    'stock_tersedia' => $stockTersedia,
+                    'sufficient' => $stockTersedia >= $kebutuhan,
+                    'debug' => $debugStatus,
+                    'satuan_stok' => $stockItem ? $stockItem->satuan : $bahan['satuan']
+                ];
+
+                if ($stockTersedia < $kebutuhan) {
+                    $canProduce = false;
+                    $shortages[] = [
+                        'id_template_item' => $idTemplate,
+                        'nama_bahan' => $bahan['nama_bahan'],
+                        'kebutuhan' => $kebutuhan,
+                        'stock_tersedia' => $stockTersedia,
+                        'kekurangan' => $kebutuhan - $stockTersedia,
+                        'satuan' => $bahan['satuan'],
+                        'percentage_shortage' => $stockTersedia > 0
+                            ? round((($kebutuhan - $stockTersedia) / $kebutuhan) * 100, 2)
+                            : 100
+                    ];
+                }
+            }
+
+            Log::debug('Stock Check Result', [
+                'transaksi_id' => $transaksi->id_transaksi,
+                'stock_data' => $stockData,
+                'shortages' => $shortages
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'can_produce' => $canProduce,
+                'shortages' => $shortages,
+                'stock_data' => $stockData,
+                'bahan_kebutuhan' => $bahanKebutuhan,
+                'total_ingredients' => count($bahanKebutuhan),
+                'sufficient_ingredients' => count($bahanKebutuhan) - count($shortages),
+                'shortage_count' => count($shortages),
+                'message' => $canProduce
+                    ? 'Stock mencukupi untuk semua bahan'
+                    : 'Terdapat kekurangan stock pada beberapa bahan',
+                'summary' => [
+                    'total_bahan' => count($bahanKebutuhan),
+                    'bahan_cukup' => count($bahanKebutuhan) - count($shortages),
+                    'bahan_kurang' => count($shortages),
+                    'persentase_kecukupan' => count($bahanKebutuhan) > 0
+                        ? round(((count($bahanKebutuhan) - count($shortages)) / count($bahanKebutuhan)) * 100, 2)
+                        : 0
+                ],
+                'debug_id_dapur' => $transaksi->id_dapur
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in checkStockAvailability: ' . $e->getMessage(), [
+                'transaksi_id' => $transaksi->id_transaksi,
+                'user_id' => Auth::id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Terjadi kesalahan saat memeriksa stock',
+                'message' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
         }
-
-        $stockCheck = $transaksi->checkAllStockAvailability();
-        $bahanKebutuhan = $this->calculateIngredientNeeds($transaksi);
-
-        return response()->json([
-            'success' => true,
-            'can_produce' => $stockCheck['can_produce'],
-            'shortages' => $stockCheck['shortages'] ?? [],
-            'bahan_kebutuhan' => $bahanKebutuhan,
-            'message' => $stockCheck['can_produce']
-                ? 'Stock mencukupi untuk semua bahan'
-                : 'Terdapat kekurangan stock pada beberapa bahan'
-        ]);
     }
-
     public function getDashboardSummary()
     {
         $user = Auth::user();

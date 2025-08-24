@@ -168,13 +168,22 @@ class TransaksiDapur extends Model
             return false;
         }
 
-        ApprovalTransaksi::create([
+        $approval = ApprovalTransaksi::create([
             'id_transaksi' => $this->id_transaksi,
             'id_ahli_gizi' => $ahliGiziId,
             'id_kepala_dapur' => $kepalaDapurId,
             'keterangan' => $keterangan,
             'status' => 'pending'
         ]);
+
+        foreach ($stockCheck['ingredients_summary'] as $ingredient) {
+            StockSnapshot::create([
+                'id_approval_transaksi' => $approval->id_approval_transaksi,
+                'id_template_item' => $ingredient['id_template_item'],
+                'available' => $ingredient['available'],
+                'satuan' => $ingredient['satuan'],
+            ]);
+        }
 
         $this->status = 'processing';
         return $this->save();

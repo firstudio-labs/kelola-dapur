@@ -17,7 +17,7 @@
     class="light-style layout-menu-fixed"
     dir="ltr"
     data-theme="theme-default"
-    data-assets-path="{{ asset('admin') }}/assets/"
+    data-assets-path="{{ asset("admin") }}/assets/"
     data-template="vertical-menu-template-free"
 >
     <head>
@@ -26,7 +26,36 @@
             name="viewport"
             content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
         />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.0.0/sweetalert2.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.0.0/sweetalert2.min.css"
+        />
+        <script>
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                        'content',
+                    ),
+                },
+            });
 
+            if (typeof Swal === 'undefined') {
+                window.Swal = {
+                    fire: function (options) {
+                        if (typeof options === 'string') {
+                            alert(options);
+                        } else if (options && options.text) {
+                            alert(options.text);
+                        } else if (options && options.title) {
+                            alert(options.title);
+                        }
+                        return Promise.resolve({ isConfirmed: true });
+                    },
+                };
+            }
+        </script>
         <title>Kepala Dapur Dashboard - Profile</title>
 
         <meta
@@ -46,12 +75,12 @@
             href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css"
         />
 
-        @stack('styles')
+        @stack("styles")
 
         <!-- Favicon -->
         <link
             rel="icon"
-            href="{{ asset('admin') }}/assets/img/favicon/favicon.ico"
+            href="{{ asset("admin") }}/assets/img/favicon/favicon.ico"
         />
 
         <!-- Fonts -->
@@ -65,35 +94,31 @@
         <!-- Icons. Uncomment required icon fonts -->
         <link
             rel="stylesheet"
-            href="{{ asset('admin') }}/assets/vendor/fonts/boxicons.css"
+            href="{{ asset("admin") }}/assets/vendor/fonts/boxicons.css"
         />
 
         <!-- Core CSS -->
         <link
             rel="stylesheet"
-            href="{{ asset('admin') }}/assets/vendor/css/core.css"
+            href="{{ asset("admin") }}/assets/vendor/css/core.css"
         />
         <link
             rel="stylesheet"
-            href="{{ asset('admin') }}/assets/vendor/css/theme-default.css"
+            href="{{ asset("admin") }}/assets/vendor/css/theme-default.css"
         />
         <link
             rel="stylesheet"
-            href="{{ asset('admin') }}/assets/css/demo.css"
+            href="{{ asset("admin") }}/assets/css/demo.css"
         />
 
         <!-- Vendors CSS -->
         <link
             rel="stylesheet"
-            href="{{
-                asset('admin')
-            }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css"
+            href="{{ asset("admin") }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css"
         />
         <link
             rel="stylesheet"
-            href="{{
-                asset('admin')
-            }}/assets/vendor/libs/apex-charts/apex-charts.css"
+            href="{{ asset("admin") }}/assets/vendor/libs/apex-charts/apex-charts.css"
         />
 
         <script src="https://cdn.tailwindcss.com"></script>
@@ -103,11 +128,11 @@
         />
 
         <!-- Helpers -->
-        <script src="{{ asset('admin') }}/assets/vendor/js/helpers.js"></script>
+        <script src="{{ asset("admin") }}/assets/vendor/js/helpers.js"></script>
 
         <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
         <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-        <script src="{{ asset('admin') }}/assets/js/config.js"></script>
+        <script src="{{ asset("admin") }}/assets/js/config.js"></script>
     </head>
 
     <body>
@@ -115,19 +140,19 @@
         <div class="layout-wrapper layout-content-navbar">
             <div class="layout-container">
                 <!-- Menu -->
-                @include('template_ahli_gizi.sidebar')
+                @include("template_ahli_gizi.sidebar")
                 <!-- / Menu -->
 
                 <!-- Layout container -->
                 <div class="layout-page">
                     <!-- Navbar -->
-                    @include('template_ahli_gizi.navbar')
+                    @include("template_ahli_gizi.navbar")
                     <!-- / Navbar -->
 
                     <!-- Content wrapper -->
                     <div class="content-wrapper">
                         <!-- Content -->
-                        @yield('content')
+                        @yield("content")
                         <!-- / Content -->
 
                         <div class="content-backdrop fade"></div>
@@ -143,36 +168,24 @@
         <!-- / Layout wrapper -->
 
         <!-- Core JS -->
-        @yield('script')
+        @yield("script")
         <!-- build:js assets/vendor/js/core.js -->
-        <script src="{{
-                asset('admin')
-            }}/assets/vendor/libs/jquery/jquery.js"></script>
-        <script src="{{
-                asset('admin')
-            }}/assets/vendor/libs/popper/popper.js"></script>
-        <script src="{{
-                asset('admin')
-            }}/assets/vendor/js/bootstrap.js"></script>
-        <script src="{{
-                asset('admin')
-            }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+        <script src="{{ asset("admin") }}/assets/vendor/libs/jquery/jquery.js"></script>
+        <script src="{{ asset("admin") }}/assets/vendor/libs/popper/popper.js"></script>
+        <script src="{{ asset("admin") }}/assets/vendor/js/bootstrap.js"></script>
+        <script src="{{ asset("admin") }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
 
-        <script src="{{ asset('admin') }}/assets/vendor/js/menu.js"></script>
+        <script src="{{ asset("admin") }}/assets/vendor/js/menu.js"></script>
         <!-- endbuild -->
 
         <!-- Vendors JS -->
-        <script src="{{
-                asset('admin')
-            }}/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+        <script src="{{ asset("admin") }}/assets/vendor/libs/apex-charts/apexcharts.js"></script>
 
         <!-- Main JS -->
-        <script src="{{ asset('admin') }}/assets/js/main.js"></script>
+        <script src="{{ asset("admin") }}/assets/js/main.js"></script>
 
         <!-- Page JS -->
-        <script src="{{
-                asset('admin')
-            }}/assets/js/dashboards-analytics.js"></script>
+        <script src="{{ asset("admin") }}/assets/js/dashboards-analytics.js"></script>
 
         <!-- Leaflet JS -->
         <script
@@ -182,6 +195,8 @@
         ></script>
         <script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
 
-        @stack('js-internal') @yield('scripts') @stack('scripts')
+        @stack("js-internal")
+        @yield("scripts")
+        @stack("scripts")
     </body>
 </html>

@@ -26,7 +26,7 @@
                             id="path-4"
                         ></path>
                         <path
-                            d="M20.6,7.13333333 L25.6,13.8 C26.2627417,14.6836556 26.0836556,15.9372583 25.2,16.6 C24.8538077,16.8596443 24.4327404,17 24,17 L14,17 C12.8954305,17 12,16.1045695 12,15 C12,14.5672596 12.1403557,14.1461923 12.4,13.8 L17.4,7.13333333 C18.0627417,6.24967773 19.3163444,6.07059163 20.2,6.73333333 C20.3516113,6.84704183 20.4862915,6.981722 20.6,7.13333333 Z"
+                            d="M20.6,7.13333333 L25.6,13.8 C26.2627417,14.6836556 26.0836556,15.9372583 25.2,16.6 C24.3163444,17.2627417 24.0836556,17.0836556 24,17 L14,17 C12.8954305,17 12,16.1045695 12,15 C12,14.5672596 12.1403557,14.1461923 12.4,13.8 L17.4,7.13333333 C18.0627417,6.24967773 19.3163444,6.07059163 20.2,6.73333333 C20.3516113,6.84704183 20.4862915,6.981722 20.6,7.13333333 Z"
                             id="path-5"
                         ></path>
                     </defs>
@@ -132,7 +132,7 @@
             <span class="menu-header-text">Kepala Dapur</span>
         </li>
 
-        <!-- Approval Permintaan Stok - BARU -->
+        <!-- Approval Permintaan Stok -->
         <li
             class="menu-item {{ request()->routeIs("kepala-dapur.approvals.*") ? "active" : "" }}"
         >
@@ -145,6 +145,44 @@
                 @if (isset($pendingApprovalsCount) && $pendingApprovalsCount > 0)
                     <span class="badge bg-danger ms-2">
                         {{ $pendingApprovalsCount }}
+                    </span>
+                @endif
+            </a>
+        </li>
+
+        <!-- Approval Transaksi Dapur -->
+        <li
+            class="menu-item {{ request()->routeIs("kepala-dapur.approval-transaksi.*") ? "active" : "" }}"
+        >
+            <a
+                href="{{ route("kepala-dapur.approval-transaksi.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                class="menu-link"
+            >
+                <i class="menu-icon tf-icons bx bx-file"></i>
+                <div data-i18n="Approval Transaksi">Approval Transaksi</div>
+                @if (isset($pendingTransaksiCount) && $pendingTransaksiCount > 0)
+                    <span class="badge bg-danger ms-2">
+                        {{ $pendingTransaksiCount }}
+                    </span>
+                @endif
+            </a>
+        </li>
+
+        <!-- Laporan Kekurangan Stok -->
+        <li
+            class="menu-item {{ request()->routeIs("kepala-dapur.laporan-kekurangan.*") ? "active" : "" }}"
+        >
+            <a
+                href="{{ route("kepala-dapur.laporan-kekurangan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                class="menu-link"
+            >
+                <i class="menu-icon tf-icons bx bx-error"></i>
+                <div data-i18n="Laporan Kekurangan Stok">
+                    Laporan Kekurangan Stok
+                </div>
+                @if (isset($pendingShortageCount) && $pendingShortageCount > 0)
+                    <span class="badge bg-danger ms-2">
+                        {{ $pendingShortageCount }}
                     </span>
                 @endif
             </a>

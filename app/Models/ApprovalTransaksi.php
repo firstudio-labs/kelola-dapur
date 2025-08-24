@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ApprovalTransaksi extends Model
 {
@@ -40,6 +41,11 @@ class ApprovalTransaksi extends Model
     public function kepalaDapur()
     {
         return $this->belongsTo(KepalaDapur::class, 'id_kepala_dapur');
+    }
+
+    public function stockSnapshots(): HasMany
+    {
+        return $this->hasMany(StockSnapshot::class, 'id_approval_transaksi');
     }
 
     // Helper methods

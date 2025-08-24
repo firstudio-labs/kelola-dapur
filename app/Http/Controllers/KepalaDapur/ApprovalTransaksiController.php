@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\KepalaDapur;
 
 use App\Http\Controllers\Controller;
-use App\Models\ApprovalTransaksi;
+use App\Models\Dapur;
 use App\Models\TransaksiDapur;
+use App\Models\ApprovalTransaksi;
+use App\Models\UserRole;
 use App\Models\KepalaDapur;
-use App\Models\LaporanKekuranganStock;
+use App\Models\StockSnapshot;
 use App\Models\StockItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,393 +19,382 @@ class ApprovalTransaksiController extends Controller
 {
     public function index(Request $request)
     {
-        $user = Auth::user();
-        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
-            $query->where('id_user', $user->id_user);
-        })->first();
+        $dapurId = $request->query('dapur');
+        $dapur = Dapur::findOrFail($dapurId);
 
-        if (!$kepalaDapur) {
-            abort(403, 'Unauthorized');
+        $user = Auth::user();
+        $userRole = UserRole::where('id_user', $user->id_user)
+            ->where('role_type', 'kepala_dapur')
+            ->where('id_dapur', $dapur->id_dapur)
+            ->first();
+
+        if (!$userRole) {
+            Log::error('UserRole not found', [
+                'user_id' => $user->id_user,
+                'dapur_id' => $dapur->id_dapur,
+                'role_type' => 'kepala_dapur'
+            ]);
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses sebagai Kepala Dapur untuk dapur ini.');
         }
 
-        $query = ApprovalTransaksi::where('id_kepala_dapur', $kepalaDapur->id_kepala_dapur)
-            ->with([
-                'transaksiDapur.detailTransaksiDapur.menuMakanan',
-                'transaksiDapur.createdBy',
-                'ahliGizi.user'
-            ]);
+        $kepalaDapur = KepalaDapur::where('id_user_role', $userRole->id_user_role)->first();
+
+        if (!$kepalaDapur) {
+            Log::error('KepalaDapur not found', ['id_user_role' => $userRole->id_user_role]);
+            return redirect()->back()->with('error', 'Kepala Dapur tidak ditemukan untuk user ini.');
+        }
+
+        $query = ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
+            $q->where('id_dapur', $dapur->id_dapur);
+        })->with([
+            'transaksiDapur.createdBy',
+            'transaksiDapur.detailTransaksiDapur.menuMakanan'
+        ]);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('transaksiDapur', function ($q) use ($search) {
+                $q->where('keterangan', 'like', '%' . $search . '%')
+                    ->orWhereHas('createdBy', function ($q) use ($search) {
+                        $q->where('nama', 'like', '%' . $search . '%');
+                    });
+            });
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $query->whereHas('transaksiDapur', function ($q) use ($request) {
+                $q->whereDate('tanggal_transaksi', '>=', $request->date_from);
+            });
         }
-
         if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $query->whereHas('transaksiDapur', function ($q) use ($request) {
+                $q->whereDate('tanggal_transaksi', '<=', $request->date_to);
+            });
         }
 
-        if ($request->filled('ahli_gizi')) {
-            $query->where('id_ahli_gizi', $request->ahli_gizi);
+        if ($request->filled('sort')) {
+            $sort = $request->sort;
+            if ($sort === 'created_by') {
+                $query->join('transaksi_dapur', 'approval_transaksi.id_transaksi', '=', 'transaksi_dapur.id_transaksi')
+                    ->join('users', 'transaksi_dapur.created_by', '=', 'users.id_user')
+                    ->orderBy('users.nama', 'asc')
+                    ->select('approval_transaksi.*');
+            } elseif ($sort === 'tanggal_transaksi') {
+                $query->join('transaksi_dapur', 'approval_transaksi.id_transaksi', '=', 'transaksi_dapur.id_transaksi')
+                    ->orderBy('transaksi_dapur.tanggal_transaksi', 'desc')
+                    ->select('approval_transaksi.*');
+            } else {
+                $query->orderBy($sort, 'desc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
-        $approvals = $query->orderBy('created_at', 'desc')->paginate(10);
+        $approvals = $query->paginate(10);
 
         $stats = [
-            'pending' => ApprovalTransaksi::where('id_kepala_dapur', $kepalaDapur->id_kepala_dapur)
-                ->where('status', 'pending')->count(),
-            'approved' => ApprovalTransaksi::where('id_kepala_dapur', $kepalaDapur->id_kepala_dapur)
-                ->where('status', 'approved')->count(),
-            'rejected' => ApprovalTransaksi::where('id_kepala_dapur', $kepalaDapur->id_kepala_dapur)
-                ->where('status', 'rejected')->count(),
+            'total' => ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
+                $q->where('id_dapur', $dapur->id_dapur);
+            })->count(),
+            'pending' => ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
+                $q->where('id_dapur', $dapur->id_dapur);
+            })->where('status', 'pending')->count(),
+            'approved' => ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
+                $q->where('id_dapur', $dapur->id_dapur);
+            })->where('status', 'approved')->count(),
+            'rejected' => ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
+                $q->where('id_dapur', $dapur->id_dapur);
+            })->where('status', 'rejected')->count(),
         ];
 
-        return view('kepala-dapur.approval-transaksi.index', compact('approvals', 'stats', 'kepalaDapur'));
+        return view('kepaladapur.approval-transaksi.index', compact('approvals', 'dapur', 'stats'));
     }
 
-    public function show(ApprovalTransaksi $approval)
+    public function show(Request $request, $approvalId)
     {
-        $user = Auth::user();
-        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
-            $query->where('id_user', $user->id_user);
-        })->first();
-
-        if (!$kepalaDapur || $approval->id_kepala_dapur !== $kepalaDapur->id_kepala_dapur) {
-            abort(403, 'Unauthorized');
-        }
-
-        $approval->load([
+        $dapurId = $request->query('dapur');
+        $dapur = Dapur::findOrFail($dapurId);
+        $approval = ApprovalTransaksi::with([
             'transaksiDapur.detailTransaksiDapur.menuMakanan.bahanMenu.templateItem',
-            'transaksiDapur.laporanKekuranganStock.templateItem',
             'transaksiDapur.createdBy',
-            'transaksiDapur.dapur',
-            'ahliGizi.user',
-            'kepalaDapur.user'
-        ]);
+            'stockSnapshots.templateItem'
+        ])->findOrFail($approvalId);
 
-        $stockCheck = $approval->transaksiDapur->checkAllStockAvailability();
+        $this->createStockSnapshots($approval, $dapur);
 
-        $bahanKebutuhan = $this->calculateIngredientNeeds($approval->transaksiDapur);
+        $stockCheck = $this->getEnhancedStockCheck($approval, $dapur);
 
-        return view('kepala-dapur.approval-transaksi.show', compact('approval', 'stockCheck', 'bahanKebutuhan', 'kepalaDapur'));
+        $menuDetails = $this->getDetailedMenuInfo($approval);
+
+        return view('kepaladapur.approval-transaksi.show', compact(
+            'approval',
+            'dapur',
+            'stockCheck',
+            'menuDetails'
+        ));
     }
 
-    public function approve(Request $request, ApprovalTransaksi $approval)
+    public function approve(Request $request, $approvalId)
     {
+        $dapurId = $request->query('dapur');
+        $dapur = Dapur::findOrFail($dapurId);
+        $approval = ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
+            $q->where('id_dapur', $dapur->id_dapur);
+        })->findOrFail($approvalId);
+
         $user = Auth::user();
-        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
-            $query->where('id_user', $user->id_user);
-        })->first();
+        $userRole = UserRole::where('id_user', $user->id_user)
+            ->where('role_type', 'kepala_dapur')
+            ->where('id_dapur', $dapur->id_dapur)
+            ->first();
 
-        if (!$kepalaDapur || $approval->id_kepala_dapur !== $kepalaDapur->id_kepala_dapur) {
-            abort(403, 'Unauthorized');
-        }
-
-        if (!$approval->isPending()) {
-            return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                ->with('error', 'Input Paket Menu sudah diproses sebelumnya.');
+        if (!$userRole) {
+            Log::error('UserRole not found', [
+                'user_id' => $user->id_user,
+                'dapur_id' => $dapur->id_dapur,
+                'role_type' => 'kepala_dapur'
+            ]);
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses sebagai Kepala Dapur untuk dapur ini.');
         }
 
         $request->validate([
             'catatan_approval' => 'nullable|string|max:500',
-            'konfirmasi_stock' => 'required|accepted'
-        ], [
-            'konfirmasi_stock.accepted' => 'Anda harus mengkonfirmasi bahwa stock mencukupi untuk menyetujui transaksi ini.'
         ]);
 
-        DB::beginTransaction();
         try {
-            $stockCheck = $approval->transaksiDapur->checkAllStockAvailability();
+            DB::transaction(function () use ($approval, $request) {
+                $approval->approve($request->catatan_approval);
+            });
 
-            if (!$stockCheck['can_produce']) {
-                DB::rollback();
-                return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                    ->with('error', 'Stock tidak mencukupi untuk menyetujui Input Paket Menu ini. Silakan cek kembali ketersediaan stock.')
-                    ->with('shortages', $stockCheck['shortages']);
-            }
-
-            $success = $approval->approve($request->catatan_approval);
-
-            if ($success) {
-                $this->reduceStockItems($approval->transaksiDapur);
-                $approval->transaksiDapur->update([
-                    'status' => 'completed',
-                    'tanggal_diproses' => now()
-                ]);
-
-                DB::commit();
-                return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                    ->with('success', 'Input Paket Menu berhasil disetujui dan diproses. Stock telah dikurangi sesuai kebutuhan.');
-            } else {
-                DB::rollback();
-                return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                    ->with('error', 'Gagal memproses persetujuan Input Paket Menu.');
-            }
+            return redirect()->route('kepala-dapur.approval-transaksi.index', ['dapur' => $dapur->id_dapur])
+                ->with('success', 'Transaksi berhasil disetujui.');
         } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Error approving transaksi: ' . $e->getMessage());
-            return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                ->with('error', 'Terjadi error saat memproses persetujuan: ' . $e->getMessage());
+            Log::error('Approval error: ' . $e->getMessage(), [
+                'approval_id' => $approval->id_approval_transaksi,
+                'user_id' => $user->id_user
+            ]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    public function reject(Request $request, ApprovalTransaksi $approval)
+    public function reject(Request $request, $dapurId, $approvalId)
     {
+        $dapur = Dapur::findOrFail($dapurId);
+        $approval = ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
+            $q->where('id_dapur', $dapur->id_dapur);
+        })->findOrFail($approvalId);
+
         $user = Auth::user();
-        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
-            $query->where('id_user', $user->id_user);
-        })->first();
+        $userRole = UserRole::where('id_user', $user->id_user)
+            ->where('role_type', 'kepala_dapur')
+            ->where('id_dapur', $dapur->id_dapur)
+            ->first();
 
-        if (!$kepalaDapur || $approval->id_kepala_dapur !== $kepalaDapur->id_kepala_dapur) {
-            abort(403, 'Unauthorized');
-        }
-
-        if (!$approval->isPending()) {
-            return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                ->with('error', 'Input Paket Menu sudah diproses sebelumnya.');
+        if (!$userRole) {
+            Log::error('UserRole not found', [
+                'user_id' => $user->id_user,
+                'dapur_id' => $dapur->id_dapur,
+                'role_type' => 'kepala_dapur'
+            ]);
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses sebagai Kepala Dapur untuk dapur ini.');
         }
 
         $request->validate([
-            'catatan_approval' => 'required|string|max:500'
-        ], [
-            'catatan_approval.required' => 'Alasan penolakan harus diisi.'
+            'alasan_penolakan' => 'required|string|max:500',
         ]);
 
-        DB::beginTransaction();
         try {
-            $success = $approval->reject($request->catatan_approval);
+            DB::transaction(function () use ($approval, $request) {
+                $approval->reject($request->alasan_penolakan);
+            });
 
-            if ($success) {
-                $approval->transaksiDapur->update([
-                    'status' => 'rejected',
-                    'tanggal_diproses' => now()
-                ]);
-
-                DB::commit();
-                return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                    ->with('success', 'Input Paket Menu berhasil ditolak.');
-            }
-
-            DB::rollback();
-            return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                ->with('error', 'Gagal menolak Input Paket Menu.');
+            return redirect()->route('kepala-dapur.approval-transaksi.index', ['dapur' => $dapur->id_dapur])
+                ->with('success', 'Transaksi berhasil ditolak.');
         } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Error rejecting transaksi: ' . $e->getMessage());
-            return redirect()->route('kepala-dapur.approval-transaksi.show', $approval)
-                ->with('error', 'Terjadi error saat menolak: ' . $e->getMessage());
+            Log::error('Reject error: ' . $e->getMessage(), [
+                'approval_id' => $approval->id_approval_transaksi,
+                'user_id' => $user->id_user
+            ]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(Request $request, $dapurId)
     {
+        $dapur = Dapur::findOrFail($dapurId);
         $user = Auth::user();
-        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
-            $query->where('id_user', $user->id_user);
-        })->first();
+        $userRole = UserRole::where('id_user', $user->id_user)
+            ->where('role_type', 'kepala_dapur')
+            ->where('id_dapur', $dapur->id_dapur)
+            ->first();
+
+        if (!$userRole) {
+            Log::error('UserRole not found', [
+                'user_id' => $user->id_user,
+                'dapur_id' => $dapur->id_dapur,
+                'role_type' => 'kepala_dapur'
+            ]);
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses sebagai Kepala Dapur untuk dapur ini.');
+        }
+
+        $kepalaDapur = KepalaDapur::where('id_user_role', $userRole->id_user_role)->first();
 
         if (!$kepalaDapur) {
-            abort(403, 'Unauthorized');
+            Log::error('KepalaDapur not found', ['id_user_role' => $userRole->id_user_role]);
+            return redirect()->back()->with('error', 'Kepala Dapur tidak ditemukan untuk user ini.');
         }
 
         $request->validate([
-            'action' => 'required|in:approve,reject',
-            'approval_ids' => 'required|array|min:1',
+            'approval_ids' => 'required|array',
             'approval_ids.*' => 'exists:approval_transaksi,id_approval_transaksi',
-            'catatan_approval' => 'nullable|string|max:500'
+            'bulk_action' => 'required|in:approve,reject',
+            'bulk_keterangan' => 'nullable|string|max:500',
         ]);
 
-        $approvals = ApprovalTransaksi::whereIn('id_approval_transaksi', $request->approval_ids)
-            ->where('id_kepala_dapur', $kepalaDapur->id_kepala_dapur)
-            ->where('status', 'pending')
-            ->get();
+        $approvalIds = $request->approval_ids;
+        $action = $request->bulk_action;
+        $keterangan = $request->bulk_keterangan;
 
-        if ($approvals->isEmpty()) {
+        if ($action === 'reject' && !$keterangan) {
             return redirect()->back()
-                ->with('error', 'Tidak ada Input Paket Menu yang valid untuk diproses.');
+                ->withErrors(['bulk_keterangan' => 'Alasan penolakan wajib diisi untuk aksi tolak.']);
         }
 
-        $successCount = 0;
-        $errors = [];
-
-        DB::beginTransaction();
         try {
-            foreach ($approvals as $approval) {
-                if ($request->action === 'approve') {
-                    $stockCheck = $approval->transaksiDapur->checkAllStockAvailability();
+            $processedCount = 0;
+            $errorCount = 0;
 
-                    if (!$stockCheck['can_produce']) {
-                        $errors[] = "Input Paket #{$approval->transaksiDapur->id_transaksi}: Stock tidak mencukupi";
-                        continue;
-                    }
+            DB::transaction(function () use ($approvalIds, $action, $keterangan, $dapur, &$processedCount, &$errorCount) {
+                $approvals = ApprovalTransaksi::whereIn('id_approval_transaksi', $approvalIds)
+                    ->whereHas('transaksiDapur', function ($q) use ($dapur) {
+                        $q->where('id_dapur', $dapur->id_dapur);
+                    })
+                    ->where('status', 'pending')
+                    ->get();
 
-                    if ($approval->approve($request->catatan_approval)) {
-                        $this->reduceStockItems($approval->transaksiDapur);
-
-                        $approval->transaksiDapur->update([
-                            'status' => 'completed',
-                            'tanggal_diproses' => now()
+                foreach ($approvals as $approval) {
+                    try {
+                        if ($action === 'approve') {
+                            $result = $approval->approve($keterangan);
+                            if ($result) {
+                                $processedCount++;
+                            } else {
+                                $errorCount++;
+                            }
+                        } else {
+                            $result = $approval->reject($keterangan);
+                            if ($result) {
+                                $processedCount++;
+                            } else {
+                                $errorCount++;
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        $errorCount++;
+                        Log::error('Bulk approval error: ' . $e->getMessage(), [
+                            'approval_id' => $approval->id_approval_transaksi,
+                            'user_id' => Auth::user()->id_user
                         ]);
-
-                        $successCount++;
-                    } else {
-                        $errors[] = "Input Paket #{$approval->transaksiDapur->id_transaksi}: Gagal disetujui";
-                    }
-                } else {
-                    if (!$request->filled('catatan_approval')) {
-                        $errors[] = "Alasan penolakan harus diisi untuk aksi bulk reject";
-                        continue;
-                    }
-
-                    if ($approval->reject($request->catatan_approval)) {
-                        $approval->transaksiDapur->update([
-                            'status' => 'rejected',
-                            'tanggal_diproses' => now()
-                        ]);
-
-                        $successCount++;
-                    } else {
-                        $errors[] = "Input Paket #{$approval->transaksiDapur->id_transaksi}: Gagal ditolak";
                     }
                 }
+            });
+
+            $actionText = $action === 'approve' ? 'disetujui' : 'ditolak';
+            $message = "{$processedCount} transaksi berhasil {$actionText}.";
+
+            if ($errorCount > 0) {
+                $message .= " {$errorCount} transaksi gagal diproses.";
             }
 
-            DB::commit();
-
-            $actionText = $request->action === 'approve' ? 'disetujui' : 'ditolak';
-            $message = "{$successCount} Input Paket Menu berhasil {$actionText}";
-
-            if (!empty($errors)) {
-                $message .= ". Errors: " . implode(', ', $errors);
-            }
-
-            return redirect()->back()
-                ->with($successCount > 0 ? 'success' : 'error', $message);
+            return redirect()->route('kepala-dapur.approval-transaksi.index', ['dapur' => $dapur->id_dapur])
+                ->with($errorCount > 0 ? 'warning' : 'success', $message);
         } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Error bulk action approval: ' . $e->getMessage());
+            Log::error('Bulk action error: ' . $e->getMessage(), [
+                'user_id' => $user->id_user,
+                'dapur_id' => $dapur->id_dapur
+            ]);
             return redirect()->back()
-                ->with('error', 'Terjadi error: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    private function reduceStockItems(TransaksiDapur $transaksi)
+    private function createStockSnapshots(ApprovalTransaksi $approval, Dapur $dapur)
     {
-        $kebutuhan = $this->calculateIngredientNeeds($transaksi);
+        $existingSnapshots = StockSnapshot::where('id_approval_transaksi', $approval->id_approval_transaksi)->count();
 
-        foreach ($kebutuhan as $idTemplate => $data) {
-            $stockItem = StockItem::where('id_template_item', $idTemplate)
-                ->where('id_dapur', $transaksi->id_dapur)
-                ->first();
+        if ($existingSnapshots > 0) {
+            return;
+        }
 
-            if ($stockItem) {
-                $stockItem->decrement('jumlah_stock', $data['total_kebutuhan']);
+        $stockCheck = $approval->transaksiDapur->checkAllStockAvailability();
 
-                Log::info("Stock reduced for template {$idTemplate}: {$data['total_kebutuhan']} {$data['satuan']}");
+        foreach ($stockCheck['ingredients_summary'] as $ingredient) {
+            StockSnapshot::create([
+                'id_approval_transaksi' => $approval->id_approval_transaksi,
+                'id_template_item' => $ingredient['id_template_item'],
+                'available' => $ingredient['available'],
+                'satuan' => $ingredient['satuan']
+            ]);
+        }
+    }
+
+    private function getEnhancedStockCheck(ApprovalTransaksi $approval, Dapur $dapur): array
+    {
+        $stockCheck = $approval->transaksiDapur->checkAllStockAvailability();
+
+        $snapshots = StockSnapshot::where('id_approval_transaksi', $approval->id_approval_transaksi)
+            ->with('templateItem')
+            ->get()
+            ->keyBy('id_template_item');
+
+        foreach ($stockCheck['ingredients_summary'] as &$ingredient) {
+            $snapshot = $snapshots->get($ingredient['id_template_item']);
+            if ($snapshot) {
+                $ingredient['snapshot_available'] = (float)$snapshot->available;
+                $ingredient['current_available'] = $ingredient['available'];
+                $ingredient['available'] = (float)$snapshot->available;
+                $ingredient['sufficient'] = $ingredient['available'] >= $ingredient['needed'];
             }
         }
+
+        $stockCheck['can_produce'] = collect($stockCheck['ingredients_summary'])->every(function ($ingredient) {
+            return $ingredient['sufficient'];
+        });
+
+        return $stockCheck;
     }
 
-    private function calculateIngredientNeeds(TransaksiDapur $transaksi)
+    private function getDetailedMenuInfo(ApprovalTransaksi $approval): array
     {
-        $kebutuhan = [];
+        $menuDetails = [];
 
-        foreach ($transaksi->detailTransaksiDapur as $detail) {
-            foreach ($detail->menuMakanan->bahanMenu as $bahanMenu) {
-                $idTemplate = $bahanMenu->id_template_item;
-                $totalKebutuhan = $bahanMenu->jumlah_per_porsi * $detail->jumlah_porsi;
+        foreach ($approval->transaksiDapur->detailTransaksiDapur as $detail) {
+            $menu = $detail->menuMakanan;
+            if (!$menu) continue;
 
-                if (!isset($kebutuhan[$idTemplate])) {
-                    $kebutuhan[$idTemplate] = [
-                        'nama_bahan' => $bahanMenu->templateItem->nama_bahan,
-                        'satuan' => $bahanMenu->satuan,
-                        'total_kebutuhan' => 0,
-                        'detail_penggunaan' => []
-                    ];
-                }
-
-                $kebutuhan[$idTemplate]['total_kebutuhan'] += $totalKebutuhan;
-                $kebutuhan[$idTemplate]['detail_penggunaan'][] = [
-                    'menu' => $detail->menuMakanan->nama_menu,
-                    'tipe_porsi' => $detail->tipe_porsi,
-                    'jumlah_porsi' => $detail->jumlah_porsi,
-                    'kebutuhan_per_porsi' => $bahanMenu->jumlah_per_porsi,
-                    'total_kebutuhan' => $totalKebutuhan
+            $baseIngredients = [];
+            foreach ($menu->bahanMenu as $bahanMenu) {
+                $baseIngredients[] = [
+                    'nama_bahan' => $bahanMenu->templateItem->nama_bahan,
+                    'jumlah_per_porsi' => $bahanMenu->jumlah,
+                    'satuan' => $bahanMenu->templateItem->satuan,
+                    'total_needed' => $bahanMenu->jumlah * $detail->jumlah_porsi,
                 ];
             }
+
+            $menuDetails[] = [
+                'detail' => $detail,
+                'menu' => $menu,
+                'base_ingredients' => $baseIngredients,
+                'jumlah_porsi' => $detail->jumlah_porsi,
+                'tipe_porsi' => $detail->tipe_porsi,
+            ];
         }
 
-        return $kebutuhan;
-    }
-
-    public function shortageReports(Request $request)
-    {
-        $user = Auth::user();
-        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
-            $query->where('id_user', $user->id_user);
-        })->first();
-
-        if (!$kepalaDapur) {
-            abort(403, 'Unauthorized');
-        }
-
-        $query = LaporanKekuranganStock::whereHas('transaksiDapur', function ($query) use ($kepalaDapur) {
-            $query->where('id_dapur', $kepalaDapur->id_dapur);
-        })->with([
-            'transaksiDapur.createdBy',
-            'templateItem'
-        ]);
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        $reports = $query->orderBy('created_at', 'desc')->paginate(10);
-
-        $stats = [
-            'pending' => LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($kepalaDapur) {
-                $q->where('id_dapur', $kepalaDapur->id_dapur);
-            })->where('status', 'pending')->count(),
-            'resolved' => LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($kepalaDapur) {
-                $q->where('id_dapur', $kepalaDapur->id_dapur);
-            })->where('status', 'resolved')->count(),
-        ];
-
-        return view('kepala-dapur.shortage-reports.index', compact('reports', 'stats', 'kepalaDapur'));
-    }
-
-    public function resolveShortage(LaporanKekuranganStock $report)
-    {
-        $user = Auth::user();
-        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
-            $query->where('id_user', $user->id_user);
-        })->first();
-
-        if (!$kepalaDapur || $report->transaksiDapur->id_dapur !== $kepalaDapur->id_dapur) {
-            abort(403, 'Unauthorized');
-        }
-
-        if ($report->isResolved()) {
-            return redirect()->back()
-                ->with('error', 'Laporan kekurangan sudah diselesaikan sebelumnya.');
-        }
-
-        if ($report->resolve()) {
-            return redirect()->back()
-                ->with('success', 'Laporan kekurangan berhasil diselesaikan.');
-        }
-
-        return redirect()->back()
-            ->with('error', 'Gagal menyelesaikan laporan kekurangan.');
+        return $menuDetails;
     }
 }

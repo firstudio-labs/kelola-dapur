@@ -8,6 +8,8 @@ use App\Models\KepalaDapur;
 use App\Models\TransaksiDapur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanKekuranganStockController extends Controller
 {
@@ -19,20 +21,23 @@ class LaporanKekuranganStockController extends Controller
         })->first();
 
         if (!$kepalaDapur) {
-            abort(403, 'Unauthorized');
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses sebagai Kepala Dapur.');
         }
 
-        $query = LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($kepalaDapur) {
-            $q->where('id_dapur', $kepalaDapur->id_dapur);
-        })
+        $id_dapur = $kepalaDapur->id_dapur;
+
+        $query = TransaksiDapur::where('id_dapur', $id_dapur)
+            ->whereHas('laporanKekuranganStock')
             ->with([
-                'transaksiDapur.createdBy',
-                'transaksiDapur.detailTransaksiDapur',
-                'templateItem'
+                'laporanKekuranganStock.templateItem',
+                'createdBy',
+                'detailTransaksiDapur.menuMakanan'
             ]);
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->whereHas('laporanKekuranganStock', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            });
         }
 
         if ($request->filled('date_from')) {
@@ -44,48 +49,71 @@ class LaporanKekuranganStockController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->whereHas('templateItem', function ($q) use ($request) {
-                $q->where('nama_bahan', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_paket', 'like', '%' . $search . '%')
+                    ->orWhereHas('createdBy', function ($q) use ($search) {
+                        $q->where('nama', 'like', '%' . $search . '%');
+                    });
             });
         }
 
-        $reports = $query->orderBy('created_at', 'desc')->paginate(10);
+        if ($request->filled('sort')) {
+            $sort = $request->sort;
+            if ($sort === 'created_by') {
+                $query->join('users', 'transaksi_dapur.created_by', '=', 'users.id_user')
+                    ->orderBy('users.nama', 'asc');
+            } else {
+                $query->orderBy($sort, 'asc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $transaksi = $query->paginate(10);
 
         $stats = [
-            'total' => LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($kepalaDapur) {
-                $q->where('id_dapur', $kepalaDapur->id_dapur);
-            })->count(),
-            'pending' => LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($kepalaDapur) {
-                $q->where('id_dapur', $kepalaDapur->id_dapur);
-            })->where('status', 'pending')->count(),
-            'resolved' => LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($kepalaDapur) {
-                $q->where('id_dapur', $kepalaDapur->id_dapur);
-            })->where('status', 'resolved')->count()
+            'total' => TransaksiDapur::where('id_dapur', $id_dapur)
+                ->whereHas('laporanKekuranganStock')
+                ->count(),
+            'pending' => TransaksiDapur::where('id_dapur', $id_dapur)
+                ->whereHas('laporanKekuranganStock', function ($q) {
+                    $q->where('status', 'pending');
+                })->count(),
+            'resolved' => TransaksiDapur::where('id_dapur', $id_dapur)
+                ->whereHas('laporanKekuranganStock', function ($q) {
+                    $q->where('status', 'resolved');
+                })->count(),
+            'total_kekurangan_bahan' => LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($id_dapur) {
+                $q->where('id_dapur', $id_dapur);
+            })->count()
         ];
 
-        return view('kepala-dapur.laporan-kekurangan.index', compact('reports', 'stats'));
+        $currentDapur = $kepalaDapur;
+
+        return view('kepaladapur.laporan-kekurangan.index', compact('transaksi', 'stats', 'currentDapur'));
     }
 
-    public function show(LaporanKekuranganStock $laporan)
+    public function show(TransaksiDapur $transaksi)
     {
         $user = Auth::user();
         $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
             $query->where('id_user', $user->id_user);
         })->first();
 
-        if (!$kepalaDapur || $laporan->transaksiDapur->id_dapur !== $kepalaDapur->id_dapur) {
+        if (!$kepalaDapur || $transaksi->id_dapur !== $kepalaDapur->id_dapur) {
             abort(403, 'Unauthorized');
         }
 
-        $laporan->load([
-            'transaksiDapur.detailTransaksiDapur.menuMakanan.bahanMenu.templateItem',
-            'transaksiDapur.createdBy',
-            'templateItem'
+        $transaksi->load([
+            'detailTransaksiDapur.menuMakanan.bahanMenu.templateItem',
+            'laporanKekuranganStock.templateItem',
+            'createdBy'
         ]);
 
-        $currentStock = $laporan->templateItem->getStockByDapur($kepalaDapur->id_dapur);
+        $laporan = $transaksi->laporanKekuranganStock;
 
-        return view('kepala-dapur.laporan-kekurangan.show', compact('laporan', 'currentStock'));
+        return view('kepaladapur.laporan-kekurangan.show', compact('transaksi', 'laporan'));
     }
 
     public function resolve(Request $request, LaporanKekuranganStock $laporan)
@@ -95,13 +123,16 @@ class LaporanKekuranganStockController extends Controller
             $query->where('id_user', $user->id_user);
         })->first();
 
-        if (!$kepalaDapur || $laporan->transaksiDapur->id_dapur !== $kepalaDapur->id_dapur) {
-            abort(403, 'Unauthorized');
+        if (!$kepalaDapur) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses sebagai Kepala Dapur.');
+        }
+
+        if ($laporan->transaksiDapur->id_dapur !== $kepalaDapur->id_dapur) {
+            return redirect()->back()->with('error', 'Transaksi ini bukan dari dapur Anda.');
         }
 
         if ($laporan->isResolved()) {
-            return redirect()->back()
-                ->with('error', 'Laporan sudah diselesaikan sebelumnya.');
+            return redirect()->back()->with('error', 'Laporan sudah diselesaikan sebelumnya.');
         }
 
         $request->validate([
@@ -113,14 +144,11 @@ class LaporanKekuranganStockController extends Controller
                 $laporan->update(['keterangan_resolve' => $request->catatan]);
             }
 
-            return redirect()->back()
-                ->with('success', 'Laporan kekurangan berhasil diselesaikan.');
+            return redirect()->back()->with('success', 'Laporan kekurangan berhasil diselesaikan.');
         }
 
-        return redirect()->back()
-            ->with('error', 'Gagal menyelesaikan laporan kekurangan.');
+        return redirect()->back()->with('error', 'Gagal menyelesaikan laporan kekurangan.');
     }
-
     public function bulkResolve(Request $request)
     {
         $user = Auth::user();
@@ -197,7 +225,7 @@ class LaporanKekuranganStockController extends Controller
             ];
         });
 
-        return view('kepala-dapur.laporan-kekurangan.summary', compact('summary', 'dateFrom', 'dateTo'));
+        return view('kepaladapur.laporan-kekurangan.summary', compact('summary', 'dateFrom', 'dateTo'));
     }
 
     public function export(Request $request)
@@ -263,6 +291,76 @@ class LaporanKekuranganStockController extends Controller
                     $report->satuan,
                     $report->status,
                     $report->transaksiDapur->createdBy->nama
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportKekuranganPdf(TransaksiDapur $transaksi)
+    {
+        $user = Auth::user();
+        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
+            $query->where('id_user', $user->id_user);
+        })->first();
+
+        if (!$kepalaDapur || $transaksi->id_dapur !== $kepalaDapur->id_dapur) {
+            abort(403, 'Unauthorized');
+        }
+
+        $laporan = $transaksi->laporanKekuranganStock->load('templateItem');
+
+        $pdf = Pdf::loadView('kepaladapur.laporan-kekurangan.export-pdf', compact('transaksi', 'laporan'));
+        return $pdf->download('laporan-kekurangan-' . $transaksi->id_transaksi . '.pdf');
+    }
+
+    public function exportKekuranganCsv(TransaksiDapur $transaksi)
+    {
+        $user = Auth::user();
+        $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {
+            $query->where('id_user', $user->id_user);
+        })->first();
+
+        if (!$kepalaDapur) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses sebagai Kepala Dapur.');
+        }
+
+        if ($transaksi->id_dapur !== $kepalaDapur->id_dapur) {
+            return redirect()->back()->with('error', 'Transaksi ini bukan dari dapur Anda.');
+        }
+
+        $laporan = $transaksi->laporanKekuranganStock->load('templateItem');
+
+        $filename = 'kekurangan-stok-' . $transaksi->id_transaksi . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ];
+
+        $callback = function () use ($laporan) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                'Nama Bahan',
+                'Jumlah Dibutuhkan',
+                'Jumlah Tersedia',
+                'Jumlah Kurang',
+                'Satuan',
+                'Status'
+            ]);
+
+            foreach ($laporan as $item) {
+                fputcsv($file, [
+                    $item->templateItem->nama_bahan,
+                    $item->jumlah_dibutuhkan,
+                    $item->jumlah_tersedia,
+                    $item->jumlah_kurang,
+                    $item->satuan,
+                    $item->status
                 ]);
             }
 
