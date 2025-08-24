@@ -36,6 +36,7 @@ class MenuMakanan extends Model
         'Tambahan' => 'Tambahan'
     ];
 
+    // Relationships
     public function createdByDapur()
     {
         return $this->belongsTo(Dapur::class, 'created_by_dapur_id', 'id_dapur');
@@ -51,7 +52,7 @@ class MenuMakanan extends Model
         return $this->hasMany(DetailTransaksiDapur::class, 'id_menu');
     }
 
-    // Image handling 
+    // Image handling
     public function getGambarUrlAttribute(): ?string
     {
         if (!$this->gambar_menu) {
@@ -84,39 +85,40 @@ class MenuMakanan extends Model
 
     public function hasGambar(): bool
     {
-        return !empty($this->gambar_menu) && $this->isGambarExists();
+        return !empty($this->gambar_menu);
     }
-
-    public function isGambarExists(): bool
+    public function calculateRequiredIngredients(int $jumlahPorsi): array
     {
-        if (!$this->gambar_menu) {
-            return false;
+        $ingredients = [];
+
+        foreach ($this->bahanMenu as $bahan) {
+            $totalNeeded = $bahan->getTotalKebutuhan($jumlahPorsi);
+            $beratBasahPerPorsi = $bahan->getBeratBasah();
+            $totalBeratBasah = $bahan->getTotalBeratBasah($jumlahPorsi);
+
+            $ingredients[] = [
+                'id_template_item' => $bahan->id_template_item,
+                'nama_bahan' => $bahan->templateItem->nama_bahan ?? 'Unknown',
+                'satuan' => $bahan->templateItem->satuan ?? '',
+                'jumlah_per_porsi' => (float) $bahan->jumlah_per_porsi,
+                'total_needed' => $totalNeeded,
+                'is_bahan_basah' => $bahan->is_bahan_basah,
+                'berat_basah_per_porsi' => $beratBasahPerPorsi,
+                'total_berat_basah' => $totalBeratBasah,
+                'keterangan' => $bahan->templateItem->keterangan ?? ''
+            ];
         }
 
-        return Storage::disk('public')->exists('menu/' . $this->gambar_menu) ||
-            file_exists(public_path('images/menu/' . $this->gambar_menu));
+        return $ingredients;
     }
-
-    public function deleteGambar(): bool
+    public function getTotalIngredientsCount(): int
     {
-        if (!$this->gambar_menu) {
-            return true;
-        }
-
-        $deleted = false;
-
-        if (Storage::disk('public')->exists('menu/' . $this->gambar_menu)) {
-            $deleted = Storage::disk('public')->delete('menu/' . $this->gambar_menu);
-        }
-
-        $publicPath = public_path('images/menu/' . $this->gambar_menu);
-        if (file_exists($publicPath)) {
-            $deleted = unlink($publicPath);
-        }
-
-        return $deleted;
+        return $this->bahanMenu()->count();
     }
-
+    public function isReadyForProduction(): bool
+    {
+        return $this->is_active && $this->bahanMenu()->count() > 0;
+    }
     public function getKategoriBadgeClass(): string
     {
         return match ($this->kategori) {
@@ -127,105 +129,12 @@ class MenuMakanan extends Model
             default => 'bg-label-secondary'
         };
     }
-
-    // Helper methods 
-    public function calculateRequiredIngredients(int $porsi): array
-    {
-        $ingredients = [];
-
-        foreach ($this->bahanMenu as $bahan) {
-            $jumlahPerPorsi = $bahan->getBeratBasah();
-
-            $ingredients[] = [
-                'id_template_item' => $bahan->id_template_item,
-                'nama_bahan' => $bahan->templateItem->nama_bahan,
-                'satuan' => $bahan->templateItem->satuan,
-                'jumlah_per_porsi' => $bahan->jumlah_per_porsi,
-                'is_bahan_basah' => $bahan->is_bahan_basah,
-                'berat_basah_per_porsi' => $jumlahPerPorsi,
-                'total_needed' => $jumlahPerPorsi * $porsi,
-                'template_item' => $bahan->templateItem
-            ];
-        }
-
-        return $ingredients;
-    }
-
-    public function checkStockAvailability(int $porsi, int $dapurId): array
-    {
-        $result = [
-            'can_produce' => true,
-            'shortage' => [],
-            'ingredients' => []
-        ];
-
-        $requiredIngredients = $this->calculateRequiredIngredients($porsi);
-
-        foreach ($requiredIngredients as $ingredient) {
-            $stockItem = StockItem::where('id_dapur', $dapurId)
-                ->where('id_template_item', $ingredient['id_template_item'])
-                ->first();
-
-            $available = $stockItem ? (float)$stockItem->jumlah : 0;
-            $needed = $ingredient['total_needed'];
-
-            $ingredientData = [
-                'id_template_item' => $ingredient['id_template_item'],
-                'nama_bahan' => $ingredient['nama_bahan'],
-                'satuan' => $ingredient['satuan'],
-                'needed' => $needed,
-                'available' => $available,
-                'sufficient' => $available >= $needed,
-                'is_bahan_basah' => $ingredient['is_bahan_basah'],
-                'berat_asli' => $ingredient['jumlah_per_porsi'] * $porsi,
-                'berat_basah' => $ingredient['total_needed']
-            ];
-
-            if ($available < $needed) {
-                $result['can_produce'] = false;
-                $result['shortage'][] = [
-                    'id_template_item' => $ingredient['id_template_item'],
-                    'nama_bahan' => $ingredient['nama_bahan'],
-                    'satuan' => $ingredient['satuan'],
-                    'needed' => $needed,
-                    'available' => $available,
-                    'shortage' => $needed - $available,
-                    'is_bahan_basah' => $ingredient['is_bahan_basah']
-                ];
-            }
-
-            $result['ingredients'][] = $ingredientData;
-        }
-
-        return $result;
-    }
-    public function getTotalProductionCount(): int
-    {
-        return $this->detailTransaksiDapur()
-            ->whereHas('transaksiDapur', function ($query) {
-                $query->where('status', 'completed');
-            })
-            ->sum('jumlah_porsi');
-    }
-
-    // Scope query
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
-
-    public function scopeByKategori($query, $kategori)
+    public function scopeByKategori($query, string $kategori)
     {
         return $query->where('kategori', $kategori);
-    }
-
-    public function scopeWithGambar($query)
-    {
-        return $query->whereNotNull('gambar_menu');
-    }
-
-    public function scopeWithoutGambar($query)
-    {
-        return $query->whereNull('gambar_menu');
     }
 }

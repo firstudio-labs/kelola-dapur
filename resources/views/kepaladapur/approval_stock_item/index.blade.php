@@ -395,7 +395,7 @@
                                                     </h6>
                                                     <small class="text-muted">
                                                         Stok saat ini:
-                                                        {{ number_format($approval->stockItem->jumlah, 3) }}
+                                                        {{ rtrim(rtrim(number_format($approval->stockItem->jumlah, 3, ".", ""), "0"), ".") }}
                                                         {{ $approval->stockItem->satuan }}
                                                     </small>
                                                 </div>
@@ -405,10 +405,10 @@
                                             <span
                                                 class="fw-medium text-primary"
                                             >
-                                                +{{ number_format($approval->jumlah, 3) }}
+                                                +{{ rtrim(rtrim(number_format($approval->jumlah, 3, ".", ""), "0"), ".") }}
                                             </span>
                                             <small class="text-muted d-block">
-                                                {{ $approval->satuan }}
+                                                {{ $approval->stockItem->satuan }}
                                             </small>
                                         </td>
                                         <td>
@@ -981,7 +981,7 @@
                     document.getElementById('approveSatuan').textContent = satuan;
                     document.getElementById('approveAdminName').value = adminName;
 
-                    const actionUrl = '{{ route("kepala-dapur.approvals.approve", [$dapur, ":approvalId"]) }}';
+                    const actionUrl = '{{ route('kepala-dapur.approvals.approve', [$dapur, ':approvalId']) }}';
                     approveForm.action = actionUrl.replace(':approvalId', approvalId);
 
                     // Reset form
@@ -1007,7 +1007,7 @@
                     document.getElementById('rejectSatuan').textContent = satuan;
                     document.getElementById('rejectAdminName').value = adminName;
 
-                    const actionUrl = '{{ route("kepala-dapur.approvals.reject", [$dapur, ":approvalId"]) }}';
+                    const actionUrl = '{{ route('kepala-dapur.approvals.reject', [$dapur, ':approvalId']) }}';
                     rejectForm.action = actionUrl.replace(':approvalId', approvalId);
 
                     // Reset form

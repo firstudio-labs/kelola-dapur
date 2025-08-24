@@ -87,7 +87,6 @@ Route::middleware('auth')->group(function () {
         return response()->json($templates);
     })->name('api.template-items.search');
 
-    // Route untuk mendapatkan stock info
     Route::get('/api/stock-info/{dapur}/{templateItem}', function ($dapurId, $templateItemId) {
         $stockItem = \App\Models\StockItem::where('id_dapur', $dapurId)
             ->where('id_template_item', $templateItemId)
@@ -303,10 +302,10 @@ Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('
         Route::post('/{transaksi}/selesaikan', [KepalaDapurLaporanKekuranganStockController::class, 'resolve'])->name('resolve');
         Route::post('/bulk-selesaikan', [KepalaDapurLaporanKekuranganStockController::class, 'bulkResolve'])->name('bulk-resolve');
         Route::get('/ringkasan/bulanan', [KepalaDapurLaporanKekuranganStockController::class, 'summary'])->name('summary');
-        // Route::get('/export/csv', [KepalaDapurLaporanKekuranganStockController::class, 'export'])->name('export');
         Route::get('/laporan-kekurangan/{transaksi}/export-pdf', [KepalaDapurLaporanKekuranganStockController::class, 'exportKekuranganPdf'])->name('export-pdf');
         Route::get('/laporan-kekurangan/{transaksi}/export-csv', [KepalaDapurLaporanKekuranganStockController::class, 'exportKekuranganCsv'])->name('export-csv');
     });
+
 
     // Route::get('/shortage-reports', [KepalaDapurApprovalTransaksiController::class, 'shortageReports'])->name('shortage-reports');
     // Route::post('/shortage-reports/{report}/resolve', [KepalaDapurApprovalTransaksiController::class, 'resolveShortage'])->name('resolve-shortage');
@@ -336,7 +335,7 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
         Route::post('/{menuMakanan}/check-stock', [AhliGiziMenuMakananController::class, 'checkStock'])->name('check-stock');
         Route::get('/menu/{menuMakanan}/detail', [AhliGiziMenuMakananController::class, 'detail'])->name('menu.detail');
 
-        // API Routes untuk AJAX
+        // API Routes AJAX
         Route::get('/api/active-menus', [AhliGiziMenuMakananController::class, 'getActiveMenus'])->name('active-menus');
         Route::get('/api/search', [AhliGiziMenuMakananController::class, 'searchMenus'])->name('search-api');
         Route::get('/api/menu/{menuMakanan}/detail', [AhliGiziTransaksiDapurController::class, 'getMenuDetail'])->name('get-menu-detail');
@@ -365,7 +364,7 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
     });
 
 
-    // Laporan Kekurangan Stock - untuk melihat laporan yang sudah dibuat
+    // Laporan Kekurangan Stock
     Route::prefix('laporan-saya')->name('laporan.')->group(function () {
         Route::get('/', [AhliGiziLaporanController::class, 'index'])->name('index');
         Route::get('/{laporan}/detail', [AhliGiziLaporanController::class, 'show'])->name('show');

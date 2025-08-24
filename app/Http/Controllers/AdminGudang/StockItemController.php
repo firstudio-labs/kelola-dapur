@@ -24,8 +24,15 @@ class StockItemController extends Controller
 
         $this->ensureStockItemsExist($dapur);
 
-        $query = StockItem::with(['templateItem', 'dapur'])
-            ->where('id_dapur', $dapur->id_dapur);
+        $query = StockItem::with([
+            'templateItem',
+            'dapur',
+            'latestApprovedRequest' => function ($query) {
+                $query->where('status', 'approved')
+                    ->orderBy('approved_at', 'desc')
+                    ->limit(1);
+            }
+        ])->where('id_dapur', $dapur->id_dapur);
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;
@@ -49,7 +56,9 @@ class StockItemController extends Controller
         }
 
         if ($request->filled('satuan')) {
-            $query->where('satuan', $request->satuan);
+            $query->whereHas('templateItem', function ($q) use ($request) {
+                $q->where('satuan', $request->satuan);
+            });
         }
 
         $sortBy = $request->get('sort', 'nama_bahan');
@@ -71,7 +80,9 @@ class StockItemController extends Controller
             ->where('jumlah', '>', 0)->where('jumlah', '<=', 10)->count();
         $normalStok = StockItem::where('id_dapur', $dapur->id_dapur)->where('jumlah', '>', 10)->count();
 
-        $availableSatuans = StockItem::where('id_dapur', $dapur->id_dapur)
+        $availableSatuans = TemplateItem::whereHas('stockItems', function ($query) use ($dapur) {
+            $query->where('id_dapur', $dapur->id_dapur);
+        })
             ->distinct()
             ->pluck('satuan')
             ->filter()
@@ -171,7 +182,7 @@ class StockItemController extends Controller
                 'id_kepala_dapur' => $kepalaDapur->id_kepala_dapur,
                 'id_stock_item' => $stockItem->id_stock_item,
                 'jumlah' => $request->jumlah,
-                'satuan' => $stockItem->satuan,
+                'satuan' => $stockItem->templateItem->satuan,
                 'status' => 'pending',
                 'keterangan' => $request->keterangan
             ]);
@@ -206,6 +217,10 @@ class StockItemController extends Controller
                     'tanggal_restok' => now(),
                     'keterangan' => 'Auto-generated stock item'
                 ]);
+            } else {
+                if ($existingStock->satuan !== $templateItem->satuan) {
+                    $existingStock->update(['satuan' => $templateItem->satuan]);
+                }
             }
         }
     }
@@ -241,7 +256,7 @@ class StockItemController extends Controller
                 fputcsv($file, [
                     $item->templateItem->nama_bahan,
                     $item->jumlah,
-                    $item->satuan,
+                    $item->templateItem->satuan,
                     $item->getStockStatus(),
                     $item->tanggal_restok ? $item->tanggal_restok->format('d/m/Y') : '-',
                     $item->keterangan ?: '-'

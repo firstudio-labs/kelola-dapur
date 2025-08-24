@@ -23,7 +23,8 @@ class TemplateItemController extends Controller
 
     public function create()
     {
-        $satuans = ['kg', 'gram', 'liter', 'ml', 'pcs', 'pack', 'botol', 'kaleng', 'ikat', 'buah'];
+        $satuans = ['kg', 'liter', 'pcs'];
+        // $satuans = ['kg', 'gram', 'liter', 'ml', 'pcs', 'pack', 'botol', 'kaleng', 'ikat', 'buah'];
         return view('kepaladapur.template_item.create', compact('satuans'));
     }
 

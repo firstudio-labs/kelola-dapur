@@ -121,7 +121,7 @@
                                     <input
                                         type="text"
                                         class="form-control"
-                                        value="{{ number_format($stockItem->jumlah, 3) }}"
+                                        value="{{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}"
                                         readonly
                                     />
                                 </div>
@@ -135,7 +135,7 @@
                                     <input
                                         type="text"
                                         class="form-control"
-                                        value="{{ $stockItem->satuan }}"
+                                        value="{{ $stockItem->templateItem->satuan }}"
                                         readonly
                                     />
                                 </div>
@@ -176,20 +176,6 @@
                                     />
                                 </div>
                             </div>
-                            {{--
-                                @if ($stockItem->keterangan)
-                                <div class="col-12 mb-3">
-                                <label class="form-label">Keterangan</label>
-                                <textarea
-                                class="form-control"
-                                rows="2"
-                                readonly
-                                >
-                                {{ $stockItem->keterangan }}</textarea
-                                >
-                                </div>
-                                @endif
-                            --}}
 
                             @if ($stockItem->templateItem->keterangan)
                                 <div class="col-12">
@@ -367,10 +353,10 @@
                                         </td>
                                         <td>
                                             <span class="fw-medium">
-                                                {{ number_format($history->jumlah, 3) }}
+                                                {{ rtrim(rtrim(number_format($history->jumlah, 3), "0"), ".") }}
                                             </span>
                                             <small class="text-muted">
-                                                {{ $history->satuan }}
+                                                {{ $stockItem->templateItem->satuan }}
                                             </small>
                                         </td>
                                         <td>
@@ -559,11 +545,11 @@
                                 <input
                                     type="text"
                                     class="form-control"
-                                    value="{{ number_format($stockItem->jumlah, 3) }}"
+                                    value="{{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}"
                                     readonly
                                 />
                                 <span class="input-group-text">
-                                    {{ $stockItem->satuan }}
+                                    {{ $stockItem->templateItem->satuan }}
                                 </span>
                             </div>
                         </div>
@@ -586,7 +572,7 @@
                                     value="{{ old("jumlah") }}"
                                 />
                                 <span class="input-group-text">
-                                    {{ $stockItem->satuan }}
+                                    {{ $stockItem->templateItem->satuan }}
                                 </span>
                             </div>
                             @error("jumlah")
@@ -627,8 +613,8 @@
                                         Stok Saat Ini:
                                     </small>
                                     <div class="fw-medium">
-                                        {{ number_format($stockItem->jumlah, 3) }}
-                                        {{ $stockItem->satuan }}
+                                        {{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}
+                                        {{ $stockItem->templateItem->satuan }}
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -708,14 +694,14 @@
             const jumlahInput = document.getElementById('jumlah');
             const previewStock = document.getElementById('previewStock');
             const currentStock = {{ $stockItem->jumlah }};
-            const satuan = '{{ $stockItem->satuan }}';
+            const satuan = '{{ $stockItem->templateItem->satuan }}';
 
             // Update preview when amount changes
             if (jumlahInput && previewStock) {
                 function updatePreview() {
                     const additionalAmount = parseFloat(jumlahInput.value) || 0;
                     const newStock = currentStock + additionalAmount;
-                    previewStock.textContent = newStock.toFixed(3) + ' ' + satuan;
+                    previewStock.textContent = parseFloat(newStock.toFixed(3)) + ' ' + satuan;
                 }
 
                 jumlahInput.addEventListener('input', updatePreview);

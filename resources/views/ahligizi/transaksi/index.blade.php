@@ -74,28 +74,6 @@
                     class="row g-3"
                 >
                     <div class="col-md-3">
-                        <label for="search-input" class="form-label">
-                            Cari Paket
-                        </label>
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                name="search"
-                                id="search-input"
-                                value="{{ request("search") }}"
-                                class="form-control"
-                                placeholder="Cari nama paket atau keterangan..."
-                            />
-                            <button
-                                type="button"
-                                class="btn btn-outline-secondary"
-                                onclick="document.getElementById('search-input').value='';this.form.submit();"
-                            >
-                                <i class="bx bx-x"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
                         <label for="status-filter" class="form-label">
                             Filter Status
                         </label>
@@ -262,8 +240,8 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Nama Paket</th>
+                                    <th>No</th>
+                                    {{-- <th>Nama Paket</th> --}}
                                     <th>Tanggal Transaksi</th>
                                     <th>Total Porsi</th>
                                     <th>Status</th>
@@ -291,11 +269,13 @@
                                         <td>
                                             {{ $loop->iteration + ($transaksi->currentPage() - 1) * $transaksi->perPage() }}
                                         </td>
-                                        <td>
+                                        {{--
+                                            <td>
                                             <div class="fw-semibold">
-                                                {{ $item->nama_paket }}
+                                            {{ $item->nama_paket }}
                                             </div>
-                                        </td>
+                                            </td>
+                                        --}}
                                         <td>
                                             <small class="text-muted">
                                                 {{ $item->tanggal_transaksi->format("d M Y") }}

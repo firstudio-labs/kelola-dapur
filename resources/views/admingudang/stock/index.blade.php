@@ -349,7 +349,7 @@
                                         </td>
                                         <td>
                                             <span class="fw-medium">
-                                                {{ number_format($stockItem->jumlah, 3) }}
+                                                {{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}
                                             </span>
                                         </td>
                                         <td>
@@ -375,7 +375,11 @@
                                             </span>
                                         </td>
                                         <td>
-                                            {{ $stockItem->tanggal_restok ? $stockItem->tanggal_restok->format("d M Y") : "-" }}
+                                            @php
+                                                $latestRestockDate = $stockItem->getLatestRestockDate();
+                                            @endphp
+
+                                            {{ $latestRestockDate ? $latestRestockDate->format("d M Y") : "-" }}
                                         </td>
                                         <td>
                                             <div class="d-flex gap-1">
@@ -645,9 +649,9 @@
                     const currentStock = button.getAttribute('data-current-stock');
                     const satuan = button.getAttribute('data-satuan');
 
-                    // Update modal content
+                    // Update modal content with clean number format
                     modalBahanName.value = bahanName;
-                    modalCurrentStock.value = parseFloat(currentStock).toFixed(3);
+                    modalCurrentStock.value = parseFloat(parseFloat(currentStock).toFixed(3));
                     modalCurrentSatuan.textContent = satuan;
                     modalSatuan.textContent = satuan;
 
@@ -659,7 +663,7 @@
                     requestStockForm.reset();
                     // Restore non-input values
                     modalBahanName.value = bahanName;
-                    modalCurrentStock.value = parseFloat(currentStock).toFixed(3);
+                    modalCurrentStock.value = parseFloat(parseFloat(currentStock).toFixed(3));
                 });
             }
 

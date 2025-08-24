@@ -118,17 +118,20 @@ class ApprovalTransaksiController extends Controller
     {
         $dapurId = $request->query('dapur');
         $dapur = Dapur::findOrFail($dapurId);
+
         $approval = ApprovalTransaksi::with([
             'transaksiDapur.detailTransaksiDapur.menuMakanan.bahanMenu.templateItem',
             'transaksiDapur.createdBy',
             'stockSnapshots.templateItem'
         ])->findOrFail($approvalId);
 
-        $this->createStockSnapshots($approval, $dapur);
+        if ($approval->isPending()) {
+            $this->createStockSnapshots($approval, $dapur);
+        }
 
-        $stockCheck = $this->getEnhancedStockCheck($approval, $dapur);
+        $stockCheck = $this->getStockCheckWithSnapshots($approval, $dapur);
 
-        $menuDetails = $this->getDetailedMenuInfo($approval);
+        $menuDetails = $this->getMenuDetails($approval->transaksiDapur);
 
         return view('kepaladapur.approval-transaksi.show', compact(
             'approval',
@@ -166,7 +169,9 @@ class ApprovalTransaksiController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($approval, $request) {
+            DB::transaction(function () use ($approval, $request, $dapur) {
+                $this->createStockSnapshots($approval, $dapur);
+
                 $approval->approve($request->catatan_approval);
             });
 
@@ -181,8 +186,9 @@ class ApprovalTransaksiController extends Controller
         }
     }
 
-    public function reject(Request $request, $dapurId, $approvalId)
+    public function reject(Request $request, $approvalId)
     {
+        $dapurId = $request->query('dapur');
         $dapur = Dapur::findOrFail($dapurId);
         $approval = ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
             $q->where('id_dapur', $dapur->id_dapur);
@@ -208,7 +214,9 @@ class ApprovalTransaksiController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($approval, $request) {
+            DB::transaction(function () use ($approval, $request, $dapur) {
+                $this->createStockSnapshots($approval, $dapur);
+
                 $approval->reject($request->alasan_penolakan);
             });
 
@@ -278,6 +286,8 @@ class ApprovalTransaksiController extends Controller
 
                 foreach ($approvals as $approval) {
                     try {
+                        $this->createStockSnapshots($approval, $dapur);
+
                         if ($action === 'approve') {
                             $result = $approval->approve($keterangan);
                             if ($result) {
@@ -321,7 +331,6 @@ class ApprovalTransaksiController extends Controller
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-
     private function createStockSnapshots(ApprovalTransaksi $approval, Dapur $dapur)
     {
         $existingSnapshots = StockSnapshot::where('id_approval_transaksi', $approval->id_approval_transaksi)->count();
@@ -340,9 +349,14 @@ class ApprovalTransaksiController extends Controller
                 'satuan' => $ingredient['satuan']
             ]);
         }
+
+        Log::info('Stock snapshots created', [
+            'approval_id' => $approval->id_approval_transaksi,
+            'snapshots_count' => count($stockCheck['ingredients_summary'])
+        ]);
     }
 
-    private function getEnhancedStockCheck(ApprovalTransaksi $approval, Dapur $dapur): array
+    private function getStockCheckWithSnapshots(ApprovalTransaksi $approval, Dapur $dapur): array
     {
         $stockCheck = $approval->transaksiDapur->checkAllStockAvailability();
 
@@ -351,47 +365,56 @@ class ApprovalTransaksiController extends Controller
             ->get()
             ->keyBy('id_template_item');
 
-        foreach ($stockCheck['ingredients_summary'] as &$ingredient) {
-            $snapshot = $snapshots->get($ingredient['id_template_item']);
-            if ($snapshot) {
-                $ingredient['snapshot_available'] = (float)$snapshot->available;
-                $ingredient['current_available'] = $ingredient['available'];
-                $ingredient['available'] = (float)$snapshot->available;
-                $ingredient['sufficient'] = $ingredient['available'] >= $ingredient['needed'];
-            }
-        }
+        $hasSnapshots = $snapshots->count() > 0;
+        $stockCheck['has_snapshots'] = $hasSnapshots;
+        $stockCheck['snapshot_created_at'] = $hasSnapshots ? $approval->created_at : null;
 
-        $stockCheck['can_produce'] = collect($stockCheck['ingredients_summary'])->every(function ($ingredient) {
-            return $ingredient['sufficient'];
-        });
+        if ($hasSnapshots) {
+            foreach ($stockCheck['ingredients_summary'] as &$ingredient) {
+                $snapshot = $snapshots->get($ingredient['id_template_item']);
+                if ($snapshot) {
+                    $ingredient['current_available'] = StockItem::where('id_dapur', $dapur->id_dapur)
+                        ->where('id_template_item', $ingredient['id_template_item'])
+                        ->value('jumlah') ?? 0;
+
+                    $ingredient['available'] = (float)$snapshot->available;
+                    $ingredient['sufficient'] = $ingredient['available'] >= $ingredient['needed'];
+                    $ingredient['from_snapshot'] = true;
+
+                    Log::debug('getStockCheckWithSnapshots', [
+                        'id_approval' => $approval->id_approval_transaksi,
+                        'nama_bahan' => $ingredient['nama_bahan'],
+                        'is_bahan_basah' => $ingredient['is_bahan_basah'] ?? 'not_set',
+                        'needed' => $ingredient['needed'],
+                        'available' => $ingredient['available'],
+                        'current_available' => $ingredient['current_available']
+                    ]);
+                } else {
+                    $ingredient['from_snapshot'] = false;
+                }
+            }
+
+            $stockCheck['can_produce'] = collect($stockCheck['ingredients_summary'])->every(function ($ingredient) {
+                return $ingredient['sufficient'];
+            });
+        }
 
         return $stockCheck;
     }
 
-    private function getDetailedMenuInfo(ApprovalTransaksi $approval): array
+    private function getMenuDetails(TransaksiDapur $transaksi): array
     {
         $menuDetails = [];
 
-        foreach ($approval->transaksiDapur->detailTransaksiDapur as $detail) {
-            $menu = $detail->menuMakanan;
-            if (!$menu) continue;
-
-            $baseIngredients = [];
-            foreach ($menu->bahanMenu as $bahanMenu) {
-                $baseIngredients[] = [
-                    'nama_bahan' => $bahanMenu->templateItem->nama_bahan,
-                    'jumlah_per_porsi' => $bahanMenu->jumlah,
-                    'satuan' => $bahanMenu->templateItem->satuan,
-                    'total_needed' => $bahanMenu->jumlah * $detail->jumlah_porsi,
-                ];
-            }
+        foreach ($transaksi->detailTransaksiDapur as $detail) {
+            $requiredIngredients = $detail->menuMakanan->calculateRequiredIngredients($detail->jumlah_porsi);
 
             $menuDetails[] = [
+                'menu' => $detail->menuMakanan,
                 'detail' => $detail,
-                'menu' => $menu,
-                'base_ingredients' => $baseIngredients,
-                'jumlah_porsi' => $detail->jumlah_porsi,
-                'tipe_porsi' => $detail->tipe_porsi,
+                'ingredients' => $requiredIngredients,
+                'total_ingredients' => count($requiredIngredients),
+                'formatted_portions' => $detail->jumlah_porsi . ' ' . $detail->getTipePorsiText()
             ];
         }
 

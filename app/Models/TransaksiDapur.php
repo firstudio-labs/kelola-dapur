@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
 
 class TransaksiDapur extends Model
 {
@@ -95,11 +96,22 @@ class TransaksiDapur extends Model
                         'id_template_item' => $ingredient['id_template_item'],
                         'nama_bahan' => $ingredient['nama_bahan'],
                         'satuan' => $ingredient['satuan'],
-                        'total_needed' => 0
+                        'is_bahan_basah' => isset($ingredient['is_bahan_basah']) ? $ingredient['is_bahan_basah'] : false,
                     ];
                 }
 
-                $allIngredients[$key]['total_needed'] += $ingredient['total_needed'];
+                $neededToAdd = isset($ingredient['is_bahan_basah']) && $ingredient['is_bahan_basah']
+                    ? $ingredient['total_berat_basah']
+                    : $ingredient['total_needed'];
+
+                $allIngredients[$key]['needed'] += $neededToAdd;
+
+                Log::debug('Aggregating ingredient in checkAllStockAvailability', [
+                    'id_transaksi' => $this->id_transaksi,
+                    'nama_bahan' => $ingredient['nama_bahan'],
+                    'is_bahan_basah' => $ingredient['is_bahan_basah'] ?? 'not_set',
+                    'needed_to_add' => $neededToAdd
+                ]);
             }
         }
 
@@ -109,16 +121,25 @@ class TransaksiDapur extends Model
                 ->first();
 
             $available = $stockItem ? (float)$stockItem->jumlah : 0;
-            $needed = $ingredient['total_needed'];
+            $needed = $ingredient['needed'];
 
             $ingredientData = [
                 'id_template_item' => $ingredient['id_template_item'],
                 'nama_bahan' => $ingredient['nama_bahan'],
                 'satuan' => $ingredient['satuan'],
+                'is_bahan_basah' => $ingredient['is_bahan_basah'],
                 'needed' => $needed,
                 'available' => $available,
                 'sufficient' => $available >= $needed
             ];
+
+            Log::debug('Final ingredient data in checkAllStockAvailability', [
+                'id_transaksi' => $this->id_transaksi,
+                'nama_bahan' => $ingredient['nama_bahan'],
+                'is_bahan_basah' => $ingredient['is_bahan_basah'],
+                'needed' => $needed,
+                'available' => $available
+            ]);
 
             if ($available < $needed) {
                 $result['can_produce'] = false;
@@ -136,6 +157,68 @@ class TransaksiDapur extends Model
         }
 
         return $result;
+    }
+
+    /**
+     * Check stock availability using snapshots if available
+     */
+    public function checkStockWithSnapshots(ApprovalTransaksi $approval = null): array
+    {
+        $stockCheck = $this->checkAllStockAvailability();
+
+        if (!$approval) {
+            $approval = $this->approvalTransaksi;
+        }
+
+        if (!$approval) {
+            return $stockCheck;
+        }
+
+        $snapshots = StockSnapshot::where('id_approval_transaksi', $approval->id_approval_transaksi)
+            ->with('templateItem')
+            ->get()
+            ->keyBy('id_template_item');
+
+        $hasSnapshots = $snapshots->count() > 0;
+        $stockCheck['has_snapshots'] = $hasSnapshots;
+
+        if ($hasSnapshots) {
+            foreach ($stockCheck['ingredients_summary'] as &$ingredient) {
+                $snapshot = $snapshots->get($ingredient['id_template_item']);
+                if ($snapshot) {
+                    $ingredient['current_available'] = $ingredient['available'];
+
+                    $ingredient['available'] = (float)$snapshot->available;
+                    $ingredient['sufficient'] = $ingredient['available'] >= $ingredient['needed'];
+                    $ingredient['from_snapshot'] = true;
+                } else {
+                    $ingredient['from_snapshot'] = false;
+                }
+            }
+
+            $stockCheck['can_produce'] = collect($stockCheck['ingredients_summary'])->every(function ($ingredient) {
+                return $ingredient['sufficient'];
+            });
+
+            $stockCheck['shortages'] = collect($stockCheck['ingredients_summary'])
+                ->filter(function ($ingredient) {
+                    return !$ingredient['sufficient'];
+                })
+                ->map(function ($ingredient) {
+                    return [
+                        'id_template_item' => $ingredient['id_template_item'],
+                        'nama_bahan' => $ingredient['nama_bahan'],
+                        'satuan' => $ingredient['satuan'],
+                        'needed' => $ingredient['needed'],
+                        'available' => $ingredient['available'],
+                        'shortage' => $ingredient['needed'] - $ingredient['available']
+                    ];
+                })
+                ->values()
+                ->toArray();
+        }
+
+        return $stockCheck;
     }
 
     public function createShortageReport(): bool
@@ -176,15 +259,6 @@ class TransaksiDapur extends Model
             'status' => 'pending'
         ]);
 
-        foreach ($stockCheck['ingredients_summary'] as $ingredient) {
-            StockSnapshot::create([
-                'id_approval_transaksi' => $approval->id_approval_transaksi,
-                'id_template_item' => $ingredient['id_template_item'],
-                'available' => $ingredient['available'],
-                'satuan' => $ingredient['satuan'],
-            ]);
-        }
-
         $this->status = 'processing';
         return $this->save();
     }
@@ -202,7 +276,12 @@ class TransaksiDapur extends Model
             return $result;
         }
 
-        $stockCheck = $this->checkAllStockAvailability();
+        $approval = $this->approvalTransaksi;
+        if ($approval) {
+            $stockCheck = $this->checkStockWithSnapshots($approval);
+        } else {
+            $stockCheck = $this->checkAllStockAvailability();
+        }
 
         if (!$stockCheck['can_produce']) {
             $result['message'] = 'Stock tidak mencukupi untuk produksi';
@@ -220,11 +299,22 @@ class TransaksiDapur extends Model
 
             $result['success'] = true;
             $result['message'] = 'Transaksi berhasil diproses';
+
+            Log::info('Transaction processed successfully', [
+                'transaction_id' => $this->id_transaksi,
+                'total_porsi' => $this->total_porsi,
+                'used_snapshots' => $stockCheck['has_snapshots'] ?? false
+            ]);
         } catch (\Exception $e) {
             $this->status = 'processing';
             $this->save();
 
             $result['message'] = 'Terjadi error saat memproses transaksi: ' . $e->getMessage();
+
+            Log::error('Transaction processing failed', [
+                'transaction_id' => $this->id_transaksi,
+                'error' => $e->getMessage()
+            ]);
         }
 
         return $result;
@@ -279,5 +369,61 @@ class TransaksiDapur extends Model
             'cancelled' => 'bg-label-danger',
             default => 'bg-label-secondary'
         };
+    }
+
+    /**
+     * Get detailed menu information for this transaction
+     */
+    public function getMenuDetails(): array
+    {
+        $menuDetails = [];
+
+        foreach ($this->detailTransaksiDapur as $detail) {
+            $requiredIngredients = $detail->menuMakanan->calculateRequiredIngredients($detail->jumlah_porsi);
+
+            $menuDetails[] = [
+                'menu' => $detail->menuMakanan,
+                'detail' => $detail,
+                'ingredients' => $requiredIngredients,
+                'total_ingredients' => count($requiredIngredients),
+                'formatted_portions' => $detail->jumlah_porsi . ' ' . $detail->getTipePorsiText()
+            ];
+        }
+
+        return $menuDetails;
+    }
+
+    /**
+     * Create stock snapshots for this transaction
+     */
+    public function createStockSnapshots(int $approvalId): bool
+    {
+        try {
+            $stockCheck = $this->checkAllStockAvailability();
+
+            foreach ($stockCheck['ingredients_summary'] as $ingredient) {
+                StockSnapshot::create([
+                    'id_approval_transaksi' => $approvalId,
+                    'id_template_item' => $ingredient['id_template_item'],
+                    'available' => $ingredient['available'],
+                    'satuan' => $ingredient['satuan']
+                ]);
+            }
+
+            Log::info('Stock snapshots created for transaction', [
+                'transaction_id' => $this->id_transaksi,
+                'approval_id' => $approvalId,
+                'snapshots_count' => count($stockCheck['ingredients_summary'])
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to create stock snapshots', [
+                'transaction_id' => $this->id_transaksi,
+                'approval_id' => $approvalId,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
     }
 }

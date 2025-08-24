@@ -133,11 +133,11 @@ class ApprovalStockItemController extends Controller
             abort(403, 'Approval tidak ditemukan atau bukan milik Anda.');
         }
 
-        if ($approval->stockItem->id_dapur !== $dapur->id_dapur) {
-            abort(404, 'Approval tidak ditemukan untuk dapur ini.');
-        }
-
-        $approval->load(['adminGudang.user', 'stockItem.templateItem', 'stockItem.dapur']);
+        $approval->load([
+            'adminGudang.user',
+            'stockItem.dapur',
+            'stockItem.templateItem'
+        ]);
 
         return view('kepaladapur.approval_stock_item.show', compact('approval', 'dapur'));
     }

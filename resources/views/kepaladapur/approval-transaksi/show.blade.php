@@ -153,13 +153,13 @@
                             </div>
                         </div>
 
-                        @if ($approval->keterangan)
+                        @if ($approval->catatan_approval)
                             <div class="mt-4">
                                 <label class="form-label text-muted">
                                     Catatan Approval
                                 </label>
                                 <div class="p-3 bg-light rounded">
-                                    {{ $approval->keterangan }}
+                                    {{ $approval->catatan_approval }}
                                 </div>
                             </div>
                         @endif
@@ -187,20 +187,26 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($approval->transaksiDapur->detailTransaksiDapur as $detail)
+                                        @php
+                                            $requiredIngredients = $detail->menuMakanan->calculateRequiredIngredients($detail->jumlah_porsi);
+                                        @endphp
+
                                         <tr>
                                             <td>
                                                 <div
                                                     class="d-flex align-items-center"
                                                 >
-                                                    <div
-                                                        class="avatar avatar-sm me-2"
-                                                    >
-                                                        <span
-                                                            class="avatar-initial rounded bg-label-primary"
-                                                        >
-                                                            {{ strtoupper(substr($detail->menuMakanan->nama_menu ?? "M", 0, 2)) }}
-                                                        </span>
-                                                    </div>
+                                                    <img
+                                                        src="{{ $detail->menuMakanan->gambar_url ?? asset("images/menu/default-menu.jpg") }}"
+                                                        alt="{{ $detail->menuMakanan->nama_menu ?? "Menu" }}"
+                                                        class="rounded me-2"
+                                                        style="
+                                                            width: 100px;
+                                                            height: 100px;
+                                                            object-fit: cover;
+                                                        "
+                                                        onerror="this.src='{{ asset("images/menu/default-menu.jpg") }}'"
+                                                    />
                                                     <div>
                                                         <h6 class="mb-0">
                                                             {{ $detail->menuMakanan->nama_menu ?? "Menu Tidak Ditemukan" }}
@@ -226,31 +232,66 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                @php
-                                                    $ingredients = $detail->getRequiredIngredients();
-                                                @endphp
-
-                                                <div
-                                                    class="d-flex flex-wrap gap-1"
-                                                >
-                                                    @foreach (array_slice($ingredients, 0, 3) as $ingredient)
-                                                        <span
-                                                            class="badge bg-light text-dark"
-                                                        >
-                                                            {{ $ingredient["nama_bahan"] }}:
-                                                            {{ $ingredient["total_needed"] }}
-                                                            {{ $ingredient["satuan"] }}
-                                                        </span>
-                                                    @endforeach
-
-                                                    @if (count($ingredients) > 3)
-                                                        <span
-                                                            class="badge bg-secondary"
-                                                        >
-                                                            +{{ count($ingredients) - 3 }}
-                                                            lainnya
-                                                        </span>
-                                                    @endif
+                                                <div class="table-responsive">
+                                                    <table
+                                                        class="table table-sm mb-0"
+                                                    >
+                                                        <thead>
+                                                            <tr>
+                                                                <th>
+                                                                    Nama Bahan
+                                                                </th>
+                                                                <th>
+                                                                    Per Porsi
+                                                                </th>
+                                                                <th>
+                                                                    Total
+                                                                    Diperlukan
+                                                                </th>
+                                                                <th>Satuan</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @forelse ($requiredIngredients as $ingredient)
+                                                                <tr>
+                                                                    <td>
+                                                                        {{ $ingredient["nama_bahan"] }}
+                                                                        @if (isset($ingredient["is_bahan_basah"]) && $ingredient["is_bahan_basah"])
+                                                                            <small
+                                                                                class="text-info"
+                                                                            >
+                                                                                (Bahan
+                                                                                Basah
+                                                                                +7%)
+                                                                            </small>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ number_format(isset($ingredient["is_bahan_basah"]) && $ingredient["is_bahan_basah"] ? $ingredient["berat_basah_per_porsi"] : $ingredient["jumlah_per_porsi"], 3) }}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ number_format(isset($ingredient["is_bahan_basah"]) && $ingredient["is_bahan_basah"] ? $ingredient["total_berat_basah"] : $ingredient["total_needed"], 3) }}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ $ingredient["satuan"] }}
+                                                                    </td>
+                                                                </tr>
+                                                            @empty
+                                                                <tr>
+                                                                    <td
+                                                                        colspan="4"
+                                                                        class="text-muted"
+                                                                    >
+                                                                        Tidak
+                                                                        ada
+                                                                        bahan
+                                                                        yang
+                                                                        diperlukan
+                                                                    </td>
+                                                                </tr>
+                                                            @endforelse
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </td>
                                         </tr>
@@ -269,6 +310,11 @@
                         <h5 class="card-title mb-0">
                             <i class="bx bx-package me-2"></i>
                             Ketersediaan Stock
+                            @if ($stockCheck["has_snapshots"])
+                                <small class="text-muted">
+                                    (berdasarkan snapshot saat approval)
+                                </small>
+                            @endif
                         </h5>
                         @if (! $stockCheck["can_produce"])
                             <span class="badge bg-danger">
@@ -290,20 +336,46 @@
                             </div>
                         @endif
 
+                        @if ($stockCheck["has_snapshots"])
+                            <div class="alert alert-info mb-4">
+                                <i class="bx bx-camera me-2"></i>
+                                <strong>Info:</strong>
+                                Data stock yang ditampilkan adalah snapshot saat
+                                approval transaksi dibuat pada
+                                {{ $approval->created_at->format("d M Y, H:i") }}.
+                            </div>
+                        @endif
+
                         <div class="table-responsive">
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
                                         <th>Bahan</th>
                                         <th>Diperlukan</th>
-                                        <th>Tersedia</th>
+                                        <th>Snapshot Stock</th>
+                                        @if ($stockCheck["has_snapshots"] && isset($stockCheck["ingredients_summary"][0]["current_available"]))
+                                            <th>Stock Saat Ini</th>
+                                        @endif
+
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($stockCheck["ingredients_summary"] as $ingredient)
+                                        @php
+                                            $neededAmount = $ingredient["needed"];
+                                            $isSufficient = $ingredient["sufficient"];
+                                            $isBahanBasah = isset($ingredient["is_bahan_basah"]) ? $ingredient["is_bahan_basah"] : false;
+                                            // Logging untuk debugging
+                                            Log::debug("Stock summary in view", [
+                                                "nama_bahan" => $ingredient["nama_bahan"],
+                                                "is_bahan_basah" => $isBahanBasah,
+                                                "needed" => $neededAmount,
+                                            ]);
+                                        @endphp
+
                                         <tr
-                                            class="{{ ! $ingredient["sufficient"] ? "table-danger-subtle" : "" }}"
+                                            class="{{ ! $isSufficient ? "table-danger-subtle" : "" }}"
                                         >
                                             <td>
                                                 <div class="fw-medium">
@@ -311,16 +383,36 @@
                                                 </div>
                                                 <small class="text-muted">
                                                     {{ $ingredient["satuan"] }}
+                                                    @if ($isBahanBasah)
+                                                        <span class="text-info">
+                                                            (Bahan Basah +7%)
+                                                        </span>
+                                                    @endif
                                                 </small>
                                             </td>
                                             <td>
-                                                {{ $ingredient["needed"] }}
+                                                {{ number_format($neededAmount, 3) }}
                                             </td>
                                             <td>
-                                                {{ $ingredient["available"] }}
+                                                {{ number_format($ingredient["available"], 3) }}
+                                                {{--
+                                                    @if ($stockCheck["has_snapshots"])
+                                                    <small
+                                                    class="text-info d-block"
+                                                    >
+                                                    (Snapshot)
+                                                    </small>
+                                                    @endif
+                                                --}}
                                             </td>
+                                            @if ($stockCheck["has_snapshots"] && isset($ingredient["current_available"]))
+                                                <td>
+                                                    {{ number_format($ingredient["current_available"], 3) }}
+                                                </td>
+                                            @endif
+
                                             <td>
-                                                @if ($ingredient["sufficient"])
+                                                @if ($isSufficient)
                                                     <span
                                                         class="badge bg-success"
                                                     >
@@ -331,7 +423,7 @@
                                                         class="badge bg-danger"
                                                     >
                                                         Kurang
-                                                        {{ $ingredient["needed"] - $ingredient["available"] }}
+                                                        {{ number_format($neededAmount - $ingredient["available"], 3) }}
                                                     </span>
                                                 @endif
                                             </td>
@@ -465,6 +557,11 @@
                                         <small class="text-muted">
                                             {{ $approval->created_at->format("d M Y, H:i") }}
                                         </small>
+                                        @if ($stockCheck["has_snapshots"])
+                                            <small class="text-info d-block">
+                                                Stock snapshot dibuat
+                                            </small>
+                                        @endif
                                     </div>
                                 </div>
                                 @if ($approval->approved_at)
@@ -507,6 +604,7 @@
                                     class="btn btn-success"
                                     data-bs-toggle="modal"
                                     data-bs-target="#approveModal"
+                                    {{ ! $stockCheck["can_produce"] ? "disabled" : "" }}
                                 >
                                     <i class="bx bx-check me-1"></i>
                                     Setujui Transaksi
@@ -580,6 +678,16 @@
                                     produksi.
                                 </div>
                             @endif
+                            @if ($stockCheck["has_snapshots"])
+                                <div class="alert alert-info">
+                                    <i class="bx bx-camera me-2"></i>
+                                    <strong>Snapshot Stock:</strong>
+                                    Pengurangan stock akan menggunakan data
+                                    snapshot yang dibuat pada
+                                    {{ $approval->created_at->format("d M Y, H:i") }}.
+                                </div>
+                            @endif
+
                             <div class="mb-3">
                                 <label
                                     for="catatan_approval"

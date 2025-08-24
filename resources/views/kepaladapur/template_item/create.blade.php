@@ -1,156 +1,229 @@
-@extends('template_kepala_dapur.layout')
+@extends("template_kepala_dapur.layout")
 
-@section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <nav class="d-flex align-items-center mb-2">
-                        <a href="{{ route('dashboard') }}" class="text-muted me-2">
-                            <i class="bx bx-home-alt me-1"></i>Dashboard
-                        </a>
-                        <i class="bx bx-chevron-right me-2"></i>
-                        <a href="{{ route('kepala-dapur.template-items.index') }}" class="text-muted me-2">Kelola Template Bahan</a>
-                        <i class="bx bx-chevron-right me-2"></i>
-                        <span class="text-dark">Tambah Template Bahan</span>
-                    </nav>
-                    <h4 class="mb-1">Tambah Template Bahan</h4>
-                    <p class="mb-0 text-muted">Buat template bahan baru untuk digunakan dalam menu makanan</p>
+@section("content")
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <nav class="d-flex align-items-center mb-2">
+                            <a
+                                href="{{ route("dashboard") }}"
+                                class="text-muted me-2"
+                            >
+                                <i class="bx bx-home-alt me-1"></i>
+                                Dashboard
+                            </a>
+                            <i class="bx bx-chevron-right me-2"></i>
+                            <a
+                                href="{{ route("kepala-dapur.template-items.index") }}"
+                                class="text-muted me-2"
+                            >
+                                Kelola Template Bahan
+                            </a>
+                            <i class="bx bx-chevron-right me-2"></i>
+                            <span class="text-dark">Tambah Template Bahan</span>
+                        </nav>
+                        <h4 class="mb-1">Tambah Template Bahan</h4>
+                        <p class="mb-0 text-muted">
+                            Buat template bahan baru untuk digunakan dalam menu
+                            makanan
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Form -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ route('kepala-dapur.template-items.store') }}" method="POST" class="row g-4">
-                @csrf
+        <!-- Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form
+                    action="{{ route("kepala-dapur.template-items.store") }}"
+                    method="POST"
+                    class="row g-4"
+                >
+                    @csrf
 
-                <!-- Template Item Information -->
-                <div class="col-12">
-                    <h5 class="card-title mb-0">Informasi Template Bahan</h5>
-                    <div class="row g-4 mt-2">
-                        <!-- Nama Bahan -->
-                        <div class="col-md-6">
-                            <label for="nama_bahan" class="form-label">Nama Bahan <span class="text-danger">*</span></label>
-                            <input type="text" 
-                                   name="nama_bahan" 
-                                   id="nama_bahan" 
-                                   required
-                                   class="form-control @error('nama_bahan') is-invalid @enderror"
-                                   placeholder="Contoh: Beras"
-                                   value="{{ old('nama_bahan') }}">
-                            @error('nama_bahan')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Satuan -->
-                        <div class="col-md-6">
-                            <label for="satuan" class="form-label">Satuan <span class="text-danger">*</span></label>
-                            <select name="satuan" 
-                                    id="satuan" 
+                    <!-- Template Item Information -->
+                    <div class="col-12">
+                        <h5 class="card-title mb-0">
+                            Informasi Template Bahan
+                        </h5>
+                        <div class="row g-4 mt-2">
+                            <!-- Nama Bahan -->
+                            <div class="col-md-6">
+                                <label for="nama_bahan" class="form-label">
+                                    Nama Bahan
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="nama_bahan"
+                                    id="nama_bahan"
                                     required
-                                    class="form-select @error('satuan') is-invalid @enderror">
-                                <option value="">Pilih Satuan</option>
-                                @if(isset($satuans))
-                                    @foreach ($satuans as $satuan)
-                                        <option value="{{ $satuan }}" {{ old('satuan') == $satuan ? 'selected' : '' }}>
-                                            {{ ucfirst($satuan) }}
+                                    class="form-control @error("nama_bahan") is-invalid @enderror"
+                                    placeholder="Contoh: Beras"
+                                    value="{{ old("nama_bahan") }}"
+                                />
+                                @error("nama_bahan")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- Satuan -->
+                            <div class="col-md-6">
+                                <label for="satuan" class="form-label">
+                                    Satuan
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select
+                                    name="satuan"
+                                    id="satuan"
+                                    required
+                                    class="form-select @error("satuan") is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Satuan</option>
+                                    @if (isset($satuans))
+                                        @foreach ($satuans as $satuan)
+                                            <option
+                                                value="{{ $satuan }}"
+                                                {{ old("satuan") == $satuan ? "selected" : "" }}
+                                            >
+                                                {{ ucfirst($satuan) }}
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        {{-- <option value="gram" {{ old('satuan') == 'gram' ? 'selected' : '' }}>Gram</option> --}}
+                                        <option
+                                            value="kilogram"
+                                            {{ old("satuan") == "kilogram" ? "selected" : "" }}
+                                        >
+                                            Kilogram
                                         </option>
-                                    @endforeach
-                                @else
-                                    <option value="gram" {{ old('satuan') == 'gram' ? 'selected' : '' }}>Gram</option>
-                                    <option value="kilogram" {{ old('satuan') == 'kilogram' ? 'selected' : '' }}>Kilogram</option>
-                                    <option value="liter" {{ old('satuan') == 'liter' ? 'selected' : '' }}>Liter</option>
-                                    <option value="mililiter" {{ old('satuan') == 'mililiter' ? 'selected' : '' }}>Mililiter</option>
-                                    <option value="buah" {{ old('satuan') == 'buah' ? 'selected' : '' }}>Buah</option>
-                                    <option value="potong" {{ old('satuan') == 'potong' ? 'selected' : '' }}>Potong</option>
-                                    <option value="sendok" {{ old('satuan') == 'sendok' ? 'selected' : '' }}>Sendok</option>
-                                @endif
-                            </select>
-                            @error('satuan')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                                        <option
+                                            value="liter"
+                                            {{ old("satuan") == "liter" ? "selected" : "" }}
+                                        >
+                                            Liter
+                                        </option>
+                                        {{-- <option value="mililiter" {{ old('satuan') == 'mililiter' ? 'selected' : '' }}>Mililiter</option> --}}
+                                        <option
+                                            value="buah"
+                                            {{ old("satuan") == "buah" ? "selected" : "" }}
+                                        >
+                                            Buah
+                                        </option>
+                                        {{-- <option value="potong" {{ old('satuan') == 'potong' ? 'selected' : '' }}>Potong</option> --}}
+                                        {{-- <option value="sendok" {{ old('satuan') == 'sendok' ? 'selected' : '' }}>Sendok</option> --}}
+                                    @endif
+                                </select>
+                                @error("satuan")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
 
-                        <!-- Keterangan -->
-                        <div class="col-12">
-                            <label for="keterangan" class="form-label">Keterangan</label>
-                            <textarea name="keterangan" 
-                                      id="keterangan" 
-                                      rows="3"
-                                      class="form-control @error('keterangan') is-invalid @enderror"
-                                      placeholder="Deskripsi atau catatan tentang bahan ini">{{ old('keterangan') }}</textarea>
-                            @error('keterangan')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <!-- Keterangan -->
+                            <div class="col-12">
+                                <label for="keterangan" class="form-label">
+                                    Keterangan
+                                </label>
+                                <textarea
+                                    name="keterangan"
+                                    id="keterangan"
+                                    rows="3"
+                                    class="form-control @error("keterangan") is-invalid @enderror"
+                                    placeholder="Deskripsi atau catatan tentang bahan ini"
+                                >
+{{ old("keterangan") }}</textarea
+                                >
+                                @error("keterangan")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Submit Buttons -->
-                <div class="col-12 mt-4">
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ route('kepala-dapur.template-items.index') }}" class="btn btn-label-secondary">Batal</a>
-                        <button type="submit" class="btn btn-primary">Simpan Template Bahan</button>
+                    <!-- Submit Buttons -->
+                    <div class="col-12 mt-4">
+                        <div class="d-flex justify-content-between">
+                            <a
+                                href="{{ route("kepala-dapur.template-items.index") }}"
+                                class="btn btn-label-secondary"
+                            >
+                                Batal
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                Simpan Template Bahan
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <!-- Preview Card -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Preview Template Bahan</h5>
+        <!-- Preview Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Preview Template Bahan</h5>
+            </div>
+            <div class="card-body">
+                <h4 id="preview-nama">Nama Bahan</h4>
+                <p id="preview-satuan">Satuan: -</p>
+                <p id="preview-keterangan">Keterangan: -</p>
+            </div>
         </div>
-        <div class="card-body">
-            <h4 id="preview-nama">Nama Bahan</h4>
-            <p id="preview-satuan">Satuan: -</p>
-            <p id="preview-keterangan">Keterangan: -</p>
-        </div>
-    </div>
 
-    <!-- Instructions Alert -->
-    <div class="alert alert-info alert-dismissible" role="alert">
-        <h6 class="alert-heading mb-2">Instruksi Tambah Template Bahan</h6>
-        <ul class="mb-0">
-            <li>Nama bahan harus unik.</li>
-            <li>Satuan wajib diisi (misal: gram, ml, buah).</li>
-            <li>Keterangan bersifat opsional untuk catatan tambahan.</li>
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <!-- Instructions Alert -->
+        <div class="alert alert-info alert-dismissible" role="alert">
+            <h6 class="alert-heading mb-2">Instruksi Tambah Template Bahan</h6>
+            <ul class="mb-0">
+                <li>Nama bahan harus unik.</li>
+                <li>Satuan wajib diisi (misal: gram, ml, buah).</li>
+                <li>Keterangan bersifat opsional untuk catatan tambahan.</li>
+            </ul>
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+            ></button>
+        </div>
     </div>
-</div>
 @endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const namaInput = document.getElementById('nama_bahan');
-    const satuanInput = document.getElementById('satuan');
-    const keteranganInput = document.getElementById('keterangan');
+@push("scripts")
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const namaInput = document.getElementById('nama_bahan');
+            const satuanInput = document.getElementById('satuan');
+            const keteranganInput = document.getElementById('keterangan');
 
-    const previewNama = document.getElementById('preview-nama');
-    const previewSatuan = document.getElementById('preview-satuan');
-    const previewKeterangan = document.getElementById('preview-keterangan');
+            const previewNama = document.getElementById('preview-nama');
+            const previewSatuan = document.getElementById('preview-satuan');
+            const previewKeterangan =
+                document.getElementById('preview-keterangan');
 
-    namaInput.addEventListener('input', function() {
-        previewNama.textContent = this.value || 'Nama Bahan';
-    });
+            namaInput.addEventListener('input', function () {
+                previewNama.textContent = this.value || 'Nama Bahan';
+            });
 
-    satuanInput.addEventListener('change', function() {
-        const selectedText = this.options[this.selectedIndex].text;
-        previewSatuan.textContent = 'Satuan: ' + (this.value ? selectedText : '-');
-    });
+            satuanInput.addEventListener('change', function () {
+                const selectedText = this.options[this.selectedIndex].text;
+                previewSatuan.textContent =
+                    'Satuan: ' + (this.value ? selectedText : '-');
+            });
 
-    keteranganInput.addEventListener('input', function() {
-        previewKeterangan.textContent = 'Keterangan: ' + (this.value || '-');
-    });
-});
-</script>
+            keteranganInput.addEventListener('input', function () {
+                previewKeterangan.textContent =
+                    'Keterangan: ' + (this.value || '-');
+            });
+        });
+    </script>
 @endpush

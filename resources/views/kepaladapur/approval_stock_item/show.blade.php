@@ -183,16 +183,6 @@
                                                     {{ $approval->stockItem->dapur->nama_dapur }}
                                                 </td>
                                             </tr>
-                                            <tr>
-                                                <td>
-                                                    <strong>
-                                                        Alamat Dapur:
-                                                    </strong>
-                                                </td>
-                                                <td>
-                                                    {{ $approval->stockItem->dapur->alamat_dapur }}
-                                                </td>
-                                            </tr>
                                         </table>
                                     </div>
                                 </div>
@@ -225,29 +215,13 @@
                                                     <tr>
                                                         <td>
                                                             <strong>
-                                                                Kategori:
-                                                            </strong>
-                                                        </td>
-                                                        <td>
-                                                            {{ ucfirst($approval->stockItem->templateItem->kategori) }}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>
-                                                            <strong>
                                                                 Satuan:
                                                             </strong>
                                                         </td>
                                                         <td>
-                                                            {{ $approval->stockItem->templateItem->satuan }}
+                                                            {{ $approval->stockItem->satuan }}
                                                         </td>
                                                     </tr>
-                                                </table>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <table
-                                                    class="table table-borderless"
-                                                >
                                                     <tr>
                                                         <td>
                                                             <strong>
@@ -255,8 +229,8 @@
                                                             </strong>
                                                         </td>
                                                         <td>
-                                                            {{ number_format($approval->stockItem->jumlah_stok, 0) }}
-                                                            {{ $approval->stockItem->templateItem->satuan }}
+                                                            {{ number_format($approval->stockItem->jumlah, 0) }}
+                                                            {{ $approval->stockItem->satuan }}
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -268,20 +242,8 @@
                                                         <td
                                                             class="fw-bold text-primary"
                                                         >
-                                                            {{ number_format($approval->jumlah_diminta, 0) }}
-                                                            {{ $approval->stockItem->templateItem->satuan }}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>
-                                                            <strong>
-                                                                Harga per
-                                                                Satuan:
-                                                            </strong>
-                                                        </td>
-                                                        <td>
-                                                            Rp
-                                                            {{ number_format($approval->stockItem->harga_per_unit, 0, ",", ".") }}
+                                                            {{ number_format($approval->jumlah, 0) }}
+                                                            {{ $approval->stockItem->satuan }}
                                                         </td>
                                                     </tr>
                                                 </table>
@@ -349,10 +311,9 @@
                                 </strong>
                                 <br />
                                 Jumlah:
-                                {{ number_format($approval->jumlah_diminta, 0) }}
-                                {{ $approval->stockItem->templateItem->satuan }}
+                                {{ number_format($approval->jumlah, 0) }}
+                                {{ $approval->stockItem->satuan }}
                             </div>
-
                             <div class="mb-3">
                                 <label
                                     for="keterangan_approval"
@@ -422,10 +383,9 @@
                                 </strong>
                                 <br />
                                 Jumlah:
-                                {{ number_format($approval->jumlah_diminta, 0) }}
-                                {{ $approval->stockItem->templateItem->satuan }}
+                                {{ number_format($approval->jumlah, 0) }}
+                                {{ $approval->stockItem->satuan }}
                             </div>
-
                             <div class="mb-3">
                                 <label
                                     for="alasan_penolakan"

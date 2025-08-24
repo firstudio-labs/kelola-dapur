@@ -38,6 +38,10 @@ class DetailTransaksiDapur extends Model
     public function reduceStockFromProduction(): bool
     {
         $requiredIngredients = $this->menuMakanan->calculateRequiredIngredients($this->jumlah_porsi);
+        $approval = $this->transaksiDapur->approvalTransaksi;
+        $snapshots = $approval ? StockSnapshot::where('id_approval_transaksi', $approval->id_approval_transaksi)
+            ->get()
+            ->keyBy('id_template_item') : collect();
 
         foreach ($requiredIngredients as $ingredient) {
             $stockItem = StockItem::where('id_dapur', $this->transaksiDapur->id_dapur)
@@ -45,8 +49,19 @@ class DetailTransaksiDapur extends Model
                 ->first();
 
             if ($stockItem) {
-                if (!$stockItem->reduceStock($ingredient['total_needed'])) {
-                    throw new \Exception("Gagal mengurangi stock untuk {$ingredient['nama_bahan']}");
+                $amountToReduce = isset($ingredient['is_bahan_basah']) && $ingredient['is_bahan_basah']
+                    ? $ingredient['total_berat_basah']
+                    : $ingredient['total_needed'];
+
+                if ($snapshots->has($ingredient['id_template_item'])) {
+                    $snapshot = $snapshots->get($ingredient['id_template_item']);
+                    if ((float)$snapshot->available < $amountToReduce) {
+                        throw new \Exception("Stok snapshot tidak cukup untuk {$ingredient['nama_bahan']} (Diperlukan: {$amountToReduce}, Snapshot: {$snapshot->available})");
+                    }
+                }
+
+                if (!$stockItem->reduceStock($amountToReduce)) {
+                    throw new \Exception("Gagal mengurangi stock untuk {$ingredient['nama_bahan']} (Diperlukan: {$amountToReduce}, Tersedia: {$stockItem->jumlah})");
                 }
             } else {
                 throw new \Exception("Stock item tidak ditemukan untuk {$ingredient['nama_bahan']}");
