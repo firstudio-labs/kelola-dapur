@@ -79,15 +79,22 @@
                                     Satuan
                                     <span class="text-danger">*</span>
                                 </label>
-                                <input
-                                    type="text"
+                                <select
                                     name="satuan"
                                     id="satuan"
                                     required
-                                    class="form-control @error("satuan") is-invalid @enderror"
-                                    placeholder="Contoh: gram"
-                                    value="{{ old("satuan") }}"
-                                />
+                                    class="form-select @error("satuan") is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Satuan</option>
+                                    @foreach (["kg", "liter", "pcs"] as $satuan)
+                                        <option
+                                            value="{{ $satuan }}"
+                                            {{ old("satuan") == $satuan ? "selected" : "" }}
+                                        >
+                                            {{ ucfirst($satuan) }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 @error("satuan")
                                     <div class="invalid-feedback">
                                         {{ $message }}
@@ -164,8 +171,9 @@
             ></button>
         </div>
     </div>
+@endsection
 
-    <!-- JavaScript for Preview -->
+@push("scripts")
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const namaInput = document.getElementById('nama_bahan');
@@ -181,8 +189,10 @@
                 previewNama.textContent = this.value || 'Nama Bahan';
             });
 
-            satuanInput.addEventListener('input', function () {
-                previewSatuan.textContent = 'Satuan: ' + (this.value || '-');
+            satuanInput.addEventListener('change', function () {
+                const selectedText = this.options[this.selectedIndex].text;
+                previewSatuan.textContent =
+                    'Satuan: ' + (this.value ? selectedText : '-');
             });
 
             keteranganInput.addEventListener('input', function () {
@@ -191,4 +201,4 @@
             });
         });
     </script>
-@endsection
+@endpush

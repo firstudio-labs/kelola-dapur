@@ -83,6 +83,13 @@ class MenuMakanan extends Model
         return public_path('images/menu/' . $this->gambar_menu);
     }
 
+    public function deleteGambar(): bool
+    {
+        if ($this->gambar_menu && Storage::disk('public')->exists('menu/' . $this->gambar_menu)) {
+            return Storage::disk('public')->delete('menu/' . $this->gambar_menu);
+        }
+        return false;
+    }
     public function hasGambar(): bool
     {
         return !empty($this->gambar_menu);

@@ -9,7 +9,7 @@
                     <div class="card-body">
                         <nav class="d-flex align-items-center mb-2">
                             <a
-                                href="{{ route("superadmin.dashboard") }}"
+                                href="{{ route('superadmin.dashboard') }}"
                                 class="text-muted me-2"
                             >
                                 <i class="bx bx-home-alt me-1"></i>
@@ -17,7 +17,7 @@
                             </a>
                             <i class="bx bx-chevron-right me-2"></i>
                             <a
-                                href="{{ route("superadmin.menu-makanan.index") }}"
+                                href="{{ route('superadmin.menu-makanan.index') }}"
                                 class="text-muted me-2"
                             >
                                 Kelola Menu Makanan
@@ -38,7 +38,8 @@
         <div class="card mb-4">
             <div class="card-body">
                 <form
-                    action="{{ route("superadmin.menu-makanan.store") }}"
+                    id="menu-form"
+                    action="{{ route('superadmin.menu-makanan.store') }}"
                     method="POST"
                     enctype="multipart/form-data"
                     class="row g-4"
@@ -50,7 +51,7 @@
                         <h5 class="card-title mb-0">Informasi Menu</h5>
                         <div class="row g-4 mt-2">
                             <!-- Nama Menu -->
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="nama_menu" class="form-label">
                                     Nama Menu
                                     <span class="text-danger">*</span>
@@ -60,11 +61,56 @@
                                     name="nama_menu"
                                     id="nama_menu"
                                     required
-                                    class="form-control @error("nama_menu") is-invalid @enderror"
+                                    class="form-control @error('nama_menu') is-invalid @enderror"
                                     placeholder="Contoh: Nasi Goreng Spesial"
-                                    value="{{ old("nama_menu") }}"
+                                    value="{{ old('nama_menu') }}"
                                 />
-                                @error("nama_menu")
+                                @error('nama_menu')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- Kategori -->
+                            <div class="col-md-4">
+                                <label for="kategori" class="form-label">
+                                    Kategori
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select
+                                    name="kategori"
+                                    id="kategori"
+                                    required
+                                    class="form-select @error('kategori') is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Kategori</option>
+                                    <option
+                                        value="Karbohidrat"
+                                        {{ old('kategori') == 'Karbohidrat' ? 'selected' : '' }}
+                                    >
+                                        Karbohidrat
+                                    </option>
+                                    <option
+                                        value="Lauk"
+                                        {{ old('kategori') == 'Lauk' ? 'selected' : '' }}
+                                    >
+                                        Lauk
+                                    </option>
+                                    <option
+                                        value="Sayur"
+                                        {{ old('kategori') == 'Sayur' ? 'selected' : '' }}
+                                    >
+                                        Sayur
+                                    </option>
+                                    <option
+                                        value="Tambahan"
+                                        {{ old('kategori') == 'Tambahan' ? 'selected' : '' }}
+                                    >
+                                        Tambahan
+                                    </option>
+                                </select>
+                                @error('kategori')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
@@ -72,7 +118,7 @@
                             </div>
 
                             <!-- Status -->
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="is_active" class="form-label">
                                     Status
                                     <span class="text-danger">*</span>
@@ -81,23 +127,45 @@
                                     name="is_active"
                                     id="is_active"
                                     required
-                                    class="form-select @error("is_active") is-invalid @enderror"
+                                    class="form-select @error('is_active') is-invalid @enderror"
                                 >
                                     <option value="">Pilih Status</option>
                                     <option
                                         value="1"
-                                        {{ old("is_active") == "1" ? "selected" : "" }}
+                                        {{ old('is_active') == '1' ? 'selected' : '' }}
                                     >
                                         Active
                                     </option>
                                     <option
                                         value="0"
-                                        {{ old("is_active") == "0" ? "selected" : "" }}
+                                        {{ old('is_active') == '0' ? 'selected' : '' }}
                                     >
                                         Inactive
                                     </option>
                                 </select>
-                                @error("is_active")
+                                @error('is_active')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- Gambar Menu -->
+                            <div class="col-md-4">
+                                <label for="gambar_menu" class="form-label">
+                                    Gambar Menu
+                                </label>
+                                <input
+                                    type="file"
+                                    name="gambar_menu"
+                                    id="gambar_menu"
+                                    class="form-control @error('gambar_menu') is-invalid @enderror"
+                                    accept="image/*"
+                                />
+                                <small class="text-muted"
+                                    >Format: JPEG, PNG, GIF. Maks: 2MB</small
+                                >
+                                @error('gambar_menu')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
@@ -113,68 +181,142 @@
                                     name="deskripsi"
                                     id="deskripsi"
                                     rows="3"
-                                    class="form-control @error("deskripsi") is-invalid @enderror"
-                                    placeholder="Deskripsi singkat tentang menu ini"
-                                >
-{{ old("deskripsi") }}</textarea
-                                >
-                                @error("deskripsi")
+                                    class="form-control @error('deskripsi') is-invalid @enderror"
+                                    placeholder="Masukkan deskripsi menu"
+                                >{{ old('deskripsi') }}</textarea>
+                                @error('deskripsi')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
                                 @enderror
-                            </div>
-
-                            <!-- Gambar Menu -->
-                            <div class="col-md-6">
-                                <label for="gambar_menu" class="form-label">
-                                    Gambar Menu
-                                </label>
-                                <input
-                                    type="file"
-                                    name="gambar_menu"
-                                    id="gambar_menu"
-                                    accept="image/*"
-                                    class="form-control @error("gambar_menu") is-invalid @enderror"
-                                />
-                                @error("gambar_menu")
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-
-                                <small class="text-muted">
-                                    Format: JPG, PNG, GIF. Maksimal 2MB
-                                </small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Bahan Menu -->
+                    <!-- Ingredients Section -->
                     <div class="col-12 mt-4">
-                        <h5 class="card-title mb-0">
-                            Bahan Menu
-                            <span class="text-danger">*</span>
-                        </h5>
-                        <p class="text-muted mb-3">
-                            Tambahkan minimal satu bahan untuk menu ini
-                        </p>
-                        <div id="bahan-container" class="row g-4">
-                            <!-- Initial Bahan Field -->
-                            <div class="col-12 bahan-row">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">
-                                                    Template Bahan
-                                                    <span class="text-danger">
-                                                        *
-                                                    </span>
+                        <h5 class="card-title mb-0">Daftar Bahan</h5>
+                        <div class="row g-4 mt-2">
+                            <div class="col-12">
+                                <div id="bahan-container">
+                                    @if (old('bahan_menu'))
+                                        @foreach (old('bahan_menu') as $index => $bahan)
+                                            <div class="bahan-row row g-3 mb-3 align-items-end">
+                                                <div class="col-md-4">
+                                                    <label
+                                                        class="form-label"
+                                                        for="bahan_menu_{{ $index }}_id_template_item"
+                                                    >
+                                                        Nama Bahan
+                                                        <span
+                                                            class="text-danger"
+                                                            >*</span
+                                                        >
+                                                    </label>
+                                                    <select
+                                                        name="bahan_menu[{{ $index }}][id_template_item]"
+                                                        class="form-select template-item-select @error('bahan_menu.' . $index . '.id_template_item') is-invalid @enderror"
+                                                        data-satuan="{{ isset($bahan['id_template_item']) ? ($templateItems->find($bahan['id_template_item'])->satuan ?? '') : '' }}"
+                                                        required
+                                                    >
+                                                        <option value="">
+                                                            Pilih Bahan
+                                                        </option>
+                                                        @foreach ($templateItems as $item)
+                                                            <option
+                                                                value="{{ $item->id_template_item }}"
+                                                                data-satuan="{{ $item->satuan }}"
+                                                                {{ old('bahan_menu.' . $index . '.id_template_item') == $item->id_template_item ? 'selected' : '' }}
+                                                            >
+                                                                {{ $item->nama_bahan }}
+                                                                ({{ $item->satuan }})
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('bahan_menu.' . $index . '.id_template_item')
+                                                        <div
+                                                            class="invalid-feedback"
+                                                        >
+                                                            {{ $message }}
+                                                        </div>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label
+                                                        class="form-label"
+                                                        for="bahan_menu_{{ $index }}_jumlah_per_porsi"
+                                                    >
+                                                        Jumlah per Porsi
+                                                        <span
+                                                            class="text-danger"
+                                                            >*</span
+                                                        >
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        name="bahan_menu[{{ $index }}][jumlah_per_porsi]"
+                                                        class="form-control jumlah-input @error('bahan_menu.' . $index . '.jumlah_per_porsi') is-invalid @enderror"
+                                                        step="0.0001"
+                                                        min="0.0001"
+                                                        value="{{ old('bahan_menu.' . $index . '.jumlah_per_porsi') }}"
+                                                        required
+                                                    />
+                                                    @error('bahan_menu.' . $index . '.jumlah_per_porsi')
+                                                        <div
+                                                            class="invalid-feedback"
+                                                        >
+                                                            {{ $message }}
+                                                        </div>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-check">
+                                                        <input
+                                                            type="checkbox"
+                                                            name="bahan_menu[{{ $index }}][is_bahan_basah]"
+                                                            class="form-check-input is-bahan-basah"
+                                                            {{ old('bahan_menu.' . $index . '.is_bahan_basah') ? 'checked' : '' }}
+                                                        />
+                                                        <label
+                                                            class="form-check-label"
+                                                            for="bahan_menu_{{ $index }}_is_bahan_basah"
+                                                        >
+                                                            Bahan Basah
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-outline-danger remove-bahan-btn"
+                                                        {{ $index == 0 && count(old('bahan_menu')) == 1 ? 'disabled' : '' }}
+                                                    >
+                                                        <i
+                                                            class="bx bx-trash me-1"
+                                                        ></i>
+                                                        Hapus
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div
+                                            class="bahan-row row g-3 mb-3 align-items-end"
+                                        >
+                                            <div class="col-md-4">
+                                                <label
+                                                    class="form-label"
+                                                    for="bahan_menu_0_id_template_item"
+                                                >
+                                                    Nama Bahan
+                                                    <span
+                                                        class="text-danger"
+                                                        >*</span
+                                                    >
                                                 </label>
                                                 <select
                                                     name="bahan_menu[0][id_template_item]"
-                                                    class="form-select template-select @error("bahan_menu.0.id_template_item") is-invalid @enderror"
+                                                    class="form-select template-item-select"
                                                     required
                                                 >
                                                     <option value="">
@@ -183,70 +325,73 @@
                                                     @foreach ($templateItems as $item)
                                                         <option
                                                             value="{{ $item->id_template_item }}"
-                                                            {{ old("bahan_menu.0.id_template_item") == $item->id_template_item ? "selected" : "" }}
+                                                            data-satuan="{{ $item->satuan }}"
                                                         >
                                                             {{ $item->nama_bahan }}
                                                             ({{ $item->satuan }})
                                                         </option>
                                                     @endforeach
                                                 </select>
-                                                @error("bahan_menu.0.id_template_item")
-                                                    <div
-                                                        class="invalid-feedback"
-                                                    >
-                                                        {{ $message }}
-                                                    </div>
-                                                @enderror
                                             </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">
+                                            <div class="col-md-3">
+                                                <label
+                                                    class="form-label"
+                                                    for="bahan_menu_0_jumlah_per_porsi"
+                                                >
                                                     Jumlah per Porsi
-                                                    <span class="text-danger">
-                                                        *
-                                                    </span>
+                                                    <span
+                                                        class="text-danger"
+                                                        >*</span
+                                                    >
                                                 </label>
                                                 <input
                                                     type="number"
                                                     name="bahan_menu[0][jumlah_per_porsi]"
+                                                    class="form-control jumlah-input"
                                                     step="0.0001"
                                                     min="0.0001"
                                                     required
-                                                    class="form-control @error("bahan_menu.0.jumlah_per_porsi") is-invalid @enderror"
-                                                    placeholder="Contoh: 0.5"
-                                                    value="{{ old("bahan_menu.0.jumlah_per_porsi") }}"
                                                 />
-                                                @error("bahan_menu.0.jumlah_per_porsi")
-                                                    <div
-                                                        class="invalid-feedback"
-                                                    >
-                                                        {{ $message }}
-                                                    </div>
-                                                @enderror
                                             </div>
-                                            <div
-                                                class="col-md-2 d-flex align-items-end"
-                                            >
+                                            <div class="col-md-2">
+                                                <div class="form-check">
+                                                    <input
+                                                        type="checkbox"
+                                                        name="bahan_menu[0][is_bahan_basah]"
+                                                        class="form-check-input is-bahan-basah"
+                                                    />
+                                                    <label
+                                                        class="form-check-label"
+                                                        for="bahan_menu_0_is_bahan_basah"
+                                                    >
+                                                        Bahan Basah
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
                                                 <button
                                                     type="button"
-                                                    class="btn btn-danger w-100 remove-bahan"
+                                                    class="btn btn-outline-danger remove-bahan-btn"
+                                                    disabled
                                                 >
-                                                    <i class="bx bx-trash"></i>
+                                                    <i
+                                                        class="bx bx-trash me-1"
+                                                    ></i>
+                                                    Hapus
                                                 </button>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </div>
+                                <button
+                                    type="button"
+                                    id="add-bahan-btn"
+                                    class="btn btn-outline-primary"
+                                >
+                                    <i class="bx bx-plus me-1"></i>
+                                    Tambah Bahan
+                                </button>
                             </div>
-                        </div>
-                        <div class="mt-3">
-                            <button
-                                type="button"
-                                id="add-bahan"
-                                class="btn btn-primary"
-                            >
-                                <i class="bx bx-plus"></i>
-                                Tambah Bahan
-                            </button>
                         </div>
                     </div>
 
@@ -254,7 +399,7 @@
                     <div class="col-12 mt-4">
                         <div class="d-flex justify-content-between">
                             <a
-                                href="{{ route("superadmin.menu-makanan.index") }}"
+                                href="{{ route('superadmin.menu-makanan.index') }}"
                                 class="btn btn-label-secondary"
                             >
                                 Batal
@@ -277,270 +422,338 @@
                 <div class="row">
                     <div class="col-md-4">
                         <img
-                            id="preview-gambar"
-                            src="{{ asset("images/menu/default-menu.jpg") }}"
+                            src="{{ asset('images/menu/default-menu.jpg') }}"
                             alt="Preview Gambar"
                             class="img-fluid rounded mb-3"
+                            id="preview-gambar"
+                            style="
+                                max-height: 200px;
+                                width: 100%;
+                                object-fit: cover;
+                            "
                         />
                     </div>
                     <div class="col-md-8">
                         <h4 id="preview-nama">Nama Menu</h4>
-                        <p id="preview-deskripsi">
-                            Deskripsi menu akan tampil di sini...
+                        <p id="preview-kategori" class="text-muted">
+                            Kategori Menu
                         </p>
-                        <span
-                            id="preview-status-badge"
-                            class="badge bg-label-secondary"
-                        >
-                            Status
-                        </span>
-                        <h6 class="mt-3">Bahan-bahan:</h6>
-                        <ul id="preview-bahan-list" class="list-unstyled">
-                            <li class="text-muted">
-                                Tambahkan bahan untuk melihat preview
-                            </li>
-                        </ul>
+                        <p id="preview-deskripsi" class="text-muted">
+                            Deskripsi Menu
+                        </p>
+                        <ul id="preview-bahan" class="mb-0"></ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Instructions Alert -->
-        <div class="alert alert-info alert-dismissible" role="alert">
-            <h6 class="alert-heading mb-2">Instruksi Tambah Menu</h6>
-            <ul class="mb-0">
-                <li>Nama menu harus unik</li>
-                <li>Minimal satu bahan dengan jumlah > 0</li>
-                <li>
-                    Gambar opsional, default akan digunakan jika tidak diupload
-                </li>
-                <li>Status "Active" agar menu bisa digunakan</li>
-                <li>
-                    Jumlah per porsi dalam satuan template (misal: gram, ml)
-                </li>
-            </ul>
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-            ></button>
-        </div>
-    </div>
+        <!-- Choices.js CSS -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
+        />
 
-    <!-- Choices.js CSS -->
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
-    />
+        <!-- JavaScript for Dynamic Ingredients and Preview -->
+        <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Initialize Choices.js for template item selects
+                const templateSelects = document.querySelectorAll(
+                    '.template-item-select',
+                );
+                templateSelects.forEach((select) => {
+                    new Choices(select, {
+                        searchEnabled: true,
+                        itemSelectText: '',
+                        placeholder: true,
+                        placeholderValue: 'Pilih Bahan',
+                        noResultsText: 'Bahan tidak ditemukan',
+                    });
+                });
 
-    <!-- Custom Choices.js Styling -->
-    <style>
-        .choices__inner {
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            padding: 0.5rem;
-            font-size: 0.875rem;
-        }
-        .choices__list--dropdown {
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        }
-        .choices__list--dropdown .choices__item--selectable.is-highlighted {
-            background-color: #f8f9fa;
-        }
-        .choices[data-type*='select-one'] .choices__inner {
-            padding-bottom: 0;
-        }
-        .is-invalid .choices__inner {
-            border-color: #dc3545;
-        }
-        .bahan-row .card {
-            transition: all 0.3s ease;
-        }
-        .bahan-row .remove-bahan {
-            height: 38px;
-        }
-    </style>
+                // Template options data for preview
+                const templateOptionsData = [
+                    @foreach ($templateItems as $item)
+                        {
+                            value: '{{ $item->id_template_item }}',
+                            label: '{{ $item->nama_bahan }} ({{ $item->satuan }})',
+                            satuan: '{{ $item->satuan }}',
+                        },
+                    @endforeach
+                ];
 
-    <!-- Choices.js JS -->
-    <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
+                // Add new ingredient row
+                let bahanIndex =
+                    {{ old('bahan_menu') ? count(old('bahan_menu')) : 1 }};
+                const bahanContainer =
+                    document.getElementById('bahan-container');
+                const addBahanBtn = document.getElementById('add-bahan-btn');
 
-    <!-- JavaScript for Dynamic Form and Preview -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let bahanIndex = 1;
-            const templateOptions = `{!!
-                addslashes(
-                    json_encode(
-                        $templateItems->map(function ($item) {
-                            return ["value" => $item->id_template_item, "label" => $item->nama_bahan . " (" . $item->satuan . ")"];
-                        }),
-                    ),
-                )
-            !!}`;
-
-            const namaInput = document.getElementById('nama_menu');
-            const deskripsiInput = document.getElementById('deskripsi');
-            const gambarInput = document.getElementById('gambar_menu');
-            const statusSelect = document.getElementById('is_active');
-
-            const previewNama = document.getElementById('preview-nama');
-            const previewDeskripsi =
-                document.getElementById('preview-deskripsi');
-            const previewGambar = document.getElementById('preview-gambar');
-            const previewStatusBadge = document.getElementById(
-                'preview-status-badge',
-            );
-            const previewBahanList =
-                document.getElementById('preview-bahan-list');
-
-            // Add new bahan
-            document
-                .getElementById('add-bahan')
-                .addEventListener('click', function () {
-                    const container =
-                        document.getElementById('bahan-container');
-                    const row = document.createElement('div');
-                    row.className = 'col-12 bahan-row';
-                    row.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Template Bahan <span class="text-danger">*</span></label>
-                            <select name="bahan_menu[${bahanIndex}][id_template_item]" class="form-select template-select" required></select>
-                        </div>
+                addBahanBtn.addEventListener('click', function () {
+                    const bahanRow = document.createElement('div');
+                    bahanRow.className = 'bahan-row row g-3 mb-3 align-items-end';
+                    bahanRow.innerHTML = `
                         <div class="col-md-4">
-                            <label class="form-label">Jumlah per Porsi <span class="text-danger">*</span></label>
-                            <input type="number" name="bahan_menu[${bahanIndex}][jumlah_per_porsi]" step="0.0001" min="0.0001" required class="form-control" placeholder="Contoh: 0.5">
+                            <label class="form-label" for="bahan_menu_${bahanIndex}_id_template_item">
+                                Nama Bahan <span class="text-danger">*</span>
+                            </label>
+                            <select
+                                name="bahan_menu[${bahanIndex}][id_template_item]"
+                                class="form-select template-item-select"
+                                required
+                            >
+                                <option value="">Pilih Bahan</option>
+                                @foreach ($templateItems as $item)
+                                    <option value="{{ $item->id_template_item }}" data-satuan="{{ $item->satuan }}">
+                                        {{ $item->nama_bahan }} ({{ $item->satuan }})
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="button" class="btn btn-danger w-100 remove-bahan"><i class="bx bx-trash"></i></button>
+                        <div class="col-md-3">
+                            <label class="form-label" for="bahan_menu_${bahanIndex}_jumlah_per_porsi">
+                                Jumlah per Porsi <span class="text-danger">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                name="bahan_menu[${bahanIndex}][jumlah_per_porsi]"
+                                class="form-control jumlah-input"
+                                step="0.0001"
+                                min="0.0001"
+                                required
+                            />
                         </div>
-                    </div>
-                </div>
-            </div>
-        `;
-                    container.appendChild(row);
+                        <div class="col-md-2">
+                            <div class="form-check">
+                                <input
+                                    type="checkbox"
+                                    name="bahan_menu[${bahanIndex}][is_bahan_basah]"
+                                    class="form-check-input is-bahan-basah"
+                                />
+                                <label class="form-check-label" for="bahan_menu_${bahanIndex}_is_bahan_basah">
+                                    Bahan Basah
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-outline-danger remove-bahan-btn">
+                                <i class="bx bx-trash me-1"></i> Hapus
+                            </button>
+                        </div>
+                    `;
+                    bahanContainer.appendChild(bahanRow);
 
                     // Initialize Choices.js for new select
-                    const select = row.querySelector('.template-select');
-                    const choices = new Choices(select, {
-                        searchEnabled: true,
-                        placeholderValue: 'Pilih Bahan',
-                        searchPlaceholderValue: 'Cari bahan...',
-                        itemSelectText: '',
-                    });
-                    // Set options dynamically
-                    const options = JSON.parse(templateOptions);
-                    choices.setChoices(options, 'value', 'label', true);
-
-                    // Add event listeners for update preview
-                    select.addEventListener('change', updatePreview);
-                    row.querySelector('input[type="number"]').addEventListener(
-                        'input',
-                        updatePreview,
+                    const newSelect = bahanRow.querySelector(
+                        '.template-item-select',
                     );
+                    new Choices(newSelect, {
+                        searchEnabled: true,
+                        itemSelectText: '',
+                        placeholder: true,
+                        placeholderValue: 'Pilih Bahan',
+                        noResultsText: 'Bahan tidak ditemukan',
+                    });
 
                     bahanIndex++;
+                    toggleRemoveButtons();
                     updatePreview();
                 });
 
-            // Remove bahan
-            document.addEventListener('click', function (e) {
-                if (e.target.closest('.remove-bahan')) {
-                    const row = e.target.closest('.bahan-row');
-                    if (document.querySelectorAll('.bahan-row').length > 1) {
-                        row.remove();
+                // Remove ingredient row
+                document.addEventListener('click', function (e) {
+                    if (e.target.closest('.remove-bahan-btn')) {
+                        e.target.closest('.bahan-row').remove();
+                        toggleRemoveButtons();
                         updatePreview();
                     }
-                }
-            });
-
-            // Initialize first Choices.js
-            const firstSelect = document.querySelector('.template-select');
-            if (firstSelect) {
-                const firstChoices = new Choices(firstSelect, {
-                    searchEnabled: true,
-                    placeholderValue: 'Pilih Bahan',
-                    searchPlaceholderValue: 'Cari bahan...',
-                    itemSelectText: '',
                 });
-                const options = JSON.parse(templateOptions);
-                firstChoices.setChoices(options, 'value', 'label', true);
-                firstSelect.addEventListener('change', updatePreview);
-                document
-                    .querySelector(
-                        'input[name="bahan_menu[0][jumlah_per_porsi]"]',
-                    )
-                    .addEventListener('input', updatePreview);
-            }
 
-            // Handle input changes for preview
-            namaInput.addEventListener('input', function () {
-                previewNama.textContent = this.value || 'Nama Menu';
-            });
-
-            deskripsiInput.addEventListener('input', function () {
-                previewDeskripsi.textContent =
-                    this.value || 'Deskripsi menu akan tampil di sini...';
-            });
-
-            statusSelect.addEventListener('change', function () {
-                const badge = previewStatusBadge;
-                if (this.value === '1') {
-                    badge.textContent = 'Active';
-                    badge.className = 'badge bg-label-success';
-                } else if (this.value === '0') {
-                    badge.textContent = 'Inactive';
-                    badge.className = 'badge bg-label-danger';
-                } else {
-                    badge.textContent = 'Status';
-                    badge.className = 'badge bg-label-secondary';
+                // Toggle remove buttons
+                function toggleRemoveButtons() {
+                    const bahanRows =
+                        document.querySelectorAll('.bahan-row');
+                    const removeButtons = document.querySelectorAll(
+                        '.remove-bahan-btn',
+                    );
+                    removeButtons.forEach((btn, index) => {
+                        btn.disabled = bahanRows.length === 1 && index === 0;
+                    });
                 }
-            });
 
-            gambarInput.addEventListener('change', function () {
-                const file = this.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        previewGambar.src = e.target.result;
+                // Update preview
+                function updatePreview() {
+                    const namaMenuInput =
+                        document.getElementById('nama_menu');
+                    const kategoriInput = document.getElementById('kategori');
+                    const deskripsiInput =
+                        document.getElementById('deskripsi');
+                    const gambarInput = document.getElementById('gambar_menu');
+                    const previewNama =
+                        document.getElementById('preview-nama');
+                    const previewKategori = document.getElementById(
+                        'preview-kategori',
+                    );
+                    const previewDeskripsi = document.getElementById(
+                        'preview-deskripsi',
+                    );
+                    const previewGambar =
+                        document.getElementById('preview-gambar');
+                    const previewBahanList =
+                        document.getElementById('preview-bahan');
+
+                    // Update nama
+                    previewNama.textContent = namaMenuInput.value
+                        ? namaMenuInput.value
+                        : 'Nama Menu';
+
+                    // Update kategori
+                    previewKategori.textContent = kategoriInput.value
+                        ? kategoriInput.options[kategoriInput.selectedIndex]
+                              .text
+                        : 'Kategori Menu';
+
+                    // Update deskripsi
+                    previewDeskripsi.textContent = deskripsiInput.value
+                        ? deskripsiInput.value
+                        : 'Deskripsi Menu';
+
+                    // Update gambar
+                    if (gambarInput.files && gambarInput.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            previewGambar.src = e.target.result;
+                        };
+                        reader.readAsDataURL(gambarInput.files[0]);
+                    } else {
+                        previewGambar.src = '{{ asset("images/menu/default-menu.jpg") }}';
+                    }
+
+                    // Update bahan
+                    previewBahanList.innerHTML = '';
+                    const bahanRows =
+                        document.querySelectorAll('.bahan-row');
+                    bahanRows.forEach((row) => {
+                        const select = row.querySelector(
+                            '.template-item-select',
+                        );
+                        const input = row.querySelector('.jumlah-input');
+                        const checkbox = row.querySelector('.is-bahan-basah');
+
+                        if (select.value && input.value) {
+                            const selectedOption =
+                                select.options[select.selectedIndex];
+                            const ingredientName = selectedOption.textContent;
+                            const isBasah = checkbox && checkbox.checked;
+
+                            let displayUnit = select.dataset.satuan;
+                            if (!displayUnit) {
+                                const originalSatuan =
+                                    selectedOption.dataset.satuan || '';
+                                if (!originalSatuan) {
+                                    const foundItem = templateOptionsData.find(
+                                        (item) =>
+                                            item.value == selectedOption.value,
+                                    );
+                                    displayUnit = foundItem
+                                        ? getDisplayUnit(foundItem.satuan)
+                                        : '';
+                                } else {
+                                    displayUnit = getDisplayUnit(originalSatuan);
+                                }
+                            }
+
+                            let value = parseFloat(input.value);
+                            let formattedValue = value;
+                            let finalValue = value;
+
+                            // Calculate bahan basah if checked
+                            if (isBasah) {
+                                finalValue = value * 1.07;
+                            }
+
+                            // Format the numbers to remove trailing zeros
+                            if (formattedValue % 1 === 0) {
+                                formattedValue = formattedValue.toString();
+                            } else {
+                                formattedValue = formattedValue
+                                    .toFixed(2)
+                                    .replace(/\.?0+$/, '');
+                            }
+
+                            if (finalValue % 1 === 0) {
+                                finalValue = finalValue.toString();
+                            } else {
+                                finalValue = finalValue
+                                    .toFixed(2)
+                                    .replace(/\.?0+$/, '');
+                            }
+
+                            const li = document.createElement('li');
+
+                            if (isBasah) {
+                                li.innerHTML = `${ingredientName} - ${formattedValue} ${displayUnit} Bahan Matang - ${finalValue} ${displayUnit} per porsi <span class="badge bg-label-info ms-2">Bahan Basah +7%</span>`;
+                            } else {
+                                li.innerHTML = `${ingredientName} - ${formattedValue} ${displayUnit} per porsi`;
+                            }
+
+                            previewBahanList.appendChild(li);
+                        }
+                    });
+                }
+
+                // Unit conversion function
+                function getDisplayUnit(satuan) {
+                    const unitMap = {
+                        kg: 'kg',
+                        g: 'gram',
+                        l: 'liter',
+                        ml: 'ml',
                     };
-                    reader.readAsDataURL(file);
-                } else {
-                    // Error but work
-                    previewGambar.src =
-                        '{{ asset("images/menu/default-menu.jpg") }}';
+                    return unitMap[satuan.toLowerCase()] || satuan;
                 }
-            });
 
-            // Update bahan preview
-            function updatePreview() {
-                previewBahanList.innerHTML = '';
-                const rows = document.querySelectorAll('.bahan-row');
-                if (
-                    rows.length === 0 ||
-                    (rows.length === 1 &&
-                        !rows[0].querySelector('select').value)
-                ) {
-                    previewBahanList.innerHTML =
-                        '<li class="text-muted">Tambahkan bahan untuk melihat preview</li>';
-                    return;
+                // Format number input
+                function formatNumberInput(input) {
+                    let value = parseFloat(input.value);
+                    if (!isNaN(value)) {
+                        if (value % 1 === 0) {
+                            input.value = value.toString();
+                        } else {
+                            input.value = value
+                                .toFixed(4)
+                                .replace(/\.?0+$/, '');
+                        }
+                    }
                 }
-                rows.forEach((row) => {
-                    const select = row.querySelector('select');
-                    const input = row.querySelector('input[type="number"]');
-                    if (select.value && input.value) {
-                        const li = document.createElement('li');
-                        li.textContent = `${select.options[select.selectedIndex].text} - ${input.value} per porsi`;
-                        previewBahanList.appendChild(li);
+
+                // Event listeners
+                document.addEventListener('input', function (e) {
+                    if (
+                        e.target.id === 'nama_menu' ||
+                        e.target.id === 'deskripsi' ||
+                        e.target.id === 'gambar_menu' ||
+                        e.target.classList.contains('jumlah-input')
+                    ) {
+                        updatePreview();
+                    }
+                    if (e.target.classList.contains('jumlah-input')) {
+                        setTimeout(() => formatNumberInput(e.target), 500);
                     }
                 });
-            }
-        });
-    </script>
-@endsection
+
+                document.addEventListener('change', function (e) {
+                    if (
+                        e.target.classList.contains('template-item-select') ||
+                        e.target.classList.contains('is-bahan-basah') ||
+                        e.target.id === 'kategori'
+                    ) {
+                        updatePreview();
+                    }
+                });
+
+                // Initial preview update
+                updatePreview();
+            });
+        </script>
+    @endsection

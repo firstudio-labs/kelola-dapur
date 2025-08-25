@@ -22,6 +22,15 @@ class UserController extends Controller
         try {
             $dapur = $request->current_dapur;
             $search = $request->input('search');
+            $current_user = auth()->user();
+
+            if (!$current_user->userRole || $current_user->userRole->role_type !== 'kepala_dapur') {
+                Log::warning('Unauthorized access attempt to user management', [
+                    'user_id' => $current_user->id_user,
+                    'role_type' => $current_user->userRole ? $current_user->userRole->role_type : 'none'
+                ]);
+                return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengelola user.');
+            }
 
             $users = User::whereHas('userRole', function ($query) use ($dapur) {
                 $query->where('id_dapur', $dapur->id_dapur)
@@ -32,8 +41,12 @@ class UserController extends Controller
                     ->orWhere('email', 'like', "%{$search}%");
             })->with('userRole')->paginate(10);
 
-            return view('kepaladapur.user.index', compact('users', 'dapur'));
+            return view('kepaladapur.user.index', compact('users', 'dapur', 'current_user'));
         } catch (Exception $e) {
+            Log::error('Failed to load user list', [
+                'error' => $e->getMessage(),
+                'dapur_id' => $dapur->id_dapur ?? 'not_set',
+            ]);
             return redirect()->back()->with('error', 'Gagal memuat daftar user: ' . $e->getMessage());
         }
     }
@@ -173,6 +186,7 @@ class UserController extends Controller
 
         try {
             $dapur = $request->current_dapur;
+            $current_user = auth()->user();
 
             $user = User::where('id_user', $userId)->first();
 
@@ -220,7 +234,7 @@ class UserController extends Controller
                 'dapur_id' => $dapur->id_dapur
             ]);
 
-            return view('kepaladapur.user.edit', compact('user', 'dapur', 'roles'));
+            return view('kepaladapur.user.edit', compact('user', 'dapur', 'roles', 'current_user'));
         } catch (Exception $e) {
             Log::error('Failed to edit user', [
                 'error' => $e->getMessage(),
@@ -378,6 +392,130 @@ class UserController extends Controller
                 'dapur_id' => $request->current_dapur->id_dapur ?? 'not_set',
             ]);
             return redirect()->back()->with('error', 'Gagal menghapus user: ' . $e->getMessage());
+        }
+    }
+
+    public function editKepalaDapur(Request $request)
+    {
+        try {
+            $current_user = User::with('userRole')->find(auth()->id());
+
+            if (!$current_user) {
+                Log::error('Current user not found', ['user_id' => auth()->id()]);
+                return redirect()->route('dashboard')->with('error', 'User tidak ditemukan.');
+            }
+
+            Log::info('User role debug', [
+                'user_id' => $current_user->id_user,
+                'has_user_role' => $current_user->userRole !== null,
+                'user_role_data' => $current_user->userRole ? [
+                    'role_type' => $current_user->userRole->role_type,
+                    'id_dapur' => $current_user->userRole->id_dapur
+                ] : 'null'
+            ]);
+
+            if (!$current_user->userRole) {
+                Log::error('User has no role assigned', [
+                    'user_id' => $current_user->id_user,
+                    'user_name' => $current_user->nama
+                ]);
+                return redirect()->route('dashboard')->with('error', 'User tidak memiliki role yang ditetapkan. Silahkan hubungi administrator.');
+            }
+
+            if ($current_user->userRole->role_type !== 'kepala_dapur') {
+                Log::warning('User is not kepala dapur', [
+                    'user_id' => $current_user->id_user,
+                    'role_type' => $current_user->userRole->role_type
+                ]);
+                return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses untuk mengedit profil kepala dapur.');
+            }
+
+            $dapur = Dapur::find($current_user->userRole->id_dapur);
+
+            if (!$dapur) {
+                Log::error('Dapur not found for kepala dapur', [
+                    'user_id' => $current_user->id_user,
+                    'dapur_id' => $current_user->userRole->id_dapur
+                ]);
+                return redirect()->route('dashboard')->with('error', 'Data dapur tidak ditemukan. Silahkan hubungi administrator.');
+            }
+
+            Log::info('Kepala dapur edit profile access granted', [
+                'user_id' => $current_user->id_user,
+                'user_name' => $current_user->nama,
+                'dapur_id' => $dapur->id_dapur,
+                'dapur_name' => $dapur->nama_dapur
+            ]);
+
+            return view('kepaladapur.user.edit-kepala-dapur', compact('current_user', 'dapur'));
+        } catch (Exception $e) {
+            Log::error('Failed to load kepala dapur edit form', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id() ?? 'not_set',
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('dashboard')->with('error', 'Gagal memuat form edit profil: ' . $e->getMessage());
+        }
+    }
+
+    public function updateKepalaDapur(Request $request)
+    {
+        try {
+            $current_user = User::with('userRole')->find(auth()->id());
+
+            if (!$current_user) {
+                return redirect()->route('dashboard')->with('error', 'User tidak ditemukan.');
+            }
+
+            if (!$current_user->userRole) {
+                return redirect()->route('dashboard')->with('error', 'User tidak memiliki role yang ditetapkan.');
+            }
+
+            if ($current_user->userRole->role_type !== 'kepala_dapur') {
+                return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses untuk mengedit profil kepala dapur.');
+            }
+
+            $dapur = Dapur::find($current_user->userRole->id_dapur);
+
+            if (!$dapur) {
+                return redirect()->route('dashboard')->with('error', 'Data dapur tidak ditemukan.');
+            }
+
+            $validated = $request->validate([
+                'nama' => 'required|string|max:255',
+                'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($current_user->id_user, 'id_user')],
+                'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($current_user->id_user, 'id_user')],
+                'password' => 'nullable|string|min:8|confirmed',
+            ]);
+
+            $updateData = [
+                'nama' => $validated['nama'],
+                'username' => $validated['username'],
+                'email' => $validated['email'],
+            ];
+
+            if (!empty($validated['password'])) {
+                $updateData['password'] = Hash::make($validated['password']);
+            }
+
+            User::where('id_user', $current_user->id_user)->update($updateData);
+
+            Log::info('Kepala dapur profile updated successfully', [
+                'user_id' => $current_user->id_user,
+                'user_name' => $validated['nama'],
+                'dapur_id' => $dapur->id_dapur
+            ]);
+
+            return redirect()->route('kepala-dapur.edit-profil')
+                ->with('success', 'Profil berhasil diperbarui.');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator)->withInput();
+        } catch (Exception $e) {
+            Log::error('Failed to update kepala dapur profile', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id() ?? 'not_set',
+            ]);
+            return redirect()->back()->with('error', 'Gagal memperbarui profil: ' . $e->getMessage());
         }
     }
 }

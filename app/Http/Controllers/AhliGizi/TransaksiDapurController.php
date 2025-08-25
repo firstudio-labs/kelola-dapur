@@ -166,14 +166,14 @@ class TransaksiDapurController extends Controller
                     }
                 }
             ],
-            'menus.*.jumlah_porsi' => 'required|integer|min:1|max:1000'
+            'menus.*.jumlah_porsi' => 'required|integer|min:1|max:1000000'
         ], [
             'menus.required' => 'Minimal harus ada 1 menu untuk porsi besar',
             'menus.*.id_menu.required' => 'Menu harus dipilih',
             'menus.*.id_menu.exists' => 'Menu yang dipilih tidak valid',
             'menus.*.jumlah_porsi.required' => 'Jumlah porsi harus diisi',
             'menus.*.jumlah_porsi.min' => 'Jumlah porsi minimal 1',
-            'menus.*.jumlah_porsi.max' => 'Jumlah porsi maksimal 1000'
+            'menus.*.jumlah_porsi.max' => 'Jumlah porsi maksimal 1000000'
         ]);
 
         $menuIds = array_column($request->menus, 'id_menu');
@@ -267,7 +267,7 @@ class TransaksiDapurController extends Controller
                     }
                 }
             ],
-            'menus.*.jumlah_porsi' => 'required|integer|min:1|max:1000'
+            'menus.*.jumlah_porsi' => 'required|integer|min:1|max:1000000'
         ]);
 
         if ($request->has('menus') && !empty($request->menus)) {

@@ -97,6 +97,7 @@ class TransaksiDapur extends Model
                         'nama_bahan' => $ingredient['nama_bahan'],
                         'satuan' => $ingredient['satuan'],
                         'is_bahan_basah' => isset($ingredient['is_bahan_basah']) ? $ingredient['is_bahan_basah'] : false,
+                        'needed' => 0
                     ];
                 }
 
@@ -159,9 +160,6 @@ class TransaksiDapur extends Model
         return $result;
     }
 
-    /**
-     * Check stock availability using snapshots if available
-     */
     public function checkStockWithSnapshots(ApprovalTransaksi $approval = null): array
     {
         $stockCheck = $this->checkAllStockAvailability();

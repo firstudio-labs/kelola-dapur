@@ -631,7 +631,7 @@
                         <div class="card-header">
                             <h5 class="mb-0">
                                 <i class="bx bx-error me-2"></i>
-                                Laporan Kekurangan Stock
+                                Laporan Kekurangan Stock Yang Pernah Diajukan
                             </h5>
                         </div>
                         <div class="card-body">

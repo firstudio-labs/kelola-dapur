@@ -138,18 +138,18 @@ Route::middleware(['auth', 'super.admin.only'])
         });
 
         // User Management
-        Route::prefix('users')->name('users.')->group(function () {
-            Route::get('/', [UserController::class, 'userIndex'])->name('index');
-            Route::get('/create', [UserController::class, 'userCreate'])->name('create');
-            Route::post('/', [UserController::class, 'userStore'])->name('store');
-            Route::get('/{user}', [UserController::class, 'userShow'])->name('show');
-            Route::get('/{user}/edit', [UserController::class, 'userEdit'])->name('edit');
-            Route::put('/{user}', [UserController::class, 'userUpdate'])->name('update');
-            Route::delete('/{user}', [UserController::class, 'userDestroy'])->name('destroy');
-            // Role Assignment
-            Route::post('/{user}/assign-role', [SuperAdminController::class, 'assignRole'])->name('assign-role');
-            Route::delete('/{user}/remove-role', [SuperAdminController::class, 'removeRole'])->name('remove-role');
-        });
+        // Route::prefix('users')->name('users.')->group(function () {
+        //     Route::get('/', [UserController::class, 'userIndex'])->name('index');
+        //     Route::get('/create', [UserController::class, 'userCreate'])->name('create');
+        //     Route::post('/', [UserController::class, 'userStore'])->name('store');
+        //     Route::get('/{user}', [UserController::class, 'userShow'])->name('show');
+        //     Route::get('/{user}/edit', [UserController::class, 'userEdit'])->name('edit');
+        //     Route::put('/{user}', [UserController::class, 'userUpdate'])->name('update');
+        //     Route::delete('/{user}', [UserController::class, 'userDestroy'])->name('destroy');
+        //     // Role Assignment
+        //     Route::post('/{user}/assign-role', [SuperAdminController::class, 'assignRole'])->name('assign-role');
+        //     Route::delete('/{user}/remove-role', [SuperAdminController::class, 'removeRole'])->name('remove-role');
+        // });
 
         // Template Items
         Route::prefix('template-items')->name('template-items.')->group(function () {
@@ -158,6 +158,7 @@ Route::middleware(['auth', 'super.admin.only'])
             Route::post('/', [TemplateItemController::class, 'store'])->name('store');
             Route::get('/{templateItem}/edit', [TemplateItemController::class, 'edit'])->name('edit');
             Route::put('/{templateItem}', [TemplateItemController::class, 'update'])->name('update');
+            Route::get('/{templateItem}', [TemplateItemController::class, 'show'])->name('show');
             Route::delete('/{templateItem}', [TemplateItemController::class, 'destroy'])->name('destroy');
         });
 
@@ -166,12 +167,16 @@ Route::middleware(['auth', 'super.admin.only'])
             Route::get('/', [MenuMakananController::class, 'index'])->name('index');
             Route::get('/create', [MenuMakananController::class, 'create'])->name('create');
             Route::post('/', [MenuMakananController::class, 'store'])->name('store');
+            Route::get('/{menuMakanan}', [MenuMakananController::class, 'show'])->name('show');
             Route::get('/{menuMakanan}/edit', [MenuMakananController::class, 'edit'])->name('edit');
             Route::put('/{menuMakanan}', [MenuMakananController::class, 'update'])->name('update');
+            Route::patch('/{menuMakanan}/toggle-status', [MenuMakananController::class, 'toggleStatus'])->name('toggleStatus');
             Route::delete('/{menuMakanan}', [MenuMakananController::class, 'destroy'])->name('destroy');
-            Route::patch('/{menuMakanan}/toggle-status', [MenuMakananController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{menuMakanan}/check-stock', [MenuMakananController::class, 'checkStock'])->name('check-stock');
+            Route::get('/active-menus', [MenuMakananController::class, 'getActiveMenus'])->name('active-menus');
+            Route::get('/{menu}/menu-details', [MenuMakananController::class, 'getMenuDetails'])->name('menu-details');
+            Route::get('/{menu}/ingredient-details', [MenuMakananController::class, 'getIngredientDetails'])->name('ingredient-details');
         });
-
         Route::prefix('bahan-menu')->name('bahan-menu.')->group(function () {
             Route::get('/create', [BahanMenuController::class, 'create'])->name('create');
             Route::post('/', [BahanMenuController::class, 'store'])->name('store');
@@ -181,27 +186,27 @@ Route::middleware(['auth', 'super.admin.only'])
             Route::put('/menu/{menu}/bulk-update', [BahanMenuController::class, 'bulkUpdate'])->name('bulk-update');
         });
 
-        Route::prefix('stock-items')->name('stock-items.')->group(function () {
-            Route::get('/', [StockItemController::class, 'index'])->name('index');
-            Route::get('/create', [StockItemController::class, 'create'])->name('create');
-            Route::post('/', [StockItemController::class, 'store'])->name('store');
-            Route::get('/{stockItem}', [StockItemController::class, 'show'])->name('show');
-            Route::get('/{stockItem}/edit', [StockItemController::class, 'edit'])->name('edit');
-            Route::put('/{stockItem}', [StockItemController::class, 'update'])->name('update');
-            Route::delete('/{stockItem}', [StockItemController::class, 'destroy'])->name('destroy');
-        });
+        // Route::prefix('stock-items')->name('stock-items.')->group(function () {
+        //     Route::get('/', [StockItemController::class, 'index'])->name('index');
+        //     Route::get('/create', [StockItemController::class, 'create'])->name('create');
+        //     Route::post('/', [StockItemController::class, 'store'])->name('store');
+        //     Route::get('/{stockItem}', [StockItemController::class, 'show'])->name('show');
+        //     Route::get('/{stockItem}/edit', [StockItemController::class, 'edit'])->name('edit');
+        //     Route::put('/{stockItem}', [StockItemController::class, 'update'])->name('update');
+        //     Route::delete('/{stockItem}', [StockItemController::class, 'destroy'])->name('destroy');
+        // });
 
-        Route::prefix('approval')->name('approvals.')->group(function () {
-            Route::get('/', [ApprovalStockItemController::class, 'index'])->name('index');
-            Route::get('/create', [ApprovalStockItemController::class, 'create'])->name('create');
-            Route::post('/', [ApprovalStockItemController::class, 'store'])->name('store');
-            Route::get('/{approvalStockItem}', [ApprovalStockItemController::class, 'show'])->name('show');
-            Route::get('/{approvalStockItem}/edit', [ApprovalStockItemController::class, 'edit'])->name('edit');
-            Route::put('/{approvalStockItem}', [ApprovalStockItemController::class, 'update'])->name('update');
-            Route::delete('/{approvalStockItem}', [ApprovalStockItemController::class, 'destroy'])->name('destroy');
-            Route::post('/{approvalStockItem}/approve', [ApprovalStockItemController::class, 'approve'])->name('approve');
-            Route::post('/{approvalStockItem}/reject', [ApprovalStockItemController::class, 'reject'])->name('reject');
-        });
+        // Route::prefix('approval')->name('approvals.')->group(function () {
+        //     Route::get('/', [ApprovalStockItemController::class, 'index'])->name('index');
+        //     Route::get('/create', [ApprovalStockItemController::class, 'create'])->name('create');
+        //     Route::post('/', [ApprovalStockItemController::class, 'store'])->name('store');
+        //     Route::get('/{approvalStockItem}', [ApprovalStockItemController::class, 'show'])->name('show');
+        //     Route::get('/{approvalStockItem}/edit', [ApprovalStockItemController::class, 'edit'])->name('edit');
+        //     Route::put('/{approvalStockItem}', [ApprovalStockItemController::class, 'update'])->name('update');
+        //     Route::delete('/{approvalStockItem}', [ApprovalStockItemController::class, 'destroy'])->name('destroy');
+        //     Route::post('/{approvalStockItem}/approve', [ApprovalStockItemController::class, 'approve'])->name('approve');
+        //     Route::post('/{approvalStockItem}/reject', [ApprovalStockItemController::class, 'reject'])->name('reject');
+        // });
     });
 
 
@@ -223,6 +228,8 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur'])
             Route::get('/{user}/edit', [KepalaDapurUserController::class, 'edit'])->name('edit');
             Route::put('/{user}', [KepalaDapurUserController::class, 'update'])->name('update');
             Route::delete('/{user}', [KepalaDapurUserController::class, 'destroy'])->name('destroy');
+            Route::get('/edit-kepala-dapur/', [KepalaDapurUserController::class, 'editKepalaDapur'])->name('edit-kepala-dapur');
+            Route::put('/edit-kepala-dapur/', [KepalaDapurUserController::class, 'updateKepalaDapur'])->name('update-kepala-dapur');
         });
 
         // Approval Stock Item
@@ -263,7 +270,7 @@ Route::middleware(['auth', 'dapur.access:ahli_gizi'])
     ->group(function () {});
 
 
-//========== General Role Check Kepala Dapur Routes  ==========
+//TODO ========== General Role Check Kepala Dapur Routes  ==========
 Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('kepala-dapur.')->group(function () {
 
 
@@ -306,6 +313,8 @@ Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('
         Route::get('/laporan-kekurangan/{transaksi}/export-csv', [KepalaDapurLaporanKekuranganStockController::class, 'exportKekuranganCsv'])->name('export-csv');
     });
 
+    Route::get('/edit-profil', [KepalaDapurUserController::class, 'editKepalaDapur'])->name('edit-profil');
+    Route::put('/edit-profil', [KepalaDapurUserController::class, 'updateKepalaDapur'])->name('update-profil');
 
     // Route::get('/shortage-reports', [KepalaDapurApprovalTransaksiController::class, 'shortageReports'])->name('shortage-reports');
     // Route::post('/shortage-reports/{report}/resolve', [KepalaDapurApprovalTransaksiController::class, 'resolveShortage'])->name('resolve-shortage');

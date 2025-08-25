@@ -56,7 +56,7 @@
                 };
             }
         </script>
-        <title>Kepala Dapur Dashboard - Profile</title>
+        <title>Ahli Gizi</title>
 
         <meta
             name="description"

@@ -40,6 +40,36 @@
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title mb-3">Informasi Template Bahan</h5>
+                @if (session("success"))
+                    <div
+                        class="alert alert-success alert-dismissible"
+                        role="alert"
+                    >
+                        {{ session("success") }}
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                @endif
+
+                @if (session("error"))
+                    <div
+                        class="alert alert-danger alert-dismissible"
+                        role="alert"
+                    >
+                        {{ session("error") }}
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                @endif
+
                 <div class="row g-3">
                     <div class="col-md-6">
                         <p>
@@ -48,7 +78,7 @@
                         </p>
                         <p>
                             <strong>Satuan:</strong>
-                            {{ $templateItem->satuan }}
+                            {{ ucfirst($templateItem->satuan) }}
                         </p>
                     </div>
                     <div class="col-md-6">
@@ -62,17 +92,15 @@
                         </p>
                     </div>
                 </div>
-                @hasrole("super_admin|ahli_gizi")
-                    <div class="mt-4">
-                        <a
-                            href="{{ route("superadmin.template-items.edit", $templateItem) }}"
-                            class="btn btn-primary"
-                        >
-                            <i class="bx bx-edit-alt me-1"></i>
-                            Edit Template Bahan
-                        </a>
-                    </div>
-                @endhasrole
+                <div class="mt-4">
+                    <a
+                        href="{{ route("superadmin.template-items.edit", $templateItem) }}"
+                        class="btn btn-primary"
+                    >
+                        <i class="bx bx-edit-alt me-1"></i>
+                        Edit Template Bahan
+                    </a>
+                </div>
             </div>
         </div>
 

@@ -523,6 +523,9 @@
             const previewBahanList =
                 document.getElementById('preview-bahan-list');
 
+            // Store Choices instances
+            let choicesInstances = [];
+
             // Function to get display unit from original unit
             function getDisplayUnit(originalUnit) {
                 if (!originalUnit) return '';
@@ -530,6 +533,56 @@
                 if (unit === 'kg') return 'gram';
                 if (unit === 'liter' || unit === 'l') return 'ml';
                 return originalUnit;
+            }
+
+            // Function to populate select options
+            function populateSelectOptions(selectElement) {
+                // Store currently selected value
+                const currentValue = selectElement.value;
+
+                // Clear existing options except the first placeholder
+                while (selectElement.children.length > 1) {
+                    selectElement.removeChild(selectElement.lastChild);
+                }
+
+                // Add all template options
+                templateOptionsData.forEach((item) => {
+                    const option = document.createElement('option');
+                    option.value = item.value;
+                    option.textContent = item.label;
+                    option.dataset.satuan = item.satuan;
+                    // Restore selection if it matches
+                    if (item.value == currentValue) {
+                        option.selected = true;
+                    }
+                    selectElement.appendChild(option);
+                });
+            }
+
+            // Function to initialize Choices.js
+            function initializeChoices(selectElement) {
+                // Initialize Choices.js
+                const choices = new Choices(selectElement, {
+                    searchEnabled: true,
+                    placeholderValue: 'Pilih Bahan',
+                    searchPlaceholderValue: 'Cari bahan...',
+                    itemSelectText: '',
+                    shouldSort: false,
+                    searchResultLimit: 20,
+                    searchFields: ['label'],
+                    fuseOptions: {
+                        threshold: 0.3,
+                        keys: ['label'],
+                    },
+                });
+
+                // Store instance for cleanup
+                choicesInstances.push({
+                    element: selectElement,
+                    instance: choices,
+                });
+
+                return choices;
             }
 
             // Function to update input label and placeholder based on selected ingredient
@@ -613,13 +666,11 @@
                     const label = row.querySelector('.jumlah-label');
                     const checkbox = row.querySelector('.bahan-basah-checkbox');
 
+                    // Populate options first to ensure all data is available
+                    populateSelectOptions(select);
+
                     // Initialize Choices.js for existing selects
-                    const choices = new Choices(select, {
-                        searchEnabled: true,
-                        placeholderValue: 'Pilih Bahan',
-                        searchPlaceholderValue: 'Cari bahan...',
-                        itemSelectText: '',
-                    });
+                    const choices = initializeChoices(select);
 
                     updateInputUnit(select, input, label, true);
                     formatNumberInput(input);
@@ -643,62 +694,53 @@
                     const row = document.createElement('div');
                     row.className = 'col-12 bahan-row';
                     row.innerHTML = `
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-5">
-                                    <label class="form-label">Template Bahan <span class="text-danger">*</span></label>
-                                    <select name="bahan_menu[${bahanIndex}][id_template_item]" class="form-select template-select" required>
-                                        <option value="">Pilih Bahan</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label jumlah-label">Jumlah per Porsi <span class="text-danger">*</span></label>
-                                    <input type="number" name="bahan_menu[${bahanIndex}][jumlah_per_porsi]" step="0.0001" min="0.0001" required class="form-control jumlah-input" placeholder="Contoh: 0.5">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Bahan Basah</label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input bahan-basah-checkbox" type="checkbox" name="bahan_menu[${bahanIndex}][is_bahan_basah]" value="1" id="bahan_basah_${bahanIndex}">
-                                        <label class="form-check-label" for="bahan_basah_${bahanIndex}">
-                                            <small class="text-muted">+7%</small>
-                                        </label>
-                                    </div>
-                                    <small class="text-muted">Berat matang +7%</small>
-                                </div>
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <button type="button" class="btn btn-danger w-100 remove-bahan"><i class="bx bx-trash"></i></button>
-                                </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label">Template Bahan <span class="text-danger">*</span></label>
+                            <select name="bahan_menu[${bahanIndex}][id_template_item]" class="form-select template-select" required>
+                                <option value="">Pilih Bahan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label jumlah-label">Jumlah per Porsi <span class="text-danger">*</span></label>
+                            <input type="number" name="bahan_menu[${bahanIndex}][jumlah_per_porsi]" step="0.0001" min="0.0001" required class="form-control jumlah-input" placeholder="Contoh: 0.5">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Bahan Basah</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input bahan-basah-checkbox" type="checkbox" name="bahan_menu[${bahanIndex}][is_bahan_basah]" value="1" id="bahan_basah_${bahanIndex}">
+                                <label class="form-check-label" for="bahan_basah_${bahanIndex}">
+                                    <small class="text-muted">+7%</small>
+                                </label>
                             </div>
+                            <small class="text-muted">Berat matang +7%</small>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger w-100 remove-bahan"><i class="bx bx-trash"></i></button>
                         </div>
                     </div>
-                `;
+                </div>
+            </div>
+        `;
                     container.appendChild(row);
 
-                    // Populate options for new select
+                    // Get new elements
                     const newSelect = row.querySelector('.template-select');
-                    templateOptionsData.forEach((item) => {
-                        const option = document.createElement('option');
-                        option.value = item.value;
-                        option.textContent = item.label;
-                        option.dataset.satuan = item.satuan;
-                        newSelect.appendChild(option);
-                    });
-
-                    // Initialize Choices.js for new select
-                    const choices = new Choices(newSelect, {
-                        searchEnabled: true,
-                        placeholderValue: 'Pilih Bahan',
-                        searchPlaceholderValue: 'Cari bahan...',
-                        itemSelectText: '',
-                    });
-
                     const newInput = row.querySelector('.jumlah-input');
                     const newLabel = row.querySelector('.jumlah-label');
                     const newCheckbox = row.querySelector(
                         '.bahan-basah-checkbox',
                     );
 
+                    // Populate options for new select
+                    populateSelectOptions(newSelect);
+
+                    // Initialize Choices.js for new select
+                    const newChoices = initializeChoices(newSelect);
+
+                    // Add event listeners
                     newSelect.addEventListener('change', () => {
                         updateInputUnit(newSelect, newInput, newLabel);
                         updatePreview();
@@ -717,6 +759,22 @@
                 if (e.target.closest('.remove-bahan')) {
                     const row = e.target.closest('.bahan-row');
                     if (document.querySelectorAll('.bahan-row').length > 1) {
+                        // Find and destroy Choices instance for this row
+                        const selectElement =
+                            row.querySelector('.template-select');
+                        const choicesInstance = choicesInstances.find(
+                            (item) => item.element === selectElement,
+                        );
+                        if (choicesInstance) {
+                            choicesInstance.instance.destroy();
+                            // Remove from array
+                            const index =
+                                choicesInstances.indexOf(choicesInstance);
+                            if (index > -1) {
+                                choicesInstances.splice(index, 1);
+                            }
+                        }
+
                         row.remove();
                         updatePreview();
                     }

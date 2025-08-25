@@ -96,7 +96,7 @@
                                        class="btn btn-sm btn-outline-warning">
                                         <i class="bx bx-edit"></i>
                                     </a>
-                                    <form action="{{ route('kepala-dapur.template-items.destroy', $item) }}" 
+                                    {{-- <form action="{{ route('kepala-dapur.template-items.destroy', $item) }}" 
                                           method="POST" 
                                           class="d-inline"
                                           onsubmit="return confirm('Yakin ingin menghapus {{ $item->nama_bahan }}?');">
@@ -105,7 +105,7 @@
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="bx bx-trash"></i>
                                         </button>
-                                    </form>
+                                    </form> --}}
                                 </div>
                             </td>
                         </tr>

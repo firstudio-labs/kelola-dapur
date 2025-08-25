@@ -27,7 +27,7 @@
             content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
         />
 
-        <title>Kepala Dapur Dashboard - Profile</title>
+        <title>Admin Gudang</title>
 
         <meta
             name="description"

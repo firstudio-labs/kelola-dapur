@@ -14,10 +14,17 @@ class TemplateItemController extends Controller
         $this->middleware(['auth', 'role:kepala_dapur']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $templateItems = TemplateItem::orderBy('nama_bahan', 'asc')->paginate(15);
+        $search = $request->query('search');
+        $query = TemplateItem::orderBy('nama_bahan', 'asc');
 
+        if ($search) {
+            $query->where('nama_bahan', 'like', "%{$search}%")
+                ->orWhere('keterangan', 'like', "%{$search}%");
+        }
+
+        $templateItems = $query->paginate(10);
         return view('kepaladapur.template_item.index', compact('templateItems'));
     }
 
@@ -66,7 +73,7 @@ class TemplateItemController extends Controller
 
     public function edit(TemplateItem $templateItem)
     {
-        $satuans = ['kg', 'gram', 'liter', 'ml', 'pcs', 'pack', 'botol', 'kaleng', 'ikat', 'buah'];
+        $satuans = ['kg', 'liter', 'pcs'];
         return view('kepaladapur.template_item.edit', compact('templateItem', 'satuans'));
     }
 

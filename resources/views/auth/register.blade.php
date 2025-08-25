@@ -70,15 +70,13 @@
                                 <a href="/" class="app-brand-link gap-2">
                                     <span class="app-brand-logo demo">
                                         <img
-                                            src="{{ asset("env") }}/logoo.png"
+                                            src="{{ asset("logo.png") }}"
                                             alt="Logo"
                                             style="height: 60px"
                                         />
                                     </span>
-                                    <span
-                                        class="app-brand-text demo text-body fw-bolder"
-                                    >
-                                        Dapur
+                                    <span class="demo text-body fw-bolder fs-2">
+                                        Kelola Dapur
                                     </span>
                                 </a>
                             </div>

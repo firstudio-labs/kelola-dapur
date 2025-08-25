@@ -26,7 +26,7 @@ class TemplateItemController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama_bahan' => 'required|string|max:100|unique:template_items,nama_bahan',
-            'satuan' => 'required|string|max:20',
+            'satuan' => 'required|in:kg,liter,pcs',
             'keterangan' => 'nullable|string|max:500'
         ], [
             'nama_bahan.required' => 'Nama bahan harus diisi',

@@ -39,6 +39,21 @@
         <!-- Form -->
         <div class="card mb-4">
             <div class="card-body">
+                @if (session("error"))
+                    <div
+                        class="alert alert-danger alert-dismissible"
+                        role="alert"
+                    >
+                        {{ session("error") }}
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                @endif
+
                 <form
                     action="{{ route("superadmin.template-items.update", $templateItem) }}"
                     method="POST"
@@ -87,7 +102,7 @@
                                     id="satuan"
                                     required
                                     class="form-control @error("satuan") is-invalid @enderror"
-                                    placeholder="Contoh: gram"
+                                    placeholder="Contoh: kg, liter, pcs"
                                     value="{{ old("satuan", $templateItem->satuan) }}"
                                 />
                                 @error("satuan")
@@ -173,30 +188,32 @@
         </div>
     </div>
 
-    <!-- JavaScript for Preview -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const namaInput = document.getElementById('nama_bahan');
-            const satuanInput = document.getElementById('satuan');
-            const keteranganInput = document.getElementById('keterangan');
+    @push("scripts")
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const namaInput = document.getElementById('nama_bahan');
+                const satuanInput = document.getElementById('satuan');
+                const keteranganInput = document.getElementById('keterangan');
 
-            const previewNama = document.getElementById('preview-nama');
-            const previewSatuan = document.getElementById('preview-satuan');
-            const previewKeterangan =
-                document.getElementById('preview-keterangan');
+                const previewNama = document.getElementById('preview-nama');
+                const previewSatuan = document.getElementById('preview-satuan');
+                const previewKeterangan =
+                    document.getElementById('preview-keterangan');
 
-            namaInput.addEventListener('input', function () {
-                previewNama.textContent = this.value || 'Nama Bahan';
+                namaInput.addEventListener('input', function () {
+                    previewNama.textContent = this.value || 'Nama Bahan';
+                });
+
+                satuanInput.addEventListener('input', function () {
+                    previewSatuan.textContent =
+                        'Satuan: ' + (this.value || '-');
+                });
+
+                keteranganInput.addEventListener('input', function () {
+                    previewKeterangan.textContent =
+                        'Keterangan: ' + (this.value || '-');
+                });
             });
-
-            satuanInput.addEventListener('input', function () {
-                previewSatuan.textContent = 'Satuan: ' + (this.value || '-');
-            });
-
-            keteranganInput.addEventListener('input', function () {
-                previewKeterangan.textContent =
-                    'Keterangan: ' + (this.value || '-');
-            });
-        });
-    </script>
+        </script>
+    @endpush
 @endsection

@@ -344,7 +344,7 @@
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header bg-success text-white">
+                            <div class="card-header text-white">
                                 <h6 class="mb-0">
                                     <i class="bx bx-package me-2"></i>
                                     Kebutuhan Bahan - Porsi Besar
@@ -405,7 +405,7 @@
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header bg-warning text-white">
+                            <div class="card-header text-white">
                                 <h6 class="mb-0">
                                     <i class="bx bx-package me-2"></i>
                                     Kebutuhan Bahan - Porsi Kecil
@@ -466,7 +466,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div
-                            class="card-header d-flex justify-content-between align-items-center bg-primary text-white"
+                            class="card-header d-flex justify-content-between align-items-center text-white"
                         >
                             <h6 class="mb-0">
                                 <i class="bx bx-package me-2"></i>
@@ -667,8 +667,8 @@
                         <div class="card-body">
                             <div class="alert alert-warning">
                                 <i class="bx bx-info-circle me-2"></i>
-                                Paket menu ini memiliki laporan kekurangan stock
-                                yang belum diselesaikan.
+                                Daftar laporan kekurangan stok yang pernah
+                                diajukan ke Kepala Dapur
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-sm">
@@ -826,7 +826,7 @@
                 const stockAlert = document.getElementById('stockAlert');
                 if (stockAlert && stockAlert.style.display !== 'none') {
                     e.preventDefault();
-                    if (confirm('Stock tidak mencukupi! Apakah Anda yakin ingin tetap mengajukan persetujuan?')) {
+                    if (confirm('Stock tidak mencukupi! Laporan Kekurangan Akan Diajukan Ke Kepala Dapur')) {
                         // Remove event listener to prevent loop
                         this.removeEventListener('submit', arguments.callee);
                         this.submit();

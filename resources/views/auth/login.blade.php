@@ -13,7 +13,7 @@
             name="viewport"
             content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
         />
-        <title>Login</title>
+        <title>Login - Kelola Dapur</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -78,10 +78,8 @@
                                             style="height: 60px"
                                         />
                                     </span>
-                                    <span
-                                        class="app-brand-text demo text-body fw-bolder"
-                                    >
-                                        Admin Panel
+                                    <span class="demo fw-bolder fs-2">
+                                        Kelola Dapur
                                     </span>
                                 </a>
                             </div>

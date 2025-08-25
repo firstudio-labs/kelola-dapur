@@ -150,7 +150,7 @@
                                                         name="menus[{{ $index }}][jumlah_porsi]"
                                                         class="form-control porsi-input"
                                                         min="1"
-                                                        max="1000"
+                                                        max="1000000"
                                                         value="{{ $detail->jumlah_porsi }}"
                                                         required
                                                     />
@@ -579,7 +579,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Jumlah Porsi</label>
-                                    <input type="number" name="menus[${index}][jumlah_porsi]" class="form-control porsi-input" min="1" max="1000" value="1" required />
+                                    <input type="number" name="menus[${index}][jumlah_porsi]" class="form-control porsi-input" min="1" max="1000000" value="1" required />
                                 </div>
                                 <div class="col-md-1">
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeMenuRow(this)">
