@@ -391,6 +391,8 @@
                 </div>
             </div>
         </div>
+
+        {{-- Modal Alert --}}
         <div
             class="modal fade"
             id="duplicateModal"

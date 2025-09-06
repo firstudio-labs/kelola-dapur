@@ -18,239 +18,267 @@
                     style="height: 45px; width: auto"
                 />
             </span>
-
-            <span class="demo fw-bolder ms-4 fs-3">Kepala Dapur</span>
+            <span class="app-brand-text demo fw-bolder ms-4 fs-3">
+                Kepala Dapur
+            </span>
         </a>
     </div>
 
-    <!-- Menu Utama -->
-    <ul class="menu-inner py-1">
-        <!-- Dashboard -->
-        <li
-            class="menu-item {{ request()->routeIs("dashboard") ? "active" : "" }}"
-        >
-            <a
-                href="{{ route("dashboard", request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
-                class="menu-link"
-            >
-                <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Dashboard">Dashboard</div>
-            </a>
-        </li>
-
-        <!-- Kepala Dapur Header -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Kepala Dapur</span>
-        </li>
-
-        <!-- Approval Permintaan Stok -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.approvals.*") ? "active" : "" }}"
-        >
-            <a
-                href="{{ route("kepala-dapur.approvals.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                class="menu-link"
-            >
-                <i class="menu-icon tf-icons bx bx-check-circle"></i>
-                <div data-i18n="Approval Stok">Approval Stok</div>
-                @if (isset($pendingApprovalsCount) && $pendingApprovalsCount > 0)
-                    <span class="badge bg-danger ms-2">
-                        {{ $pendingApprovalsCount }}
-                    </span>
-                @endif
-            </a>
-        </li>
-
-        <!-- Approval Transaksi Dapur -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.approval-transaksi.*") ? "active" : "" }}"
-        >
-            <a
-                href="{{ route("kepala-dapur.approval-transaksi.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                class="menu-link"
-            >
-                <i class="menu-icon tf-icons bx bx-file"></i>
-                <div data-i18n="Approval Transaksi">Approval Transaksi</div>
-                @if (isset($pendingTransaksiCount) && $pendingTransaksiCount > 0)
-                    <span class="badge bg-danger ms-2">
-                        {{ $pendingTransaksiCount }}
-                    </span>
-                @endif
-            </a>
-        </li>
-
-        <!-- Laporan Kekurangan Stok -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.laporan-kekurangan.*") ? "active" : "" }}"
-        >
-            <a
-                href="{{ route("kepala-dapur.laporan-kekurangan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                class="menu-link"
-            >
-                <i class="menu-icon tf-icons bx bx-error"></i>
-                <div data-i18n="Laporan Kekurangan Stok">
-                    Laporan Kekurangan Stok
-                </div>
-                @if (isset($pendingShortageCount) && $pendingShortageCount > 0)
-                    <span class="badge bg-danger ms-2">
-                        {{ $pendingShortageCount }}
-                    </span>
-                @endif
-            </a>
-        </li>
-
-        <!-- Konten -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Konten</span>
-        </li>
-
-        <!-- Template Bahan -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.template-items.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-package"></i>
-                <div data-i18n="Template Bahan">Template Bahan</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("kepala-dapur.template-items.index") ? "active" : "" }}"
+    <!-- Menu Container with flex layout -->
+    <div class="menu-container d-flex flex-column h-100">
+        <!-- User Profile Section - Moved to Top of Menu -->
+        <div class="user-profile-section mt-3 px-3 pb-3">
+            <div class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a
+                    class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
+                    href="javascript:void(0);"
+                    data-bs-toggle="dropdown"
+                    style="
+                        background: rgba(255, 255, 255, 0.15);
+                        transition: all 0.3s ease;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    "
+                    onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.15)'"
                 >
-                    <a
-                        href="{{ route("kepala-dapur.template-items.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                        class="menu-link"
-                    >
-                        <div data-i18n="Daftar Template Bahan">
-                            Daftar Template Bahan
+                    <div class="avatar avatar-online me-3">
+                        <img
+                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
+                            alt
+                            class="w-px-40 h-auto rounded-circle"
+                        />
+                    </div>
+                    <div class="flex-grow-1 text-start user-info">
+                        <div class="fw-semibold text-black">
+                            {{ auth()->user()->nama ?? "Unknown" }}
                         </div>
-                    </a>
-                </li>
-                <li
-                    class="menu-item {{ request()->routeIs("kepala-dapur.template-items.create") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("kepala-dapur.template-items.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                        class="menu-link"
-                    >
-                        <div data-i18n="Tambah Template Bahan">
-                            Tambah Template Bahan
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <!-- Kelola Menu Makanan -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.menu-makanan.*") ? "active" : "" }}"
-        >
-            <a
-                href="{{ route("kepala-dapur.menu-makanan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                class="menu-link"
-            >
-                <i class="menu-icon tf-icons bx bx-food-menu"></i>
-                <div data-i18n="Kelola Menu Makanan">Kelola Menu Makanan</div>
-            </a>
-        </li>
-
-        <!-- Kelola User -->
-        <li
-            class="menu-item {{ request()->routeIs("kepala-dapur.users.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Kelola User">Kelola User</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("kepala-dapur.users.index") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("kepala-dapur.users.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                        class="menu-link"
-                    >
-                        <div data-i18n="Daftar User">Daftar User</div>
-                    </a>
-                </li>
-                <li
-                    class="menu-item {{ request()->routeIs("kepala-dapur.users.create") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("kepala-dapur.users.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                        class="menu-link"
-                    >
-                        <div data-i18n="Tambah User">Tambah User</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <!-- User dropdown -->
-        <li class="nav-item navbar-dropdown dropdown-user dropdown">
-            <a
-                class="nav-link dropdown-toggle hide-arrow"
-                href="javascript:void(0);"
-                data-bs-toggle="dropdown"
-            >
-                <div class="avatar avatar-online">
-                    <img
-                        src="{{ asset("admin/assets/img/avatars/1.png") }}"
-                        alt
-                        class="w-px-40 h-auto rounded-circle"
-                    />
-                </div>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <a class="dropdown-item" href="#">
-                        <div class="d-flex">
-                            <div class="flex-shrink-0 me-3">
-                                <div class="avatar avatar-online">
-                                    <img
-                                        src="{{ asset("admin/assets/img/avatars/1.png") }}"
-                                        alt
-                                        class="w-px-40 h-auto rounded-circle"
-                                    />
+                        <small class="text-muted">
+                            {{ ucfirst(str_replace("_", " ", auth()->user()->userRole->role_type ?? "Unknown")) }}
+                        </small>
+                    </div>
+                    <i class="bx bx-chevron-up user-chevron"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="avatar avatar-online">
+                                        <img
+                                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
+                                            alt
+                                            class="w-px-40 h-auto rounded-circle"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold d-block">
+                                        {{ auth()->user()->nama ?? "Unknown" }}
+                                    </span>
+                                    <small class="text-muted">
+                                        {{ ucfirst(str_replace("_", " ", auth()->user()->userRole->role_type ?? "Unknown")) }}
+                                    </small>
                                 </div>
                             </div>
-                            <div class="flex-grow-1">
-                                <span class="fw-semibold d-block">
-                                    {{ auth()->user()->nama ?? "Unknown" }}
-                                </span>
-                                <small class="text-muted">
-                                    {{ ucfirst(str_replace("_", " ", auth()->user()->userRole->role_type ?? "Unknown")) }}
-                                </small>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <div class="dropdown-divider"></div>
-                </li>
-                @if (auth()->user()->userRole && auth()->user()->userRole->role_type === "kepala_dapur")
-                    <li>
-                        <a
-                            class="dropdown-item"
-                            href="{{ route("kepala-dapur.edit-profil") }}"
-                        >
-                            <i class="bx bx-edit me-2"></i>
-                            <span class="align-middle">Edit Profil</span>
                         </a>
                     </li>
-                @endif
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    @if (auth()->user()->userRole && auth()->user()->userRole->role_type === "kepala_dapur")
+                        <li>
+                            <a
+                                class="dropdown-item"
+                                href="{{ route("kepala-dapur.edit-profil") }}"
+                            >
+                                <i class="bx bx-edit me-2"></i>
+                                <span class="align-middle">Edit Profil</span>
+                            </a>
+                        </li>
+                    @endif
 
-                <li>
-                    <form action="{{ route("logout") }}" method="POST">
-                        @csrf
-                        <button type="submit" class="dropdown-item">
-                            <i class="bx bx-power-off me-2"></i>
-                            <span class="align-middle">Log Out</span>
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </li>
-    </ul>
+                    <li>
+                        <form action="{{ route("logout") }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dropdown-item">
+                                <i class="bx bx-power-off me-2"></i>
+                                <span class="align-middle">Log Out</span>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Menu Utama -->
+        <ul class="menu-inner py-1 flex-grow-1">
+            <!-- Dashboard -->
+            <li
+                class="menu-item {{ request()->routeIs("dashboard") ? "active" : "" }}"
+            >
+                <a
+                    href="{{ route("dashboard", request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
+                    class="menu-link"
+                >
+                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                    <div data-i18n="Dashboard">Dashboard</div>
+                </a>
+            </li>
+
+            <!-- Kepala Dapur Header -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Kepala Dapur</span>
+            </li>
+
+            <!-- Approval Permintaan Stok -->
+            <li
+                class="menu-item {{ request()->routeIs("kepala-dapur.approvals.*") ? "active" : "" }}"
+            >
+                <a
+                    href="{{ route("kepala-dapur.approvals.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                    class="menu-link"
+                >
+                    <i class="menu-icon tf-icons bx bx-check-circle"></i>
+                    <div data-i18n="Approval Stok">Approval Stok</div>
+                    @if (isset($pendingApprovalsCount) && $pendingApprovalsCount > 0)
+                        <span class="badge bg-danger ms-2">
+                            {{ $pendingApprovalsCount }}
+                        </span>
+                    @endif
+                </a>
+            </li>
+
+            <!-- Approval Transaksi Dapur -->
+            <li
+                class="menu-item {{ request()->routeIs("kepala-dapur.approval-transaksi.*") ? "active" : "" }}"
+            >
+                <a
+                    href="{{ route("kepala-dapur.approval-transaksi.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                    class="menu-link"
+                >
+                    <i class="menu-icon tf-icons bx bx-file"></i>
+                    <div data-i18n="Approval Transaksi">Approval Transaksi</div>
+                    @if (isset($pendingTransaksiCount) && $pendingTransaksiCount > 0)
+                        <span class="badge bg-danger ms-2">
+                            {{ $pendingTransaksiCount }}
+                        </span>
+                    @endif
+                </a>
+            </li>
+
+            <!-- Laporan Kekurangan Stok -->
+            <li
+                class="menu-item {{ request()->routeIs("kepala-dapur.laporan-kekurangan.*") ? "active" : "" }}"
+            >
+                <a
+                    href="{{ route("kepala-dapur.laporan-kekurangan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                    class="menu-link"
+                >
+                    <i class="menu-icon tf-icons bx bx-error"></i>
+                    <div data-i18n="Laporan Kekurangan Stok">
+                        Laporan Kekurangan Stok
+                    </div>
+                    @if (isset($pendingShortageCount) && $pendingShortageCount > 0)
+                        <span class="badge bg-danger ms-2">
+                            {{ $pendingShortageCount }}
+                        </span>
+                    @endif
+                </a>
+            </li>
+
+            <!-- Konten -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Konten</span>
+            </li>
+
+            <!-- Template Bahan -->
+            <li
+                class="menu-item {{ request()->routeIs("kepala-dapur.template-items.*") ? "active open" : "" }}"
+            >
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-package"></i>
+                    <div data-i18n="Template Bahan">Template Bahan</div>
+                </a>
+                <ul class="menu-sub">
+                    <li
+                        class="menu-item {{ request()->routeIs("kepala-dapur.template-items.index") ? "active" : "" }}"
+                    >
+                        <a
+                            href="{{ route("kepala-dapur.template-items.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                            class="menu-link"
+                        >
+                            <div data-i18n="Daftar Template Bahan">
+                                Daftar Template Bahan
+                            </div>
+                        </a>
+                    </li>
+                    <li
+                        class="menu-item {{ request()->routeIs("kepala-dapur.template-items.create") ? "active" : "" }}"
+                    >
+                        <a
+                            href="{{ route("kepala-dapur.template-items.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                            class="menu-link"
+                        >
+                            <div data-i18n="Tambah Template Bahan">
+                                Tambah Template Bahan
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Kelola Menu Makanan -->
+            <li
+                class="menu-item {{ request()->routeIs("kepala-dapur.menu-makanan.*") ? "active" : "" }}"
+            >
+                <a
+                    href="{{ route("kepala-dapur.menu-makanan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                    class="menu-link"
+                >
+                    <i class="menu-icon tf-icons bx bx-food-menu"></i>
+                    <div data-i18n="Kelola Menu Makanan">
+                        Kelola Menu Makanan
+                    </div>
+                </a>
+            </li>
+
+            <!-- Kelola User -->
+            <li
+                class="menu-item {{ request()->routeIs("kepala-dapur.users.*") ? "active open" : "" }}"
+            >
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-user"></i>
+                    <div data-i18n="Kelola User">Kelola User</div>
+                </a>
+                <ul class="menu-sub">
+                    <li
+                        class="menu-item {{ request()->routeIs("kepala-dapur.users.index") ? "active" : "" }}"
+                    >
+                        <a
+                            href="{{
+                                route("kepala-dapur.users.index", [
+                                    "dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null),
+                                ])
+                            }}"
+                            class="menu-link"
+                        >
+                            <div data-i18n="Daftar User">Daftar User</div>
+                        </a>
+                    </li>
+                    <li
+                        class="menu-item {{ request()->routeIs("kepala-dapur.users.create") ? "active" : "" }}"
+                    >
+                        <a
+                            href="{{ route("kepala-dapur.users.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                            class="menu-link"
+                        >
+                            <div data-i18n="Tambah User">Tambah User</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
 </aside>
 
 <!-- Mobile Menu Toggle Button (tampil hanya di mobile) -->
@@ -294,6 +322,20 @@
         z-index: 1045;
     }
 
+    /* Menu container styling */
+    .menu-container {
+        height: calc(100vh - 80px); /* Adjust based on brand height */
+        min-height: 500px; /* Ensure minimum height */
+        overflow-y: auto; /* Allow scrolling if content is too long */
+    }
+
+    /* User profile section styling */
+    .user-profile-section {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        flex-shrink: 0; /* Prevent shrinking */
+        min-height: 60px; /* Reduced height for better positioning */
+    }
+
     /* State ketika sidebar collapsed */
     .layout-menu.collapsed {
         width: 78px;
@@ -304,6 +346,33 @@
     .layout-menu.collapsed .menu-header-text,
     .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
         display: none;
+    }
+
+    /* User profile collapsed state - hanya tampilkan avatar */
+    .layout-menu.collapsed .user-profile-section .user-info,
+    .layout-menu.collapsed .user-profile-section .user-chevron {
+        display: none;
+    }
+
+    /* Show only avatar when collapsed */
+    .layout-menu.collapsed .user-profile-section .nav-link {
+        justify-content: center;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: none;
+    }
+
+    .layout-menu.collapsed .user-profile-section .avatar {
+        margin: 0;
+        transform: scale(1.1); /* Slightly larger avatar for visibility */
+    }
+
+    /* Pastikan user profile section tetap terlihat */
+    .layout-menu .user-profile-section {
+        display: block !important;
+        position: relative;
+        z-index: 1;
+        order: -1; /* Move to top of menu-container */
     }
 
     /* Posisikan tombol toggle di samping logo saat collapsed */
@@ -378,6 +447,24 @@
             display: block;
         }
 
+        /* Mobile user profile styling */
+        .layout-menu.collapsed .user-profile-section .user-info,
+        .layout-menu.collapsed .user-profile-section .user-chevron {
+            display: block;
+        }
+
+        .layout-menu.collapsed .user-profile-section .nav-link {
+            justify-content: flex-start;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.15) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .layout-menu.collapsed .user-profile-section .avatar {
+            margin-right: 0.75rem;
+            transform: none;
+        }
+
         .layout-menu.collapsed .app-brand {
             justify-content: space-between;
             padding-left: 1rem;
@@ -442,7 +529,7 @@
     }
 
     .layout-page.sidebar-collapsed {
-        padding-left: 60px;
+        padding-left: 78px;
     }
 
     @media (max-width: 991.98px) {

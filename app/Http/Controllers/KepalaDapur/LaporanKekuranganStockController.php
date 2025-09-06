@@ -51,10 +51,9 @@ class LaporanKekuranganStockController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('nama_paket', 'like', '%' . $search . '%')
-                    ->orWhereHas('createdBy', function ($q) use ($search) {
-                        $q->where('nama', 'like', '%' . $search . '%');
-                    });
+                $q->orWhereHas('createdBy', function ($q) use ($search) {
+                    $q->where('nama', 'like', '%' . $search . '%');
+                });
             });
         }
 
@@ -189,7 +188,8 @@ class LaporanKekuranganStockController extends Controller
         }
 
         return redirect()->back()
-            ->with('success', "{$successCount} laporan berhasil diselesaikan.");
+            // ->with('success', "{$successCount} bahan stok berhasil diselesaikan.");
+            ->with('success', "Laporan berhasil diselesaikan.");
     }
 
     public function summary(Request $request)

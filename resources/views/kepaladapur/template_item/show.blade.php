@@ -173,7 +173,7 @@
                                 <th>Nama Dapur</th>
                                 <th>Jumlah Stock</th>
                                 <th>Tanggal Update</th>
-                                <th>Aksi</th>
+                                {{-- <th>Aksi</th> --}}
                             </tr>
                         </thead>
                         <tbody>

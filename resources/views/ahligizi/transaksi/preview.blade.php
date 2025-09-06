@@ -652,7 +652,39 @@
                 </div>
             </div>
         </div>
-
+        <!-- Instructions Alert -->
+        <div class="alert alert-info alert-dismissible" role="alert">
+            <h6 class="alert-heading mb-2">
+                Informasi Laporan Kekurangan Stok
+            </h6>
+            <ul class="mb-0">
+                <li>
+                    Tampilan Informasi Laporan Kekurangan Stok Akan Muncul
+                    Ketika Sudah Diajukan
+                </li>
+                <li>
+                    Informasi Laporan Kekurangan Stok Akan Dikirim Ke Kepala
+                    Dapur Berdasarkan Ajuan Laporan Terakhir
+                </li>
+                <li>
+                    Status Pada Laporan Kekurangan Stok Menunggu Aksi Dari
+                    Kepala Dapur
+                </li>
+                <li>
+                    Anda Dapat Kembali Ke Edit Jika Sudah Ajukan Kekurangan Stok
+                </li>
+                <li>
+                    Anda Dapat Ajukan Menu Dengan Menu Lain Jika Stok Ada
+                    Walaupun Laporan Stok Sudah Terbuat
+                </li>
+            </ul>
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+            ></button>
+        </div>
         <!-- Laporan Kekurangan yang Sudah Ada -->
         @if ($transaksi->laporanKekuranganStock->count() > 0)
             <div class="row mb-4">

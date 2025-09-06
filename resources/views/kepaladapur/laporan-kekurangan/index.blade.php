@@ -200,7 +200,7 @@
                                 id="search-input"
                                 value="{{ request('search') }}"
                                 class="form-control"
-                                placeholder="Cari nama paket, pembuat..."
+                                placeholder="Cari pembuat..."
                             />
                             <button
                                 type="button"
@@ -278,12 +278,6 @@
                                 {{ request('sort') === 'created_at' ? 'selected' : '' }}
                             >
                                 Tanggal Transaksi
-                            </option>
-                            <option
-                                value="nama_paket"
-                                {{ request('sort') === 'nama_paket' ? 'selected' : '' }}
-                            >
-                                Nama Paket
                             </option>
                             <option
                                 value="created_by"
@@ -370,6 +364,7 @@
                                                         type="checkbox"
                                                         class="form-check-input bulk-checkbox"
                                                         value="{{ $transaksiItem->id_transaksi }}"
+                                                        data-laporan-ids="{{ json_encode($transaksiItem->laporanKekuranganStock->where('status', 'pending')->pluck('id_laporan')) }}"
                                                     />
                                                 @endif
                                             </td>
@@ -458,8 +453,8 @@
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#resolveModal"
                                                         data-transaksi-id="{{ $transaksiItem->id_transaksi }}"
-                                                        data-nama-paket="{{ $transaksiItem->nama_paket }}"
                                                         data-created-by="{{ $transaksiItem->createdBy->nama ?? 'Unknown' }}"
+                                                        data-laporan-ids="{{ json_encode($transaksiItem->laporanKekuranganStock->where('status', 'pending')->pluck('id_laporan')) }}"
                                                         title="Selesaikan"
                                                     >
                                                         <i class="bx bx-check"></i>
@@ -510,41 +505,29 @@
         >
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="resolveModalLabel">
-                            Selesaikan Laporan Kekurangan
-                        </h5>
-                        <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                        ></button>
-                    </div>
                     <form
                         id="resolveForm"
                         method="POST"
-                        action=""
+                        action="{{ route('kepala-dapur.laporan-kekurangan.bulk-resolve') }}"
                     >
                         @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="resolveModalLabel">
+                                Selesaikan Laporan Kekurangan
+                            </h5>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            ></button>
+                        </div>
                         <div class="modal-body">
-                            <div class="alert alert-info">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Dengan menyelesaikan laporan ini, status akan diubah menjadi diselesaikan.
-                            </div>
                             <div class="mb-3">
-                                <label for="resolveNamaPaket" class="form-label">
-                                    Nama Paket
-                                </label>
-                                <input
-                                    type="text"
-                                    id="resolveNamaPaket"
-                                    class="form-control"
-                                    readonly
-                                />
-                            </div>
-                            <div class="mb-3">
-                                <label for="resolveCreatedBy" class="form-label">
+                                <label
+                                    for="resolveCreatedBy"
+                                    class="form-label"
+                                >
                                     Dibuat Oleh
                                 </label>
                                 <input
@@ -555,18 +538,18 @@
                                 />
                             </div>
                             <div class="mb-3">
-                                <label for="keterangan_resolve" class="form-label">
-                                    Catatan Penyelesaian (Opsional)
+                                <label
+                                    for="keterangan_resolve"
+                                    class="form-label"
+                                >
+                                    Keterangan (Opsional)
                                 </label>
                                 <textarea
-                                    name="catatan"
                                     id="keterangan_resolve"
+                                    name="catatan"
                                     class="form-control"
-                                    rows="3"
-                                    maxlength="500"
-                                    placeholder="Tambahkan catatan jika diperlukan..."
+                                    rows="4"
                                 ></textarea>
-                                <div class="form-text">Maksimal 500 karakter</div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -577,9 +560,11 @@
                             >
                                 Batal
                             </button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="bx bx-check me-1"></i>
-                                Selesaikan Laporan
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                Selesaikan
                             </button>
                         </div>
                     </form>
@@ -744,7 +729,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 // Initialize Choices.js
                 const selects = document.querySelectorAll('.choices-select');
-                selects.forEach(select => {
+                selects.forEach((select) => {
                     new Choices(select, {
                         searchEnabled: false,
                         itemSelectText: '',
@@ -753,40 +738,38 @@
                 });
 
                 // Initialize Bootstrap tooltips
-                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                const tooltipTriggerList = document.querySelectorAll(
+                    '[data-bs-toggle="tooltip"]',
+                );
                 const tooltipList = [...tooltipTriggerList].map(
-                    tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl)
+                    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl),
                 );
 
                 // Handle resolve modal
                 const resolveModal = document.getElementById('resolveModal');
-                const resolveForm = document.getElementById('resolveForm');
-
                 if (resolveModal) {
                     resolveModal.addEventListener('show.bs.modal', function (event) {
                         const button = event.relatedTarget;
-                        const transaksiId = button.getAttribute('data-transaksi-id');
-                        const namaPaket = button.getAttribute('data-nama-paket');
                         const createdBy = button.getAttribute('data-created-by');
+                        const laporanIds = JSON.parse(button.getAttribute('data-laporan-ids') || '[]');
 
-                        document.getElementById('resolveNamaPaket').value = namaPaket;
                         document.getElementById('resolveCreatedBy').value = createdBy;
 
-                        const actionUrl = '{{ route("kepala-dapur.laporan-kekurangan.bulk-resolve") }}';
-                        resolveForm.action = actionUrl;
+                        const form = document.getElementById('resolveForm');
+                        // Remove existing laporan_ids inputs
+                        const existingInputs = form.querySelectorAll('input[name="laporan_ids[]"]');
+                        existingInputs.forEach(input => input.remove());
 
-                        // Add hidden input for transaksi_id
-                        const existingInput = resolveForm.querySelector('input[name="transaksi_ids[]"]');
-                        if (existingInput) {
-                            existingInput.remove();
-                        }
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'transaksi_ids[]';
-                        input.value = transaksiId;
-                        resolveForm.appendChild(input);
+                        // Add new laporan_ids inputs
+                        laporanIds.forEach(id => {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'laporan_ids[]';
+                            input.value = id;
+                            form.appendChild(input);
+                        });
 
-                        // Reset form
+                        // Reset textarea
                         document.getElementById('keterangan_resolve').value = '';
                     });
                 }
@@ -802,9 +785,17 @@
                 function updateBulkSelection() {
                     const checkedBoxes = document.querySelectorAll('.bulk-checkbox:checked');
                     const count = checkedBoxes.length;
+                    let totalLaporan = 0;
+                    const allLaporanIds = [];
+
+                    checkedBoxes.forEach(checkbox => {
+                        const laporanIds = JSON.parse(checkbox.getAttribute('data-laporan-ids') || '[]');
+                        totalLaporan += laporanIds.length;
+                        allLaporanIds.push(...laporanIds);
+                    });
 
                     if (selectedCountSpan) {
-                        selectedCountSpan.textContent = count + ' dipilih';
+                        selectedCountSpan.textContent = count + ' transaksi dipilih (' + totalLaporan + ' laporan)';
                     }
 
                     if (bulkActionSubmit) {
@@ -813,19 +804,19 @@
 
                     if (bulkSelectionInfo) {
                         bulkSelectionInfo.textContent = count > 0 
-                            ? `${count} transaksi dipilih untuk diproses.`
+                            ? `${count} transaksi dipilih (${totalLaporan} laporan kekurangan akan diselesaikan).`
                             : 'Pilih transaksi dari tabel terlebih dahulu.';
                     }
 
-                    // Update hidden input with selected IDs
-                    const existingInputs = bulkActionForm.querySelectorAll('input[name="transaksi_ids[]"]');
+                    // Update hidden inputs with laporan_ids
+                    const existingInputs = bulkActionForm.querySelectorAll('input[name="laporan_ids[]"]');
                     existingInputs.forEach(input => input.remove());
 
-                    checkedBoxes.forEach(checkbox => {
+                    allLaporanIds.forEach(id => {
                         const input = document.createElement('input');
                         input.type = 'hidden';
-                        input.name = 'transaksi_ids[]';
-                        input.value = checkbox.value;
+                        input.name = 'laporan_ids[]';
+                        input.value = id;
                         bulkActionForm.appendChild(input);
                     });
                 }
@@ -845,7 +836,7 @@
 
                 // Auto-hide alerts after 5 seconds
                 const alerts = document.querySelectorAll('.alert-dismissible');
-                alerts.forEach(alert => {
+                alerts.forEach((alert) => {
                     setTimeout(() => {
                         const bsAlert = new bootstrap.Alert(alert);
                         bsAlert.close();

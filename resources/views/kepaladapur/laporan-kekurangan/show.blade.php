@@ -34,33 +34,6 @@
                             Dapur: {{ $currentDapur->nama_dapur ?? "Dapur" }}
                         </p>
                     </div>
-                    <div class="d-flex gap-2">
-                        <a
-                            href="{{ route("kepala-dapur.laporan-kekurangan.export-pdf", $transaksi) }}"
-                            class="btn btn-outline-primary"
-                        >
-                            <i class="bx bx-file me-1"></i>
-                            Export PDF
-                        </a>
-                        <a
-                            href="{{ route("kepala-dapur.laporan-kekurangan.export-csv", $transaksi) }}"
-                            class="btn btn-outline-primary"
-                        >
-                            <i class="bx bx-download me-1"></i>
-                            Export CSV
-                        </a>
-                        @if ($laporan->where("status", "pending")->isNotEmpty())
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#resolveModal"
-                            >
-                                <i class="bx bx-check-double me-1"></i>
-                                Selesaikan
-                            </button>
-                        @endif
-                    </div>
                 </div>
             </div>
         </div>
@@ -92,6 +65,41 @@
                 ></button>
             </div>
         @endif
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Aksi</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-2">
+                    <a
+                        href="{{ route("kepala-dapur.laporan-kekurangan.export-pdf", $transaksi) }}"
+                        class="btn btn-outline-primary"
+                    >
+                        <i class="bx bx-file me-1"></i>
+                        Export PDF
+                    </a>
+                    <a
+                        href="{{ route("kepala-dapur.laporan-kekurangan.export-csv", $transaksi) }}"
+                        class="btn btn-outline-primary"
+                    >
+                        <i class="bx bx-download me-1"></i>
+                        Export CSV
+                    </a>
+                    @if ($laporan->where("status", "pending")->isNotEmpty())
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#resolveModal"
+                        >
+                            <i class="bx bx-check-double me-1"></i>
+                            Selesaikan
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
 
         <!-- Transaction Details -->
         <div class="card mb-4">
