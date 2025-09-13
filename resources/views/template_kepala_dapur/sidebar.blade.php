@@ -277,6 +277,37 @@
                     </li>
                 </ul>
             </li>
+            <!-- Subscription -->
+            <li
+                class="menu-item {{ request()->routeIs("kepala-dapur.subscription.*") ? "active open" : "" }}"
+            >
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                    <div>Subscription</div>
+                </a>
+                <ul class="menu-sub">
+                    <li
+                        class="menu-item {{ request()->routeIs("kepala-dapur.subscription.index") ? "active" : "" }}"
+                    >
+                        <a
+                            href="{{ route("kepala-dapur.subscription.index", request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
+                            class="menu-link"
+                        >
+                            <div>Daftar Request</div>
+                        </a>
+                    </li>
+                    <li
+                        class="menu-item {{ request()->routeIs("kepala-dapur.subscription.create") ? "active" : "" }}"
+                    >
+                        <a
+                            href="{{ route("kepala-dapur.subscription.choose-package", request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
+                            class="menu-link"
+                        >
+                            <div>Buat Request Baru</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
         </ul>
     </div>
 </aside>

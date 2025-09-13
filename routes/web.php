@@ -16,14 +16,18 @@ use App\Http\Controllers\KepalaDapur\UserController as KepalaDapurUserController
 use App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController as KepalaDapurLaporanKekuranganStockController;
 use App\Http\Controllers\KepalaDapur\ApprovalStockItemController as KepalaDapurApprovalStockItemController;
 use App\Http\Controllers\KepalaDapur\ApprovalTransaksiController as KepalaDapurApprovalTransaksiController;
-use App\Http\Controllers\SuperAdmin\ApprovalStockItemController;
+use App\Http\Controllers\KepalaDapur\SubscriptionController;
+// use App\Http\Controllers\SuperAdmin\ApprovalStockItemController;
 use App\Http\Controllers\SuperAdmin\BahanMenuController;
 use App\Http\Controllers\SuperAdmin\DapurController;
 use App\Http\Controllers\SuperAdmin\MenuMakananController;
-use App\Http\Controllers\SuperAdmin\StockItemController;
+use App\Http\Controllers\SuperAdmin\PromoCodeController;
+use App\Http\Controllers\SuperAdmin\SubscriptionPackageController;
+use App\Http\Controllers\SuperAdmin\SubscriptionRequestController;
+// use App\Http\Controllers\SuperAdmin\StockItemController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\TemplateItemController;
-use App\Http\Controllers\SuperAdmin\UserController;
+// use App\Http\Controllers\SuperAdmin\UserController;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -186,6 +190,44 @@ Route::middleware(['auth', 'super.admin.only'])
             Route::put('/menu/{menu}/bulk-update', [BahanMenuController::class, 'bulkUpdate'])->name('bulk-update');
         });
 
+        Route::prefix('subscription-packages')->name('subscription-packages.')->group(function () {
+            Route::get('/', [SubscriptionPackageController::class, 'index'])->name('index');
+            Route::get('/create', [SubscriptionPackageController::class, 'create'])->name('create');
+            Route::post('/', [SubscriptionPackageController::class, 'store'])->name('store');
+            Route::get('/{subscriptionPackage}', [SubscriptionPackageController::class, 'show'])->name('show');
+            Route::get('/{subscriptionPackage}/edit', [SubscriptionPackageController::class, 'edit'])->name('edit');
+            Route::put('/{subscriptionPackage}', [SubscriptionPackageController::class, 'update'])->name('update');
+            Route::delete('/{subscriptionPackage}', [SubscriptionPackageController::class, 'destroy'])->name('destroy');
+            Route::patch('/{subscriptionPackage}/toggle-status', [SubscriptionPackageController::class, 'toggleStatus'])->name('toggle-status');
+        });
+
+        // Promo Codes
+        Route::prefix('promo-codes')->name('promo-codes.')->group(function () {
+            Route::get('/', [PromoCodeController::class, 'index'])->name('index');
+            Route::get('/create', [PromoCodeController::class, 'create'])->name('create');
+            Route::post('/', [PromoCodeController::class, 'store'])->name('store');
+            Route::get('/{promoCode}', [PromoCodeController::class, 'show'])->name('show');
+            Route::get('/{promoCode}/edit', [PromoCodeController::class, 'edit'])->name('edit');
+            Route::put('/{promoCode}', [PromoCodeController::class, 'update'])->name('update');
+            Route::delete('/{promoCode}', [PromoCodeController::class, 'destroy'])->name('destroy');
+            Route::patch('/{promoCode}/toggle-status', [PromoCodeController::class, 'toggleStatus'])->name('toggle-status');
+        });
+
+        // Subscription Requests (Approval)
+        Route::prefix('subscription-requests')->name('subscription-requests.')->group(function () {
+            Route::get('/', [SubscriptionRequestController::class, 'index'])->name('index');
+            Route::get('/pending', [SubscriptionRequestController::class, 'pending'])->name('pending');
+            Route::get('/approved', [SubscriptionRequestController::class, 'approved'])->name('approved');
+            Route::get('/rejected', [SubscriptionRequestController::class, 'rejected'])->name('rejected');
+            Route::get('/{subscriptionRequest}', [SubscriptionRequestController::class, 'show'])->name('show');
+            Route::post('/{subscriptionRequest}/approve', [SubscriptionRequestController::class, 'approve'])->name('approve');
+            Route::post('/{subscriptionRequest}/reject', [SubscriptionRequestController::class, 'reject'])->name('reject');
+            Route::post('/bulk-action', [SubscriptionRequestController::class, 'bulkAction'])->name('bulk-action');
+        });
+
+        // API untuk promo code validation
+        Route::post('/api/validate-promo', [PromoCodeController::class, 'validatePromo'])->name('api.validate-promo');
+
         // Route::prefix('stock-items')->name('stock-items.')->group(function () {
         //     Route::get('/', [StockItemController::class, 'index'])->name('index');
         //     Route::get('/create', [StockItemController::class, 'create'])->name('create');
@@ -239,6 +281,17 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur'])
             Route::post('/{approval}/approve', [KepalaDapurApprovalStockItemController::class, 'approve'])->name('approve');
             Route::post('/{approval}/reject', [KepalaDapurApprovalStockItemController::class, 'reject'])->name('reject');
             Route::post('/bulk-action', [KepalaDapurApprovalStockItemController::class, 'bulkAction'])->name('bulk-action');
+        });
+
+        // Subscription Management
+        Route::prefix('subscription')->name('subscription.')->group(function () {
+            Route::get('/', [SubscriptionController::class, 'index'])->name('index');
+            Route::get('/create', [SubscriptionController::class, 'create'])->name('create');
+            Route::get('/choose-package', [SubscriptionController::class, 'choosePackage'])->name('choose-package');
+            Route::post('/process-payment', [SubscriptionController::class, 'processPayment'])->name('process-payment');
+            Route::post('/calculate-price', [SubscriptionController::class, 'calculatePrice'])->name('calculate-price');
+            Route::get('/{subscriptionRequest}', [SubscriptionController::class, 'show'])->name('show');
+            Route::delete('/{subscriptionRequest}', [SubscriptionController::class, 'cancel'])->name('cancel');
         });
     });
 

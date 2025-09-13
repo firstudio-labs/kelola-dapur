@@ -66,10 +66,65 @@ class Dapur extends Model
         return $this->hasMany(TransaksiDapur::class, 'id_dapur');
     }
 
+
+    public function subscriptionRequests(): HasMany
+    {
+        return $this->hasMany(SubscriptionRequest::class, 'id_dapur');
+    }
+
+    public function activeSubscriptionRequest()
+    {
+        return $this->hasOne(SubscriptionRequest::class, 'id_dapur')
+            ->where('status', 'approved')
+            ->latest('tanggal_approval');
+    }
+
+    public function pendingSubscriptionRequest()
+    {
+        return $this->hasOne(SubscriptionRequest::class, 'id_dapur')
+            ->where('status', 'pending')
+            ->latest('tanggal_request');
+    }
+
     // Helper methods
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->status === 'active' &&
+            ($this->subscription_end === null || $this->subscription_end >= now()->format('Y-m-d'));
+    }
+
+    public function getSubscriptionStatus(): string
+    {
+        if (!$this->subscription_end) {
+            return 'no_subscription';
+        }
+
+        if ($this->subscription_end < now()->format('Y-m-d')) {
+            return 'expired';
+        }
+
+        $daysLeft = now()->diffInDays($this->subscription_end);
+        if ($daysLeft <= 7) {
+            return 'expiring_soon';
+        }
+
+        return 'active';
+    }
+
+    public function getSubscriptionStatusTextAttribute(): string
+    {
+        switch ($this->getSubscriptionStatus()) {
+            case 'no_subscription':
+                return 'Belum Berlangganan';
+            case 'expired':
+                return 'Berlangganan Berakhir';
+            case 'expiring_soon':
+                return 'Akan Berakhir';
+            case 'active':
+                return 'Aktif';
+            default:
+                return 'Unknown';
+        }
     }
 
     public function getLowStockItems(int $threshold = 10)
