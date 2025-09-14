@@ -388,6 +388,36 @@
             let selectedPackage = null;
             let validPromo = null;
 
+            // Get CSRF token
+            function getCSRFToken() {
+                // Try to get from meta tag first
+                const metaTag = document.querySelector(
+                    'meta[name="csrf-token"]',
+                );
+                if (metaTag) {
+                    return metaTag.getAttribute('content');
+                }
+
+                // Fallback: get from form token
+                const formToken = document.querySelector(
+                    'input[name="_token"]',
+                );
+                if (formToken) {
+                    return formToken.value;
+                }
+
+                // Last fallback: get from Laravel global
+                if (
+                    typeof window.Laravel !== 'undefined' &&
+                    window.Laravel.csrfToken
+                ) {
+                    return window.Laravel.csrfToken;
+                }
+
+                console.error('CSRF token not found');
+                return null;
+            }
+
             // Handle package selection
             selectButtons.forEach((btn) => {
                 btn.addEventListener('click', function () {
@@ -435,13 +465,26 @@
                         return;
                     }
 
+                    if (!selectedPackage) {
+                        messageDiv.innerHTML =
+                            '<small class="text-danger">Paket tidak dipilih</small>';
+                        return;
+                    }
+
                     // Show loading
+                    const originalHTML = this.innerHTML;
                     this.innerHTML =
                         '<span class="spinner-border spinner-border-sm me-1"></span>Validasi...';
                     this.disabled = true;
 
                     // Calculate price with current package
-                    calculatePrice(selectedPackage.id, promoCode);
+                    calculatePrice(selectedPackage.id, promoCode).finally(
+                        () => {
+                            // Reset button state
+                            this.innerHTML = originalHTML;
+                            this.disabled = false;
+                        },
+                    );
                 });
 
             // Handle file upload preview
@@ -465,15 +508,23 @@
                 });
 
             function calculatePrice(packageId, promoCode = '') {
-                fetch(
+                const csrfToken = getCSRFToken();
+
+                if (!csrfToken) {
+                    const messageDiv = document.getElementById('promo-message');
+                    messageDiv.innerHTML =
+                        '<small class="text-danger">CSRF token tidak ditemukan</small>';
+                    return Promise.reject('CSRF token not found');
+                }
+
+                return fetch(
                     '{{ route("kepala-dapur.subscription.calculate-price", $dapur) }}',
                     {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document
-                                .querySelector('meta[name="csrf-token"]')
-                                .getAttribute('content'),
+                            'X-CSRF-TOKEN': csrfToken,
+                            Accept: 'application/json',
                         },
                         body: JSON.stringify({
                             id_package: packageId,
@@ -481,12 +532,17 @@
                         }),
                     },
                 )
-                    .then((response) => response.json())
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error(
+                                `HTTP error! status: ${response.status}`,
+                            );
+                        }
+                        return response.json();
+                    })
                     .then((data) => {
                         const messageDiv =
                             document.getElementById('promo-message');
-                        const validateBtn =
-                            document.getElementById('validate-promo');
 
                         if (data.success) {
                             if (data.data.promo_valid && promoCode) {
@@ -494,10 +550,10 @@
                                     code: promoCode,
                                     discount: data.data.diskon,
                                 };
-                                messageDiv.innerHTML = `<small class="text-success">${data.data.promo_message}</small>`;
+                                messageDiv.innerHTML = `<small class="text-success"><i class="bx bx-check-circle me-1"></i>${data.data.promo_message}</small>`;
                             } else if (promoCode && !data.data.promo_valid) {
                                 validPromo = null;
-                                messageDiv.innerHTML = `<small class="text-danger">${data.data.promo_message || 'Kode promo tidak valid'}</small>`;
+                                messageDiv.innerHTML = `<small class="text-danger"><i class="bx bx-x-circle me-1"></i>${data.data.promo_message || 'Kode promo tidak valid'}</small>`;
                             } else {
                                 validPromo = null;
                                 messageDiv.innerHTML = '';
@@ -506,27 +562,19 @@
                             updatePriceCalculation(data.data);
                         } else {
                             messageDiv.innerHTML =
-                                '<small class="text-danger">Gagal memvalidasi kode promo</small>';
+                                '<small class="text-danger"><i class="bx bx-x-circle me-1"></i>Gagal memvalidasi kode promo</small>';
                             validPromo = null;
                             updatePriceCalculation();
                         }
-
-                        // Reset validate button
-                        validateBtn.innerHTML =
-                            '<i class="bx bx-check me-1"></i>Validasi';
-                        validateBtn.disabled = false;
                     })
                     .catch((error) => {
                         console.error('Error:', error);
-                        document.getElementById('promo-message').innerHTML =
-                            '<small class="text-danger">Terjadi kesalahan</small>';
-
-                        // Reset validate button
-                        const validateBtn =
-                            document.getElementById('validate-promo');
-                        validateBtn.innerHTML =
-                            '<i class="bx bx-check me-1"></i>Validasi';
-                        validateBtn.disabled = false;
+                        const messageDiv =
+                            document.getElementById('promo-message');
+                        messageDiv.innerHTML =
+                            '<small class="text-danger"><i class="bx bx-x-circle me-1"></i>Terjadi kesalahan saat validasi</small>';
+                        validPromo = null;
+                        updatePriceCalculation();
                     });
             }
 
@@ -563,6 +611,32 @@
                         document.getElementById('promo-message').innerHTML = '';
                         updatePriceCalculation();
                     }
+                });
+
+            // Auto-convert promo code to uppercase
+            document
+                .getElementById('kode_promo')
+                .addEventListener('keyup', function () {
+                    this.value = this.value.toUpperCase();
+                });
+
+            // Handle enter key on promo input
+            document
+                .getElementById('kode_promo')
+                .addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('validate-promo').click();
+                    }
+                });
+
+            // Clear promo when modal is hidden
+            document
+                .getElementById('paymentModal')
+                .addEventListener('hidden.bs.modal', function () {
+                    document.getElementById('kode_promo').value = '';
+                    document.getElementById('promo-message').innerHTML = '';
+                    validPromo = null;
                 });
         });
     </script>
