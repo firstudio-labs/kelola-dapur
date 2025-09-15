@@ -404,13 +404,13 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="avatar avatar-sm me-2">
+                                                {{-- <div class="avatar avatar-sm me-2">
                                                     <span
                                                         class="avatar-initial rounded-circle bg-label-info"
                                                     >
                                                         {{ strtoupper(substr($transaksiItem->createdBy->nama ?? 'NA', 0, 2)) }}
                                                     </span>
-                                                </div>
+                                                </div> --}}
                                                 <div>
                                                     <span class="fw-medium">
                                                         {{ $transaksiItem->createdBy->nama ?? 'Unknown' }}

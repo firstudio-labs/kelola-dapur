@@ -11,16 +11,71 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use App\Models\Dapur;
 
 class MenuMakananController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $menus = MenuMakanan::with(['bahanMenu.templateItem', 'createdByDapur'])
-            ->orderBy('nama_menu', 'asc')
-            ->paginate(15);
+        // Base query untuk filter (tanpa with, untuk efisiensi count)
+        $baseQuery = MenuMakanan::query();
 
-        return view('ahligizi.menu_makanan.index', compact('menus'));
+        // Search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $baseQuery->where(function ($q) use ($search) {
+                $q->where('nama_menu', 'like', "%{$search}%")
+                    ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->has('status') && $request->status !== 'all') {
+            $baseQuery->where('is_active', $request->status);
+        }
+
+        // Dapur filter
+        if ($request->has('dapur') && $request->dapur !== 'all' && !empty($request->dapur)) {
+            $baseQuery->where('created_by_dapur_id', $request->dapur);
+        }
+
+        // Kategori filter
+        if ($request->has('kategori') && $request->kategori !== 'all' && !empty($request->kategori)) {
+            $baseQuery->where('kategori', $request->kategori);
+        }
+
+        // Query untuk menus dengan relations (untuk display)
+        $menuQuery = clone $baseQuery;
+        $menuQuery->with(['bahanMenu.templateItem', 'createdByDapur']);
+        $menus = $menuQuery->orderBy('nama_menu', 'asc')->paginate(15);
+
+        // Hitung statistik dari baseQuery (total keseluruhan, bukan per halaman)
+        $totalMenus = $baseQuery->count();
+        $activeMenus = $baseQuery->clone()->where('is_active', true)->count();
+        $inactiveMenus = $baseQuery->clone()->where('is_active', false)->count();
+
+        // Category statistics
+        $kategoriStats = [
+            'Karbohidrat' => $baseQuery->clone()->where('kategori', 'Karbohidrat')->count(),
+            'Lauk' => $baseQuery->clone()->where('kategori', 'Lauk')->count(),
+            'Sayur' => $baseQuery->clone()->where('kategori', 'Sayur')->count(),
+            'Tambahan' => $baseQuery->clone()->where('kategori', 'Tambahan')->count(),
+        ];
+
+        // Get all dapur for filter dropdown
+        $dapurs = Dapur::select('id_dapur', 'nama_dapur')
+            ->where('status', 'active')
+            ->orderBy('nama_dapur', 'asc')
+            ->get();
+
+        return view('ahligizi.menu_makanan.index', compact(
+            'menus',
+            'dapurs',
+            'totalMenus',
+            'activeMenus',
+            'inactiveMenus',
+            'kategoriStats'
+        ));
     }
 
     public function create()

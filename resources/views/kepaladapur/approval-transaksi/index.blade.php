@@ -421,15 +421,17 @@
                                             <div
                                                 class="d-flex align-items-center"
                                             >
-                                                <div
+                                                {{--
+                                                    <div
                                                     class="avatar avatar-sm me-2"
-                                                >
-                                                    <span
-                                                        class="avatar-initial rounded-circle bg-label-info"
                                                     >
-                                                        {{ strtoupper(substr($approval->transaksiDapur->createdBy->nama ?? "NA", 0, 2)) }}
+                                                    <span
+                                                    class="avatar-initial rounded-circle bg-label-info"
+                                                    >
+                                                    {{ strtoupper(substr($approval->transaksiDapur->createdBy->nama ?? "NA", 0, 2)) }}
                                                     </span>
-                                                </div>
+                                                    </div>
+                                                --}}
                                                 <div>
                                                     <span class="fw-medium">
                                                         {{ $approval->transaksiDapur->createdBy->nama ?? "Unknown" }}

@@ -94,7 +94,8 @@ class CheckDapurAccess
         return cache()->remember(
             "dapur.{$dapurId}",
             300, // 5 menit
-            fn() => Dapur::where('id_dapur', $dapurId)->where('status', 'active')->first()
+            fn() => Dapur::where('id_dapur', $dapurId)->first()
+            // fn() => Dapur::where('id_dapur', $dapurId)->where('status', 'active')->first()
         );
     }
 

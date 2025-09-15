@@ -144,4 +144,119 @@ class MenuMakanan extends Model
     {
         return $query->where('kategori', $kategori);
     }
+
+    public function scopeByDapur($query, $dapurId)
+    {
+        return $query->where('created_by_dapur_id', $dapurId);
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('nama_menu', 'like', "%{$search}%")
+                ->orWhere('deskripsi', 'like', "%{$search}%");
+        });
+    }
+
+    public static function getMenusByDapur($dapurId, $limit = null)
+    {
+        $query = static::where('created_by_dapur_id', $dapurId)
+            ->with(['bahanMenu.templateItem', 'createdByDapur'])
+            ->orderBy('nama_menu', 'asc');
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
+    }
+
+    public static function getStatsByDapur($dapurId = null)
+    {
+        $query = static::query();
+
+        if ($dapurId) {
+            $query->where('created_by_dapur_id', $dapurId);
+        }
+
+        return [
+            'total' => $query->count(),
+            'active' => $query->where('is_active', true)->count(),
+            'inactive' => $query->where('is_active', false)->count(),
+            'by_category' => [
+                'Karbohidrat' => $query->where('kategori', 'Karbohidrat')->count(),
+                'Lauk' => $query->where('kategori', 'Lauk')->count(),
+                'Sayur' => $query->where('kategori', 'Sayur')->count(),
+                'Tambahan' => $query->where('kategori', 'Tambahan')->count(),
+            ]
+        ];
+    }
+
+    public function getUsageFrequency()
+    {
+        return $this->detailTransaksiDapur()->count();
+    }
+
+    public function canBeProducedInDapur($dapurId): bool
+    {
+        if (!$this->is_active) {
+            return false;
+        }
+
+        // Check if all required ingredients are available in the dapur's stock
+        foreach ($this->bahanMenu as $bahan) {
+            $stockItem = \App\Models\StockItem::where('id_dapur', $dapurId)
+                ->where('id_template_item', $bahan->id_template_item)
+                ->where('jumlah_stock', '>', 0)
+                ->first();
+
+            if (!$stockItem) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function checkStockAvailability(int $jumlahPorsi, int $dapurId): array
+    {
+        $requiredIngredients = $this->calculateRequiredIngredients($jumlahPorsi);
+        $stockAvailability = [];
+        $allAvailable = true;
+        $totalCost = 0;
+
+        foreach ($requiredIngredients as $ingredient) {
+            $stockItem = \App\Models\StockItem::where('id_dapur', $dapurId)
+                ->where('id_template_item', $ingredient['id_template_item'])
+                ->first();
+
+            $available = $stockItem ? $stockItem->jumlah_stock : 0;
+            $needed = $ingredient['total_needed'];
+            $isAvailable = $available >= $needed;
+
+            if (!$isAvailable) {
+                $allAvailable = false;
+            }
+
+            $stockAvailability[] = [
+                'id_template_item' => $ingredient['id_template_item'],
+                'nama_bahan' => $ingredient['nama_bahan'],
+                'satuan' => $ingredient['satuan'],
+                'needed' => $needed,
+                'available' => $available,
+                'is_available' => $isAvailable,
+                'shortage' => $isAvailable ? 0 : ($needed - $available),
+            ];
+        }
+
+        return [
+            'menu_id' => $this->id_menu,
+            'menu_name' => $this->nama_menu,
+            'porsi' => $jumlahPorsi,
+            'all_available' => $allAvailable,
+            'ingredients' => $stockAvailability,
+            'total_ingredients' => count($stockAvailability),
+            'available_ingredients' => count(array_filter($stockAvailability, fn($item) => $item['is_available'])),
+        ];
+    }
 }

@@ -59,7 +59,7 @@ class Kernel extends HttpKernel
         'dapur.access' => \App\Http\Middleware\CheckDapurAccess::class,
         'super.admin.only' => \App\Http\Middleware\SuperAdminOnly::class,
         'dapur.guard' => \App\Http\Middleware\DapurRoleGuard::class,
-        'subscription.active' => \App\Http\Middleware\CheckSubscriptionActive::class,
+        'check.subscription' => \App\Http\Middleware\CheckSubscription::class,
 
         // Extend
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,

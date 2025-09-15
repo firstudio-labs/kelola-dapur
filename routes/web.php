@@ -104,6 +104,49 @@ Route::middleware('auth')->group(function () {
     })->name('api.stock-info');
 
 
+    Route::get('/api/dapur/options', function (Request $request) {
+        $search = $request->get('search', '');
+
+        $dapurs = \App\Models\Dapur::where('status', 'active')
+            ->when($search, function ($query, $search) {
+                return $query->where('nama_dapur', 'like', '%' . $search . '%');
+            })
+            ->select('id_dapur', 'nama_dapur')
+            ->orderBy('nama_dapur', 'asc')
+            ->limit(20)
+            ->get();
+
+        return response()->json($dapurs);
+    })->name('api.dapur.options');
+
+    // Route untuk mendapatkan statistik menu per dapur
+    Route::get('/api/menu-makanan/statistics', function (Request $request) {
+        $dapurId = $request->get('dapur_id');
+
+        $stats = \App\Models\MenuMakanan::getStatsByDapur($dapurId);
+
+        return response()->json($stats);
+    })->name('api.menu-makanan.statistics');
+
+    // Route untuk mendapatkan menu berdasarkan dapur (AJAX)
+    Route::get('/api/menu-makanan/by-dapur/{dapur}', function ($dapurId) {
+        $menus = \App\Models\MenuMakanan::getMenusByDapur($dapurId, 50);
+
+        return response()->json([
+            'success' => true,
+            'data' => $menus->map(function ($menu) {
+                return [
+                    'id' => $menu->id_menu,
+                    'nama_menu' => $menu->nama_menu,
+                    'kategori' => $menu->kategori,
+                    'is_active' => $menu->is_active,
+                    'gambar_url' => $menu->gambar_url,
+                    'total_bahan' => $menu->bahanMenu->count(),
+                    'created_at' => $menu->created_at->format('d M Y')
+                ];
+            })
+        ]);
+    })->name('api.menu-makanan.by-dapur');
     // Kepala Dapur Dashboard
     // Route::middleware(['role:kepala_dapur', 'dapur.access:kepala_dapur'])
     //     ->get('/kepala-dapur/dashboard/{dapur}', [KepalaDapurController::class, 'dashboard'])
@@ -253,15 +296,15 @@ Route::middleware(['auth', 'super.admin.only'])
 
 
 //========== Kepala Dapur Dengan ID Dapur Routes ==========
-Route::middleware(['auth', 'dapur.access:kepala_dapur'])
+Route::middleware(['auth', 'dapur.access:kepala_dapur', 'check.subscription'])
     ->prefix('kepala-dapur/dapur/{dapur}')
     ->name('kepala-dapur.')
     ->group(function () {
 
-        // Dashboard
+        // Dashboard - Always accessible
         Route::get('/dashboard', [KepalaDapurController::class, 'dashboard'])->name('dashboard');
 
-        // Users Management
+        // Users Management - Requires active subscription
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [KepalaDapurUserController::class, 'index'])->name('index');
             Route::get('/create', [KepalaDapurUserController::class, 'create'])->name('create');
@@ -274,7 +317,7 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur'])
             Route::put('/edit-kepala-dapur/', [KepalaDapurUserController::class, 'updateKepalaDapur'])->name('update-kepala-dapur');
         });
 
-        // Approval Stock Item
+        // Approval Stock Item - Requires active subscription
         Route::prefix('approvals')->name('approvals.')->group(function () {
             Route::get('/', [KepalaDapurApprovalStockItemController::class, 'index'])->name('index');
             Route::get('/{approval}', [KepalaDapurApprovalStockItemController::class, 'show'])->name('show');
@@ -283,7 +326,16 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur'])
             Route::post('/bulk-action', [KepalaDapurApprovalStockItemController::class, 'bulkAction'])->name('bulk-action');
         });
 
-        // Subscription Management
+        // Approval Transaksi
+        Route::prefix('approval-transaksi')->name('approval-transaksi.')->group(function () {
+            Route::get('/', [KepalaDapurApprovalTransaksiController::class, 'index'])->name('index');
+            Route::get('/{approval}', [KepalaDapurApprovalTransaksiController::class, 'show'])->name('show');
+            Route::post('/{approval}/setujui', [KepalaDapurApprovalTransaksiController::class, 'approve'])->name('approve');
+            Route::post('/{approval}/tolak', [KepalaDapurApprovalTransaksiController::class, 'reject'])->name('reject');
+            Route::post('/bulk-action', [KepalaDapurApprovalTransaksiController::class, 'bulkAction'])->name('bulk-action');
+        });
+
+        // Subscription Management - Always accessible
         Route::prefix('subscription')->name('subscription.')->group(function () {
             Route::get('/', [SubscriptionController::class, 'index'])->name('index');
             Route::get('/create', [SubscriptionController::class, 'create'])->name('create');
@@ -298,14 +350,15 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur'])
 
 
 //========== Admin Gudang Dengan ID Dapur Routes ==========
-Route::middleware(['auth', 'dapur.access:admin_gudang'])
+Route::middleware(['auth', 'dapur.access:admin_gudang', 'check.subscription'])
     ->prefix('dapur/{dapur}')
     ->name('admin-gudang.')
     ->group(function () {
 
-        // Dashboard
+        // Dashboard - Always accessible
         Route::get('/dashboard', [AdminGudangController::class, 'dashboard'])->name('dashboard');
-        // Stock
+
+        // Stock - Requires active subscription
         Route::prefix('stock')->name('stock.')->group(function () {
             Route::get('/', [AdminGudangStockItemController::class, 'index'])->name('index');
             Route::get('/{stockItem}', [AdminGudangStockItemController::class, 'show'])->name('show');
@@ -317,17 +370,18 @@ Route::middleware(['auth', 'dapur.access:admin_gudang'])
 
 
 //========== Ahli Gizi Dengan ID Dapur Routes ==========
-Route::middleware(['auth', 'dapur.access:ahli_gizi'])
+Route::middleware(['auth', 'dapur.access:ahli_gizi', 'check.subscription'])
     ->prefix('dapur/{dapur}')
     ->name('ahli-gizi.')
-    ->group(function () {});
+    ->group(function () {
+        // Dashboard and routes will be handled by check.subscription middleware
+    });
 
 
 //TODO ========== General Role Check Kepala Dapur Routes  ==========
-Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('kepala-dapur.')->group(function () {
+Route::middleware(['auth', 'role:kepala_dapur', 'check.subscription'])->prefix('kepala-dapur')->name('kepala-dapur.')->group(function () {
 
-
-    // Template Items
+    // Template Items - Requires active subscription
     Route::prefix('template-items')->name('template-items.')->group(function () {
         Route::get('/', [KepalaDapurTemplateItemController::class, 'index'])->name('index');
         Route::get('/create', [KepalaDapurTemplateItemController::class, 'create'])->name('create');
@@ -338,7 +392,8 @@ Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('
         Route::delete('/{templateItem}', [KepalaDapurTemplateItemController::class, 'destroy'])->name('destroy');
         Route::get('/search', [KepalaDapurTemplateItemController::class, 'getTemplateItems'])->name('search');
     });
-    // Menu Makanan
+
+    // Menu Makanan - Requires active subscription
     Route::prefix('menu-makanan')->name('menu-makanan.')->group(function () {
         Route::get('/', [KepalaDapurMenuMakananController::class, 'index'])->name('index');
         Route::get('/{menuMakanan}', [KepalaDapurMenuMakananController::class, 'show'])->name('show');
@@ -346,16 +401,16 @@ Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('
         Route::post('/{menuMakanan}/check-stock', [KepalaDapurMenuMakananController::class, 'checkStock'])->name('check-stock');
     });
 
-    // Approval Paket Menu
-    Route::prefix('approval-transaksi')->name('approval-transaksi.')->group(function () {
-        Route::get('/', [KepalaDapurApprovalTransaksiController::class, 'index'])->name('index');
-        Route::get('/{approval}', [KepalaDapurApprovalTransaksiController::class, 'show'])->name('show');
-        Route::post('/{approval}/setujui', [KepalaDapurApprovalTransaksiController::class, 'approve'])->name('approve');
-        Route::post('/{approval}/tolak', [KepalaDapurApprovalTransaksiController::class, 'reject'])->name('reject');
-        Route::post('/bulk-action', [KepalaDapurApprovalTransaksiController::class, 'bulkAction'])->name('bulk-action');
-    });
+    // Approval Paket Menu - Requires active subscription
+    // Route::prefix('approval-transaksi')->name('approval-transaksi.')->group(function () {
+    //     Route::get('/', [KepalaDapurApprovalTransaksiController::class, 'index'])->name('index');
+    //     Route::get('/{approval}', [KepalaDapurApprovalTransaksiController::class, 'show'])->name('show');
+    //     Route::post('/{approval}/setujui', [KepalaDapurApprovalTransaksiController::class, 'approve'])->name('approve');
+    //     Route::post('/{approval}/tolak', [KepalaDapurApprovalTransaksiController::class, 'reject'])->name('reject');
+    //     Route::post('/bulk-action', [KepalaDapurApprovalTransaksiController::class, 'bulkAction'])->name('bulk-action');
+    // });
 
-    // Laporan Kekurangan Stock 
+    // Laporan Kekurangan Stock - Requires active subscription
     Route::prefix('laporan-kekurangan')->name('laporan-kekurangan.')->group(function () {
         Route::get('/', [KepalaDapurLaporanKekuranganStockController::class, 'index'])->name('index');
         Route::get('/{transaksi}', [KepalaDapurLaporanKekuranganStockController::class, 'show'])->name('show');
@@ -366,6 +421,7 @@ Route::middleware(['auth', 'role:kepala_dapur'])->prefix('kepala-dapur')->name('
         Route::get('/laporan-kekurangan/{transaksi}/export-csv', [KepalaDapurLaporanKekuranganStockController::class, 'exportKekuranganCsv'])->name('export-csv');
     });
 
+    // Profile routes - Always accessible
     Route::get('/edit-profil', [KepalaDapurUserController::class, 'editKepalaDapur'])->name('edit-profil');
     Route::put('/edit-profil', [KepalaDapurUserController::class, 'updateKepalaDapur'])->name('update-profil');
 
@@ -380,11 +436,12 @@ Route::middleware(['auth', 'role:admin_gudang'])->group(function () {
 
 
 //========== General Role Check Routes ==========
-Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-gizi.')->group(function () {
+Route::middleware(['auth', 'role:ahli_gizi', 'check.subscription'])->prefix('ahli-gizi')->name('ahli-gizi.')->group(function () {
 
+    // Dashboard - Always accessible
     Route::get('/dashboard', [AhliGiziController::class, 'dashboard'])->name('dashboard');
 
-    // Menu Makanan 
+    // Menu Makanan - Requires active subscription
     Route::prefix('menu-makanan')->name('menu-makanan.')->group(function () {
         Route::get('/', [AhliGiziMenuMakananController::class, 'index'])->name('index');
         Route::get('/create', [AhliGiziMenuMakananController::class, 'create'])->name('create');
@@ -397,7 +454,7 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
         Route::post('/{menuMakanan}/check-stock', [AhliGiziMenuMakananController::class, 'checkStock'])->name('check-stock');
         Route::get('/menu/{menuMakanan}/detail', [AhliGiziMenuMakananController::class, 'detail'])->name('menu.detail');
 
-        // API Routes AJAX
+        // API Routes AJAX - Requires active subscription
         Route::get('/api/active-menus', [AhliGiziMenuMakananController::class, 'getActiveMenus'])->name('active-menus');
         Route::get('/api/search', [AhliGiziMenuMakananController::class, 'searchMenus'])->name('search-api');
         Route::get('/api/menu/{menuMakanan}/detail', [AhliGiziTransaksiDapurController::class, 'getMenuDetail'])->name('get-menu-detail');
@@ -405,7 +462,7 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
         Route::get('/api/menu/{menu}/bahan', [AhliGiziMenuMakananController::class, 'getIngredientDetails'])->name('api.menu.ingredients');
     });
 
-    // Input Paket Menu 
+    // Input Paket Menu - Requires active subscription
     Route::prefix('input-paket-menu')->name('transaksi.')->group(function () {
         Route::get('/', [AhliGiziTransaksiDapurController::class, 'index'])->name('index');
         Route::get('/buat-paket-baru', [AhliGiziTransaksiDapurController::class, 'create'])->name('create');
@@ -416,7 +473,6 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
         Route::put('/{transaksi}/simpan-porsi-kecil', [AhliGiziTransaksiDapurController::class, 'updatePorsiKecil'])->name('update-porsi-kecil');
         Route::get('/{transaksi}/preview-paket', [AhliGiziTransaksiDapurController::class, 'preview'])->name('preview');
 
-
         Route::post('/{transaksi}/ajukan-persetujuan', [AhliGiziTransaksiDapurController::class, 'submitApproval'])->name('submit-approval');
         Route::post('/{transaksi}/laporkan-kekurangan', [AhliGiziTransaksiDapurController::class, 'createShortageReport'])->name('create-shortage-report');
 
@@ -426,7 +482,7 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
     });
 
 
-    // Laporan Kekurangan Stock
+    // Laporan Kekurangan Stock - Requires active subscription
     Route::prefix('laporan-saya')->name('laporan.')->group(function () {
         Route::get('/', [AhliGiziLaporanController::class, 'index'])->name('index');
         Route::get('/{laporan}/detail', [AhliGiziLaporanController::class, 'show'])->name('show');
@@ -437,7 +493,7 @@ Route::middleware(['auth', 'role:ahli_gizi'])->prefix('ahli-gizi')->name('ahli-g
         Route::get('/ringkasan-dashboard', [AhliGiziLaporanController::class, 'dashboardSummary'])->name('dashboard-summary');
     });
 
-    // ===== MONITORING DAN TRACKING =====
+    // ===== MONITORING DAN TRACKING - Requires active subscription =====
     Route::get('/tracking-paket', [AhliGiziTransaksiDapurController::class, 'trackingStatus'])->name('tracking-status');
     Route::get('/statistik-performa', [AhliGiziLaporanController::class, 'performanceStats'])->name('performance-stats');
 });

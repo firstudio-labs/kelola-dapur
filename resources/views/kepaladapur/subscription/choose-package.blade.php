@@ -92,13 +92,13 @@
                                         <i
                                             class="bx bx-check text-success me-2"
                                         ></i>
-                                        Backup data otomatis
+                                        Tersedia berbagai layanan
                                     </li>
                                     <li class="mb-2">
                                         <i
                                             class="bx bx-check text-success me-2"
                                         ></i>
-                                        Update gratis
+                                        Mulai Sekarang
                                     </li>
                                 </ul>
                             </div>

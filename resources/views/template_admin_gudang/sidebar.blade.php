@@ -23,7 +23,7 @@
             </span>
         </a>
 
-        <!-- Desktop Toggle Button - SAMA SEPERTI KEPALA DAPUR -->
+        <!-- Desktop Toggle Button -->
         <button
             class="btn btn-outline-secondary d-none d-lg-inline-flex layout-menu-toggle"
             id="sidebarToggle"
@@ -72,8 +72,22 @@
                             {{ auth()->user()->nama ?? "Unknown" }}
                         </div>
                         <small class="text-muted">
-                            {{ ucfirst(str_replace("_", " ", auth()->user()->userRole->role_type ?? "Unknown")) }}
+                            {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
                         </small>
+                        @if (session("subscription_status") && session("subscription_status") !== "active")
+                            <small class="text-warning d-block">
+                                <i class="bx bx-warning-alt bx-xs"></i>
+                                @if (session("subscription_status") === "expired")
+                                    Subscription Expired
+                                @elseif (session("subscription_status") === "expiring_soon")
+                                    Expires in
+                                    {{ session("subscription_days_left", 0) }}
+                                    days
+                                @else
+                                    {{ ucfirst(str_replace("_", " ", session("subscription_status"))) }}
+                                @endif
+                            </small>
+                        @endif
                     </div>
                     <i class="bx bx-chevron-up user-chevron"></i>
                 </a>
@@ -95,8 +109,18 @@
                                         {{ auth()->user()->nama ?? "Unknown" }}
                                     </span>
                                     <small class="text-muted">
-                                        {{ ucfirst(str_replace("_", " ", auth()->user()->userRole->role_type ?? "Unknown")) }}
+                                        {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
                                     </small>
+                                    @if (session("subscription_end"))
+                                        <small class="text-info d-block">
+                                            Dapur:
+                                            {{ session("nama_dapur", "Unknown") }}
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            Expires:
+                                            {{ \Carbon\Carbon::parse(session("subscription_end"))->format("d M Y") }}
+                                        </small>
+                                    @endif
                                 </div>
                             </div>
                         </a>
@@ -117,14 +141,53 @@
             </div>
         </div>
 
+        @php
+            $isSubscriptionActive = session("is_subscription_active", false);
+            $subscriptionStatus = session("subscription_status");
+            $idDapur = session("id_dapur");
+        @endphp
+
+        <!-- Subscription Status Alert -->
+        @if (! $isSubscriptionActive && $subscriptionStatus)
+            <div class="px-3 mb-3">
+                <div
+                    class="alert alert-warning alert-dismissible fade show py-2 px-3"
+                    role="alert"
+                    style="font-size: 0.875rem; line-height: 1.2"
+                >
+                    <div class="d-flex align-items-start">
+                        <i class="bx bx-info-circle me-2 mt-1"></i>
+                        <div>
+                            @if ($subscriptionStatus === "expired")
+                                <strong>Subscription Expired!</strong>
+                                <br />
+                                <small>Contact Kepala Dapur to renew</small>
+                            @elseif ($subscriptionStatus === "expiring_soon")
+                                <strong>Subscription Expiring!</strong>
+                                <br />
+                                <small>
+                                    {{ session("subscription_days_left", 0) }}
+                                    days remaining
+                                </small>
+                            @else
+                                <strong>Limited Access</strong>
+                                <br />
+                                <small>Contact Kepala Dapur for renewal</small>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Menu Utama -->
         <ul class="menu-inner py-1 flex-grow-1">
-            <!-- Dashboard -->
+            <!-- Dashboard - Always accessible -->
             <li
-                class="menu-item {{ request()->routeIs("dashboard") ? "active" : "" }}"
+                class="menu-item {{ request()->routeIs("admin-gudang.dashboard") ? "active" : "" }}"
             >
                 <a
-                    href="{{ route("dashboard", request()->route("dapur")) }}"
+                    href="{{ route("admin-gudang.dashboard", ["dapur" => $idDapur]) }}"
                     class="menu-link"
                 >
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -132,32 +195,69 @@
                 </a>
             </li>
 
-            <!-- Admin Gudang Header -->
-            <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">Admin Gudang</span>
-            </li>
+            @if ($isSubscriptionActive)
+                <!-- Admin Gudang Header - Only show when subscription active -->
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text">Admin Gudang</span>
+                </li>
 
-            <!-- Kelola Stok -->
-            <li
-                class="menu-item {{ request()->routeIs("admin-gudang.stock.*") ? "active open" : "" }}"
-            >
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="menu-icon tf-icons bx bx-package"></i>
-                    <div data-i18n="Kelola Stok">Kelola Stok</div>
-                </a>
-                <ul class="menu-sub">
+                <!-- Kelola Stok -->
+                <li
+                    class="menu-item {{ request()->routeIs("admin-gudang.stock.*") ? "active open" : "" }}"
+                >
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons bx bx-package"></i>
+                        <div data-i18n="Kelola Stok">Kelola Stok</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li
+                            class="menu-item {{ request()->routeIs("admin-gudang.stock.index") ? "active" : "" }}"
+                        >
+                            <a
+                                href="{{ route("admin-gudang.stock.index", ["dapur" => $idDapur]) }}"
+                                class="menu-link"
+                            >
+                                <div data-i18n="Daftar Stok">Daftar Stok</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @else
+                <!-- Limited Access Message -->
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text text-warning">
+                        Limited Access
+                    </span>
+                </li>
+
+                <!-- Disabled menu items with tooltips -->
+                @php
+                    $disabledMenus = [
+                        "Kelola Stok" => "bx-package",
+                        "Permintaan Stok" => "bx-list-ul",
+                        "Laporan Stok" => "bx-chart",
+                    ];
+                @endphp
+
+                @foreach ($disabledMenus as $menuName => $icon)
                     <li
-                        class="menu-item {{ request()->routeIs("admin-gudang.stock.index") ? "active" : "" }}"
+                        class="menu-item disabled"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="right"
+                        title="Subscription required to access this feature"
                     >
                         <a
-                            href="{{ route("admin-gudang.stock.index", ["dapur" => request()->route("dapur")]) }}"
-                            class="menu-link"
+                            href="javascript:void(0);"
+                            class="menu-link text-muted"
+                            style="cursor: not-allowed; opacity: 0.6"
                         >
-                            <div data-i18n="Daftar Stok">Daftar Stok</div>
+                            <i class="menu-icon tf-icons bx {{ $icon }}"></i>
+                            <div>{{ $menuName }}</div>
+                            <i class="bx bx-lock-alt ms-auto text-warning"></i>
                         </a>
                     </li>
-                </ul>
-            </li>
+                @endforeach
+            @endif
         </ul>
     </div>
 </aside>
@@ -190,7 +290,7 @@
 ></div>
 
 <style>
-    /* CSS untuk toggle sidebar - IDENTIK DENGAN KEPALA DAPUR */
+    /* CSS untuk toggle sidebar - IDENTICAL TO KEPALA DAPUR */
     .layout-menu {
         transition:
             width 0.3s ease-in-out,
@@ -215,6 +315,43 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         flex-shrink: 0; /* Prevent shrinking */
         min-height: 60px; /* Reduced height for better positioning */
+    }
+
+    /* Disabled menu items styling */
+    .menu-item.disabled .menu-link {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .menu-item.disabled:hover .menu-link {
+        background: transparent !important;
+    }
+
+    /* Subscription warning styling */
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    /* Tooltip styling for disabled items */
+    .tooltip {
+        font-size: 0.875rem;
+    }
+
+    /* Alert styling */
+    .alert {
+        border: 1px solid transparent;
+        border-radius: 0.375rem;
+    }
+
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.3);
+        color: #856404;
     }
 
     /* State ketika sidebar collapsed */
@@ -246,6 +383,11 @@
     .layout-menu.collapsed .user-profile-section .avatar {
         margin: 0;
         transform: scale(1.1); /* Slightly larger avatar for visibility */
+    }
+
+    /* Hide subscription alert when collapsed */
+    .layout-menu.collapsed .alert {
+        display: none;
     }
 
     /* Pastikan user profile section tetap terlihat */
@@ -325,6 +467,11 @@
         .layout-menu.collapsed .app-brand-text,
         .layout-menu.collapsed .menu-header-text,
         .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
+            display: block;
+        }
+
+        /* Show alert in mobile even when collapsed */
+        .layout-menu.collapsed .alert {
             display: block;
         }
 
@@ -421,136 +568,417 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('layout-menu');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const layoutOverlay = document.getElementById('layoutOverlay');
-        const layoutPage =
-            document.querySelector('.layout-page') || document.body;
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('layout-menu');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const layoutOverlay = document.getElementById('layoutOverlay');
+            const layoutPage =
+                document.querySelector('.layout-page') || document.body;
 
-        // Desktop toggle functionality
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', function () {
-                sidebar.classList.toggle('collapsed');
-                layoutPage.classList.toggle('sidebar-collapsed');
+            // Initialize tooltips for disabled menu items
+            if (typeof bootstrap !== 'undefined') {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
 
-                // Simpan state ke localStorage
-                const isCollapsed = sidebar.classList.contains('collapsed');
-                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            // Desktop toggle functionality
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('collapsed');
+                    layoutPage.classList.toggle('sidebar-collapsed');
 
-                // Tutup semua submenu saat sidebar collapsed
-                if (isCollapsed) {
-                    document
-                        .querySelectorAll('.menu-item.open')
-                        .forEach(function (item) {
-                            item.classList.remove('open');
-                        });
-                }
-            });
-        }
+                    // Simpan state ke localStorage
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
 
-        // Hover functionality for desktop
-        if (sidebar) {
-            sidebar.addEventListener('mouseenter', function () {
-                if (window.innerWidth >= 992) {
-                    // Hanya aktif di desktop
-                    sidebar.classList.remove('collapsed');
-                    layoutPage.classList.remove('sidebar-collapsed');
-                }
-            });
-
-            sidebar.addEventListener('mouseleave', function () {
-                if (window.innerWidth >= 992) {
-                    // Hanya aktif di desktop
-                    const savedState = localStorage.getItem('sidebarCollapsed');
-                    if (savedState === 'true') {
-                        sidebar.classList.add('collapsed');
-                        layoutPage.classList.add('sidebar-collapsed');
+                    // Tutup semua submenu saat sidebar collapsed
+                    if (isCollapsed) {
+                        document
+                            .querySelectorAll('.menu-item.open')
+                            .forEach(function (item) {
+                                item.classList.remove('open');
+                            });
                     }
-                }
-            });
-        }
+                });
+            }
 
-        // Mobile toggle functionality
-        if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', function () {
-                sidebar.classList.remove('d-none');
-                sidebar.classList.toggle('show');
-                layoutOverlay.style.display = sidebar.classList.contains('show')
-                    ? 'block'
-                    : 'none';
-            });
-        }
+            // Enhanced hover functionality for desktop with animation
+            if (sidebar) {
+                let hoverTimeout;
+                let isUserCollapsed = false; // Track if user manually collapsed
 
-        // Close mobile menu when clicking overlay
-        if (layoutOverlay) {
-            layoutOverlay.addEventListener('click', function () {
-                sidebar.classList.remove('show');
-                layoutOverlay.style.display = 'none';
-            });
-        }
+                sidebar.addEventListener('mouseenter', function () {
+                    if (window.innerWidth >= 992) { // Only active on desktop
+                        clearTimeout(hoverTimeout);
 
-        // Restore sidebar state from localStorage
-        const savedState = localStorage.getItem('sidebarCollapsed');
-        if (savedState === 'true' && window.innerWidth >= 992) {
-            sidebar.classList.add('collapsed');
-            layoutPage.classList.add('sidebar-collapsed');
-        }
+                        // Check if user manually collapsed
+                        const savedState = localStorage.getItem('sidebarCollapsed');
+                        isUserCollapsed = savedState === 'true';
 
-        // Handle submenu toggles
-        document.querySelectorAll('.menu-toggle').forEach(function (toggle) {
-            toggle.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+                        // Always expand on hover
+                        sidebar.classList.remove('collapsed');
+                        layoutPage.classList.remove('sidebar-collapsed');
+                    }
+                });
 
-                // Jangan buka submenu jika sidebar collapsed
-                if (sidebar.classList.contains('collapsed')) {
-                    return;
-                }
+                sidebar.addEventListener('mouseleave', function () {
+                    if (window.innerWidth >= 992) { // Only active on desktop
+                        // Add delay before collapsing
+                        hoverTimeout = setTimeout(function() {
+                            // Only collapse if user had it collapsed or if it was auto-collapsed
+                            const savedState = localStorage.getItem('sidebarCollapsed');
+                            if (savedState === 'true' || isUserCollapsed) {
+                                sidebar.classList.add('collapsed');
+                                layoutPage.classList.add('sidebar-collapsed');
+                            }
+                        }, 300); // 300ms delay before collapsing
+                    }
+                });
+            }
 
-                const menuItem = this.closest('.menu-item');
-                const isCurrentlyOpen = menuItem.classList.contains('open');
+            // Mobile toggle functionality
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function () {
+                    sidebar.classList.remove('d-none');
+                    sidebar.classList.toggle('show');
+                    layoutOverlay.style.display = sidebar.classList.contains('show')
+                        ? 'block'
+                        : 'none';
+                });
+            }
 
-                // Tutup semua submenu lain di level yang sama
-                const parent = menuItem.parentElement;
-                parent
-                    .querySelectorAll('.menu-item.open')
-                    .forEach(function (openItem) {
-                        if (openItem !== menuItem) {
-                            openItem.classList.remove('open');
-                        }
-                    });
+            // Close mobile menu when clicking overlay
+            if (layoutOverlay) {
+                layoutOverlay.addEventListener('click', function () {
+                    sidebar.classList.remove('show');
+                    layoutOverlay.style.display = 'none';
+                });
+            }
 
-                // Toggle submenu saat ini
-                if (isCurrentlyOpen) {
-                    menuItem.classList.remove('open');
-                } else {
-                    menuItem.classList.add('open');
-                }
-            });
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', function () {
+            // Restore sidebar state from localStorage - Start collapsed by default
+            const savedState = localStorage.getItem('sidebarCollapsed');
             if (window.innerWidth >= 992) {
-                // Desktop mode
-                sidebar.classList.remove('show');
-                layoutOverlay.style.display = 'none';
-                // Terapkan state dari localStorage
-                const savedState = localStorage.getItem('sidebarCollapsed');
-                if (savedState === 'true') {
+                // Default to collapsed state on desktop for hover animation
+                sidebar.classList.add('collapsed');
+                layoutPage.classList.add('sidebar-collapsed');
+
+                // If user previously had it expanded, keep it collapsed but remember the preference
+                if (savedState !== 'false') {
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                }
+            }
+
+            // Handle submenu toggles - only allow when subscription is active
+            document.querySelectorAll('.menu-toggle').forEach(function (toggle) {
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Don't open submenu if sidebar is collapsed (except during hover)
+                    if (sidebar.classList.contains('collapsed') && window.innerWidth >= 992) {
+                        // During hover, sidebar will be expanded, so allow submenu toggle
+                        const isHovering = sidebar.matches(':hover');
+                        if (!isHovering) {
+                            return;
+                        }
+                    }
+
+                    const menuItem = this.closest('.menu-item');
+
+                    // Check if this is a disabled menu item
+                    if (menuItem.classList.contains('disabled')) {
+                        return;
+                    }
+
+                    const isCurrentlyOpen = menuItem.classList.contains('open');
+
+                    // Close all other submenus at the same level
+                    const parent = menuItem.parentElement;
+                    parent
+                        .querySelectorAll('.menu-item.open')
+                        .forEach(function (openItem) {
+                            if (openItem !== menuItem) {
+                                openItem.classList.remove('open');
+                            }
+                        });
+
+                    // Toggle current submenu
+                    if (isCurrentlyOpen) {
+                        menuItem.classList.remove('open');
+                    } else {
+                        menuItem.classList.add('open');
+                    }
+                });
+            });
+
+            // Handle disabled menu item clicks - show notification about contacting Kepala Dapur
+            document.querySelectorAll('.menu-item.disabled .menu-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Show a toast notification about contacting Kepala Dapur
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Access Restricted',
+                            text: 'Subscription has expired. Please contact the Kepala Dapur to renew the subscription.',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#ffc107'
+                        });
+                    } else {
+                        alert('Access is restricted due to expired subscription. Please contact the Kepala Dapur for renewal.');
+                    }
+                });
+            });
+
+            // Auto-show notification if completely expired (optional)
+            const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+            const isSubscriptionActive = {{ $isSubscriptionActive ? "true" : "false" }};
+
+            if (!isSubscriptionActive && subscriptionStatus === 'expired') {
+                // Optional: Show a prominent notification after a delay
+                setTimeout(function() {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Subscription Expired',
+                            text: 'The dapur subscription has expired. Contact the Kepala Dapur to renew and access all features.',
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            backdrop: 'rgba(0,0,0,0.8)'
+                        });
+                    }
+                }, 3000); // Show after 3 seconds
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', function () {
+                if (window.innerWidth >= 992) {
+                    // Desktop mode
+                    sidebar.classList.remove('show');
+                    layoutOverlay.style.display = 'none';
+
+                    // Apply hover-based collapsed state for desktop
                     sidebar.classList.add('collapsed');
                     layoutPage.classList.add('sidebar-collapsed');
                 } else {
+                    // Mobile mode
                     sidebar.classList.remove('collapsed');
                     layoutPage.classList.remove('sidebar-collapsed');
                 }
-            } else {
-                // Mobile mode
-                sidebar.classList.remove('collapsed');
-                layoutPage.classList.remove('sidebar-collapsed');
-            }
+            });
+
+            // Initialize any additional subscription-related functionality
+            initializeSubscriptionFeatures();
         });
+
+        // Function to handle subscription-related features for Admin Gudang
+        function initializeSubscriptionFeatures() {
+            const isSubscriptionActive = {{ $isSubscriptionActive ? "true" : "false" }};
+            const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+
+            // Add warning styles to user profile when subscription issues exist
+            if (subscriptionStatus === 'expiring_soon') {
+                const userProfile = document.querySelector('.user-profile-section .nav-link');
+                if (userProfile) {
+                    userProfile.style.borderLeft = '3px solid #ffc107';
+                }
+            } else if (subscriptionStatus === 'expired') {
+                const userProfile = document.querySelector('.user-profile-section .nav-link');
+                if (userProfile) {
+                    userProfile.style.borderLeft = '3px solid #dc3545';
+                }
+            }
+        }
+
+        // Add CSS keyframes for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse-warning {
+                0% { opacity: 1; }
+                50% { opacity: 0.7; }
+                100% { opacity: 1; }
+            }
+
+            .subscription-expired .menu-link {
+                background: rgba(220, 53, 69, 0.1) !important;
+                border-left: 3px solid #dc3545;
+            }
+
+            .subscription-expiring .menu-link {
+                background: rgba(255, 193, 7, 0.1) !important;
+                border-left: 3px solid #ffc107;
+            }
+
+            /* Enhanced hover animations */
+            .layout-menu {
+                transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .layout-menu .menu-link {
+                transition: all 0.2s ease-in-out;
+            }
+
+            .layout-menu:not(.collapsed) .menu-link:hover {
+                transform: translateX(4px);
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            /* Smooth text reveal animation */
+            .layout-menu.collapsed .app-brand-text,
+            .layout-menu.collapsed .menu-header-text,
+            .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
+                opacity: 0;
+                transform: translateX(-10px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+
+            .layout-menu:not(.collapsed) .app-brand-text,
+            .layout-menu:not(.collapsed) .menu-header-text,
+            .layout-menu:not(.collapsed) .menu-link > div:not(.menu-icon) {
+                opacity: 1;
+                transform: translateX(0);
+                transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+            }
+
+            /* Icon animations */
+            .menu-icon {
+                transition: transform 0.2s ease, color 0.2s ease;
+            }
+
+            .layout-menu:hover .menu-icon {
+                transform: scale(1.05);
+            }
+
+            /* Submenu slide animation */
+            .menu-sub {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+                opacity: 0;
+            }
+
+            .menu-item.open .menu-sub {
+                max-height: 500px;
+                opacity: 1;
+                transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            }
+
+            /* Hover effects for disabled items */
+            .menu-item.disabled:hover {
+                transform: translateX(2px);
+                transition: transform 0.2s ease;
+            }
+
+            /* Badge animations */
+            .badge {
+                animation: badge-pulse 2s infinite;
+            }
+
+            @keyframes badge-pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+
+            /* User profile hover enhancement */
+            .user-profile-section .nav-link {
+                transition: all 0.3s ease;
+            }
+
+            .user-profile-section .nav-link:hover {
+                background: rgba(255, 255, 255, 0.25) !important;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Loading animation for subscription checks */
+            .subscription-loading {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .subscription-loading::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                animation: loading-sweep 1.5s infinite;
+            }
+
+            @keyframes loading-sweep {
+                0% { left: -100%; }
+                100% { left: 100%; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Additional utility functions for Admin Gudang
+    function showSubscriptionNotification() {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Subscription Required',
+                html: `
+                    <div class="text-start">
+                        <p class="mb-3">This feature requires an active subscription.</p>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="p-2 bg-light rounded">
+                                <strong>Current Status:</strong> <span class="text-danger">{{ ucfirst(str_replace("_", " ", $subscriptionStatus ?? "expired")) }}</span>
+                            </div>
+                            <div class="p-2 bg-warning-light rounded">
+                                <i class="bx bx-info-circle me-1"></i>
+                                <strong>Note:</strong> Please contact your Kepala Dapur to renew the subscription.
+                            </div>
+                        </div>
+                    </div>
+                `,
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#ffc107',
+                customClass: {
+                    confirmButton: 'btn btn-warning'
+                }
+            });
+        } else {
+            // Fallback for browsers without SweetAlert
+            alert('This feature requires an active subscription. Please contact your Kepala Dapur to renew the subscription.');
+        }
+    }
+
+    // Export functions for external use
+    window.showSubscriptionNotification = showSubscriptionNotification;
+
+    // Initialize subscription status monitoring for Admin Gudang
+    document.addEventListener('DOMContentLoaded', function() {
+        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+        const daysLeft = {{ session("subscription_days_left", 0) }};
+
+        // Show expiration warning for Admin Gudang users
+        if (subscriptionStatus === 'expiring_soon' && daysLeft <= 5) {
+            setTimeout(function() {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Subscription Expiring Soon!',
+                        html: `
+                            <div class="text-center">
+                                <i class="bx bx-time bx-lg text-warning mb-3"></i>
+                                <p>The dapur subscription expires in <strong>${daysLeft}</strong> day${daysLeft !== 1 ? 's' : ''}.</p>
+                                <p class="text-muted">Please inform the Kepala Dapur to renew before expiration.</p>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#ffc107'
+                    });
+                }
+            }, 3000); // Show after 3 seconds
+        }
     });
 </script>

@@ -68,6 +68,7 @@ class AuthController extends Controller
 
         $user = User::where($loginType, $request->login)
             ->where('is_active', true)
+            ->with(['userRole.dapur'])  // Eager load untuk efisiensi
             ->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
@@ -76,9 +77,14 @@ class AuthController extends Controller
             Auth::login($user, $request->filled('remember'));
             $request->session()->regenerate();
 
+            // Store user session data including id_dapur
+            $this->storeUserSessionData($request, $user);
+
             Log::info('User logged in', [
                 'user_id' => $user->id_user,
                 'username' => $user->username,
+                'role' => $user->userRole ? $user->userRole->role_type : 'no_role',
+                'id_dapur' => $user->userRole ? $user->userRole->id_dapur : null,
                 'ip' => $request->ip(),
             ]);
 
@@ -180,7 +186,7 @@ class AuthController extends Controller
                 'alamat' => trim($request->alamat),
                 'telepon' => trim($request->telepon),
                 'status' => 'active',
-                'subscription_end' => now()->addYear(),
+                'subscription_end' => now()->subDays(1),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -220,10 +226,16 @@ class AuthController extends Controller
                 'username' => $user->username,
                 'email' => $user->email,
                 'dapur_id' => $dapur->id_dapur,
+                'role' => 'kepala_dapur',
                 'ip' => $request->ip(),
             ]);
 
+            // Login user and store session data
             Auth::login($user);
+
+            // Reload user with relationships for session data
+            $user->load(['userRole.dapur']);
+            $this->storeUserSessionData($request, $user);
 
             return redirect()->route('dashboard')
                 ->with('success', 'Registrasi berhasil! Selamat datang di sistem manajemen dapur.');
@@ -259,6 +271,78 @@ class AuthController extends Controller
         return redirect()->route('login')->with('success', 'Anda telah berhasil logout.');
     }
 
+    /**
+     * Store user session data including id_dapur and subscription info
+     */
+    private function storeUserSessionData(Request $request, User $user)
+    {
+        if (!$user->userRole) {
+            return;
+        }
+
+        $sessionData = [
+            'user_id' => $user->id_user,
+            'role_type' => $user->userRole->role_type,
+            'id_dapur' => $user->userRole->id_dapur,
+        ];
+
+        // For non-super admin roles, store dapur and subscription info
+        if ($user->userRole->role_type !== 'super_admin' && $user->userRole->dapur) {
+            $dapur = $user->userRole->dapur;
+
+            $sessionData['dapur_name'] = $dapur->nama_dapur;
+            $sessionData['dapur_status'] = $dapur->status;
+            $sessionData['subscription_end'] = $dapur->subscription_end;
+            $sessionData['subscription_status'] = $dapur->getSubscriptionStatus();
+            $sessionData['is_subscription_active'] = $dapur->isActive();
+        }
+
+        // Store all session data
+        foreach ($sessionData as $key => $value) {
+            $request->session()->put($key, $value);
+        }
+
+        Log::info('User session data stored', [
+            'user_id' => $user->id_user,
+            'session_data' => $sessionData,
+        ]);
+    }
+
+    /**
+     * Update session data when subscription changes
+     */
+    public function updateSubscriptionSession(Request $request, ?int $dapurId = null)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->userRole) {
+            return;
+        }
+
+        // If dapur ID is provided, use it; otherwise use current session dapur
+        $targetDapurId = $dapurId ?: session('id_dapur');
+
+        if (!$targetDapurId) {
+            return;
+        }
+
+        $dapur = Dapur::find($targetDapurId);
+        if (!$dapur) {
+            return;
+        }
+
+        // Update subscription-related session data
+        $request->session()->put('dapur_status', $dapur->status);
+        $request->session()->put('subscription_end', $dapur->subscription_end);
+        $request->session()->put('subscription_status', $dapur->getSubscriptionStatus());
+        $request->session()->put('is_subscription_active', $dapur->isActive());
+
+        Log::info('Subscription session data updated', [
+            'user_id' => $user->id_user,
+            'dapur_id' => $targetDapurId,
+            'subscription_status' => $dapur->getSubscriptionStatus(),
+        ]);
+    }
+
     private function redirectBasedOnRole()
     {
         /** @var \App\Models\User $user */
@@ -282,19 +366,27 @@ class AuthController extends Controller
                 }
                 return redirect()->route('kepala-dapur.dashboard', ['dapur' => $dapurId]);
             case 'admin_gudang':
+                $dapurId = $user->userRole->id_dapur;
+                if ($user->userRole->dapur && $user->userRole->dapur->status !== 'active') {
+                    Auth::logout();
+                    return redirect()->route('login')
+                        ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
+                }
+                return redirect()->route('admin-gudang.dashboard', ['dapur' => $dapurId]);
             case 'ahli_gizi':
                 if ($user->userRole->dapur && $user->userRole->dapur->status !== 'active') {
                     Auth::logout();
                     return redirect()->route('login')
-                        ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi administrator.');
+                        ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
                 }
-                return redirect()->route('dashboard');
+                return redirect()->route('ahli-gizi.dashboard');
             default:
                 Auth::logout();
                 return redirect()->route('login')
-                    ->with('error', 'Role akun Anda tidak valid. Silakan hubungi administrator.');
+                    ->with('error', 'Role akun Anda tidak valid. Silakan hubungi Kepala Dapur anda.');
         }
     }
+
     public function showVerificationForm()
     {
         return view('auth.verify');

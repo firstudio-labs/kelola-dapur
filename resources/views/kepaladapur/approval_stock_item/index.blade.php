@@ -415,15 +415,17 @@
                                             <div
                                                 class="d-flex align-items-center"
                                             >
-                                                <div
+                                                {{--
+                                                    <div
                                                     class="avatar avatar-sm me-2"
-                                                >
-                                                    <span
-                                                        class="avatar-initial rounded-circle bg-label-info"
                                                     >
-                                                        {{ strtoupper(substr($approval->adminGudang->user->nama ?? "AG", 0, 2)) }}
+                                                    <span
+                                                    class="avatar-initial rounded-circle bg-label-info"
+                                                    >
+                                                    {{ strtoupper(substr($approval->adminGudang->user->nama ?? "AG", 0, 2)) }}
                                                     </span>
-                                                </div>
+                                                    </div>
+                                                --}}
                                                 <div>
                                                     <span class="fw-medium">
                                                         {{ $approval->adminGudang->user->nama ?? "Admin Gudang" }}
