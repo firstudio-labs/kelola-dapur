@@ -9,11 +9,14 @@ use App\Models\KepalaDapur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ApprovalStockItemController extends Controller
 {
     public function index(Request $request, Dapur $dapur)
     {
+        $dapurId = $request->query('dapur') ?? session('id_dapur');
+        $dapur = Dapur::findOrFail($dapurId);
         $user = Auth::user();
         $userRole = $user->userRole;
 

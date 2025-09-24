@@ -24,6 +24,94 @@
 
     <!-- Menu Utama -->
     <ul class="menu-inner py-1">
+        <!-- User dropdown -->
+        <div class="user-profile-section mt-3 px-3 pb-3">
+            <div class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a
+                    class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
+                    href="javascript:void(0);"
+                    data-bs-toggle="dropdown"
+                    style="
+                        background: rgba(255, 255, 255, 0.15);
+                        transition: all 0.3s ease;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    "
+                    onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+                >
+                    <div class="avatar avatar-online me-3">
+                        <img
+                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
+                            alt
+                            class="w-px-40 h-auto rounded-circle"
+                        />
+                    </div>
+                    <div class="flex-grow-1 text-start user-info">
+                        <div class="fw-semibold text-black">
+                            {{ auth()->user()->nama ?? "Unknown" }}
+                        </div>
+                        <small class="text-muted">
+                            {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
+                        </small>
+                        @if (session("subscription_status") && session("subscription_status") !== "active")
+                            <small class="text-warning d-block">
+                                <i class="bx bx-warning-alt bx-xs"></i>
+                                @if (session("subscription_status") === "expired")
+                                    Subscription Expired
+                                @elseif (session("subscription_status") === "expiring_soon")
+                                    Expires in
+                                    {{ session("subscription_days_left", 0) }}
+                                    days
+                                @else
+                                    {{ ucfirst(str_replace("_", " ", session("subscription_status"))) }}
+                                @endif
+                            </small>
+                        @endif
+                    </div>
+                    <i class="bx bx-chevron-up user-chevron"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="avatar avatar-online">
+                                        <img
+                                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
+                                            alt
+                                            class="w-px-40 h-auto rounded-circle"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    {{--
+                        <li>
+                        <a
+                        class="dropdown-item"
+                        href="{{ route("kepala-dapur.edit-profil") }}"
+                        >
+                        <i class="bx bx-edit me-2"></i>
+                        <span class="align-middle">Edit Profil</span>
+                        </a>
+                        </li>
+                    --}}
+                    <li>
+                        <form action="{{ route("logout") }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dropdown-item">
+                                <i class="bx bx-power-off me-2"></i>
+                                <span class="align-middle">Log Out</span>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
         <!-- Dashboard -->
         <li
             class="menu-item {{ request()->routeIs("dashboard") ? "active" : "" }}"
@@ -210,57 +298,6 @@
                 </li>
             </ul>
         </li>
-
-        <!-- User dropdown -->
-        <li class="nav-item navbar-dropdown dropdown-user dropdown">
-            <a
-                class="nav-link dropdown-toggle hide-arrow"
-                href="javascript:void(0);"
-                data-bs-toggle="dropdown"
-            >
-                <div class="avatar avatar-online">
-                    <img
-                        src="{{ asset("admin/assets/img/avatars/1.png") }}"
-                        alt
-                        class="w-px-40 h-auto rounded-circle"
-                    />
-                </div>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <a class="dropdown-item" href="#">
-                        <div class="d-flex">
-                            <div class="flex-shrink-0 me-3">
-                                <div class="avatar avatar-online">
-                                    <img
-                                        src="{{ asset("admin/assets/img/avatars/1.png") }}"
-                                        alt
-                                        class="w-px-40 h-auto rounded-circle"
-                                    />
-                                </div>
-                            </div>
-                            <div class="flex-grow-1">
-                                <span class="fw-semibold d-block">
-                                    {{ auth()->user()->name }}
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <div class="dropdown-divider"></div>
-                </li>
-                <li>
-                    <form action="{{ route("logout") }}" method="POST">
-                        @csrf
-                        <button type="submit" class="dropdown-item">
-                            <i class="bx bx-power-off me-2"></i>
-                            <span class="align-middle">Log Out</span>
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </li>
     </ul>
 
     <style>
@@ -370,7 +407,8 @@
         document.addEventListener('DOMContentLoaded', function () {
             const sidebar = document.getElementById('layout-menu');
             const sidebarToggle = document.getElementById('sidebarToggle');
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileMenuToggle =
+                document.getElementById('mobileMenuToggle');
             const layoutOverlay = document.getElementById('layoutOverlay');
             const layoutPage =
                 document.querySelector('.layout-page') || document.body;
@@ -409,7 +447,8 @@
                 sidebar.addEventListener('mouseleave', function () {
                     if (window.innerWidth >= 992) {
                         // Hanya aktif di desktop
-                        const savedState = localStorage.getItem('sidebarCollapsed');
+                        const savedState =
+                            localStorage.getItem('sidebarCollapsed');
                         if (savedState === 'true') {
                             sidebar.classList.add('collapsed');
                             layoutPage.classList.add('sidebar-collapsed');
@@ -423,7 +462,9 @@
                 mobileMenuToggle.addEventListener('click', function () {
                     sidebar.classList.remove('d-none');
                     sidebar.classList.toggle('show');
-                    layoutOverlay.style.display = sidebar.classList.contains('show')
+                    layoutOverlay.style.display = sidebar.classList.contains(
+                        'show',
+                    )
                         ? 'block'
                         : 'none';
                 });
@@ -445,37 +486,40 @@
             }
 
             // Handle submenu toggles
-            document.querySelectorAll('.menu-toggle').forEach(function (toggle) {
-                toggle.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+            document
+                .querySelectorAll('.menu-toggle')
+                .forEach(function (toggle) {
+                    toggle.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
 
-                    // Jangan buka submenu jika sidebar collapsed
-                    if (sidebar.classList.contains('collapsed')) {
-                        return;
-                    }
+                        // Jangan buka submenu jika sidebar collapsed
+                        if (sidebar.classList.contains('collapsed')) {
+                            return;
+                        }
 
-                    const menuItem = this.closest('.menu-item');
-                    const isCurrentlyOpen = menuItem.classList.contains('open');
+                        const menuItem = this.closest('.menu-item');
+                        const isCurrentlyOpen =
+                            menuItem.classList.contains('open');
 
-                    // Tutup semua submenu lain di level yang sama
-                    const parent = menuItem.parentElement;
-                    parent
-                        .querySelectorAll('.menu-item.open')
-                        .forEach(function (openItem) {
-                            if (openItem !== menuItem) {
-                                openItem.classList.remove('open');
-                            }
-                        });
+                        // Tutup semua submenu lain di level yang sama
+                        const parent = menuItem.parentElement;
+                        parent
+                            .querySelectorAll('.menu-item.open')
+                            .forEach(function (openItem) {
+                                if (openItem !== menuItem) {
+                                    openItem.classList.remove('open');
+                                }
+                            });
 
-                    // Toggle submenu saat ini
-                    if (isCurrentlyOpen) {
-                        menuItem.classList.remove('open');
-                    } else {
-                        menuItem.classList.add('open');
-                    }
+                        // Toggle submenu saat ini
+                        if (isCurrentlyOpen) {
+                            menuItem.classList.remove('open');
+                        } else {
+                            menuItem.classList.add('open');
+                        }
+                    });
                 });
-            });
 
             // Handle window resize
             window.addEventListener('resize', function () {

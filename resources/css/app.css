@@ -1,3 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "../../public/play-tailwind-1.0.0/src/css/tailwind.css";
+@import "../../public/play-tailwind-1.0.0/assets/css/animate.css";
+@import "../../public/play-tailwind-1.0.0/assets/css/swiper-bundle.min.css";

@@ -10,10 +10,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Dapur;
 
 class LaporanKekuranganStockController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, Dapur $dapur)
     {
         $user = Auth::user();
         $kepalaDapur = KepalaDapur::whereHas('userRole', function ($query) use ($user) {

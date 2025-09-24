@@ -152,13 +152,13 @@ class StockItemController extends Controller
         }
 
         $request->validate([
-            'jumlah' => 'required|numeric|min:0.1|max:999999.999',
+            'jumlah' => 'required|numeric|min:0.1|max:2000000000',
             'keterangan' => 'nullable|string|max:500'
         ], [
             'jumlah.required' => 'Jumlah harus diisi',
             'jumlah.numeric' => 'Jumlah harus berupa angka',
             'jumlah.min' => 'Jumlah minimal 0.1',
-            'jumlah.max' => 'Jumlah maksimal 999999.999',
+            'jumlah.max' => 'Jumlah maksimal 2000000000',
             'keterangan.max' => 'Keterangan maksimal 500 karakter'
         ]);
 

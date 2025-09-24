@@ -96,15 +96,22 @@
                                     Satuan
                                     <span class="text-danger">*</span>
                                 </label>
-                                <input
-                                    type="text"
+                                <select
                                     name="satuan"
                                     id="satuan"
                                     required
-                                    class="form-control @error("satuan") is-invalid @enderror"
-                                    placeholder="Contoh: kg, liter, pcs"
-                                    value="{{ old("satuan", $templateItem->satuan) }}"
-                                />
+                                    class="form-select @error("satuan") is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Satuan</option>
+                                    @foreach (["kg", "liter", "pcs"] as $satuan)
+                                        <option
+                                            value="{{ $satuan }}"
+                                            {{ old("satuan") == $satuan ? "selected" : "" }}
+                                        >
+                                            {{ ucfirst($satuan) }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 @error("satuan")
                                     <div class="invalid-feedback">
                                         {{ $message }}

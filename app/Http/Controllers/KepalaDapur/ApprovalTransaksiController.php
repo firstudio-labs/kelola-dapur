@@ -17,9 +17,11 @@ use Illuminate\Support\Facades\Log;
 
 class ApprovalTransaksiController extends Controller
 {
-    public function index(Request $request)
+    // UBAH: Tambahkan parameter $dapur
+    public function index(Request $request, $dapur)
     {
-        $dapurId = $request->query('dapur');
+        // UBAH: Gunakan parameter path, bukan query
+        $dapurId = $dapur;
         $dapur = Dapur::findOrFail($dapurId);
 
         $user = Auth::user();
@@ -114,9 +116,11 @@ class ApprovalTransaksiController extends Controller
         return view('kepaladapur.approval-transaksi.index', compact('approvals', 'dapur', 'stats'));
     }
 
-    public function show(Request $request, $approvalId)
+    // UBAH: Tambahkan parameter $dapur
+    public function show(Request $request, $dapur, $approvalId)
     {
-        $dapurId = $request->query('dapur');
+        // UBAH: Gunakan parameter path, bukan query
+        $dapurId = $dapur;
         $dapur = Dapur::findOrFail($dapurId);
 
         $approval = ApprovalTransaksi::with([
@@ -141,9 +145,11 @@ class ApprovalTransaksiController extends Controller
         ));
     }
 
-    public function approve(Request $request, $approvalId)
+    // UBAH: Tambahkan parameter $dapur
+    public function approve(Request $request, $dapur, $approvalId)
     {
-        $dapurId = $request->query('dapur');
+        // UBAH: Gunakan parameter path, bukan query
+        $dapurId = $dapur;
         $dapur = Dapur::findOrFail($dapurId);
         $approval = ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
             $q->where('id_dapur', $dapur->id_dapur);
@@ -186,9 +192,11 @@ class ApprovalTransaksiController extends Controller
         }
     }
 
-    public function reject(Request $request, $approvalId)
+    // UBAH: Tambahkan parameter $dapur
+    public function reject(Request $request, $dapur, $approvalId)
     {
-        $dapurId = $request->query('dapur');
+        // UBAH: Gunakan parameter path, bukan query
+        $dapurId = $dapur;
         $dapur = Dapur::findOrFail($dapurId);
         $approval = ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($dapur) {
             $q->where('id_dapur', $dapur->id_dapur);
@@ -231,6 +239,7 @@ class ApprovalTransaksiController extends Controller
         }
     }
 
+    // Method bulkAction sudah benar - menggunakan $dapurId dari path parameter
     public function bulkAction(Request $request, $dapurId)
     {
         $dapur = Dapur::findOrFail($dapurId);
@@ -331,6 +340,8 @@ class ApprovalTransaksiController extends Controller
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    // Private methods tetap sama
     private function createStockSnapshots(ApprovalTransaksi $approval, Dapur $dapur)
     {
         $existingSnapshots = StockSnapshot::where('id_approval_transaksi', $approval->id_approval_transaksi)->count();

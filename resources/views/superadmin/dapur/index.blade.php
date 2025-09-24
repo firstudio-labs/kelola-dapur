@@ -24,8 +24,12 @@
                         </p>
                     </div>
                     {{--
-                        <a href="{{ route('superadmin.dapur.create') }}" class="btn btn-primary btn-sm">
-                        <i class="bx bx-plus me-1"></i>Tambah Dapur
+                        <a
+                        href="{{ route("superadmin.dapur.create") }}"
+                        class="btn btn-primary btn-sm"
+                        >
+                        <i class="bx bx-plus me-1"></i>
+                        Tambah Dapur
                         </a>
                     --}}
                 </div>
@@ -69,9 +73,7 @@
                     class="row g-3"
                 >
                     <div class="col-md-3">
-                        <label for="search" class="form-label">
-                            Cari Nama Dapur
-                        </label>
+                        <label for="search" class="form-label">Pencarian</label>
                         <div class="input-group">
                             <input
                                 type="text"
@@ -79,78 +81,78 @@
                                 id="search"
                                 value="{{ request("search") }}"
                                 class="form-control"
-                                placeholder="Cari nama dapur..."
+                                placeholder="Cari nama dapur, alamat, wilayah..."
                             />
                             <button
                                 type="button"
                                 class="btn btn-outline-secondary"
-                                onclick="document.getElementById('search').value='';this.form.submit();"
+                                onclick="document.getElementById('search').value='';this.closest('form').submit();"
                             >
                                 <i class="bx bx-x"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    {{--
+                        <div class="col-md-3">
                         <label for="filter_provinsi" class="form-label">
-                            Provinsi
+                        Provinsi
                         </label>
                         <select
-                            name="filter_provinsi"
-                            id="filter_provinsi"
-                            class="choices-select form-select"
+                        name="filter_provinsi"
+                        id="filter_provinsi"
+                        class="form-select"
                         >
-                            <option value="">Semua Provinsi</option>
+                        <option value="">Semua Provinsi</option>
                         </select>
-                    </div>
-                    <div class="col-md-3">
+                        </div>
+                        <div class="col-md-3">
                         <label for="filter_kabupaten" class="form-label">
-                            Kabupaten/Kota
+                        Kabupaten/Kota
                         </label>
                         <select
-                            name="filter_kabupaten"
-                            id="filter_kabupaten"
-                            disabled
-                            class="choices-select form-select"
+                        name="filter_kabupaten"
+                        id="filter_kabupaten"
+                        disabled
+                        class="form-select"
                         >
-                            <option value="">Semua Kabupaten/Kota</option>
+                        <option value="">Semua Kabupaten/Kota</option>
                         </select>
-                    </div>
-                    <div class="col-md-3">
+                        </div>
+                        <div class="col-md-3">
                         <label for="status" class="form-label">Status</label>
-                        <select
-                            name="status"
-                            id="status"
-                            class="choices-select form-select"
+                        <select name="status" id="status" class="form-select">
+                        <option value="">Semua Status</option>
+                        <option
+                        value="active"
+                        {{ request("status") === "active" ? "selected" : "" }}
                         >
-                            <option value="">Semua Status</option>
-                            <option
-                                value="active"
-                                {{ request("status") === "active" ? "selected" : "" }}
-                            >
-                                Aktif
-                            </option>
-                            <option
-                                value="inactive"
-                                {{ request("status") === "inactive" ? "selected" : "" }}
-                            >
-                                Tidak Aktif
-                            </option>
+                        Aktif
+                        </option>
+                        <option
+                        value="inactive"
+                        {{ request("status") === "inactive" ? "selected" : "" }}
+                        >
+                        Tidak Aktif
+                        </option>
                         </select>
-                    </div>
-                    <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                        </div>
+                    --}}
+                    {{--
+                        <div class="col-12 d-flex justify-content-end gap-2 mt-3">
                         @if (request()->hasAny(["search", "filter_provinsi", "filter_kabupaten", "status"]))
-                            <a
-                                href="{{ route("superadmin.dapur.index") }}"
-                                class="btn btn-outline-secondary"
-                            >
-                                Reset Filter
-                            </a>
+                        <a
+                        href="{{ route("superadmin.dapur.index") }}"
+                        class="btn btn-outline-secondary"
+                        >
+                        Reset Filter
+                        </a>
                         @endif
-
+                        
                         <button type="submit" class="btn btn-primary">
-                            Terapkan Filter
+                        Terapkan Filter
                         </button>
-                    </div>
+                        </div>
+                    --}}
                 </form>
             </div>
         </div>
@@ -256,8 +258,10 @@
                             <tbody id="dapur-table-body">
                                 @foreach ($dapurList as $dapur)
                                     <tr
-                                        data-search="{{ strtolower($dapur->nama_dapur . " " . ($dapur->wilayah ?? "")) }}"
+                                        data-search="{{ strtolower($dapur->nama_dapur . " " . $dapur->getFullWilayahAttribute() . " " . $dapur->alamat) }}"
                                         data-status="{{ $dapur->status }}"
+                                        data-provinsi="{{ $dapur->province_name }}"
+                                        data-kabupaten="{{ $dapur->regency_name }}"
                                     >
                                         <td>
                                             {{ $dapurList->firstItem() + $loop->index }}
@@ -281,7 +285,13 @@
                                             </div>
                                         </td>
                                         <td>
-                                            {{ $dapur->wilayah ?? "Wilayah belum diset" }}
+                                            @if ($dapur->getFullWilayahAttribute())
+                                                {{ $dapur->getFullWilayahAttribute() }}
+                                            @else
+                                                <span class="text-muted">
+                                                    Wilayah belum diset
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>
                                             {{ $dapur->alamat ? Str::limit($dapur->alamat, 30) : "-" }}
@@ -307,11 +317,11 @@
                                         </td>
                                         <td>
                                             <div
-                                                class="d-flex justify-content-center gap-2"
+                                                class="d-flex justify-content-center gap-1"
                                             >
                                                 <a
                                                     href="{{ route("superadmin.dapur.show", $dapur) }}"
-                                                    class="btn btn-sm btn-outline-primary btn-icon action-btn"
+                                                    class="btn btn-sm btn-outline-primary action-btn"
                                                     title="Detail"
                                                     data-bs-toggle="tooltip"
                                                     data-bs-placement="top"
@@ -320,7 +330,7 @@
                                                 </a>
                                                 <a
                                                     href="{{ route("superadmin.dapur.edit", $dapur) }}"
-                                                    class="btn btn-sm btn-outline-info btn-icon action-btn"
+                                                    class="btn btn-sm btn-outline-info action-btn"
                                                     title="Edit"
                                                     data-bs-toggle="tooltip"
                                                     data-bs-placement="top"
@@ -337,7 +347,7 @@
                                                         @method("DELETE")
                                                         <button
                                                             type="submit"
-                                                            class="btn btn-sm btn-outline-danger btn-icon action-btn"
+                                                            class="btn btn-sm btn-outline-danger action-btn"
                                                             title="Hapus"
                                                             data-bs-toggle="tooltip"
                                                             data-bs-placement="top"
@@ -349,7 +359,7 @@
                                                     </form>
                                                 @else
                                                     <button
-                                                        class="btn btn-sm btn-outline-secondary btn-icon action-btn disabled"
+                                                        class="btn btn-sm btn-outline-secondary action-btn disabled"
                                                         title="Tidak bisa dihapus karena dapur memiliki staff"
                                                         data-bs-toggle="tooltip"
                                                         data-bs-placement="top"
@@ -375,7 +385,7 @@
                     @endif
                 @else
                     <!-- Empty State -->
-                    <div class="text-center py-6">
+                    <div class="text-center py-5">
                         @if (request()->hasAny(["search", "filter_provinsi", "filter_kabupaten", "status"]))
                             <i class="bx bx-search bx-lg text-muted mb-3"></i>
                             <h5 class="mb-1">Tidak ada hasil</h5>
@@ -410,214 +420,242 @@
         </div>
     </div>
 
-    <!-- Choices.js CSS -->
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
-    />
-
-    <!-- Custom Styling for Action Buttons and Choices.js -->
+    <!-- Custom Styling -->
     <style>
-        .choices__inner {
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            padding: 0.5rem;
-            font-size: 0.875rem;
-        }
-        .choices__list--dropdown {
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        }
-        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+        .form-select:disabled {
             background-color: #f8f9fa;
+            opacity: 0.65;
+            cursor: not-allowed;
         }
-        .choices[data-type*='select-one'] .choices__inner {
-            padding-bottom: 0;
-        }
-        .choices.is-disabled .choices__inner {
-            background-color: #f8f9fa;
-        }
+
         .action-btn {
-            min-width: 40px;
+            min-width: 32px;
             height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition:
-                transform 0.2s ease,
-                opacity 0.2s ease;
+            transition: opacity 0.2s ease;
         }
+
         .action-btn:hover:not(.disabled) {
-            transform: scale(1.1);
-            opacity: 0.9;
+            opacity: 0.8;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
         }
     </style>
 
-    <!-- Choices.js JS -->
-    <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
-
-    <!-- JavaScript for Filters, Client-Side Search, and Tooltips -->
+    <!-- JavaScript for Search and Filters -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Elements
             const provinsiSelect = document.getElementById('filter_provinsi');
             const kabupatenSelect = document.getElementById('filter_kabupaten');
-            const statusSelect = document.getElementById('status');
             const searchInput = document.getElementById('search');
+            const statusSelect = document.getElementById('status');
             const tableBody = document.getElementById('dapur-table-body');
-            const rows = tableBody.getElementsByTagName('tr');
+            const form = document.querySelector('form[method="GET"]');
 
+            // Current values from request
             const currentProvinsi = '{{ request("filter_provinsi") }}';
             const currentKabupaten = '{{ request("filter_kabupaten") }}';
 
-            const provinsiChoices = new Choices(provinsiSelect, {
-                searchEnabled: true,
-                searchPlaceholderValue: 'Cari provinsi...',
-                noResultsText: 'Tidak ada hasil',
-                itemSelectText: '',
-                placeholder: true,
-                placeholderValue: 'Semua Provinsi',
-            });
-
-            const kabupatenChoices = new Choices(kabupatenSelect, {
-                searchEnabled: true,
-                searchPlaceholderValue: 'Cari kabupaten/kota...',
-                noResultsText: 'Tidak ada hasil',
-                itemSelectText: '',
-                placeholder: true,
-                placeholderValue: 'Semua Kabupaten/Kota',
-            });
-
-            const statusChoices = new Choices(statusSelect, {
-                searchEnabled: false,
-                itemSelectText: '',
-                placeholder: true,
-                placeholderValue: 'Semua Status',
-            });
-
-            if (!currentProvinsi) {
-                kabupatenChoices.disable();
+            // Loading state management
+            function setLoading(select, loading) {
+                if (loading) {
+                    const placeholder =
+                        select.querySelector('option[value=""]').textContent;
+                    select.innerHTML = `<option value="">${placeholder} (memuat...)</option>`;
+                    select.disabled = true;
+                } else {
+                    select.disabled = false;
+                }
             }
 
-            loadProvinsi();
+            // Populate select options
+            function populateSelect(select, data, selectedValue = '') {
+                const placeholder = select.dataset.placeholder || 'Pilih...';
+                let options = `<option value="">${placeholder}</option>`;
 
+                data.forEach((item) => {
+                    const selected =
+                        item.name === selectedValue ? 'selected' : '';
+                    options += `<option value="${item.name}" data-code="${item.id}" ${selected}>${item.name}</option>`;
+                });
+
+                select.innerHTML = options;
+            }
+
+            // Load provinces
             async function loadProvinsi() {
                 try {
-                    const response = await fetch('/api/wilayah/provinces');
+                    setLoading(provinsiSelect, true);
+
+                    const response = await fetch('/api/wilayah/provinces', {
+                        headers: { Accept: 'application/json' },
+                    });
+
+                    if (!response.ok)
+                        throw new Error(`HTTP ${response.status}`);
+
                     const result = await response.json();
-
-                    if (result.success && result.data) {
-                        const choices = result.data.map((province) => ({
-                            value: province.name,
-                            label: province.name,
-                            customProperties: { id: province.id },
-                            selected: province.name === currentProvinsi,
-                        }));
-
-                        provinsiChoices.setChoices(
-                            choices,
-                            'value',
-                            'label',
-                            true,
+                    if (!result.success || !Array.isArray(result.data)) {
+                        throw new Error(
+                            result.message || 'Invalid data format',
                         );
+                    }
 
-                        if (currentProvinsi) {
-                            const selectedChoice = choices.find(
-                                (c) => c.value === currentProvinsi,
-                            );
-                            if (
-                                selectedChoice &&
-                                selectedChoice.customProperties
-                            ) {
-                                setTimeout(() => {
-                                    loadKabupaten(
-                                        selectedChoice.customProperties.id,
-                                    );
-                                }, 100);
-                            }
+                    populateSelect(
+                        provinsiSelect,
+                        result.data,
+                        currentProvinsi,
+                    );
+                    setLoading(provinsiSelect, false);
+
+                    // Load kabupaten if province is selected
+                    if (currentProvinsi) {
+                        const selectedOption = provinsiSelect.querySelector(
+                            `option[value="${currentProvinsi}"]`,
+                        );
+                        if (selectedOption && selectedOption.dataset.code) {
+                            await loadKabupaten(selectedOption.dataset.code);
                         }
                     }
                 } catch (error) {
                     console.error('Error loading provinces:', error);
+                    provinsiSelect.innerHTML =
+                        '<option value="">Error loading provinces</option>';
+                    setLoading(provinsiSelect, false);
                 }
             }
 
+            // Load regencies
             async function loadKabupaten(provinceId) {
+                if (!provinceId) return;
+
                 try {
-                    kabupatenChoices.clearStore();
-                    kabupatenChoices.disable();
+                    setLoading(kabupatenSelect, true);
 
                     const response = await fetch(
                         `/api/wilayah/regencies/${provinceId}`,
+                        {
+                            headers: { Accept: 'application/json' },
+                        },
                     );
+
+                    if (!response.ok)
+                        throw new Error(`HTTP ${response.status}`);
+
                     const result = await response.json();
-
-                    if (result.success && result.data) {
-                        const choices = result.data.map((regency) => ({
-                            value: regency.name,
-                            label: regency.name,
-                            selected: regency.name === currentKabupaten,
-                        }));
-
-                        kabupatenChoices.setChoices(
-                            choices,
-                            'value',
-                            'label',
-                            true,
+                    if (!result.success || !Array.isArray(result.data)) {
+                        throw new Error(
+                            result.message || 'Invalid data format',
                         );
-                        kabupatenChoices.enable();
                     }
+
+                    populateSelect(
+                        kabupatenSelect,
+                        result.data,
+                        currentKabupaten,
+                    );
+                    setLoading(kabupatenSelect, false);
                 } catch (error) {
                     console.error('Error loading regencies:', error);
-                    kabupatenChoices.enable();
+                    kabupatenSelect.innerHTML =
+                        '<option value="">Error loading kabupaten</option>';
+                    setLoading(kabupatenSelect, false);
                 }
             }
 
-            provinsiSelect.addEventListener('change', function () {
-                const selectedChoice = provinsiChoices.getValue();
-                if (
-                    selectedChoice &&
-                    selectedChoice.customProperties &&
-                    selectedChoice.customProperties.id
-                ) {
-                    loadKabupaten(selectedChoice.customProperties.id);
-                } else {
-                    kabupatenChoices.clearStore();
-                    kabupatenChoices.disable();
-                }
+            // Real-time search functionality
+            let searchTimeout;
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filterTableRows();
+                }, 300);
             });
 
-            // Client-side search filtering
-            function filterTable() {
-                const searchText = searchInput.value.toLowerCase();
-                const statusValue = statusChoices.getValue(true);
+            // Filter table rows based on search and status
+            function filterTableRows() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const statusValue = statusSelect.value;
+                const rows = tableBody.querySelectorAll('tr');
 
-                Array.from(rows).forEach((row) => {
-                    const searchData = row.getAttribute('data-search');
-                    const statusData = row.getAttribute('data-status');
+                let visibleRows = 0;
 
-                    const matchesSearch = searchText
-                        ? searchData.includes(searchText)
-                        : true;
+                rows.forEach((row) => {
+                    const searchData = row.dataset.search || '';
+                    const statusData = row.dataset.status || '';
+
+                    const matchesSearch =
+                        !searchTerm || searchData.includes(searchTerm);
                     const matchesStatus =
-                        statusValue === '' || statusData === statusValue;
+                        !statusValue || statusData === statusValue;
 
-                    row.style.display =
-                        matchesSearch && matchesStatus ? '' : 'none';
+                    const shouldShow = matchesSearch && matchesStatus;
+                    row.style.display = shouldShow ? '' : 'none';
+
+                    if (shouldShow) visibleRows++;
+                });
+
+                // Update row numbers for visible rows
+                let visibleIndex = 1;
+                rows.forEach((row) => {
+                    if (row.style.display !== 'none') {
+                        const firstCell = row.querySelector('td:first-child');
+                        if (firstCell) {
+                            firstCell.textContent = visibleIndex++;
+                        }
+                    }
                 });
             }
 
-            searchInput.addEventListener('input', filterTable);
-            statusSelect.addEventListener('change', filterTable);
+            // Status filter change
+            statusSelect.addEventListener('change', filterTableRows);
 
-            // Initialize Bootstrap tooltips
+            // Province change handler
+            provinsiSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const provinceCode = selectedOption.dataset.code;
+
+                // Reset kabupaten
+                kabupatenSelect.innerHTML =
+                    '<option value="">Semua Kabupaten/Kota</option>';
+                kabupatenSelect.disabled = !provinceCode;
+
+                if (provinceCode) {
+                    loadKabupaten(provinceCode);
+                }
+            });
+
+            // Store original placeholder text
+            provinsiSelect.dataset.placeholder = 'Semua Provinsi';
+            kabupatenSelect.dataset.placeholder = 'Semua Kabupaten/Kota';
+
+            // Initialize
+            loadProvinsi();
+
+            // Initialize tooltips
             const tooltipTriggerList = document.querySelectorAll(
                 '[data-bs-toggle="tooltip"]',
             );
             const tooltipList = [...tooltipTriggerList].map(
                 (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl),
             );
+
+            // Disable kabupaten initially if no province selected
+            if (!currentProvinsi) {
+                kabupatenSelect.disabled = true;
+            }
         });
     </script>
 @endsection

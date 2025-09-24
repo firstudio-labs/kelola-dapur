@@ -155,13 +155,16 @@ class Dapur extends Model
     // Wilayah helper methods
     public function getFullWilayahAttribute(): string
     {
-        $parts = array_filter([
-            $this->village_name ?: $this->district_name,
+        $parts = [
+            $this->village_name,
+            $this->district_name,
             $this->regency_name,
             $this->province_name
-        ]);
+        ];
 
-        return implode(', ', $parts);
+        // Filter out null or empty values and join with commas
+        $filteredParts = array_filter($parts, fn($part) => !is_null($part) && $part !== '');
+        return $filteredParts ? implode(', ', $filteredParts) : '';
     }
 
     public function getWilayahHierarchyAttribute(): array

@@ -1,475 +1,898 @@
-@extends('template_admin.layout')
+@extends("template_admin.layout")
 
-@section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <nav class="d-flex align-items-center mb-2">
-                                <a href="{{ route('superadmin.dashboard') }}" class="text-muted me-2">
-                                    <i class="bx bx-home-alt me-1"></i>Dashboard
-                                </a>
-                                <i class="bx bx-chevron-right me-2"></i>
-                                <a href="{{ route('superadmin.dapur.index') }}" class="text-muted me-2">
-                                    Kelola Dapur
-                                </a>
-                                <i class="bx bx-chevron-right me-2"></i>
-                                <span class="text-dark">Edit Dapur</span>
-                            </nav>
-                            <h4 class="mb-1">Edit Dapur: {{ $dapur->nama_dapur }}</h4>
-                            <p class="mb-0 text-muted">Perbarui informasi dapur</p>
+@section("content")
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div
+                            class="d-flex justify-content-between align-items-center"
+                        >
+                            <div>
+                                <nav class="d-flex align-items-center mb-2">
+                                    <a
+                                        href="{{ route("superadmin.dashboard") }}"
+                                        class="text-muted me-2"
+                                    >
+                                        <i class="bx bx-home-alt me-1"></i>
+                                        Dashboard
+                                    </a>
+                                    <i class="bx bx-chevron-right me-2"></i>
+                                    <a
+                                        href="{{ route("superadmin.dapur.index") }}"
+                                        class="text-muted me-2"
+                                    >
+                                        Kelola Dapur
+                                    </a>
+                                    <i class="bx bx-chevron-right me-2"></i>
+                                    <span class="text-dark">Edit Dapur</span>
+                                </nav>
+                                <h4 class="mb-1">
+                                    Edit Dapur: {{ $dapur->nama_dapur }}
+                                </h4>
+                                <p class="mb-0 text-muted">
+                                    Perbarui informasi dapur
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible mb-4" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+        <!-- Success/Error Messages -->
+        @if (session("success"))
+            <div
+                class="alert alert-success alert-dismissible mb-4"
+                role="alert"
+            >
+                {{ session("success") }}
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"
+                ></button>
+            </div>
+        @endif
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible mb-4" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+        @if (session("error"))
+            <div class="alert alert-danger alert-dismissible mb-4" role="alert">
+                {{ session("error") }}
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"
+                ></button>
+            </div>
+        @endif
 
-    <!-- Form -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form action="{{ route('superadmin.dapur.update', $dapur) }}" method="POST" class="row g-3">
-                        @csrf
-                        @method('PUT')
+        <!-- Form -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form
+                            action="{{ route("superadmin.dapur.update", $dapur) }}"
+                            method="POST"
+                            class="row g-3"
+                        >
+                            @csrf
+                            @method("PUT")
 
-                        <!-- Nama Dapur -->
-                        <div class="col-12">
-                            <label for="nama_dapur" class="form-label">
-                                Nama Dapur <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="nama_dapur" 
-                                   id="nama_dapur" 
-                                   required
-                                   class="form-control @error('nama_dapur') is-invalid @enderror"
-                                   placeholder="Contoh: Dapur Utama Jakarta"
-                                   value="{{ old('nama_dapur', $dapur->nama_dapur) }}">
-                            @error('nama_dapur')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                            <!-- Hidden fields for wilayah codes -->
+                            <input
+                                type="hidden"
+                                name="province_code"
+                                id="province_code"
+                                value="{{ old("province_code", $dapur->province_code) }}"
+                            />
+                            <input
+                                type="hidden"
+                                name="regency_code"
+                                id="regency_code"
+                                value="{{ old("regency_code", $dapur->regency_code) }}"
+                            />
+                            <input
+                                type="hidden"
+                                name="district_code"
+                                id="district_code"
+                                value="{{ old("district_code", $dapur->district_code) }}"
+                            />
+                            <input
+                                type="hidden"
+                                name="village_code"
+                                id="village_code"
+                                value="{{ old("village_code", $dapur->village_code) }}"
+                            />
 
-                        <!-- Wilayah -->
-                        <div class="col-md-6">
-                            <label for="provinsi" class="form-label">
-                                Provinsi <span class="text-danger">*</span>
-                            </label>
-                            <select name="provinsi" 
-                                    id="provinsi" 
+                            <!-- Nama Dapur -->
+                            <div class="col-12">
+                                <label for="nama_dapur" class="form-label">
+                                    Nama Dapur
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="nama_dapur"
+                                    id="nama_dapur"
                                     required
-                                    class="choices-select form-select @error('provinsi') is-invalid @enderror">
-                                <option value="">Pilih Provinsi</option>
-                            </select>
-                            @error('provinsi')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                                    class="form-control @error("nama_dapur") is-invalid @enderror"
+                                    placeholder="Contoh: Dapur Utama Jakarta"
+                                    value="{{ old("nama_dapur", $dapur->nama_dapur) }}"
+                                />
+                                @error("nama_dapur")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
 
-                        <div class="col-md-6">
-                            <label for="kabupaten_kota" class="form-label">
-                                Kabupaten/Kota <span class="text-danger">*</span>
-                            </label>
-                            <select name="kabupaten_kota" 
-                                    id="kabupaten_kota" 
+                            <!-- Wilayah -->
+                            <div class="col-md-6">
+                                <label for="provinsi" class="form-label">
+                                    Provinsi
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select
+                                    name="provinsi"
+                                    id="provinsi"
+                                    required
+                                    class="form-select @error("provinsi") is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Provinsi</option>
+                                </select>
+                                @error("provinsi")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="kabupaten_kota" class="form-label">
+                                    Kabupaten/Kota
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select
+                                    name="kabupaten_kota"
+                                    id="kabupaten_kota"
                                     required
                                     disabled
-                                    class="choices-select form-select @error('kabupaten_kota') is-invalid @enderror">
-                                <option value="">Pilih Kabupaten/Kota</option>
-                            </select>
-                            @error('kabupaten_kota')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                                    class="form-select @error("kabupaten_kota") is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Kota</option>
+                                </select>
+                                @error("kabupaten_kota")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
 
-                        <!-- Alamat -->
-                        <div class="col-12">
-                            <label for="alamat" class="form-label">
-                                Alamat Lengkap <span class="text-danger">*</span>
-                            </label>
-                            <textarea name="alamat" 
-                                      id="alamat" 
-                                      rows="4"
-                                      required
-                                      class="form-control @error('alamat') is-invalid @enderror"
-                                      placeholder="Masukkan alamat lengkap dapur">{{ old('alamat', $dapur->alamat) }}</textarea>
-                            @error('alamat')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Telepon -->
-                        <div class="col-md-6">
-                            <label for="telepon" class="form-label">
-                                Telepon
-                            </label>
-                            <input type="text" 
-                                   name="telepon" 
-                                   id="telepon"
-                                   class="form-control @error('telepon') is-invalid @enderror"
-                                   placeholder="Contoh: 0211234567"
-                                   value="{{ old('telepon', $dapur->telepon) }}">
-                            @error('telepon')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Nomor telepon dapur (opsional)</small>
-                        </div>
-
-                        <!-- Status -->
-                        <div class="col-md-6">
-                            <label for="status" class="form-label">
-                                Status <span class="text-danger">*</span>
-                            </label>
-                            <select name="status" 
-                                    id="status" 
+                            <div class="col-md-6">
+                                <label for="kecamatan" class="form-label">
+                                    Kecamatan
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select
+                                    name="kecamatan"
+                                    id="kecamatan"
                                     required
-                                    class="form-select @error('status') is-invalid @enderror">
-                                <option value="">Pilih Status</option>
-                                <option value="active" {{ old('status', $dapur->status) === 'active' ? 'selected' : '' }}>Aktif</option>
-                                <option value="inactive" {{ old('status', $dapur->status) === 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
-                            </select>
-                            @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Status dapur dalam sistem</small>
-                        </div>
+                                    disabled
+                                    class="form-select @error("kecamatan") is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Kecamatan</option>
+                                </select>
+                                @error("kecamatan")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
 
-                        <!-- Preview Card -->
-                        <div class="col-12">
-                            <div class="card bg-light mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title mb-3">Preview</h5>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar flex-shrink-0 me-3">
-                                            <span class="avatar-initial rounded bg-label-primary">
-                                                <i class="bx bx-buildings"></i>
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <div class="d-flex align-items-center">
-                                                <h6 class="mb-0" id="preview-nama">
-                                                    {{ old('nama_dapur', $dapur->nama_dapur) }}
-                                                </h6>
-                                                <span class="badge ms-2 bg-label-secondary" id="preview-status-badge">
-                                                    @if(old('status', $dapur->status) === 'active')
-                                                        Aktif
-                                                    @elseif(old('status', $dapur->status) === 'inactive')
-                                                        Tidak Aktif
-                                                    @else
-                                                        Status
-                                                    @endif
+                            <div class="col-md-6">
+                                <label for="kelurahan" class="form-label">
+                                    Kelurahan
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select
+                                    name="kelurahan"
+                                    id="kelurahan"
+                                    required
+                                    disabled
+                                    class="form-select @error("kelurahan") is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Kelurahan</option>
+                                </select>
+                                @error("kelurahan")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- Alamat -->
+                            <div class="col-12">
+                                <label for="alamat" class="form-label">
+                                    Alamat Lengkap
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <textarea
+                                    name="alamat"
+                                    id="alamat"
+                                    rows="4"
+                                    required
+                                    class="form-control @error("alamat") is-invalid @enderror"
+                                    placeholder="Masukkan alamat lengkap dapur"
+                                >
+{{ old("alamat", $dapur->alamat) }}</textarea
+                                >
+                                @error("alamat")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- Telepon -->
+                            <div class="col-md-6">
+                                <label for="telepon" class="form-label">
+                                    Telepon
+                                </label>
+                                <input
+                                    type="text"
+                                    name="telepon"
+                                    id="telepon"
+                                    class="form-control @error("telepon") is-invalid @enderror"
+                                    placeholder="Contoh: 0211234567"
+                                    value="{{ old("telepon", $dapur->telepon) }}"
+                                />
+                                @error("telepon")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+
+                                <small class="text-muted">
+                                    Nomor telepon dapur (opsional)
+                                </small>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">
+                                    Status
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select
+                                    name="status"
+                                    id="status"
+                                    required
+                                    class="form-select @error("status") is-invalid @enderror"
+                                >
+                                    <option value="">Pilih Status</option>
+                                    <option
+                                        value="active"
+                                        {{ old("status", $dapur->status) === "active" ? "selected" : "" }}
+                                    >
+                                        Aktif
+                                    </option>
+                                    <option
+                                        value="inactive"
+                                        {{ old("status", $dapur->status) === "inactive" ? "selected" : "" }}
+                                    >
+                                        Tidak Aktif
+                                    </option>
+                                </select>
+                                @error("status")
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+
+                                <small class="text-muted">
+                                    Status dapur dalam sistem
+                                </small>
+                            </div>
+
+                            <!-- Preview Card -->
+                            <div class="col-12">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">Preview</h5>
+                                        <div class="d-flex align-items-center">
+                                            <div
+                                                class="avatar flex-shrink-0 me-3"
+                                            >
+                                                <span
+                                                    class="avatar-initial rounded bg-label-primary"
+                                                >
+                                                    <i
+                                                        class="bx bx-buildings"
+                                                    ></i>
                                                 </span>
                                             </div>
-                                            <small class="text-muted" id="preview-wilayah">
-                                                {{ old('kabupaten_kota', $dapur->kabupaten_kota) ? old('kabupaten_kota', $dapur->kabupaten_kota) . ', ' . old('provinsi', $dapur->provinsi) : 'Wilayah akan ditampilkan di sini' }}
-                                            </small><br>
-                                            <small class="text-muted" id="preview-alamat">
-                                                {{ old('alamat', $dapur->alamat) ?: 'Alamat akan ditampilkan di sini' }}
-                                            </small><br>
-                                            <small class="text-muted" id="preview-telepon" @if(!old('telepon', $dapur->telepon)) style="display: none;" @endif>
-                                                <i class="bx bx-phone me-1"></i>
-                                                <span id="preview-telepon-text">{{ old('telepon', $dapur->telepon) }}</span>
-                                            </small>
+                                            <div>
+                                                <div
+                                                    class="d-flex align-items-center"
+                                                >
+                                                    <h6
+                                                        class="mb-0"
+                                                        id="preview-nama"
+                                                    >
+                                                        {{ old("nama_dapur", $dapur->nama_dapur) }}
+                                                    </h6>
+                                                    <span
+                                                        class="badge ms-2"
+                                                        id="preview-status-badge"
+                                                    >
+                                                        @if (old("status", $dapur->status) === "active")
+                                                            <span
+                                                                class="badge bg-label-success"
+                                                            >
+                                                                Aktif
+                                                            </span>
+                                                        @elseif (old("status", $dapur->status) === "inactive")
+                                                            <span
+                                                                class="badge bg-label-danger"
+                                                            >
+                                                                Tidak Aktif
+                                                            </span>
+                                                        @else
+                                                            <span
+                                                                class="badge bg-label-secondary"
+                                                            >
+                                                                Status
+                                                            </span>
+                                                        @endif
+                                                    </span>
+                                                </div>
+                                                <small
+                                                    class="text-muted"
+                                                    id="preview-wilayah"
+                                                >
+                                                    {{ $dapur->getFullWilayahAttribute() ?: "Wilayah akan ditampilkan di sini" }}
+                                                </small>
+                                                <br />
+                                                <small
+                                                    class="text-muted"
+                                                    id="preview-alamat"
+                                                >
+                                                    {{ old("alamat", $dapur->alamat) ?: "Alamat akan ditampilkan di sini" }}
+                                                </small>
+                                                <br />
+                                                <small
+                                                    class="text-muted"
+                                                    id="preview-telepon"
+                                                    @if(!old('telepon', $dapur->telepon)) style="display: none;" @endif
+                                                >
+                                                    <i
+                                                        class="bx bx-phone me-1"
+                                                    ></i>
+                                                    <span
+                                                        id="preview-telepon-text"
+                                                    >
+                                                        {{ old("telepon", $dapur->telepon) }}
+                                                    </span>
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Form Actions -->
-                        <div class="col-12 d-flex justify-content-end gap-2">
-                            <a href="{{ route('superadmin.dapur.index') }}" 
-                               class="btn btn-outline-secondary">
-                                Batal
-                            </a>
-                            <button type="submit" 
-                                    class="btn btn-primary">
-                                Perbarui Dapur
-                            </button>
-                        </div>
-                    </form>
+                            <!-- Form Actions -->
+                            <div
+                                class="col-12 d-flex justify-content-end gap-2"
+                            >
+                                <a
+                                    href="{{ route("superadmin.dapur.index") }}"
+                                    class="btn btn-outline-secondary"
+                                >
+                                    Batal
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Perbarui Dapur
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info alert-dismissible" role="alert">
+                    <div class="alert-heading d-flex align-items-center">
+                        <i class="bx bx-info-circle me-2"></i>
+                        <h5 class="mb-0">Tips</h5>
+                    </div>
+                    <ul class="list-disc list-inside mt-2">
+                        <li>
+                            Ketik untuk mencari provinsi, kabupaten/kota,
+                            kecamatan, atau kelurahan
+                        </li>
+                        <li>
+                            Perubahan nama dapur harus tetap unik dalam sistem
+                        </li>
+                        <li>
+                            Jika mengubah wilayah, pilih provinsi, kemudian
+                            kabupaten/kota, kecamatan, dan kelurahan secara
+                            berurutan
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Help Section -->
-    <div class="row">
-        <div class="col-12">
-            <div class="alert alert-info alert-dismissible" role="alert">
-                <div class="alert-heading d-flex align-items-center">
-                    <i class="bx bx-info-circle me-2"></i>
-                    <h5 class="mb-0">Tips</h5>
-                </div>
-                <ul class="list-disc list-inside mt-2">
-                    <li>Ketik untuk mencari provinsi atau kabupaten/kota</li>
-                    <li>Perubahan nama dapur harus tetap unik dalam sistem</li>
-                    <li>Jika mengubah wilayah, pilih provinsi terlebih dahulu kemudian kabupaten/kota</li>
-                    <li>Mengubah status ke "Tidak Aktif" akan menonaktifkan dapur dari sistem</li>
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-</div>
+    @push("scripts")
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get elements
+            const provinsiSelect = document.getElementById('provinsi');
+            const kabupatenSelect = document.getElementById('kabupaten_kota');
+            const kecamatanSelect = document.getElementById('kecamatan');
+            const kelurahanSelect = document.getElementById('kelurahan');
 
-<!-- Choices.js CSS and JS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css">
-<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
+            // Hidden code fields
+            const provinceCodeInput = document.getElementById('province_code');
+            const regencyCodeInput = document.getElementById('regency_code');
+            const districtCodeInput = document.getElementById('district_code');
+            const villageCodeInput = document.getElementById('village_code');
 
-<!-- Custom CSS for Choices.js with Sneat -->
-<style>
-.choices__inner {
-    min-height: 38px;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-}
-.choices__list--dropdown {
-    border-radius: 0.375rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-.choices__item {
-    font-size: 0.875rem;
-}
-.choices__item--selectable.is-highlighted {
-    background-color: #696cff;
-    color: #fff;
-}
-.choices.is-disabled .choices__inner {
-    background-color: #f8f9fa;
-}
-.choices.is-invalid .choices__inner {
-    border-color: #dc3545;
-}
-</style>
+            // Form inputs for preview
+            const namaDapurInput = document.getElementById('nama_dapur');
+            const alamatInput = document.getElementById('alamat');
+            const teleponInput = document.getElementById('telepon');
+            const statusSelect = document.getElementById('status');
 
-<!-- JavaScript for Wilayah API and Live Preview -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const namaDapurInput = document.getElementById('nama_dapur');
-    const alamatInput = document.getElementById('alamat');
-    const teleponInput = document.getElementById('telepon');
-    const statusSelect = document.getElementById('status');
-    const provinsiSelect = document.getElementById('provinsi');
-    const kabupatenSelect = document.getElementById('kabupaten_kota');
-    
-    const previewNama = document.getElementById('preview-nama');
-    const previewWilayah = document.getElementById('preview-wilayah');
-    const previewAlamat = document.getElementById('preview-alamat');
-    const previewTelepon = document.getElementById('preview-telepon');
-    const previewTeleponText = document.getElementById('preview-telepon-text');
-    const previewStatusBadge = document.getElementById('preview-status-badge');
+            // Preview elements
+            const previewNama = document.getElementById('preview-nama');
+            const previewAlamat = document.getElementById('preview-alamat');
+            const previewTelepon = document.getElementById('preview-telepon');
+            const previewTeleponText = document.getElementById(
+                'preview-telepon-text',
+            );
+            const previewStatusBadge = document.getElementById(
+                'preview-status-badge',
+            );
+            const previewWilayah = document.getElementById('preview-wilayah');
 
-    const currentProvinsi = '{{ old("provinsi", $dapur->provinsi ?? "") }}';
-    const currentKabupaten = '{{ old("kabupaten_kota", $dapur->kabupaten_kota ?? "") }}';
+            // Current values from database
+            const currentProvinsi =
+                '{{ old("provinsi", $dapur->province_name ?? "") }}';
+            const currentKabupaten =
+                '{{ old("kabupaten_kota", $dapur->regency_name ?? "") }}';
+            const currentKecamatan =
+                '{{ old("kecamatan", $dapur->district_name ?? "") }}';
+            const currentKelurahan =
+                '{{ old("kelurahan", $dapur->village_name ?? "") }}';
 
-    const provinsiChoices = new Choices(provinsiSelect, {
-        searchEnabled: true,
-        searchPlaceholderValue: 'Ketik untuk mencari provinsi...',
-        noResultsText: 'Tidak ada hasil ditemukan',
-        noChoicesText: 'Tidak ada pilihan tersedia',
-        itemSelectText: 'Klik untuk memilih',
-        allowHTML: false,
-        shouldSort: false,
-        placeholder: true,
-        placeholderValue: 'Pilih Provinsi'
-    });
+            // Loading state manager
+            const LoadingState = {
+                show(select, message = 'Memuat...') {
+                    select.innerHTML = `<option value="">${message}</option>`;
+                    select.disabled = true;
+                },
+                hide(select, placeholder = 'Pilih...') {
+                    if (
+                        select.children.length === 0 ||
+                        (select.children.length === 1 &&
+                            select.children[0].value === '')
+                    ) {
+                        select.innerHTML = `<option value="">${placeholder}</option>`;
+                    }
+                    select.disabled = false;
+                },
+                error(select, message = 'Error loading data') {
+                    select.innerHTML = `<option value="">${message}</option>`;
+                    select.disabled = true;
+                },
+            };
 
-    const kabupatenChoices = new Choices(kabupatenSelect, {
-        searchEnabled: true,
-        searchPlaceholderValue: 'Ketik untuk mencari kabupaten/kota...',
-        noResultsText: 'Tidak ada hasil ditemukan',
-        noChoicesText: 'Pilih provinsi terlebih dahulu',
-        itemSelectText: 'Klik untuk memilih',
-        allowHTML: false,
-        shouldSort: false,
-        placeholder: true,
-        placeholderValue: 'Pilih Kabupaten/Kota'
-    });
+            // API caller with error handling
+            async function callAPI(url, retries = 2) {
+                for (let attempt = 0; attempt < retries; attempt++) {
+                    try {
+                        const response = await fetch(url, {
+                            headers: { Accept: 'application/json' },
+                            timeout: 10000,
+                        });
 
-    kabupatenChoices.disable();
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
 
-    loadProvinsi();
+                        const result = await response.json();
 
-    async function loadProvinsi() {
-        try {
-            const response = await fetch('/api/wilayah/provinces');
-            const result = await response.json();
-            
-            if (result.success && result.data) {
-                const choices = result.data.map(province => ({
-                    value: province.name,
-                    label: province.name,
-                    customProperties: { id: province.id },
-                    selected: province.name === currentProvinsi
-                }));
+                        if (!result.success || !Array.isArray(result.data)) {
+                            throw new Error(
+                                result.message || 'Invalid data format',
+                            );
+                        }
 
-                provinsiChoices.setChoices(choices, 'value', 'label', true);
-
-                if (currentProvinsi) {
-                    const selectedChoice = choices.find(c => c.value === currentProvinsi);
-                    if (selectedChoice && selectedChoice.customProperties) {
-                        setTimeout(() => {
-                            loadKabupaten(selectedChoice.customProperties.id);
-                        }, 100);
+                        return result.data;
+                    } catch (error) {
+                        if (attempt === retries - 1) throw error;
+                        await new Promise((resolve) =>
+                            setTimeout(resolve, 1000 * (attempt + 1)),
+                        );
                     }
                 }
-            } else {
-                throw new Error('Invalid response format');
             }
-        } catch (error) {
-            console.error('Error loading provinces:', error);
-            showErrorMessage('Gagal memuat data provinsi. Silakan refresh halaman.');
-        }
-    }
 
-    async function loadKabupaten(provinceId) {
-        try {
-            kabupatenChoices.clearStore();
-            kabupatenChoices.disable();
+            // Populate select with options
+            function populateSelect(
+                select,
+                data,
+                selectedValue = '',
+                codeField = 'id',
+            ) {
+                const options = data
+                    .map((item) => {
+                        const selected =
+                            item.name === selectedValue ? 'selected' : '';
+                        return `<option value="${item.name}" data-code="${item[codeField]}" ${selected}>${item.name}</option>`;
+                    })
+                    .join('');
 
-            const response = await fetch(`/api/wilayah/regencies/${provinceId}`);
-            const result = await response.json();
-            
-            if (result.success && result.data) {
-                const choices = result.data.map(regency => ({
-                    value: regency.name,
-                    label: regency.name,
-                    selected: regency.name === currentKabupaten
-                }));
+                const placeholder =
+                    select.querySelector('option[value=""]')?.textContent ||
+                    'Pilih...';
+                select.innerHTML = `<option value="">${placeholder}</option>${options}`;
 
-                kabupatenChoices.setChoices(choices, 'value', 'label', true);
-                kabupatenChoices.enable();
-                
-                setTimeout(updateWilayahPreview, 100);
-            } else {
-                throw new Error(result.message || 'Invalid response format');
+                // Update corresponding code field
+                if (selectedValue) {
+                    const selectedOption = select.querySelector(
+                        `option[value="${selectedValue}"]`,
+                    );
+                    if (selectedOption) {
+                        const codeInput = getCodeInput(select.id);
+                        if (codeInput) {
+                            codeInput.value = selectedOption.dataset.code;
+                        }
+                    }
+                }
             }
-        } catch (error) {
-            console.error('Error loading regencies:', error);
-            kabupatenChoices.enable();
-            showErrorMessage('Gagal memuat data kabupaten/kota. Silakan coba lagi.');
-        }
-    }
 
-    function showErrorMessage(message) {
-        let errorDiv = document.getElementById('wilayah-error-message');
-        if (!errorDiv) {
-            errorDiv = document.createElement('div');
-            errorDiv.id = 'wilayah-error-message';
-            errorDiv.className = 'alert alert-danger alert-dismissible mt-3';
-            errorDiv.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
-            provinsiSelect.parentNode.appendChild(errorDiv);
-        } else {
-            errorDiv.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
-        }
-
-        setTimeout(() => {
-            if (errorDiv && errorDiv.parentNode) {
-                errorDiv.parentNode.removeChild(errorDiv);
+            // Get corresponding code input for a select
+            function getCodeInput(selectId) {
+                const mapping = {
+                    provinsi: provinceCodeInput,
+                    kabupaten_kota: regencyCodeInput,
+                    kecamatan: districtCodeInput,
+                    kelurahan: villageCodeInput,
+                };
+                return mapping[selectId];
             }
-        }, 5000);
-    }
 
-    provinsiSelect.addEventListener('change', function() {
-        const selectedChoice = provinsiChoices.getValue();
-        if (selectedChoice && selectedChoice.customProperties && selectedChoice.customProperties.id) {
-            loadKabupaten(selectedChoice.customProperties.id);
-        } else {
-            kabupatenChoices.clearStore();
-            kabupatenChoices.disable();
-            updateWilayahPreview();
-        }
-    });
+            // Reset dependent selects
+            function resetDependentSelects(fromLevel) {
+                const selects = [
+                    kabupatenSelect,
+                    kecamatanSelect,
+                    kelurahanSelect,
+                ];
+                const codes = [
+                    regencyCodeInput,
+                    districtCodeInput,
+                    villageCodeInput,
+                ];
+                const placeholders = [
+                    'Pilih Kabupaten/Kota',
+                    'Pilih Kecamatan',
+                    'Pilih Kelurahan',
+                ];
 
-    kabupatenSelect.addEventListener('change', updateWilayahPreview);
+                let startIndex = 0;
+                if (fromLevel === 'kabupaten') startIndex = 1;
+                if (fromLevel === 'kecamatan') startIndex = 2;
 
-    function updateWilayahPreview() {
-        const provinsiValue = provinsiChoices.getValue();
-        const kabupatenValue = kabupatenChoices.getValue();
-        
-        const provinsi = provinsiValue ? provinsiValue.value : '';
-        const kabupaten = kabupatenValue ? kabupatenValue.value : '';
-        
-        if (kabupaten && provinsi) {
-            previewWilayah.textContent = `${kabupaten}, ${provinsi}`;
-        } else if (provinsi) {
-            previewWilayah.textContent = provinsi;
-        } else {
-            previewWilayah.textContent = 'Wilayah akan ditampilkan di sini';
-        }
-    }
+                for (let i = startIndex; i < selects.length; i++) {
+                    selects[i].innerHTML =
+                        `<option value="">${placeholders[i]}</option>`;
+                    selects[i].disabled = true;
+                    codes[i].value = '';
+                }
 
-    namaDapurInput.addEventListener('input', function() {
-        previewNama.textContent = this.value || 'Nama Dapur';
-    });
+                updateWilayahPreview();
+            }
 
-    alamatInput.addEventListener('input', function() {
-        previewAlamat.textContent = this.value || 'Alamat akan ditampilkan di sini';
-    });
+            // Load provinces
+            async function loadProvinsi() {
+                try {
+                    LoadingState.show(provinsiSelect, 'Memuat provinsi...');
 
-    teleponInput.addEventListener('input', function() {
-        if (this.value) {
-            previewTeleponText.textContent = this.value;
-            previewTelepon.style.display = 'block';
-        } else {
-            previewTelepon.style.display = 'none';
-        }
-    });
+                    const provinces = await callAPI('/api/wilayah/provinces');
+                    populateSelect(provinsiSelect, provinces, currentProvinsi);
 
-    statusSelect.addEventListener('change', function() {
-        if (this.value === 'active') {
-            previewStatusBadge.textContent = 'Aktif';
-            previewStatusBadge.className = 'badge ms-2 bg-label-success';
-        } else if (this.value === 'inactive') {
-            previewStatusBadge.textContent = 'Tidak Aktif';
-            previewStatusBadge.className = 'badge ms-2 bg-label-danger';
-        } else {
-            previewStatusBadge.textContent = 'Status';
-            previewStatusBadge.className = 'badge ms-2 bg-label-secondary';
-        }
-    });
+                    LoadingState.hide(provinsiSelect, 'Pilih Provinsi');
 
-    setTimeout(() => {
-        if (teleponInput.value) {
-            teleponInput.dispatchEvent(new Event('input'));
-        }
-        if (statusSelect.value) {
-            statusSelect.dispatchEvent(new Event('change'));
-        }
-        updateWilayahPreview();
-    }, 100);
+                    // Load kabupaten if province is selected
+                    if (currentProvinsi) {
+                        const selectedOption = provinsiSelect.querySelector(
+                            `option[value="${currentProvinsi}"]`,
+                        );
+                        if (selectedOption) {
+                            await loadKabupaten(selectedOption.dataset.code);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading provinces:', error);
+                    LoadingState.error(provinsiSelect, 'Gagal memuat provinsi');
+                    showErrorMessage(
+                        'Gagal memuat data provinsi. Silakan refresh halaman.',
+                    );
+                }
+            }
 
-    function addErrorStyling() {
-        if (document.querySelector('.invalid-feedback[for="provinsi"]')) {
-            provinsiChoices.containerOuter.element.classList.add('is-invalid');
-        }
-        if (document.querySelector('.invalid-feedback[for="kabupaten_kota"]')) {
-            kabupatenChoices.containerOuter.element.classList.add('is-invalid');
-        }
-    }
+            // Load regencies
+            async function loadKabupaten(provinceId) {
+                if (!provinceId) return;
 
-    setTimeout(addErrorStyling, 100);
-});
-</script>
+                try {
+                    LoadingState.show(kabupatenSelect, 'Memuat kabupaten...');
+                    resetDependentSelects('kabupaten');
+
+                    const regencies = await callAPI(
+                        `/api/wilayah/regencies/${provinceId}`,
+                    );
+                    populateSelect(
+                        kabupatenSelect,
+                        regencies,
+                        currentKabupaten,
+                    );
+
+                    LoadingState.hide(kabupatenSelect, 'Pilih Kabupaten/Kota');
+
+                    // Load kecamatan if regency is selected
+                    if (currentKabupaten) {
+                        const selectedOption = kabupatenSelect.querySelector(
+                            `option[value="${currentKabupaten}"]`,
+                        );
+                        if (selectedOption) {
+                            await loadKecamatan(selectedOption.dataset.code);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading regencies:', error);
+                    LoadingState.error(
+                        kabupatenSelect,
+                        'Gagal memuat kabupaten',
+                    );
+                    showErrorMessage('Gagal memuat data kabupaten/kota.');
+                }
+            }
+
+            // Load districts
+            async function loadKecamatan(regencyId) {
+                if (!regencyId) return;
+
+                try {
+                    LoadingState.show(kecamatanSelect, 'Memuat kecamatan...');
+                    resetDependentSelects('kecamatan');
+
+                    const districts = await callAPI(
+                        `/api/wilayah/districts/${regencyId}`,
+                    );
+                    populateSelect(
+                        kecamatanSelect,
+                        districts,
+                        currentKecamatan,
+                    );
+
+                    LoadingState.hide(kecamatanSelect, 'Pilih Kecamatan');
+
+                    // Load kelurahan if district is selected
+                    if (currentKecamatan) {
+                        const selectedOption = kecamatanSelect.querySelector(
+                            `option[value="${currentKecamatan}"]`,
+                        );
+                        if (selectedOption) {
+                            await loadKelurahan(selectedOption.dataset.code);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading districts:', error);
+                    LoadingState.error(
+                        kecamatanSelect,
+                        'Gagal memuat kecamatan',
+                    );
+                    showErrorMessage('Gagal memuat data kecamatan.');
+                }
+            }
+
+            // Load villages
+            async function loadKelurahan(districtId) {
+                if (!districtId) return;
+
+                try {
+                    LoadingState.show(kelurahanSelect, 'Memuat kelurahan...');
+
+                    const villages = await callAPI(
+                        `/api/wilayah/villages/${districtId}`,
+                    );
+                    populateSelect(kelurahanSelect, villages, currentKelurahan);
+
+                    LoadingState.hide(kelurahanSelect, 'Pilih Kelurahan');
+                } catch (error) {
+                    console.error('Error loading villages:', error);
+                    LoadingState.error(
+                        kelurahanSelect,
+                        'Gagal memuat kelurahan',
+                    );
+                    showErrorMessage('Gagal memuat data kelurahan.');
+                }
+            }
+
+            // Show error message
+            function showErrorMessage(message) {
+                let errorDiv = document.getElementById('wilayah-error-message');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.id = 'wilayah-error-message';
+                    errorDiv.className =
+                        'alert alert-danger alert-dismissible mt-3';
+                    errorDiv.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+                    provinsiSelect.parentNode.appendChild(errorDiv);
+                } else {
+                    errorDiv.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+                }
+
+                setTimeout(() => {
+                    if (errorDiv && errorDiv.parentNode) {
+                        errorDiv.parentNode.removeChild(errorDiv);
+                    }
+                }, 5000);
+            }
+
+            // Update wilayah preview
+            function updateWilayahPreview() {
+                const parts = [
+                    kelurahanSelect.value,
+                    kecamatanSelect.value,
+                    kabupatenSelect.value,
+                    provinsiSelect.value,
+                ].filter((part) => part);
+
+                previewWilayah.textContent =
+                    parts.length > 0
+                        ? parts.join(', ')
+                        : 'Wilayah akan ditampilkan di sini';
+            }
+
+            // Event listeners for cascading dropdowns
+            provinsiSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const provinceCode = selectedOption.dataset.code || '';
+
+                provinceCodeInput.value = provinceCode;
+                resetDependentSelects('provinsi');
+
+                if (provinceCode) {
+                    loadKabupaten(provinceCode);
+                }
+                updateWilayahPreview();
+            });
+
+            kabupatenSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const regencyCode = selectedOption.dataset.code || '';
+
+                regencyCodeInput.value = regencyCode;
+                resetDependentSelects('kabupaten');
+
+                if (regencyCode) {
+                    loadKecamatan(regencyCode);
+                }
+                updateWilayahPreview();
+            });
+
+            kecamatanSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const districtCode = selectedOption.dataset.code || '';
+
+                districtCodeInput.value = districtCode;
+                resetDependentSelects('kecamatan');
+
+                if (districtCode) {
+                    loadKelurahan(districtCode);
+                }
+                updateWilayahPreview();
+            });
+
+            kelurahanSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const villageCode = selectedOption.dataset.code || '';
+
+                villageCodeInput.value = villageCode;
+                updateWilayahPreview();
+            });
+
+            // Live preview updates for other fields
+            namaDapurInput.addEventListener('input', function () {
+                previewNama.textContent = this.value || 'Nama Dapur';
+            });
+
+            alamatInput.addEventListener('input', function () {
+                previewAlamat.textContent =
+                    this.value || 'Alamat akan ditampilkan di sini';
+            });
+
+            teleponInput.addEventListener('input', function () {
+                if (this.value) {
+                    previewTeleponText.textContent = this.value;
+                    previewTelepon.style.display = 'block';
+                } else {
+                    previewTelepon.style.display = 'none';
+                }
+            });
+
+            statusSelect.addEventListener('change', function () {
+                const badgeClasses = {
+                    active: 'bg-label-success',
+                    inactive: 'bg-label-danger',
+                };
+
+                const statusTexts = {
+                    active: 'Aktif',
+                    inactive: 'Tidak Aktif',
+                };
+
+                if (this.value && badgeClasses[this.value]) {
+                    previewStatusBadge.innerHTML = `<span class="badge ${badgeClasses[this.value]}">${statusTexts[this.value]}</span>`;
+                } else {
+                    previewStatusBadge.innerHTML =
+                        '<span class="badge bg-label-secondary">Status</span>';
+                }
+            });
+
+            // Initialize everything
+            async function initialize() {
+                // Set initial preview values
+                if (teleponInput.value) {
+                    teleponInput.dispatchEvent(new Event('input'));
+                }
+                if (statusSelect.value) {
+                    statusSelect.dispatchEvent(new Event('change'));
+                }
+
+                // Load provinces and cascade down
+                await loadProvinsi();
+
+                // Update initial preview
+                updateWilayahPreview();
+
+                // Apply error styling if validation errors exist
+                [
+                    'provinsi',
+                    'kabupaten_kota',
+                    'kecamatan',
+                    'kelurahan',
+                ].forEach((field) => {
+                    const select = document.getElementById(field);
+                    const errorDiv =
+                        select.parentNode.querySelector('.invalid-feedback');
+                    if (errorDiv) {
+                        select.classList.add('is-invalid');
+                    }
+                });
+            }
+
+            // Start initialization
+            initialize().catch((error) => {
+                console.error('Initialization error:', error);
+                showErrorMessage(
+                    'Terjadi kesalahan saat memuat halaman. Silakan refresh halaman.',
+                );
+            });
+        });
+    </script>
 @endsection

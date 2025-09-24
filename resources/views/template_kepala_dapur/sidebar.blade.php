@@ -1,7 +1,4 @@
-<aside
-    id="layout-menu"
-    class="layout-menu menu-vertical menu bg-menu-theme d-none d-lg-block"
->
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <!-- Brand + Toggle -->
     <div
         class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2"
@@ -22,10 +19,29 @@
                 Kepala Dapur
             </span>
         </a>
+
+        <!-- Desktop Toggle Button -->
+        <button
+            class="btn btn-outline-secondary d-none d-lg-inline-flex layout-menu-toggle"
+            id="sidebarToggle"
+            style="
+                border: none;
+                background: transparent;
+                color: inherit;
+                width: 32px;
+                height: 32px;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease-in-out;
+            "
+        >
+            <i class="bx bx-chevron-left bx-sm"></i>
+        </button>
     </div>
 
     <!-- Menu Container with flex layout -->
-    <div class="menu-container d-flex flex-column h-100">
+    <div class="menu-container d-flex flex-column">
         <!-- User Profile Section - Moved to Top of Menu -->
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
@@ -95,7 +111,7 @@
                                     @if (session("subscription_end"))
                                         <small class="text-info d-block">
                                             Dapur:
-                                            {{ session("nama_dapur", "Unknown") }}
+                                            {{ session("dapur_name") ?? "Tidak Tersedia" }}
                                         </small>
                                         <small class="text-muted d-block">
                                             Expires:
@@ -292,6 +308,18 @@
                     </ul>
                 </li>
 
+                <!-- Kelola Stok -->
+                <li
+                    class="menu-item {{ request()->routeIs("kepala-dapur.stock.*") ? "active" : "" }}"
+                >
+                    <a
+                        href="{{ route("kepala-dapur.stock.index", ["dapur" => $idDapur]) }}"
+                        class="menu-link"
+                    >
+                        <i class="menu-icon tf-icons bx bx-food-menu"></i>
+                        <div data-i18n="Kelola Stok">Kelola Stok</div>
+                    </a>
+                </li>
                 <!-- Kelola Menu Makanan -->
                 <li
                     class="menu-item {{ request()->routeIs("kepala-dapur.menu-makanan.*") ? "active" : "" }}"
@@ -462,9 +490,71 @@
     style="display: none"
 ></div>
 
+<!-- Subscription Expired Modal -->
+<div
+    class="modal fade"
+    id="subscriptionExpiredModal"
+    tabindex="-1"
+    aria-labelledby="subscriptionExpiredModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div
+            class="modal-content border-0 shadow-lg"
+            style="border-radius: 0.5rem; overflow: hidden"
+        >
+            <div class="modal-header bg-gradient-danger text-white p-4">
+                <div class="d-flex align-items-center">
+                    <i class="bx bx-error-circle bx-md me-3"></i>
+                    <h5
+                        class="modal-title mb-0"
+                        id="subscriptionExpiredModalLabel"
+                    >
+                        Subscription Expired
+                    </h5>
+                </div>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <i
+                        class="bx bx-time-five bx-lg text-danger mb-3 animate__animated animate__pulse animate__infinite"
+                    ></i>
+                    <h6 class="fw-semibold">
+                        Your Dapur Subscription Has Expired
+                    </h6>
+                    <p class="text-muted mb-0">
+                        To regain full access to all features, please renew your
+                        subscription.
+                    </p>
+                </div>
+                <div
+                    class="alert alert-info bg-light-info border-0 d-flex align-items-center justify-content-center p-3"
+                    role="alert"
+                >
+                    <i class="bx bx-info-circle me-2"></i>
+                    <small>
+                        Renew subscribe now to continue managing your kitchen!
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3 justify-content-center">
+                <button
+                    type="button"
+                    class="btn btn-primary px-4"
+                    data-bs-dismiss="modal"
+                >
+                    Understood
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     /* CSS untuk toggle sidebar */
     .layout-menu {
+        display: flex;
+        flex-direction: column;
         transition:
             width 0.3s ease-in-out,
             transform 0.3s ease-in-out;
@@ -474,23 +564,51 @@
         height: 100vh;
         width: 260px;
         z-index: 1045;
+        overflow: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
-    /* Menu container styling */
+    .layout-menu::-webkit-scrollbar {
+        display: none;
+    }
+
+    .app-brand {
+        flex-shrink: 0;
+    }
+
     .menu-container {
-        height: calc(100vh - 80px); /* Adjust based on brand height */
-        min-height: 500px; /* Ensure minimum height */
-        overflow-y: auto; /* Allow scrolling if content is too long */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
-    /* User profile section styling */
+    .menu-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .menu-inner {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-bottom: 50px; /* Diperbesar padding-bottom agar scroll lebih luas ke bawah */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .menu-inner::-webkit-scrollbar {
+        display: none;
+    }
+
     .user-profile-section {
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        flex-shrink: 0; /* Prevent shrinking */
-        min-height: 60px; /* Reduced height for better positioning */
+        flex-shrink: 0;
+        min-height: 60px;
     }
 
-    /* Disabled menu items styling */
     .menu-item.disabled .menu-link {
         pointer-events: none;
         opacity: 0.6;
@@ -500,7 +618,6 @@
         background: transparent !important;
     }
 
-    /* Subscription warning styling */
     .text-warning {
         color: #ffc107 !important;
     }
@@ -510,12 +627,10 @@
         color: #000 !important;
     }
 
-    /* Tooltip styling for disabled items */
     .tooltip {
         font-size: 0.875rem;
     }
 
-    /* Alert styling */
     .alert {
         border: 1px solid transparent;
         border-radius: 0.375rem;
@@ -527,25 +642,21 @@
         color: #856404;
     }
 
-    /* State ketika sidebar collapsed */
     .layout-menu.collapsed {
         width: 78px;
     }
 
-    /* Sembunyikan text saat collapsed */
     .layout-menu.collapsed .app-brand-text,
     .layout-menu.collapsed .menu-header-text,
     .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
         display: none;
     }
 
-    /* User profile collapsed state - hanya tampilkan avatar */
     .layout-menu.collapsed .user-profile-section .user-info,
     .layout-menu.collapsed .user-profile-section .user-chevron {
         display: none;
     }
 
-    /* Show only avatar when collapsed */
     .layout-menu.collapsed .user-profile-section .nav-link {
         justify-content: center;
         padding: 0.5rem;
@@ -555,23 +666,20 @@
 
     .layout-menu.collapsed .user-profile-section .avatar {
         margin: 0;
-        transform: scale(1.1); /* Slightly larger avatar for visibility */
+        transform: scale(1.1);
     }
 
-    /* Hide subscription alert when collapsed */
     .layout-menu.collapsed .alert {
         display: none;
     }
 
-    /* Pastikan user profile section tetap terlihat */
     .layout-menu .user-profile-section {
         display: block !important;
         position: relative;
         z-index: 1;
-        order: -1; /* Move to top of menu-container */
+        order: -1;
     }
 
-    /* Posisikan tombol toggle di samping logo saat collapsed */
     .layout-menu.collapsed .layout-menu-toggle {
         position: absolute;
         top: 50%;
@@ -594,17 +702,14 @@
         background: var(--bs-primary-dark);
     }
 
-    /* Rotate icon saat collapsed */
     .layout-menu.collapsed .layout-menu-toggle i {
         transform: rotate(180deg);
     }
 
-    /* Sembunyikan submenu saat collapsed */
     .layout-menu.collapsed .menu-sub {
         display: none !important;
     }
 
-    /* Submenu styling */
     .menu-sub {
         display: none;
         padding-left: 1rem;
@@ -620,13 +725,14 @@
             transform: translateX(-100%);
             width: 260px !important;
             transition: transform 0.3s ease-in-out;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .layout-menu.show {
             transform: translateX(0);
         }
 
-        /* Reset collapsed state di mobile */
         .layout-menu.collapsed {
             width: 260px !important;
             transform: translateX(-100%);
@@ -636,19 +742,16 @@
             transform: translateX(0);
         }
 
-        /* Tampilkan kembali semua elemen di mobile */
         .layout-menu.collapsed .app-brand-text,
         .layout-menu.collapsed .menu-header-text,
         .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
             display: block;
         }
 
-        /* Show alert in mobile even when collapsed */
         .layout-menu.collapsed .alert {
             display: block;
         }
 
-        /* Mobile user profile styling */
         .layout-menu.collapsed .user-profile-section .user-info,
         .layout-menu.collapsed .user-profile-section .user-chevron {
             display: block;
@@ -672,7 +775,6 @@
             padding-right: 1rem;
         }
 
-        /* Reset tombol toggle di mobile */
         .layout-menu.collapsed .layout-menu-toggle {
             position: static;
             background: transparent;
@@ -691,11 +793,6 @@
             transform: none;
         }
 
-        .layout-menu.collapsed .app-brand {
-            justify-content: space-between;
-            position: static;
-        }
-
         .layout-overlay {
             position: fixed;
             top: 0;
@@ -706,7 +803,6 @@
             z-index: 1040;
         }
 
-        /* Style tombol mobile agar mirip desktop */
         #mobileMenuToggle {
             background: var(--bs-primary);
             color: white;
@@ -717,26 +813,100 @@
             background: var(--bs-primary-dark);
         }
 
-        /* Rotate ikon saat sidebar terbuka di mobile */
         .layout-menu.show + #mobileMenuToggle i {
             transform: rotate(180deg);
         }
-    }
 
-    /* Adjust main content */
-    .layout-page {
-        padding-left: 260px;
-        transition: padding-left 0.3s ease-in-out;
-    }
-
-    .layout-page.sidebar-collapsed {
-        padding-left: 78px;
-    }
-
-    @media (max-width: 991.98px) {
         .layout-page {
             padding-left: 0 !important;
         }
+    }
+
+    /* Ensure sidebar visibility at 992px and above */
+    @media (min-width: 992px) {
+        .layout-menu {
+            display: flex !important;
+            transform: translateX(0) !important;
+            width: 260px;
+        }
+
+        .layout-menu.collapsed {
+            width: 78px;
+        }
+
+        .layout-page {
+            padding-left: 260px;
+            transition: padding-left 0.3s ease-in-out;
+        }
+
+        .layout-page.sidebar-collapsed {
+            padding-left: 78px;
+        }
+    }
+
+    /* Modal styling */
+    .modal-content {
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header.bg-gradient-danger {
+        background: linear-gradient(45deg, #dc3545, #e4606d);
+        border-bottom: none;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-content {
+        transform: scale(0.95);
+        transition:
+            transform 0.3s ease-in-out,
+            opacity 0.3s ease-in-out;
+        opacity: 0;
+    }
+
+    .modal.fade.show .modal-content {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        transition: transform 0.2s ease;
+    }
+
+    .modal-header .btn-close:hover {
+        transform: scale(1.2);
+    }
+
+    .modal-body .alert.bg-light-info {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+        border-radius: 0.375rem;
+        color: #0057b8;
+    }
+
+    .modal-body .bx-time-five {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-footer .btn-primary {
+        background: #696cff;
+        border-color: #696cff;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .modal-footer .btn-primary:hover {
+        background: #5f61e6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 </style>
 
@@ -751,7 +921,9 @@
 
         // Initialize tooltips for disabled menu items
         if (typeof bootstrap !== 'undefined') {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipTriggerList = [].slice.call(
+                document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+            );
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
@@ -763,11 +935,11 @@
                 sidebar.classList.toggle('collapsed');
                 layoutPage.classList.toggle('sidebar-collapsed');
 
-                // Simpan state ke localStorage
+                // Save state to localStorage
                 const isCollapsed = sidebar.classList.contains('collapsed');
                 localStorage.setItem('sidebarCollapsed', isCollapsed);
 
-                // Tutup semua submenu saat sidebar collapsed
+                // Close all submenus when sidebar is collapsed
                 if (isCollapsed) {
                     document
                         .querySelectorAll('.menu-item.open')
@@ -778,44 +950,9 @@
             });
         }
 
-        // Enhanced hover functionality for desktop with animation
-        if (sidebar) {
-            let hoverTimeout;
-            let isUserCollapsed = false; // Track if user manually collapsed
-
-            sidebar.addEventListener('mouseenter', function () {
-                if (window.innerWidth >= 992) { // Only active on desktop
-                    clearTimeout(hoverTimeout);
-
-                    // Check if user manually collapsed
-                    const savedState = localStorage.getItem('sidebarCollapsed');
-                    isUserCollapsed = savedState === 'true';
-
-                    // Always expand on hover
-                    sidebar.classList.remove('collapsed');
-                    layoutPage.classList.remove('sidebar-collapsed');
-                }
-            });
-
-            sidebar.addEventListener('mouseleave', function () {
-                if (window.innerWidth >= 992) { // Only active on desktop
-                    // Add delay before collapsing
-                    hoverTimeout = setTimeout(function() {
-                        // Only collapse if user had it collapsed or if it was auto-collapsed
-                        const savedState = localStorage.getItem('sidebarCollapsed');
-                        if (savedState === 'true' || isUserCollapsed) {
-                            sidebar.classList.add('collapsed');
-                            layoutPage.classList.add('sidebar-collapsed');
-                        }
-                    }, 300); // 300ms delay before collapsing
-                }
-            });
-        }
-
         // Mobile toggle functionality
         if (mobileMenuToggle) {
             mobileMenuToggle.addEventListener('click', function () {
-                sidebar.classList.remove('d-none');
                 sidebar.classList.toggle('show');
                 layoutOverlay.style.display = sidebar.classList.contains('show')
                     ? 'block'
@@ -831,32 +968,18 @@
             });
         }
 
-        // Restore sidebar state from localStorage - Start collapsed by default
-        const savedState = localStorage.getItem('sidebarCollapsed');
-        if (window.innerWidth >= 992) {
-            // Default to collapsed state on desktop for hover animation
-            sidebar.classList.add('collapsed');
-            layoutPage.classList.add('sidebar-collapsed');
-
-            // If user previously had it expanded, keep it collapsed but remember the preference
-            if (savedState !== 'false') {
-                localStorage.setItem('sidebarCollapsed', 'true');
-            }
-        }
-
         // Handle submenu toggles - only allow when subscription is active
         document.querySelectorAll('.menu-toggle').forEach(function (toggle) {
             toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Don't open submenu if sidebar is collapsed (except during hover)
-                if (sidebar.classList.contains('collapsed') && window.innerWidth >= 992) {
-                    // During hover, sidebar will be expanded, so allow submenu toggle
-                    const isHovering = sidebar.matches(':hover');
-                    if (!isHovering) {
-                        return;
-                    }
+                // Don't open submenu if sidebar is collapsed in desktop mode
+                if (
+                    sidebar.classList.contains('collapsed') &&
+                    window.innerWidth >= 992
+                ) {
+                    return;
                 }
 
                 const menuItem = this.closest('.menu-item');
@@ -887,55 +1010,41 @@
             });
         });
 
-        // Handle disabled menu item clicks - show notification
-        document.querySelectorAll('.menu-item.disabled .menu-link').forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+        // Handle disabled menu item clicks - show subscription modal
+        document
+            .querySelectorAll('.menu-item.disabled .menu-link')
+            .forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
 
-                // Show a toast notification or alert about subscription requirement
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Subscription Required',
-                        text: 'Please renew your subscription to access this feature.',
-                        confirmButtonText: 'View Subscription',
-                        showCancelButton: true,
-                        cancelButtonText: 'Close'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            const idDapur = '{{ $idDapur }}';
-                            window.location.href = `/kepala-dapur/dapur/${idDapur}/subscription`;
-                        }
-                    });
-                } else {
-                    alert('This feature requires an active subscription. Please renew your subscription to continue.');
-                }
+                    // Show a modal notification about subscription requirement
+                    const subscriptionModal = new bootstrap.Modal(
+                        document.getElementById('subscriptionExpiredModal'),
+                        {
+                            backdrop: 'static',
+                            keyboard: false,
+                        },
+                    );
+                    subscriptionModal.show();
+                });
             });
-        });
 
-        // Auto-redirect to subscription page if completely expired (optional)
-        const subscriptionStatus = '{{ $subscriptionStatus }}';
-        if (subscriptionStatus === 'expired') {
-            // Optional: Show a prominent notification after a delay
-            setTimeout(function() {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Subscription Expired',
-                        text: 'Your subscription has expired. Please renew to continue using all features.',
-                        confirmButtonText: 'Renew Now',
-                        showCancelButton: true,
-                        cancelButtonText: 'Later',
-                        allowOutsideClick: false,
-                        backdrop: 'rgba(0,0,0,0.8)'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            const idDapur = '{{ $idDapur }}';
-                            window.location.href = `/kepala-dapur/dapur/${idDapur}/subscription/choose-package`;
-                        }
-                    });
-                }
+        // Auto-show modal if completely expired
+        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+        const isSubscriptionActive =
+            {{ $isSubscriptionActive ? "true" : "false" }};
+
+        if (!isSubscriptionActive && subscriptionStatus === 'expired') {
+            setTimeout(function () {
+                const subscriptionModal = new bootstrap.Modal(
+                    document.getElementById('subscriptionExpiredModal'),
+                    {
+                        backdrop: 'static',
+                        keyboard: false,
+                    },
+                );
+                subscriptionModal.show();
             }, 3000); // Show after 3 seconds
         }
 
@@ -945,41 +1054,49 @@
                 // Desktop mode
                 sidebar.classList.remove('show');
                 layoutOverlay.style.display = 'none';
-
-                // Apply hover-based collapsed state for desktop
-                sidebar.classList.add('collapsed');
-                layoutPage.classList.add('sidebar-collapsed');
             } else {
                 // Mobile mode
                 sidebar.classList.remove('collapsed');
                 layoutPage.classList.remove('sidebar-collapsed');
+                if (!sidebar.classList.contains('show')) {
+                    layoutOverlay.style.display = 'none';
+                }
             }
         });
 
-        // Initialize any additional subscription-related functionality
+        // Initialize subscription-related functionality
         initializeSubscriptionFeatures();
     });
 
     // Function to handle subscription-related features
     function initializeSubscriptionFeatures() {
+        const isSubscriptionActive =
+            {{ $isSubscriptionActive ? "true" : "false" }};
+        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+
         // Add pulsing effect to subscription menu when expired
-        const isSubscriptionActive = {{ $isSubscriptionActive ? 'true' : 'false' }};
         if (!isSubscriptionActive) {
-            const subscriptionMenuItem = document.querySelector('.menu-item:has([href*="subscription"])');
+            const subscriptionMenuItem = document.querySelector(
+                '.menu-item:has([href*="subscription"])',
+            );
             if (subscriptionMenuItem) {
-                subscriptionMenuItem.style.animation = 'pulse-warning 2s infinite';
+                subscriptionMenuItem.style.animation =
+                    'pulse-warning 2s infinite';
             }
         }
 
-        // Add warning badges to user profile when subscription issues exist
-        const subscriptionStatus = '{{ $subscriptionStatus }}';
+        // Add warning styles to user profile when subscription issues exist
         if (subscriptionStatus === 'expiring_soon') {
-            const userProfile = document.querySelector('.user-profile-section .nav-link');
+            const userProfile = document.querySelector(
+                '.user-profile-section .nav-link',
+            );
             if (userProfile) {
                 userProfile.style.borderLeft = '3px solid #ffc107';
             }
         } else if (subscriptionStatus === 'expired') {
-            const userProfile = document.querySelector('.user-profile-section .nav-link');
+            const userProfile = document.querySelector(
+                '.user-profile-section .nav-link',
+            );
             if (userProfile) {
                 userProfile.style.borderLeft = '3px solid #dc3545';
             }
@@ -1005,7 +1122,6 @@
             border-left: 3px solid #ffc107;
         }
 
-        /* Enhanced hover animations */
         .layout-menu {
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -1019,7 +1135,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Smooth text reveal animation */
         .layout-menu.collapsed .app-brand-text,
         .layout-menu.collapsed .menu-header-text,
         .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
@@ -1036,7 +1151,6 @@
             transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
         }
 
-        /* Icon animations */
         .menu-icon {
             transition: transform 0.2s ease, color 0.2s ease;
         }
@@ -1045,7 +1159,6 @@
             transform: scale(1.05);
         }
 
-        /* Submenu slide animation */
         .menu-sub {
             max-height: 0;
             overflow: hidden;
@@ -1059,20 +1172,30 @@
             transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
 
-        /* Hover effects for disabled items */
         .menu-item.disabled:hover {
             transform: translateX(2px);
             transition: transform 0.2s ease;
         }
 
-        /* Enhanced subscription menu styling */
-        .subscription-highlight {
-            background: linear-gradient(45deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.2));
-            border-radius: 6px;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+        .badge {
+            animation: badge-pulse 2s infinite;
         }
 
-        /* Loading animation for subscription checks */
+        @keyframes badge-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .user-profile-section .nav-link {
+            transition: all 0.3s ease;
+        }
+
+        .user-profile-section .nav-link:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
         .subscription-loading {
             position: relative;
             overflow: hidden;
@@ -1093,151 +1216,48 @@
             0% { left: -100%; }
             100% { left: 100%; }
         }
-
-        /* Badge animations */
-        .badge {
-            animation: badge-pulse 2s infinite;
-        }
-
-        @keyframes badge-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* User profile hover enhancement */
-        .user-profile-section .nav-link {
-            transition: all 0.3s ease;
-        }
-
-        .user-profile-section .nav-link:hover {
-            background: rgba(255, 255, 255, 0.25) !important;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
     `;
     document.head.appendChild(style);
-}
 
-// Additional utility functions for subscription management
-function showSubscriptionModal() {
-    const idDapur = '{{ $idDapur }}';
-
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            title: 'Subscription Required',
-            html: `
-                <div class="text-start">
-                    <p class="mb-3">Your subscription is required to access this feature.</p>
-                    <div class="d-flex flex-column gap-2">
-                        <div class="p-2 bg-light rounded">
-                            <strong>Current Status:</strong> <span class="text-danger">{{ ucfirst(str_replace('_', ' ', $subscriptionStatus)) }}</span>
-                        </div>
-                        @if(session('subscription_end'))
-                        <div class="p-2 bg-light rounded">
-                            <strong>Expired On:</strong> {{ \Carbon\Carbon::parse(session('subscription_end'))->format('d M Y') }}
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: '<i class="bx bx-credit-card me-1"></i> Renew Subscription',
-            cancelButtonText: 'Close',
-            confirmButtonColor: '#ffc107',
-            customClass: {
-                confirmButton: 'btn btn-warning',
-                cancelButton: 'btn btn-secondary'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/kepala-dapur/dapur/${idDapur}/subscription/choose-package`;
-            }
-        });
-    } else {
-        // Fallback for browsers without SweetAlert
-        const confirmed = confirm('This feature requires an active subscription. Would you like to renew your subscription now?');
-        if (confirmed) {
-            window.location.href = `/kepala-dapur/dapur/${idDapur}/subscription/choose-package`;
-        }
+    // Additional utility functions for subscription management
+    function showSubscriptionModal() {
+        const subscriptionModal = new bootstrap.Modal(
+            document.getElementById('subscriptionExpiredModal'),
+            {
+                backdrop: 'static',
+                keyboard: false,
+            },
+        );
+        subscriptionModal.show();
     }
-}
 
-// Function to check subscription status periodically (optional)
-function startSubscriptionStatusCheck() {
-    // Check every 5 minutes for subscription updates
-    setInterval(function() {
-        fetch('/api/subscription-status-check', {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status_changed) {
-                // Reload page if subscription status changed
+    // Initialize subscription status monitoring
+    document.addEventListener('DOMContentLoaded', function () {
+        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+        const daysLeft = {{ session("subscription_days_left", 0) }};
+
+        // Show expiration warning for Kepala Dapur users
+        if (subscriptionStatus === 'expiring_soon' && daysLeft <= 5) {
+            setTimeout(function () {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        title: 'Subscription Status Updated',
-                        text: 'Your subscription status has been updated. The page will refresh automatically.',
-                        icon: 'info',
-                        timer: 3000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
-                    }).then(() => {
-                        location.reload();
+                        title: 'Subscription Expiring Soon!',
+                        html: `
+                            <div class="text-center">
+                                <i class="bx bx-time bx-lg text-warning mb-3"></i>
+                                <p>The dapur subscription expires in <strong>${daysLeft}</strong> day${daysLeft !== 1 ? 's' : ''}.</p>
+                                <p class="text-muted">Please renew before expiration.</p>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#ffc107',
                     });
-                } else {
-                    setTimeout(() => location.reload(), 3000);
                 }
-            }
-        })
-        .catch(error => {
-            console.log('Subscription status check failed:', error);
-        });
-    }, 300000); // 5 minutes
-}
+            }, 3000); // Show after 3 seconds
+        }
+    });
 
-// Initialize subscription status monitoring
-document.addEventListener('DOMContentLoaded', function() {
-    // Start periodic subscription checks (uncomment if needed)
-    // startSubscriptionStatusCheck();
-
-    // Add subscription reminder for expiring subscriptions
-    const subscriptionStatus = '{{ $subscriptionStatus }}';
-    const daysLeft = {{ session('subscription_days_left', 0) }};
-
-    if (subscriptionStatus === 'expiring_soon' && daysLeft <= 3) {
-        setTimeout(function() {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Subscription Expiring Soon!',
-                    html: `
-                        <div class="text-center">
-                            <i class="bx bx-time bx-lg text-warning mb-3"></i>
-                            <p>Your subscription expires in <strong>${daysLeft}</strong> day${daysLeft !== 1 ? 's' : ''}.</p>
-                            <p class="text-muted">Renew now to avoid service interruption.</p>
-                        </div>
-                    `,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Renew Now',
-                    cancelButtonText: 'Remind Later',
-                    confirmButtonColor: '#ffc107'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const idDapur = '{{ $idDapur }}';
-                        window.location.href = `/kepala-dapur/dapur/${idDapur}/subscription/choose-package`;
-                    }
-                });
-            }
-        }, 5000); // Show after 5 seconds
-    }
-});
-
-// Export functions for external use
-window.showSubscriptionModal = showSubscriptionModal;
-window.startSubscriptionStatusCheck = startSubscriptionStatusCheck;
+    // Export functions for external use
+    window.showSubscriptionModal = showSubscriptionModal;
 </script>

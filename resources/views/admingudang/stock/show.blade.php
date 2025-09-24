@@ -566,7 +566,7 @@
                                     class="form-control @error("jumlah") is-invalid @enderror"
                                     step="0.001"
                                     min="0.1"
-                                    max="999999.999"
+                                    max="2000000000"
                                     required
                                     placeholder="0.000"
                                     value="{{ old("jumlah") }}"

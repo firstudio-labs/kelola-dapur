@@ -39,9 +39,9 @@
                             </span>
                         </div>
                         <p class="mb-0 text-muted">
-                            @if ($dapur->wilayah)
+                            @if ($dapur->full_wilayah)
                                 <i class="bx bx-map me-1"></i>
-                                {{ $dapur->wilayah }}
+                                {{ $dapur->full_wilayah }}
                             @else
                                     Wilayah belum diset
                             @endif
@@ -205,7 +205,7 @@
                                 Wilayah
                             </dt>
                             <dd class="col-sm-8">
-                                {{ $dapur->wilayah ?: "Belum diset" }}
+                                {{ $dapur->full_wilayah ?: "Belum diset" }}
                             </dd>
                             <dt class="col-sm-4 d-flex align-items-center">
                                 <i class="bx bx-home me-2"></i>
@@ -297,7 +297,6 @@
                                     <th>Email</th>
                                     <th>Role</th>
                                     <th style="width: 10%">Status</th>
-                                    {{-- <th style="width: 15%">Aksi</th> --}}
                                 </tr>
                             </thead>
                             <tbody>
@@ -327,23 +326,6 @@
                                                 {{ $kd->user->is_active ? "Active" : "Inactive" }}
                                             </span>
                                         </td>
-                                        {{--
-                                            <td>
-                                            <div
-                                            class="d-flex justify-content-center gap-2"
-                                            >
-                                            <a
-                                            href="{{ route("superadmin.users.show", $kd->user) }}"
-                                            class="btn btn-sm btn-outline-primary btn-icon action-btn"
-                                            title="Detail"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            >
-                                            <i class="bx bx-show"></i>
-                                            </a>
-                                            </div>
-                                            </td>
-                                        --}}
                                     </tr>
                                 @endforeach
 
@@ -369,23 +351,6 @@
                                                 {{ $ag->user->is_active ? "Active" : "Inactive" }}
                                             </span>
                                         </td>
-                                        {{--
-                                            <td>
-                                            <div
-                                            class="d-flex justify-content-center gap-2"
-                                            >
-                                            <a
-                                            href="{{ route("superadmin.users.show", $ag->user) }}"
-                                            class="btn btn-sm btn-outline-primary btn-icon action-btn"
-                                            title="Detail"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            >
-                                            <i class="bx bx-show"></i>
-                                            </a>
-                                            </div>
-                                            </td>
-                                        --}}
                                     </tr>
                                 @endforeach
 
@@ -411,23 +376,6 @@
                                                 {{ $ag->user->is_active ? "Active" : "Inactive" }}
                                             </span>
                                         </td>
-                                        {{--
-                                            <td>
-                                            <div
-                                            class="d-flex justify-content-center gap-2"
-                                            >
-                                            <a
-                                            href="{{ route("superadmin.users.show", $ag->user) }}"
-                                            class="btn btn-sm btn-outline-primary btn-icon action-btn"
-                                            title="Detail"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            >
-                                            <i class="bx bx-show"></i>
-                                            </a>
-                                            </div>
-                                            </td>
-                                        --}}
                                     </tr>
                                 @endforeach
                             </tbody>

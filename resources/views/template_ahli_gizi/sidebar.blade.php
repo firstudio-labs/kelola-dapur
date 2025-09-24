@@ -23,7 +23,7 @@
             </span>
         </a>
 
-        <!-- Desktop Toggle Button - SAMA SEPERTI KEPALA DAPUR -->
+        <!-- Desktop Toggle Button -->
         <button
             class="btn btn-outline-secondary d-none d-lg-inline-flex layout-menu-toggle"
             id="sidebarToggle"
@@ -72,8 +72,22 @@
                             {{ auth()->user()->nama ?? "Unknown" }}
                         </div>
                         <small class="text-muted">
-                            {{ ucfirst(str_replace("_", " ", auth()->user()->userRole->role_type ?? "Unknown")) }}
+                            {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
                         </small>
+                        @if (session("subscription_status") && session("subscription_status") !== "active")
+                            <small class="text-warning d-block">
+                                <i class="bx bx-warning-alt bx-xs"></i>
+                                @if (session("subscription_status") === "expired")
+                                    Subscription Expired
+                                @elseif (session("subscription_status") === "expiring_soon")
+                                    Expires in
+                                    {{ session("subscription_days_left", 0) }}
+                                    days
+                                @else
+                                    {{ ucfirst(str_replace("_", " ", session("subscription_status"))) }}
+                                @endif
+                            </small>
+                        @endif
                     </div>
                     <i class="bx bx-chevron-up user-chevron"></i>
                 </a>
@@ -95,8 +109,18 @@
                                         {{ auth()->user()->nama ?? "Unknown" }}
                                     </span>
                                     <small class="text-muted">
-                                        {{ ucfirst(str_replace("_", " ", auth()->user()->userRole->role_type ?? "Unknown")) }}
+                                        {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
                                     </small>
+                                    @if (session("subscription_end"))
+                                        <small class="text-info d-block">
+                                            Dapur:
+                                            {{ session("dapur_name") ?? "Tidak Tersedia" }}
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            Expires:
+                                            {{ \Carbon\Carbon::parse(session("subscription_end"))->format("d M Y") }}
+                                        </small>
+                                    @endif
                                 </div>
                             </div>
                         </a>
@@ -104,17 +128,6 @@
                     <li>
                         <div class="dropdown-divider"></div>
                     </li>
-                    {{--
-                        @if (auth()->user()->userRole && auth()->user()->userRole->role_type === "ahli_gizi")
-                        <li>
-                        <a class="dropdown-item" href="#">
-                        <i class="bx bx-edit me-2"></i>
-                        <span class="align-middle">Edit Profil</span>
-                        </a>
-                        </li>
-                        @endif
-                    --}}
-
                     <li>
                         <form action="{{ route("logout") }}" method="POST">
                             @csrf
@@ -128,9 +141,48 @@
             </div>
         </div>
 
+        @php
+            $isSubscriptionActive = session("is_subscription_active", false);
+            $subscriptionStatus = session("subscription_status");
+            $idDapur = session("id_dapur");
+        @endphp
+
+        <!-- Subscription Status Alert -->
+        @if (! $isSubscriptionActive && $subscriptionStatus)
+            <div class="px-3 mb-3">
+                <div
+                    class="alert alert-warning alert-dismissible fade show py-2 px-3"
+                    role="alert"
+                    style="font-size: 0.875rem; line-height: 1.2"
+                >
+                    <div class="d-flex align-items-start">
+                        <i class="bx bx-info-circle me-2 mt-1"></i>
+                        <div>
+                            @if ($subscriptionStatus === "expired")
+                                <strong>Subscription Expired!</strong>
+                                <br />
+                                <small>Contact Kepala Dapur to renew</small>
+                            @elseif ($subscriptionStatus === "expiring_soon")
+                                <strong>Subscription Expiring!</strong>
+                                <br />
+                                <small>
+                                    {{ session("subscription_days_left", 0) }}
+                                    days remaining
+                                </small>
+                            @else
+                                <strong>Limited Access</strong>
+                                <br />
+                                <small>Contact Kepala Dapur for renewal</small>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Menu Utama -->
         <ul class="menu-inner py-1 flex-grow-1">
-            <!-- Dashboard -->
+            <!-- Dashboard - Always accessible -->
             <li
                 class="menu-item {{ request()->routeIs("dashboard") ? "active" : "" }}"
             >
@@ -143,80 +195,118 @@
                 </a>
             </li>
 
-            <!-- Ahli Gizi Header -->
-            <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">Ahli Gizi</span>
-            </li>
+            @if ($isSubscriptionActive)
+                <!-- Ahli Gizi Header - Only show when subscription active -->
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text">Ahli Gizi</span>
+                </li>
 
-            <!-- Menu Makanan -->
-            <li
-                class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.*") ? "active open" : "" }}"
-            >
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="menu-icon tf-icons bx bx-food-menu"></i>
-                    <div data-i18n="Menu Makanan">Menu Makanan</div>
-                </a>
-                <ul class="menu-sub">
-                    <li
-                        class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.index") ? "active" : "" }}"
-                    >
-                        <a
-                            href="{{ route("ahli-gizi.menu-makanan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                            class="menu-link"
+                <!-- Menu Makanan -->
+                <li
+                    class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.*") ? "active open" : "" }}"
+                >
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons bx bx-food-menu"></i>
+                        <div data-i18n="Menu Makanan">Menu Makanan</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li
+                            class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.index") ? "active" : "" }}"
                         >
-                            <div data-i18n="Daftar Menu Makanan">
-                                Daftar Menu Makanan
-                            </div>
-                        </a>
-                    </li>
-                    <li
-                        class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.create") ? "active" : "" }}"
-                    >
-                        <a
-                            href="{{ route("ahli-gizi.menu-makanan.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                            class="menu-link"
+                            <a
+                                href="{{ route("ahli-gizi.menu-makanan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                                class="menu-link"
+                            >
+                                <div data-i18n="Daftar Menu Makanan">
+                                    Daftar Menu Makanan
+                                </div>
+                            </a>
+                        </li>
+                        <li
+                            class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.create") ? "active" : "" }}"
                         >
-                            <div data-i18n="Tambah Menu Makanan">
-                                Tambah Menu Makanan
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-            </li>
+                            <a
+                                href="{{ route("ahli-gizi.menu-makanan.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                                class="menu-link"
+                            >
+                                <div data-i18n="Tambah Menu Makanan">
+                                    Tambah Menu Makanan
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
-            <!-- Transaksi Dapur -->
-            <li
-                class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.*") ? "active open" : "" }}"
-            >
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="menu-icon tf-icons bx bx-cart"></i>
-                    <div data-i18n="Transaksi Dapur">Transaksi Dapur</div>
-                </a>
-                <ul class="menu-sub">
+                <!-- Transaksi Dapur -->
+                <li
+                    class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.*") ? "active open" : "" }}"
+                >
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons bx bx-cart"></i>
+                        <div data-i18n="Transaksi Dapur">Transaksi Dapur</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li
+                            class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.index") ? "active" : "" }}"
+                        >
+                            <a
+                                href="{{ route("ahli-gizi.transaksi.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                                class="menu-link"
+                            >
+                                <div data-i18n="Daftar Transaksi">
+                                    Daftar Transaksi
+                                </div>
+                            </a>
+                        </li>
+                        <li
+                            class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.create") ? "active" : "" }}"
+                        >
+                            <a
+                                href="{{ route("ahli-gizi.transaksi.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                                class="menu-link"
+                            >
+                                <div data-i18n="Buat Transaksi">
+                                    Buat Transaksi
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @else
+                <!-- Limited Access Message -->
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text text-warning">
+                        Limited Access
+                    </span>
+                </li>
+
+                <!-- Disabled menu items with tooltips -->
+                @php
+                    $disabledMenus = [
+                        "Menu Makanan" => "bx-food-menu",
+                        "Transaksi Dapur" => "bx-cart",
+                    ];
+                @endphp
+
+                @foreach ($disabledMenus as $menuName => $icon)
                     <li
-                        class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.index") ? "active" : "" }}"
+                        class="menu-item disabled"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="right"
+                        title="Subscription required to access this feature"
                     >
                         <a
-                            href="{{ route("ahli-gizi.transaksi.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                            class="menu-link"
+                            href="javascript:void(0);"
+                            class="menu-link text-muted"
+                            style="cursor: not-allowed; opacity: 0.6"
                         >
-                            <div data-i18n="Daftar Transaksi">
-                                Daftar Transaksi
-                            </div>
+                            <i class="menu-icon tf-icons bx {{ $icon }}"></i>
+                            <div>{{ $menuName }}</div>
+                            <i class="bx bx-lock-alt ms-auto text-warning"></i>
                         </a>
                     </li>
-                    <li
-                        class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.create") ? "active" : "" }}"
-                    >
-                        <a
-                            href="{{ route("ahli-gizi.transaksi.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                            class="menu-link"
-                        >
-                            <div data-i18n="Buat Transaksi">Buat Transaksi</div>
-                        </a>
-                    </li>
-                </ul>
-            </li>
+                @endforeach
+            @endif
         </ul>
     </div>
 </aside>
@@ -248,8 +338,68 @@
     style="display: none"
 ></div>
 
+<!-- Subscription Expired Modal -->
+<div
+    class="modal fade"
+    id="subscriptionExpiredModal"
+    tabindex="-1"
+    aria-labelledby="subscriptionExpiredModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div
+            class="modal-content border-0 shadow-lg"
+            style="border-radius: 0.5rem; overflow: hidden"
+        >
+            <div class="modal-header bg-gradient-danger text-white p-4">
+                <div class="d-flex align-items-center">
+                    <i class="bx bx-error-circle bx-md me-3"></i>
+                    <h5
+                        class="modal-title mb-0"
+                        id="subscriptionExpiredModalLabel"
+                    >
+                        Subscription Expired
+                    </h5>
+                </div>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <i
+                        class="bx bx-time-five bx-lg text-danger mb-3 animate__animated animate__pulse animate__infinite"
+                    ></i>
+                    <h6 class="fw-semibold">
+                        Your Dapur Subscription Has Expired
+                    </h6>
+                    <p class="text-muted mb-0">
+                        To regain full access to all features, please contact
+                        your Kepala Dapur to renew the subscription.
+                    </p>
+                </div>
+                <div
+                    class="alert alert-info bg-light-info border-0 d-flex align-items-center justify-content-center p-3"
+                    role="alert"
+                >
+                    <i class="bx bx-info-circle me-2"></i>
+                    <small>
+                        Renew now to continue managing menus and transactions!
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3 justify-content-center">
+                <button
+                    type="button"
+                    class="btn btn-primary px-4"
+                    data-bs-dismiss="modal"
+                >
+                    Understood
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
-    /* CSS untuk toggle sidebar - IDENTIK DENGAN KEPALA DAPUR */
+    /* CSS untuk toggle sidebar - IDENTICAL TO ADMIN GUDANG */
     .layout-menu {
         transition:
             width 0.3s ease-in-out,
@@ -274,6 +424,43 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         flex-shrink: 0; /* Prevent shrinking */
         min-height: 60px; /* Reduced height for better positioning */
+    }
+
+    /* Disabled menu items styling */
+    .menu-item.disabled .menu-link {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .menu-item.disabled:hover .menu-link {
+        background: transparent !important;
+    }
+
+    /* Subscription warning styling */
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    /* Tooltip styling for disabled items */
+    .tooltip {
+        font-size: 0.875rem;
+    }
+
+    /* Alert styling */
+    .alert {
+        border: 1px solid transparent;
+        border-radius: 0.375rem;
+    }
+
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.3);
+        color: #856404;
     }
 
     /* State ketika sidebar collapsed */
@@ -305,6 +492,11 @@
     .layout-menu.collapsed .user-profile-section .avatar {
         margin: 0;
         transform: scale(1.1); /* Slightly larger avatar for visibility */
+    }
+
+    /* Hide subscription alert when collapsed */
+    .layout-menu.collapsed .alert {
+        display: none;
     }
 
     /* Pastikan user profile section tetap terlihat */
@@ -384,6 +576,11 @@
         .layout-menu.collapsed .app-brand-text,
         .layout-menu.collapsed .menu-header-text,
         .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
+            display: block;
+        }
+
+        /* Show alert in mobile even when collapsed */
+        .layout-menu.collapsed .alert {
             display: block;
         }
 
@@ -477,6 +674,72 @@
             padding-left: 0 !important;
         }
     }
+
+    /* Modal styling */
+    .modal-content {
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header.bg-gradient-danger {
+        background: linear-gradient(45deg, #dc3545, #e4606d);
+        border-bottom: none;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    /* Additional Sneat-inspired modal styling */
+    .modal-content {
+        transform: scale(0.95);
+        transition:
+            transform 0.3s ease-in-out,
+            opacity 0.3s ease-in-out;
+        opacity: 0;
+    }
+
+    .modal.fade.show .modal-content {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        transition: transform 0.2s ease;
+    }
+
+    .modal-header .btn-close:hover {
+        transform: scale(1.2);
+    }
+
+    .modal-body .alert.bg-light-info {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+        border-radius: 0.375rem;
+        color: #0057b8;
+    }
+
+    .modal-body .bx-time-five {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-footer .btn-primary {
+        background: #696cff;
+        border-color: #696cff;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .modal-footer .btn-primary:hover {
+        background: #5f61e6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 </style>
 
 <script>
@@ -487,6 +750,16 @@
         const layoutOverlay = document.getElementById('layoutOverlay');
         const layoutPage =
             document.querySelector('.layout-page') || document.body;
+
+        // Initialize tooltips for disabled menu items
+        if (typeof bootstrap !== 'undefined') {
+            const tooltipTriggerList = [].slice.call(
+                document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+            );
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
 
         // Desktop toggle functionality
         if (sidebarToggle) {
@@ -509,11 +782,21 @@
             });
         }
 
-        // Hover functionality for desktop
+        // Enhanced hover functionality for desktop with animation
         if (sidebar) {
+            let hoverTimeout;
+            let isUserCollapsed = false; // Track if user manually collapsed
+
             sidebar.addEventListener('mouseenter', function () {
                 if (window.innerWidth >= 992) {
-                    // Hanya aktif di desktop
+                    // Only active on desktop
+                    clearTimeout(hoverTimeout);
+
+                    // Check if user manually collapsed
+                    const savedState = localStorage.getItem('sidebarCollapsed');
+                    isUserCollapsed = savedState === 'true';
+
+                    // Always expand on hover
                     sidebar.classList.remove('collapsed');
                     layoutPage.classList.remove('sidebar-collapsed');
                 }
@@ -521,12 +804,17 @@
 
             sidebar.addEventListener('mouseleave', function () {
                 if (window.innerWidth >= 992) {
-                    // Hanya aktif di desktop
-                    const savedState = localStorage.getItem('sidebarCollapsed');
-                    if (savedState === 'true') {
-                        sidebar.classList.add('collapsed');
-                        layoutPage.classList.add('sidebar-collapsed');
-                    }
+                    // Only active on desktop
+                    // Add delay before collapsing
+                    hoverTimeout = setTimeout(function () {
+                        // Only collapse if user had it collapsed or if it was auto-collapsed
+                        const savedState =
+                            localStorage.getItem('sidebarCollapsed');
+                        if (savedState === 'true' || isUserCollapsed) {
+                            sidebar.classList.add('collapsed');
+                            layoutPage.classList.add('sidebar-collapsed');
+                        }
+                    }, 300); // 300ms delay before collapsing
                 }
             });
         }
@@ -550,28 +838,47 @@
             });
         }
 
-        // Restore sidebar state from localStorage
+        // Restore sidebar state from localStorage - Start collapsed by default
         const savedState = localStorage.getItem('sidebarCollapsed');
-        if (savedState === 'true' && window.innerWidth >= 992) {
+        if (window.innerWidth >= 992) {
+            // Default to collapsed state on desktop for hover animation
             sidebar.classList.add('collapsed');
             layoutPage.classList.add('sidebar-collapsed');
+
+            // If user previously had it expanded, keep it collapsed but remember the preference
+            if (savedState !== 'false') {
+                localStorage.setItem('sidebarCollapsed', 'true');
+            }
         }
 
-        // Handle submenu toggles
+        // Handle submenu toggles - only allow when subscription is active
         document.querySelectorAll('.menu-toggle').forEach(function (toggle) {
             toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Jangan buka submenu jika sidebar collapsed
-                if (sidebar.classList.contains('collapsed')) {
-                    return;
+                // Don't open submenu if sidebar is collapsed (except during hover)
+                if (
+                    sidebar.classList.contains('collapsed') &&
+                    window.innerWidth >= 992
+                ) {
+                    // During hover, sidebar will be expanded, so allow submenu toggle
+                    const isHovering = sidebar.matches(':hover');
+                    if (!isHovering) {
+                        return;
+                    }
                 }
 
                 const menuItem = this.closest('.menu-item');
+
+                // Check if this is a disabled menu item
+                if (menuItem.classList.contains('disabled')) {
+                    return;
+                }
+
                 const isCurrentlyOpen = menuItem.classList.contains('open');
 
-                // Tutup semua submenu lain di level yang sama
+                // Close all other submenus at the same level
                 const parent = menuItem.parentElement;
                 parent
                     .querySelectorAll('.menu-item.open')
@@ -581,7 +888,7 @@
                         }
                     });
 
-                // Toggle submenu saat ini
+                // Toggle current submenu
                 if (isCurrentlyOpen) {
                     menuItem.classList.remove('open');
                 } else {
@@ -590,26 +897,252 @@
             });
         });
 
+        // Handle disabled menu item clicks - show notification about contacting Kepala Dapur
+        document
+            .querySelectorAll('.menu-item.disabled .menu-link')
+            .forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Show a modal notification about contacting Kepala Dapur
+                    const subscriptionModal = new bootstrap.Modal(
+                        document.getElementById('subscriptionExpiredModal'),
+                        {
+                            backdrop: 'static',
+                            keyboard: false,
+                        },
+                    );
+                    subscriptionModal.show();
+                });
+            });
+
+        // Auto-show modal if completely expired
+        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+        const isSubscriptionActive =
+            {{ $isSubscriptionActive ? "true" : "false" }};
+
+        if (!isSubscriptionActive && subscriptionStatus === 'expired') {
+            setTimeout(function () {
+                const subscriptionModal = new bootstrap.Modal(
+                    document.getElementById('subscriptionExpiredModal'),
+                    {
+                        backdrop: 'static',
+                        keyboard: false,
+                    },
+                );
+                subscriptionModal.show();
+            }, 3000); // Show after 3 seconds
+        }
+
         // Handle window resize
         window.addEventListener('resize', function () {
             if (window.innerWidth >= 992) {
                 // Desktop mode
                 sidebar.classList.remove('show');
                 layoutOverlay.style.display = 'none';
-                // Terapkan state dari localStorage
-                const savedState = localStorage.getItem('sidebarCollapsed');
-                if (savedState === 'true') {
-                    sidebar.classList.add('collapsed');
-                    layoutPage.classList.add('sidebar-collapsed');
-                } else {
-                    sidebar.classList.remove('collapsed');
-                    layoutPage.classList.remove('sidebar-collapsed');
-                }
+
+                // Apply hover-based collapsed state for desktop
+                sidebar.classList.add('collapsed');
+                layoutPage.classList.add('sidebar-collapsed');
             } else {
                 // Mobile mode
                 sidebar.classList.remove('collapsed');
                 layoutPage.classList.remove('sidebar-collapsed');
             }
         });
+
+        // Initialize any additional subscription-related functionality
+        initializeSubscriptionFeatures();
+    });
+
+    // Function to handle subscription-related features for Ahli Gizi
+    function initializeSubscriptionFeatures() {
+        const isSubscriptionActive =
+            {{ $isSubscriptionActive ? "true" : "false" }};
+        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+
+        // Add warning styles to user profile when subscription issues exist
+        if (subscriptionStatus === 'expiring_soon') {
+            const userProfile = document.querySelector(
+                '.user-profile-section .nav-link',
+            );
+            if (userProfile) {
+                userProfile.style.borderLeft = '3px solid #ffc107';
+            }
+        } else if (subscriptionStatus === 'expired') {
+            const userProfile = document.querySelector(
+                '.user-profile-section .nav-link',
+            );
+            if (userProfile) {
+                userProfile.style.borderLeft = '3px solid #dc3545';
+            }
+        }
+    }
+
+    // Add CSS keyframes for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse-warning {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .subscription-expired .menu-link {
+            background: rgba(220, 53, 69, 0.1) !important;
+            border-left: 3px solid #dc3545;
+        }
+
+        .subscription-expiring .menu-link {
+            background: rgba(255, 193, 7, 0.1) !important;
+            border-left: 3px solid #ffc107;
+        }
+
+        /* Enhanced hover animations */
+        .layout-menu {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .layout-menu .menu-link {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .layout-menu:not(.collapsed) .menu-link:hover {
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Smooth text reveal animation */
+        .layout-menu.collapsed .app-brand-text,
+        .layout-menu.collapsed .menu-header-text,
+        .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .layout-menu:not(.collapsed) .app-brand-text,
+        .layout-menu:not(.collapsed) .menu-header-text,
+        .layout-menu:not(.collapsed) .menu-link > div:not(.menu-icon) {
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+        }
+
+        /* Icon animations */
+        .menu-icon {
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .layout-menu:hover .menu-icon {
+            transform: scale(1.05);
+        }
+
+        /* Submenu slide animation */
+        .menu-sub {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-item.open .menu-sub {
+            max-height: 500px;
+            opacity: 1;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+        /* Hover effects for disabled items */
+        .menu-item.disabled:hover {
+            transform: translateX(2px);
+            transition: transform 0.2s ease;
+        }
+
+        /* Badge animations */
+        .badge {
+            animation: badge-pulse 2s infinite;
+        }
+
+        @keyframes badge-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* User profile hover enhancement */
+        .user-profile-section .nav-link {
+            transition: all 0.3s ease;
+        }
+
+        .user-profile-section .nav-link:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Loading animation for subscription checks */
+        .subscription-loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscription-loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: loading-sweep 1.5s infinite;
+        }
+
+        @keyframes loading-sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Additional utility functions for Ahli Gizi
+    function showSubscriptionNotification() {
+        const subscriptionModal = new bootstrap.Modal(
+            document.getElementById('subscriptionExpiredModal'),
+            {
+                backdrop: 'static',
+                keyboard: false,
+            },
+        );
+        subscriptionModal.show();
+    }
+
+    // Export functions for external use
+    window.showSubscriptionNotification = showSubscriptionNotification;
+
+    // Initialize subscription status monitoring for Ahli Gizi
+    document.addEventListener('DOMContentLoaded', function () {
+        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+        const daysLeft = {{ session("subscription_days_left", 0) }};
+
+        // Show expiration warning for Ahli Gizi users
+        if (subscriptionStatus === 'expiring_soon' && daysLeft <= 5) {
+            setTimeout(function () {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Subscription Expiring Soon!',
+                        html: `
+                            <div class="text-center">
+                                <i class="bx bx-time bx-lg text-warning mb-3"></i>
+                                <p>The dapur subscription expires in <strong>${daysLeft}</strong> day${daysLeft !== 1 ? 's' : ''}.</p>
+                                <p class="text-muted">Please inform the Kepala Dapur to renew before expiration.</p>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#ffc107',
+                    });
+                }
+            }, 3000); // Show after 3 seconds
+        }
     });
 </script>

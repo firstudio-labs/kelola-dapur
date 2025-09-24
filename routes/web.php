@@ -16,6 +16,7 @@ use App\Http\Controllers\KepalaDapur\UserController as KepalaDapurUserController
 use App\Http\Controllers\KepalaDapur\LaporanKekuranganStockController as KepalaDapurLaporanKekuranganStockController;
 use App\Http\Controllers\KepalaDapur\ApprovalStockItemController as KepalaDapurApprovalStockItemController;
 use App\Http\Controllers\KepalaDapur\ApprovalTransaksiController as KepalaDapurApprovalTransaksiController;
+use App\Http\Controllers\KepalaDapur\StockItemController;
 use App\Http\Controllers\KepalaDapur\SubscriptionController;
 // use App\Http\Controllers\SuperAdmin\ApprovalStockItemController;
 use App\Http\Controllers\SuperAdmin\BahanMenuController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\SuperAdmin\SubscriptionRequestController;
 // use App\Http\Controllers\SuperAdmin\StockItemController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\TemplateItemController;
+use Illuminate\Support\Facades\Auth;
 // use App\Http\Controllers\SuperAdmin\UserController;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -43,7 +45,29 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+
+    // Ambil paket subscription yang aktif
+    $subscriptionPackages = \App\Models\SubscriptionPackage::where('is_active', true)
+        ->orderBy('harga', 'asc')
+        ->get();
+
+    return view('welcome.index', compact('subscriptionPackages'));
+});
+
+Route::get('/welcome', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+
+    // Ambil paket subscription yang aktif
+    $subscriptionPackages = \App\Models\SubscriptionPackage::where('is_active', true)
+        ->orderBy('harga', 'asc')
+        ->get();
+
+    return view('welcome.index', compact('subscriptionPackages'));
 });
 
 // Guest 
@@ -304,6 +328,11 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur', 'check.subscription'])
         // Dashboard - Always accessible
         Route::get('/dashboard', [KepalaDapurController::class, 'dashboard'])->name('dashboard');
 
+        // Stok
+        Route::prefix('stock')->name('stock.')->group(function () {
+            Route::get('/', [StockItemController::class, 'index'])->name('index');
+        });
+
         // Users Management - Requires active subscription
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [KepalaDapurUserController::class, 'index'])->name('index');
@@ -401,14 +430,7 @@ Route::middleware(['auth', 'role:kepala_dapur', 'check.subscription'])->prefix('
         Route::post('/{menuMakanan}/check-stock', [KepalaDapurMenuMakananController::class, 'checkStock'])->name('check-stock');
     });
 
-    // Approval Paket Menu - Requires active subscription
-    // Route::prefix('approval-transaksi')->name('approval-transaksi.')->group(function () {
-    //     Route::get('/', [KepalaDapurApprovalTransaksiController::class, 'index'])->name('index');
-    //     Route::get('/{approval}', [KepalaDapurApprovalTransaksiController::class, 'show'])->name('show');
-    //     Route::post('/{approval}/setujui', [KepalaDapurApprovalTransaksiController::class, 'approve'])->name('approve');
-    //     Route::post('/{approval}/tolak', [KepalaDapurApprovalTransaksiController::class, 'reject'])->name('reject');
-    //     Route::post('/bulk-action', [KepalaDapurApprovalTransaksiController::class, 'bulkAction'])->name('bulk-action');
-    // });
+
 
     // Laporan Kekurangan Stock - Requires active subscription
     Route::prefix('laporan-kekurangan')->name('laporan-kekurangan.')->group(function () {

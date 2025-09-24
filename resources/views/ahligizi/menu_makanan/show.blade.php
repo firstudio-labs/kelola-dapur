@@ -263,19 +263,6 @@
                                 Menu
                             </button>
                         </form>
-                        <form
-                            action="{{ route("ahli-gizi.menu-makanan.destroy", $menuMakanan->id_menu) }}"
-                            method="POST"
-                            class="d-inline"
-                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus menu ini?');"
-                        >
-                            @csrf
-                            @method("DELETE")
-                            <button type="submit" class="btn btn-danger w-100">
-                                <i class="bx bx-trash me-2"></i>
-                                Hapus Menu
-                            </button>
-                        </form>
                     </div>
                 </div>
 

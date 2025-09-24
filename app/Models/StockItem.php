@@ -163,6 +163,7 @@ class StockItem extends Model
         return $latestApproval ? $latestApproval->approved_at : $this->tanggal_restok;
     }
 
+
     /**
      * Boot method to sync satuan with TemplateItem when saving
      */
