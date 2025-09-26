@@ -126,16 +126,6 @@
                                             Contact
                                         </a>
                                     </li>
-                                    {{--
-                                        <li class="relative group">
-                                        <a
-                                        href="blog-grids.html"
-                                        class="flex py-2 mx-8 text-base font-medium ud-menu-scroll text-dark group-hover:text-primary dark:text-white lg:ml-7 lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 lg:text-white lg:group-hover:text-white lg:group-hover:opacity-70 xl:ml-10"
-                                        >
-                                        Blog
-                                        </a>
-                                        </li>
-                                    --}}
                                 </ul>
                             </nav>
                         </div>
@@ -254,12 +244,12 @@
                             <h1
                                 class="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]"
                             >
-                                HEADING
+                                Mengelola Dapur dengan teratur,ciptakan hasil yang optimal
                             </h1>
                             <p
                                 class="mx-auto mb-9 max-w-[600px] text-base font-medium text-white sm:text-lg sm:leading-[1.44]"
                             >
-                                HEADING 2
+                                Kelola menu, stok, dan kebutuhan harian secara teratur. Berikan Nutrisi yang Tepat Sasaran. Semuanya Dimulai dari Pengelolaan Data yang Sederhana.
                             </p>
                             <ul
                                 class="flex flex-wrap items-center justify-center gap-5 mb-10"
@@ -269,7 +259,7 @@
                                         href="login"
                                         class="inline-flex items-center justify-center rounded-md bg-white px-7 py-[14px] text-center text-base font-medium text-dark shadow-1 transition duration-300 ease-in-out hover:bg-gray-2 hover:text-body-color"
                                     >
-                                        Join Now
+                                        Ciptakan Dampak Besar melalui cara yang sederhana!
                                     </a>
                                 </li>
                             </ul>
@@ -1454,14 +1444,12 @@
                             <h2
                                 class="mb-3 text-3xl font-bold text-dark dark:text-white sm:text-4xl md:text-[40px] md:leading-[1.2]"
                             >
-                                Fitur Utama
+                                Fitur Utama Kelola Dapur
                             </h2>
                             <p
                                 class="text-base text-body-color dark:text-dark-6"
                             >
-                                There are many variations of passages of Lorem
-                                Ipsum available but the majority have suffered
-                                alteration in some form.
+                                Solusi digital untuk pengelolaan dapur agar lebih sederhana dan efisien.
                             </p>
                         </div>
                     </div>
@@ -1492,8 +1480,7 @@
                             <p
                                 class="mb-8 text-body-color dark:text-dark-6 lg:mb-9"
                             >
-                                Lorem Ipsum is simply dummy text of the printing
-                                and industry.
+                                Catat semua transaksi dengan cepat dan akurat.
                             </p>
                         </div>
                     </div>
@@ -1523,8 +1510,7 @@
                             <p
                                 class="mb-8 text-body-color dark:text-dark-6 lg:mb-9"
                             >
-                                Lorem Ipsum is simply dummy text of the printing
-                                and industry.
+                                Susun menu harian dan mingguan sesuai kebutuhan.
                             </p>
                         </div>
                     </div>
@@ -1554,8 +1540,7 @@
                             <p
                                 class="mb-8 text-body-color dark:text-dark-6 lg:mb-9"
                             >
-                                Lorem Ipsum is simply dummy text of the printing
-                                and industry.
+                                Pantau bahan baku masuk dan keluar secara real-time.
                             </p>
                         </div>
                     </div>
@@ -1585,8 +1570,7 @@
                             <p
                                 class="mb-8 text-body-color dark:text-dark-6 lg:mb-9"
                             >
-                                Lorem Ipsum is simply dummy text of the printing
-                                and industry.
+                                Dapatkan laporan otomatis untuk pengambilan keputusan yang tepat.
                             </p>
                         </div>
                     </div>
@@ -1608,29 +1592,24 @@
                                 <h2
                                     class="mb-5 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2]"
                                 >
-                                    Heading
+                                    Sederhanakan Dapur Anda
                                 </h2>
                                 <p
                                     class="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6"
                                 >
-                                    The main 'thrust' is to focus on educating
-                                    attendees on how to best protect highly
-                                    vulnerable business applications with
-                                    interactive panel discussions and
-                                    roundtables led by subject matter experts.
+                                    Tidak perlu lagi bingung dengan pencatatan manual. Dengan Kelola Dapur, 
+                                    setiap proses mulai dari perencanaan menu, kebutuhan bahan baku, 
+                                    hingga stok dapat diatur secara otomatis. 
                                     <br />
                                     <br />
-                                    The main 'thrust' is to focus on educating
-                                    attendees on how to best protect highly
-                                    vulnerable business applications with
-                                    interactive panel.
+                                    Hemat waktu, kurangi kesalahan, dan fokus pada rasa.
                                 </p>
 
                                 <a
                                     href="javascript:void(0)"
                                     class="inline-flex items-center justify-center py-3 text-base font-medium text-center text-white border rounded-md border-primary bg-primary px-7 hover:border-blue-dark hover:bg-blue-dark"
                                 >
-                                    CTA
+                                    Pelajari Lebih Lanjut
                                 </a>
                             </div>
                         </div>
@@ -1830,25 +1809,24 @@
                                 <h2
                                     class="mb-2.5 text-3xl font-bold text-white md:text-[38px] md:leading-[1.44]"
                                 >
-                                    <span>Heading</span>
+                                    <span>Dari Dapur untuk Dapur</span>
+                            </br>
                                     <span
                                         class="text-3xl font-normal md:text-[40px]"
                                     >
-                                        Get Started Now
+                                        Kita berhak mendapatkan kemampuan maksimal, pelajari secepatnya
                                     </span>
                                 </h2>
                                 <p
                                     class="mx-auto mb-6 max-w-[515px] text-base leading-[1.5] text-white"
                                 >
-                                    There are many variations of passages of
-                                    Lorem Ipsum but the majority have suffered
-                                    in some form.
+                                    Dibuat khusus untuk kebutuhan Pencatatan Kelola Dapur skala kecil hingga besar.
                                 </p>
                                 <a
                                     href="javascript:void(0)"
                                     class="inline-block rounded-md border border-transparent bg-secondary px-7 py-3 text-base font-medium text-white transition hover:bg-[#0BB489]"
                                 >
-                                    CTA
+                                    Pelajari secepatnya
                                 </a>
                             </div>
                         </div>
@@ -1947,9 +1925,7 @@
                             <p
                                 class="text-base text-body-color dark:text-dark-6"
                             >
-                                Dapatkan akses penuh ke sistem manajemen dapur
-                                dengan paket berlangganan yang sesuai dengan
-                                kebutuhan bisnis Anda.
+                                Pilih paket yang sesuai dengan skala bisnis  Anda.
                             </p>
                         </div>
                     </div>
@@ -1960,7 +1936,7 @@
                             <div
                                 class="relative z-10 px-8 py-10 mb-10 overflow-hidden bg-white rounded-xl shadow-pricing dark:bg-dark-2 sm:p-12 lg:px-6 lg:py-10 xl:p-14"
                             >
-                                @if ($package->nama_paket === "Basic" || $package->nama_paket === "Recommended")
+                                @if ($package->nama_paket === "Paket Tahunan" || $package->nama_paket === "Recommended")
                                     <p
                                         class="absolute right-[-50px] top-[60px] inline-block -rotate-90 rounded-bl-md rounded-tl-md bg-primary px-5 py-2 text-base font-medium text-white"
                                     >
@@ -2108,16 +2084,12 @@
                                 <h3
                                     class="mb-6 text-xl font-semibold text-dark dark:text-white sm:text-2xl lg:text-xl xl:text-2xl"
                                 >
-                                    Is TailGrids Well-documented?
+                                    Apakah Kelola Dapur bisa digunakan untuk bisnis skala besar?
                                 </h3>
                                 <p
                                     class="text-base text-body-color dark:text-dark-6"
                                 >
-                                    It takes 2-3 weeks to get your first blog
-                                    post ready. That includes the in-depth
-                                    research & creation of your monthly content
-                                    ui/ux strategy that we do writing your first
-                                    blog post.
+                                    Ya, sistem kami fleksibel dan dapat disesuaikan dengan kebutuhan dapur kecil hingga besar.
                                 </p>
                             </div>
                         </div>
@@ -2146,16 +2118,12 @@
                                 <h3
                                     class="mb-6 text-xl font-semibold text-dark dark:text-white sm:text-2xl lg:text-xl xl:text-2xl"
                                 >
-                                    Is TailGrids Well-documented?
+                                    Apakah data aman?
                                 </h3>
                                 <p
                                     class="text-base text-body-color dark:text-dark-6"
                                 >
-                                    It takes 2-3 weeks to get your first blog
-                                    post ready. That includes the in-depth
-                                    research & creation of your monthly content
-                                    ui/ux strategy that we do writing your first
-                                    blog post.
+                                    Semua data Anda tersimpan aman di server dengan enkripsi penuh."
                                 </p>
                             </div>
                         </div>
@@ -2186,16 +2154,12 @@
                                 <h3
                                     class="mb-6 text-xl font-semibold text-dark dark:text-white sm:text-2xl lg:text-xl xl:text-2xl"
                                 >
-                                    Is TailGrids Well-documented?
+                                    Apakah bisa diakses lewat HP?
                                 </h3>
                                 <p
                                     class="text-base text-body-color dark:text-dark-6"
                                 >
-                                    It takes 2-3 weeks to get your first blog
-                                    post ready. That includes the in-depth
-                                    research & creation of your monthly content
-                                    ui/ux strategy that we do writing your first
-                                    blog post.
+                                    Tentu, Kelola Dapur dapat digunakan di berbagai perangkat baik laptop maupun smartphone.
                                 </p>
                             </div>
                         </div>

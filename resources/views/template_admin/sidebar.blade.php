@@ -13,12 +13,12 @@
         >
             <span class="app-brand-logo demo">
                 <img
-                    src="{{ asset("logo.png") }}"
+                    src="{{ asset("logo_kelola_dapur_black.png") }}"
                     alt="Logo"
                     style="height: 45px; width: auto"
                 />
             </span>
-            <span class="demo fw-bolder ms-4 fs-4">Super Admin</span>
+            {{-- <span class="demo fw-bolder ms-4 fs-4">Super Admin</span> --}}
         </a>
     </div>
 

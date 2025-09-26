@@ -55,7 +55,7 @@ Route::get('/', function () {
         ->get();
 
     return view('welcome.index', compact('subscriptionPackages'));
-});
+})->name('welcome');
 
 Route::get('/welcome', function () {
     if (Auth::check()) {
@@ -68,7 +68,7 @@ Route::get('/welcome', function () {
         ->get();
 
     return view('welcome.index', compact('subscriptionPackages'));
-});
+})->name('welcome');
 
 // Guest 
 Route::middleware('guest')->group(function () {

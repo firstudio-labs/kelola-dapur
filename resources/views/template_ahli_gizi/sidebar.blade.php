@@ -13,14 +13,14 @@
         >
             <span class="app-brand-logo demo">
                 <img
-                    src="{{ asset("logo.png") }}"
+                    src="{{ asset("logo_kelola_dapur_black.png") }}"
                     alt="Logo"
                     style="height: 45px; width: auto"
                 />
             </span>
-            <span class="app-brand-text demo fw-bolder ms-4 fs-3">
+            {{-- <span class="app-brand-text demo fw-bolder ms-4 fs-3">
                 Ahli Gizi
-            </span>
+            </span> --}}
         </a>
 
         <!-- Desktop Toggle Button -->
@@ -782,43 +782,6 @@
             });
         }
 
-        // Enhanced hover functionality for desktop with animation
-        if (sidebar) {
-            let hoverTimeout;
-            let isUserCollapsed = false; // Track if user manually collapsed
-
-            sidebar.addEventListener('mouseenter', function () {
-                if (window.innerWidth >= 992) {
-                    // Only active on desktop
-                    clearTimeout(hoverTimeout);
-
-                    // Check if user manually collapsed
-                    const savedState = localStorage.getItem('sidebarCollapsed');
-                    isUserCollapsed = savedState === 'true';
-
-                    // Always expand on hover
-                    sidebar.classList.remove('collapsed');
-                    layoutPage.classList.remove('sidebar-collapsed');
-                }
-            });
-
-            sidebar.addEventListener('mouseleave', function () {
-                if (window.innerWidth >= 992) {
-                    // Only active on desktop
-                    // Add delay before collapsing
-                    hoverTimeout = setTimeout(function () {
-                        // Only collapse if user had it collapsed or if it was auto-collapsed
-                        const savedState =
-                            localStorage.getItem('sidebarCollapsed');
-                        if (savedState === 'true' || isUserCollapsed) {
-                            sidebar.classList.add('collapsed');
-                            layoutPage.classList.add('sidebar-collapsed');
-                        }
-                    }, 300); // 300ms delay before collapsing
-                }
-            });
-        }
-
         // Mobile toggle functionality
         if (mobileMenuToggle) {
             mobileMenuToggle.addEventListener('click', function () {
@@ -838,17 +801,13 @@
             });
         }
 
-        // Restore sidebar state from localStorage - Start collapsed by default
+        // Restore sidebar state from localStorage - Start expanded by default on desktop
         const savedState = localStorage.getItem('sidebarCollapsed');
         if (window.innerWidth >= 992) {
-            // Default to collapsed state on desktop for hover animation
-            sidebar.classList.add('collapsed');
-            layoutPage.classList.add('sidebar-collapsed');
-
-            // If user previously had it expanded, keep it collapsed but remember the preference
-            if (savedState !== 'false') {
-                localStorage.setItem('sidebarCollapsed', 'true');
-            }
+            // Ensure sidebar is expanded by default on desktop
+            sidebar.classList.remove('collapsed');
+            layoutPage.classList.remove('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', 'false');
         }
 
         // Handle submenu toggles - only allow when subscription is active
@@ -857,16 +816,12 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Don't open submenu if sidebar is collapsed (except during hover)
+                // Don't open submenu if sidebar is collapsed (desktop)
                 if (
                     sidebar.classList.contains('collapsed') &&
                     window.innerWidth >= 992
                 ) {
-                    // During hover, sidebar will be expanded, so allow submenu toggle
-                    const isHovering = sidebar.matches(':hover');
-                    if (!isHovering) {
-                        return;
-                    }
+                    return;
                 }
 
                 const menuItem = this.closest('.menu-item');
@@ -942,9 +897,9 @@
                 sidebar.classList.remove('show');
                 layoutOverlay.style.display = 'none';
 
-                // Apply hover-based collapsed state for desktop
-                sidebar.classList.add('collapsed');
-                layoutPage.classList.add('sidebar-collapsed');
+                // Ensure sidebar is expanded on desktop
+                sidebar.classList.remove('collapsed');
+                layoutPage.classList.remove('sidebar-collapsed');
             } else {
                 // Mobile mode
                 sidebar.classList.remove('collapsed');

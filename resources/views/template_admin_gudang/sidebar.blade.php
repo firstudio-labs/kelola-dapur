@@ -1,3 +1,4 @@
+```php
 <aside
     id="layout-menu"
     class="layout-menu menu-vertical menu bg-menu-theme d-none d-lg-block"
@@ -13,13 +14,10 @@
         >
             <span class="app-brand-logo demo">
                 <img
-                    src="{{ asset("logo.png") }}"
+                    src="{{ asset('logo_kelola_dapur_black.png') }}"
                     alt="Logo"
                     style="height: 45px; width: auto"
                 />
-            </span>
-            <span class="app-brand-text demo fw-bolder ms-4 fs-3">
-                Admin Gudang
             </span>
         </a>
 
@@ -45,7 +43,7 @@
 
     <!-- Menu Container with flex layout -->
     <div class="menu-container d-flex flex-column h-100">
-        <!-- User Profile Section - Moved to Top of Menu -->
+        <!-- User Profile Section -->
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a
@@ -62,29 +60,27 @@
                 >
                     <div class="avatar avatar-online me-3">
                         <img
-                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
+                            src="{{ asset('admin/assets/img/avatars/1.png') }}"
                             alt
                             class="w-px-40 h-auto rounded-circle"
                         />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
-                            {{ auth()->user()->nama ?? "Unknown" }}
+                            {{ auth()->user()->nama ?? 'Unknown' }}
                         </div>
                         <small class="text-muted">
-                            {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
+                            {{ ucfirst(str_replace('_', ' ', session('role_type', 'Unknown'))) }}
                         </small>
-                        @if (session("subscription_status") && session("subscription_status") !== "active")
+                        @if (session('subscription_status') && session('subscription_status') !== 'active')
                             <small class="text-warning d-block">
                                 <i class="bx bx-warning-alt bx-xs"></i>
-                                @if (session("subscription_status") === "expired")
+                                @if (session('subscription_status') === 'expired')
                                     Subscription Expired
-                                @elseif (session("subscription_status") === "expiring_soon")
-                                    Expires in
-                                    {{ session("subscription_days_left", 0) }}
-                                    days
+                                @elseif (session('subscription_status') === 'expiring_soon')
+                                    Expires in {{ session('subscription_days_left', 0) }} days
                                 @else
-                                    {{ ucfirst(str_replace("_", " ", session("subscription_status"))) }}
+                                    {{ ucfirst(str_replace('_', ' ', session('subscription_status'))) }}
                                 @endif
                             </small>
                         @endif
@@ -98,7 +94,7 @@
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
                                         <img
-                                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
+                                            src="{{ asset('admin/assets/img/avatars/1.png') }}"
                                             alt
                                             class="w-px-40 h-auto rounded-circle"
                                         />
@@ -106,19 +102,17 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <span class="fw-semibold d-block">
-                                        {{ auth()->user()->nama ?? "Unknown" }}
+                                        {{ auth()->user()->nama ?? 'Unknown' }}
                                     </span>
                                     <small class="text-muted">
-                                        {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
+                                        {{ ucfirst(str_replace('_', ' ', session('role_type', 'Unknown'))) }}
                                     </small>
-                                    @if (session("subscription_end"))
+                                    @if (session('subscription_end'))
                                         <small class="text-info d-block">
-                                            Dapur:
-                                            {{ session("dapur_name") ?? "Tidak Tersedia" }}
+                                            Dapur: {{ session('dapur_name', 'Tidak Tersedia') }}
                                         </small>
                                         <small class="text-muted d-block">
-                                            Expires:
-                                            {{ \Carbon\Carbon::parse(session("subscription_end"))->format("d M Y") }}
+                                            Expires: {{ session('subscription_end') ? \Carbon\Carbon::parse(session('subscription_end'))->format('d M Y') : 'N/A' }}
                                         </small>
                                     @endif
                                 </div>
@@ -129,7 +123,7 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <form action="{{ route("logout") }}" method="POST">
+                        <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <button type="submit" class="dropdown-item">
                                 <i class="bx bx-power-off me-2"></i>
@@ -142,9 +136,9 @@
         </div>
 
         @php
-            $isSubscriptionActive = session("is_subscription_active", false);
-            $subscriptionStatus = session("subscription_status");
-            $idDapur = session("id_dapur");
+            $isSubscriptionActive = session('is_subscription_active', false);
+            $subscriptionStatus = session('subscription_status', null);
+            $idDapur = session('id_dapur', $dapur->id_dapur ?? null); // Cocokkan dengan $dapur dari controller
         @endphp
 
         <!-- Subscription Status Alert -->
@@ -158,16 +152,15 @@
                     <div class="d-flex align-items-start">
                         <i class="bx bx-info-circle me-2 mt-1"></i>
                         <div>
-                            @if ($subscriptionStatus === "expired")
+                            @if ($subscriptionStatus === 'expired')
                                 <strong>Subscription Expired!</strong>
                                 <br />
                                 <small>Contact Kepala Dapur to renew</small>
-                            @elseif ($subscriptionStatus === "expiring_soon")
+                            @elseif ($subscriptionStatus === 'expiring_soon')
                                 <strong>Subscription Expiring!</strong>
                                 <br />
                                 <small>
-                                    {{ session("subscription_days_left", 0) }}
-                                    days remaining
+                                    {{ session('subscription_days_left', 0) }} days remaining
                                 </small>
                             @else
                                 <strong>Limited Access</strong>
@@ -184,10 +177,10 @@
         <ul class="menu-inner py-1 flex-grow-1">
             <!-- Dashboard - Always accessible -->
             <li
-                class="menu-item {{ request()->routeIs("admin-gudang.dashboard") ? "active" : "" }}"
+                class="menu-item {{ request()->routeIs('admin-gudang.dashboard') ? 'active' : '' }}"
             >
                 <a
-                    href="{{ route("admin-gudang.dashboard", ["dapur" => $idDapur]) }}"
+                    href="{{ route('admin-gudang.dashboard', ['dapur' => $idDapur]) }}"
                     class="menu-link"
                 >
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -203,7 +196,7 @@
 
                 <!-- Kelola Stok -->
                 <li
-                    class="menu-item {{ request()->routeIs("admin-gudang.stock.*") ? "active open" : "" }}"
+                    class="menu-item {{ request()->routeIs('admin-gudang.stock.*') ? 'active open' : '' }}"
                 >
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-package"></i>
@@ -211,93 +204,13 @@
                     </a>
                     <ul class="menu-sub">
                         <li
-                            class="menu-item {{ request()->routeIs("admin-gudang.stock.index") ? "active" : "" }}"
+                            class="menu-item {{ request()->routeIs('admin-gudang.stock.index') ? 'active' : '' }}"
                         >
                             <a
-                                href="{{ route("admin-gudang.stock.index", ["dapur" => $idDapur]) }}"
+                                href="{{ route('admin-gudang.stock.index', ['dapur' => $idDapur]) }}"
                                 class="menu-link"
                             >
                                 <div data-i18n="Daftar Stok">Daftar Stok</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs("admin-gudang.stock.create") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("admin-gudang.stock.create", ["dapur" => $idDapur]) }}"
-                                class="menu-link"
-                            >
-                                <div data-i18n="Tambah Stok">Tambah Stok</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- Permintaan Stok -->
-                <li
-                    class="menu-item {{ request()->routeIs("admin-gudang.stock-requests.*") ? "active open" : "" }}"
-                >
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-list-ul"></i>
-                        <div data-i18n="Permintaan Stok">Permintaan Stok</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li
-                            class="menu-item {{ request()->routeIs("admin-gudang.stock-requests.index") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("admin-gudang.stock-requests.index", ["dapur" => $idDapur]) }}"
-                                class="menu-link"
-                            >
-                                <div data-i18n="Daftar Permintaan">
-                                    Daftar Permintaan
-                                </div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs("admin-gudang.stock-requests.pending") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("admin-gudang.stock-requests.pending", ["dapur" => $idDapur]) }}"
-                                class="menu-link"
-                            >
-                                <div data-i18n="Permintaan Pending">
-                                    Permintaan Pending
-                                </div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- Laporan Stok -->
-                <li
-                    class="menu-item {{ request()->routeIs("admin-gudang.reports.*") ? "active open" : "" }}"
-                >
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-chart"></i>
-                        <div data-i18n="Laporan Stok">Laporan Stok</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li
-                            class="menu-item {{ request()->routeIs("admin-gudang.reports.stock") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("admin-gudang.reports.stock", ["dapur" => $idDapur]) }}"
-                                class="menu-link"
-                            >
-                                <div data-i18n="Laporan Stok">Laporan Stok</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs("admin-gudang.reports.usage") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("admin-gudang.reports.usage", ["dapur" => $idDapur]) }}"
-                                class="menu-link"
-                            >
-                                <div data-i18n="Laporan Pemakaian">
-                                    Laporan Pemakaian
-                                </div>
                             </a>
                         </li>
                     </ul>
@@ -313,9 +226,9 @@
                 <!-- Disabled menu items with tooltips -->
                 @php
                     $disabledMenus = [
-                        "Kelola Stok" => "bx-package",
-                        "Permintaan Stok" => "bx-list-ul",
-                        "Laporan Stok" => "bx-chart",
+                        'Kelola Stok' => 'bx-package',
+                        'Permintaan Stok' => 'bx-list-ul',
+                        'Laporan Stok' => 'bx-chart',
                     ];
                 @endphp
 
@@ -342,511 +255,20 @@
     </div>
 </aside>
 
-<!-- Mobile Menu Toggle Button (tampil hanya di mobile) -->
-<button
-    class="btn btn-primary d-lg-none position-fixed"
-    id="mobileMenuToggle"
-    style="
-        top: 10px;
-        left: 10px;
-        z-index: 1050;
-        border-radius: 4px;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-    "
->
-    <i class="bx bx-chevron-right bx-sm align-middle"></i>
-</button>
-
-<!-- Overlay untuk mobile -->
-<div
-    class="layout-overlay d-lg-none"
-    id="layoutOverlay"
-    style="display: none"
-></div>
-
-<!-- Subscription Expired Modal -->
-<div
-    class="modal fade"
-    id="subscriptionExpiredModal"
-    tabindex="-1"
-    aria-labelledby="subscriptionExpiredModalLabel"
-    aria-hidden="true"
->
-    <div class="modal-dialog modal-dialog-centered">
-        <div
-            class="modal-content border-0 shadow-lg"
-            style="border-radius: 0.5rem; overflow: hidden"
-        >
-            <div class="modal-header bg-gradient-danger text-white p-4">
-                <div class="d-flex align-items-center">
-                    <i class="bx bx-error-circle bx-md me-3"></i>
-                    <h5
-                        class="modal-title mb-0"
-                        id="subscriptionExpiredModalLabel"
-                    >
-                        Subscription Expired
-                    </h5>
-                </div>
-            </div>
-            <div class="modal-body p-4 text-center">
-                <div class="mb-3">
-                    <i
-                        class="bx bx-time-five bx-lg text-danger mb-3 animate__animated animate__pulse animate__infinite"
-                    ></i>
-                    <h6 class="fw-semibold">
-                        Your Dapur Subscription Has Expired
-                    </h6>
-                    <p class="text-muted mb-0">
-                        To regain full access to all features, please contact
-                        your Kepala Dapur to renew the subscription.
-                    </p>
-                </div>
-                <div
-                    class="alert alert-info bg-light-info border-0 d-flex align-items-center justify-content-center p-3"
-                    role="alert"
-                >
-                    <i class="bx bx-info-circle me-2"></i>
-                    <small>
-                        Renew now to continue managing stock and requests!
-                    </small>
-                </div>
-            </div>
-            <div class="modal-footer border-0 p-3 justify-content-center">
-                <button
-                    type="button"
-                    class="btn btn-primary px-4"
-                    data-bs-dismiss="modal"
-                >
-                    Understood
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    /* CSS untuk toggle sidebar - IDENTICAL TO ADMIN GUDANG */
-    .layout-menu {
-        transition:
-            width 0.3s ease-in-out,
-            transform 0.3s ease-in-out;
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: 260px;
-        z-index: 1045;
-    }
-
-    /* Menu container styling */
-    .menu-container {
-        height: calc(100vh - 80px); /* Adjust based on brand height */
-        min-height: 500px; /* Ensure minimum height */
-        overflow-y: auto; /* Allow scrolling if content is too long */
-    }
-
-    /* User profile section styling */
-    .user-profile-section {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        flex-shrink: 0; /* Prevent shrinking */
-        min-height: 60px; /* Reduced height for better positioning */
-    }
-
-    /* Disabled menu items styling */
-    .menu-item.disabled .menu-link {
-        pointer-events: none;
-        opacity: 0.6;
-    }
-
-    .menu-item.disabled:hover .menu-link {
-        background: transparent !important;
-    }
-
-    /* Subscription warning styling */
-    .text-warning {
-        color: #ffc107 !important;
-    }
-
-    .badge.bg-warning {
-        background-color: #ffc107 !important;
-        color: #000 !important;
-    }
-
-    /* Tooltip styling for disabled items */
-    .tooltip {
-        font-size: 0.875rem;
-    }
-
-    /* Alert styling */
-    .alert {
-        border: 1px solid transparent;
-        border-radius: 0.375rem;
-    }
-
-    .alert-warning {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-color: rgba(255, 193, 7, 0.3);
-        color: #856404;
-    }
-
-    /* State ketika sidebar collapsed */
-    .layout-menu.collapsed {
-        width: 78px;
-    }
-
-    /* Sembunyikan text saat collapsed */
-    .layout-menu.collapsed .app-brand-text,
-    .layout-menu.collapsed .menu-header-text,
-    .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
-        display: none;
-    }
-
-    /* User profile collapsed state - hanya tampilkan avatar */
-    .layout-menu.collapsed .user-profile-section .user-info,
-    .layout-menu.collapsed .user-profile-section .user-chevron {
-        display: none;
-    }
-
-    /* Show only avatar when collapsed */
-    .layout-menu.collapsed .user-profile-section .nav-link {
-        justify-content: center;
-        padding: 0.5rem;
-        background: rgba(255, 255, 255, 0.2) !important;
-        border: none;
-    }
-
-    .layout-menu.collapsed .user-profile-section .avatar {
-        margin: 0;
-        transform: scale(1.1); /* Slightly larger avatar for visibility */
-    }
-
-    /* Hide subscription alert when collapsed */
-    .layout-menu.collapsed .alert {
-        display: none;
-    }
-
-    /* Pastikan user profile section tetap terlihat */
-    .layout-menu .user-profile-section {
-        display: block !important;
-        position: relative;
-        z-index: 1;
-        order: -1; /* Move to top of menu-container */
-    }
-
-    /* Posisikan tombol toggle di samping logo saat collapsed */
-    .layout-menu.collapsed .layout-menu-toggle {
-        position: absolute;
-        top: 50%;
-        right: 10px;
-        transform: translateY(-50%);
-        z-index: 1050;
-        background: var(--bs-primary);
-        color: white;
-        border-radius: 4px;
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease-in-out;
-        font-size: 14px;
-    }
-
-    .layout-menu.collapsed .layout-menu-toggle:hover {
-        background: var(--bs-primary-dark);
-    }
-
-    /* Rotate icon saat collapsed */
-    .layout-menu.collapsed .layout-menu-toggle i {
-        transform: rotate(180deg);
-    }
-
-    /* Sembunyikan submenu saat collapsed */
-    .layout-menu.collapsed .menu-sub {
-        display: none !important;
-    }
-
-    /* Submenu styling */
-    .menu-sub {
-        display: none;
-        padding-left: 1rem;
-    }
-
-    .menu-item.open .menu-sub {
-        display: block;
-    }
-
-    /* Mobile styles */
-    @media (max-width: 991.98px) {
-        .layout-menu {
-            transform: translateX(-100%);
-            width: 260px !important;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .layout-menu.show {
-            transform: translateX(0);
-        }
-
-        /* Reset collapsed state di mobile */
-        .layout-menu.collapsed {
-            width: 260px !important;
-            transform: translateX(-100%);
-        }
-
-        .layout-menu.collapsed.show {
-            transform: translateX(0);
-        }
-
-        /* Tampilkan kembali semua elemen di mobile */
-        .layout-menu.collapsed .app-brand-text,
-        .layout-menu.collapsed .menu-header-text,
-        .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
-            display: block;
-        }
-
-        /* Show alert in mobile even when collapsed */
-        .layout-menu.collapsed .alert {
-            display: block;
-        }
-
-        /* Mobile user profile styling */
-        .layout-menu.collapsed .user-profile-section .user-info,
-        .layout-menu.collapsed .user-profile-section .user-chevron {
-            display: block;
-        }
-
-        .layout-menu.collapsed .user-profile-section .nav-link {
-            justify-content: flex-start;
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.15) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .layout-menu.collapsed .user-profile-section .avatar {
-            margin-right: 0.75rem;
-            transform: none;
-        }
-
-        .layout-menu.collapsed .app-brand {
-            justify-content: space-between;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        /* Reset tombol toggle di mobile */
-        .layout-menu.collapsed .layout-menu-toggle {
-            position: static;
-            background: transparent;
-            color: inherit;
-            border-radius: 0;
-            width: auto;
-            height: auto;
-            display: flex;
-            transform: none;
-            font-size: inherit;
-            right: auto;
-            top: auto;
-        }
-
-        .layout-menu.collapsed .layout-menu-toggle i {
-            transform: none;
-        }
-
-        .layout-menu.collapsed .app-brand {
-            justify-content: space-between;
-            position: static;
-        }
-
-        .layout-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-        }
-
-        /* Style tombol mobile agar mirip desktop */
-        #mobileMenuToggle {
-            background: var(--bs-primary);
-            color: white;
-            transition: all 0.3s ease-in-out;
-        }
-
-        #mobileMenuToggle:hover {
-            background: var(--bs-primary-dark);
-        }
-
-        /* Rotate ikon saat sidebar terbuka di mobile */
-        .layout-menu.show + #mobileMenuToggle i {
-            transform: rotate(180deg);
-        }
-    }
-
-    /* Adjust main content */
-    .layout-page {
-        padding-left: 260px;
-        transition: padding-left 0.3s ease-in-out;
-    }
-
-    .layout-page.sidebar-collapsed {
-        padding-left: 78px;
-    }
-
-    @media (max-width: 991.98px) {
-        .layout-page {
-            padding-left: 0 !important;
-        }
-    }
-
-    /* Modal styling */
-    .modal-content {
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .modal-header.bg-gradient-danger {
-        background: linear-gradient(45deg, #dc3545, #e4606d);
-        border-bottom: none;
-    }
-
-    .modal-footer {
-        border-top: none;
-    }
-
-    .modal-body {
-        padding: 1.5rem;
-    }
-
-    /* Additional Sneat-inspired modal styling */
-    .modal-content {
-        transform: scale(0.95);
-        transition:
-            transform 0.3s ease-in-out,
-            opacity 0.3s ease-in-out;
-        opacity: 0;
-    }
-
-    .modal.fade.show .modal-content {
-        transform: scale(1);
-        opacity: 1;
-    }
-
-    .modal-header .btn-close {
-        filter: brightness(0) invert(1);
-        transition: transform 0.2s ease;
-    }
-
-    .modal-header .btn-close:hover {
-        transform: scale(1.2);
-    }
-
-    .modal-body .alert.bg-light-info {
-        background-color: rgba(0, 123, 255, 0.1) !important;
-        border-radius: 0.375rem;
-        color: #0057b8;
-    }
-
-    .modal-body .bx-time-five {
-        font-size: 2.5rem;
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-
-    .modal-footer .btn-primary {
-        background: #696cff;
-        border-color: #696cff;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .modal-footer .btn-primary:hover {
-        background: #5f61e6;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-</style>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const sidebar = document.getElementById('layout-menu');
+        const layoutPage = document.querySelector('.layout-page');
         const sidebarToggle = document.getElementById('sidebarToggle');
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const layoutOverlay = document.getElementById('layoutOverlay');
-        const layoutPage =
-            document.querySelector('.layout-page') || document.body;
+        const mobileMenuToggle = document.querySelector('.menu-toggle-mobile'); // Asumsi ada jika diperlukan
+        const layoutOverlay = document.querySelector('.layout-overlay');
 
-        // Initialize tooltips for disabled menu items
-        if (typeof bootstrap !== 'undefined') {
-            const tooltipTriggerList = [].slice.call(
-                document.querySelectorAll('[data-bs-toggle="tooltip"]'),
-            );
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        }
-
-        // Desktop toggle functionality
+        // Sidebar toggle functionality
         if (sidebarToggle) {
             sidebarToggle.addEventListener('click', function () {
                 sidebar.classList.toggle('collapsed');
                 layoutPage.classList.toggle('sidebar-collapsed');
-
-                // Simpan state ke localStorage
-                const isCollapsed = sidebar.classList.contains('collapsed');
-                localStorage.setItem('sidebarCollapsed', isCollapsed);
-
-                // Tutup semua submenu saat sidebar collapsed
-                if (isCollapsed) {
-                    document
-                        .querySelectorAll('.menu-item.open')
-                        .forEach(function (item) {
-                            item.classList.remove('open');
-                        });
-                }
-            });
-        }
-
-        // Enhanced hover functionality for desktop with animation
-        if (sidebar) {
-            let hoverTimeout;
-            let isUserCollapsed = false; // Track if user manually collapsed
-
-            sidebar.addEventListener('mouseenter', function () {
-                if (window.innerWidth >= 992) {
-                    // Only active on desktop
-                    clearTimeout(hoverTimeout);
-
-                    // Check if user manually collapsed
-                    const savedState = localStorage.getItem('sidebarCollapsed');
-                    isUserCollapsed = savedState === 'true';
-
-                    // Always expand on hover
-                    sidebar.classList.remove('collapsed');
-                    layoutPage.classList.remove('sidebar-collapsed');
-                }
-            });
-
-            sidebar.addEventListener('mouseleave', function () {
-                if (window.innerWidth >= 992) {
-                    // Only active on desktop
-                    // Add delay before collapsing
-                    hoverTimeout = setTimeout(function () {
-                        // Only collapse if user had it collapsed or if it was auto-collapsed
-                        const savedState =
-                            localStorage.getItem('sidebarCollapsed');
-                        if (savedState === 'true' || isUserCollapsed) {
-                            sidebar.classList.add('collapsed');
-                            layoutPage.classList.add('sidebar-collapsed');
-                        }
-                    }, 300); // 300ms delay before collapsing
-                }
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
             });
         }
 
@@ -872,7 +294,7 @@
         // Restore sidebar state from localStorage - Start collapsed by default
         const savedState = localStorage.getItem('sidebarCollapsed');
         if (window.innerWidth >= 992) {
-            // Default to collapsed state on desktop for hover animation
+            // Default to collapsed state on desktop
             sidebar.classList.add('collapsed');
             layoutPage.classList.add('sidebar-collapsed');
 
@@ -887,18 +309,6 @@
             toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-
-                // Don't open submenu if sidebar is collapsed (except during hover)
-                if (
-                    sidebar.classList.contains('collapsed') &&
-                    window.innerWidth >= 992
-                ) {
-                    // During hover, sidebar will be expanded, so allow submenu toggle
-                    const isHovering = sidebar.matches(':hover');
-                    if (!isHovering) {
-                        return;
-                    }
-                }
 
                 const menuItem = this.closest('.menu-item');
 
@@ -950,8 +360,7 @@
 
         // Auto-show modal if completely expired
         const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
-        const isSubscriptionActive =
-            {{ $isSubscriptionActive ? "true" : "false" }};
+        const isSubscriptionActive = {{ $isSubscriptionActive ? 'true' : 'false' }};
 
         if (!isSubscriptionActive && subscriptionStatus === 'expired') {
             setTimeout(function () {
@@ -972,8 +381,6 @@
                 // Desktop mode
                 sidebar.classList.remove('show');
                 layoutOverlay.style.display = 'none';
-
-                // Apply hover-based collapsed state for desktop
                 sidebar.classList.add('collapsed');
                 layoutPage.classList.add('sidebar-collapsed');
             } else {
@@ -983,14 +390,13 @@
             }
         });
 
-        // Initialize any additional subscription-related functionality
+        // Initialize subscription-related features
         initializeSubscriptionFeatures();
     });
 
     // Function to handle subscription-related features for Admin Gudang
     function initializeSubscriptionFeatures() {
-        const isSubscriptionActive =
-            {{ $isSubscriptionActive ? "true" : "false" }};
+        const isSubscriptionActive = {{ $isSubscriptionActive ? 'true' : 'false' }};
         const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
 
         // Add warning styles to user profile when subscription issues exist
@@ -1011,15 +417,51 @@
         }
     }
 
-    // Add CSS keyframes for animations
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes pulse-warning {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
+    // Additional utility functions for Admin Gudang
+    function showSubscriptionNotification() {
+        const subscriptionModal = new bootstrap.Modal(
+            document.getElementById('subscriptionExpiredModal'),
+            {
+                backdrop: 'static',
+                keyboard: false,
+            },
+        );
+        subscriptionModal.show();
+    }
 
+    // Export functions for external use
+    window.showSubscriptionNotification = showSubscriptionNotification;
+
+    // Initialize subscription status monitoring for Admin Gudang
+    document.addEventListener('DOMContentLoaded', function () {
+        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+        const daysLeft = {{ session('subscription_days_left', 0) }};
+
+        // Show expiration warning for Admin Gudang users
+        if (subscriptionStatus === 'expiring_soon' && daysLeft <= 5) {
+            setTimeout(function () {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Subscription Expiring Soon!',
+                        html: `
+                            <div class="text-center">
+                                <i class="bx bx-time bx-lg text-warning mb-3"></i>
+                                <p>The dapur subscription expires in <strong>${daysLeft}</strong> day${daysLeft !== 1 ? 's' : ''}.</p>
+                                <p class="text-muted">Please inform the Kepala Dapur to renew before expiration.</p>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#ffc107',
+                    });
+                }
+            }, 3000);
+        }
+    });
+
+    // Add CSS for basic styling without fade animations
+    const style = document.createElement('style');
+    style.textContent = 
         .subscription-expired .menu-link {
             background: rgba(220, 53, 69, 0.1) !important;
             border-left: 3px solid #dc3545;
@@ -1030,35 +472,17 @@
             border-left: 3px solid #ffc107;
         }
 
-        /* Enhanced hover animations */
+        /* Basic transitions for sidebar */
         .layout-menu {
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .layout-menu .menu-link {
-            transition: all 0.2s ease-in-out;
+            transition: background 0.2s ease-in-out;
         }
 
         .layout-menu:not(.collapsed) .menu-link:hover {
-            transform: translateX(4px);
             background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Smooth text reveal animation */
-        .layout-menu.collapsed .app-brand-text,
-        .layout-menu.collapsed .menu-header-text,
-        .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .layout-menu:not(.collapsed) .app-brand-text,
-        .layout-menu:not(.collapsed) .menu-header-text,
-        .layout-menu:not(.collapsed) .menu-link > div:not(.menu-icon) {
-            opacity: 1;
-            transform: translateX(0);
-            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
         }
 
         /* Icon animations */
@@ -1066,7 +490,7 @@
             transition: transform 0.2s ease, color 0.2s ease;
         }
 
-        .layout-menu:hover .menu-icon {
+        .menu-icon:hover {
             transform: scale(1.05);
         }
 
@@ -1074,30 +498,11 @@
         .menu-sub {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            opacity: 0;
+            transition: max-height 0.3s ease-in-out;
         }
 
         .menu-item.open .menu-sub {
             max-height: 500px;
-            opacity: 1;
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-
-        /* Hover effects for disabled items */
-        .menu-item.disabled:hover {
-            transform: translateX(2px);
-            transition: transform 0.2s ease;
-        }
-
-        /* Badge animations */
-        .badge {
-            animation: badge-pulse 2s infinite;
-        }
-
-        @keyframes badge-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
         }
 
         /* User profile hover enhancement */
@@ -1107,7 +512,6 @@
 
         .user-profile-section .nav-link:hover {
             background: rgba(255, 255, 255, 0.25) !important;
-            transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -1132,47 +536,6 @@
             0% { left: -100%; }
             100% { left: 100%; }
         }
-    `;
+    ;
     document.head.appendChild(style);
-
-    // Additional utility functions for Admin Gudang
-    function showSubscriptionNotification() {
-        const subscriptionModal = new bootstrap.Modal(
-            document.getElementById('subscriptionExpiredModal'),
-            {
-                backdrop: 'static',
-                keyboard: false,
-            },
-        );
-        subscriptionModal.show();
-    }
-
-    // Export functions for external use
-    window.showSubscriptionNotification = showSubscriptionNotification;
-
-    // Initialize subscription status monitoring for Admin Gudang
-    document.addEventListener('DOMContentLoaded', function () {
-        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
-        const daysLeft = {{ session("subscription_days_left", 0) }};
-
-        // Show expiration warning for Admin Gudang users
-        if (subscriptionStatus === 'expiring_soon' && daysLeft <= 5) {
-            setTimeout(function () {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: 'Subscription Expiring Soon!',
-                        html: `
-                            <div class="text-center">
-                                <i class="bx bx-time bx-lg text-warning mb-3"></i>
-                                <p>The dapur subscription expires in <strong>${daysLeft}</strong> day${daysLeft !== 1 ? 's' : ''}.</p>
-                                <p class="text-muted">Please inform the Kepala Dapur to renew before expiration.</p>
-                            </div>
-                        `,
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#ffc107',
-                    });
-                }
-            }, 3000); // Show after 3 seconds
-        }
-    });
+</script>

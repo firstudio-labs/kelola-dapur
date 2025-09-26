@@ -58,8 +58,11 @@
         <!-- Helpers -->
         <script src="{{ asset("admin") }}/assets/vendor/js/helpers.js"></script>
         <script src="{{ asset("admin") }}/assets/js/config.js"></script>
+
+        <!-- hCaptcha -->
+        <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     </head>
-    <body style="background-color: #26355d">
+    <body style="background-color: #3758F9">
         <div class="container-xxl">
             <div
                 class="authentication-wrapper authentication-basic container-p-y"
@@ -73,14 +76,14 @@
                                 <a href="/welcome" class="app-brand-link gap-2">
                                     <span class="app-brand-logo demo">
                                         <img
-                                            src="{{ asset("logo.png") }}"
+                                            src="{{ asset("logo_kelola_dapur_black.png") }}"
                                             alt="Logo"
                                             style="height: 60px"
                                         />
                                     </span>
-                                    <span class="demo fw-bolder fs-2">
+                                    {{-- <span class="demo fw-bolder fs-2">
                                         Kelola Dapur
-                                    </span>
+                                    </span> --}}
                                 </a>
                             </div>
 
@@ -133,7 +136,7 @@
 
                             <h4 class="mb-2">Selamat Datang</h4>
                             <p class="mb-4">
-                                Silakan login untuk mengakses dashboard
+                                Silakan login untuk menikmati layanan kami
                             </p>
 
                             <form
@@ -150,13 +153,18 @@
                                     </label>
                                     <input
                                         type="text"
-                                        class="form-control"
+                                        class="form-control @error('login') is-invalid @enderror"
                                         id="login"
                                         name="login"
                                         placeholder="Masukkan username atau email"
                                         value="{{ old("login") }}"
                                         autofocus
                                     />
+                                    @error('login')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Password -->
@@ -168,9 +176,9 @@
                                         <input
                                             type="password"
                                             id="password"
-                                            class="form-control"
+                                            class="form-control @error('password') is-invalid @enderror"
                                             name="password"
-                                            placeholder="••••••••"
+                                            placeholder="********"
                                             aria-describedby="password"
                                         />
                                         <span
@@ -179,14 +187,47 @@
                                             <i class="bx bx-hide"></i>
                                         </span>
                                     </div>
+                                    @error('password')
+                                        <div class="invalid-feedback d-block">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
+
+                                <!-- hCaptcha -->
+                                <div class="mb-3">
+                                    <div class="h-captcha" data-sitekey="{{ config('services.hcaptcha.site_key', env('HCAPTCHA_SITE_KEY')) }}"></div>
+                                    @error('h-captcha-response')
+                                        <div class="text-danger mt-1 small">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+
+                                <!-- Remember Me -->
+                                {{-- <div class="mb-3">
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            id="remember"
+                                            name="remember"
+                                            {{ old('remember') ? 'checked' : '' }}
+                                        />
+                                        <label class="form-check-label" for="remember">
+                                            Ingat saya
+                                        </label>
+                                    </div>
+                                </div> --}}
 
                                 <!-- Submit -->
                                 <div class="mb-3">
                                     <button
                                         class="btn btn-primary d-grid w-100"
                                         type="submit"
+                                        id="loginBtn"
                                     >
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
                                         Sign in
                                     </button>
                                 </div>
@@ -212,5 +253,25 @@
         <script src="{{ asset("admin") }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
         <script src="{{ asset("admin") }}/assets/vendor/js/menu.js"></script>
         <script src="{{ asset("admin") }}/assets/js/main.js"></script>
+
+        <script>
+            // Handle form submission
+            document.getElementById('formAuthentication').addEventListener('submit', function(e) {
+                const submitBtn = document.getElementById('loginBtn');
+                const spinner = submitBtn.querySelector('.spinner-border');
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                spinner.classList.remove('d-none');
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Logging in...';
+            });
+
+            // Reset button state on page load (in case of validation errors)
+            window.addEventListener('load', function() {
+                const submitBtn = document.getElementById('loginBtn');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Sign in';
+            });
+        </script>
     </body>
 </html>

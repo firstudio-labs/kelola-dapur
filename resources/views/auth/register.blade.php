@@ -55,9 +55,12 @@
 
         <script src="{{ asset("admin") }}/assets/vendor/js/helpers.js"></script>
         <script src="{{ asset("admin") }}/assets/js/config.js"></script>
+
+        <!-- hCaptcha -->
+        <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     </head>
 
-    <body style="background-color: #26355d">
+    <body style="background-color: #3758F9">
         <div class="container-xxl">
             <div
                 class="authentication-wrapper authentication-basic container-p-y"
@@ -70,20 +73,67 @@
                                 <a href="/welcome" class="app-brand-link gap-2">
                                     <span class="app-brand-logo demo">
                                         <img
-                                            src="{{ asset("logo.png") }}"
+                                            src="{{ asset("logo_kelola_dapur_black.png") }}"
                                             alt="Logo"
                                             style="height: 60px"
                                         />
                                     </span>
-                                    <span class="demo text-body fw-bolder fs-2">
+                                    {{-- <span class="demo text-body fw-bolder fs-2">
                                         Kelola Dapur
-                                    </span>
+                                    </span> --}}
                                 </a>
                             </div>
                             <!-- /Logo -->
 
+                            <!-- Alert Section -->
+                            @if (session("success"))
+                                <div
+                                    class="alert alert-success alert-dismissible fade show"
+                                    role="alert"
+                                >
+                                    {{ session("success") }}
+                                    <button
+                                        type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                    ></button>
+                                </div>
+                            @endif
+
+                            @if (session("error"))
+                                <div
+                                    class="alert alert-danger alert-dismissible fade show"
+                                    role="alert"
+                                >
+                                    {{ session("error") }}
+                                    <button
+                                        type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                    ></button>
+                                </div>
+                            @endif
+
+                            @if ($errors->any())
+                                <div
+                                    class="alert alert-danger alert-dismissible fade show"
+                                    role="alert"
+                                >
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                    <button
+                                        type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                    ></button>
+                                </div>
+                            @endif
+
                             <h4 class="mb-2">
-                                Bergabung dengan Kelola Dapur 🚀
+                                Bergabung dengan Kelola Dapur
                             </h4>
                             <p class="mb-4">
                                 Daftar sekarang untuk mengelola MBG dapur anda
@@ -303,9 +353,7 @@
                                         name="alamat"
                                         placeholder="Masukkan alamat lengkap"
                                         required
-                                    >
-{{ old("alamat") }}</textarea
-                                    >
+                                    >{{ old("alamat") }}</textarea>
                                     @error("alamat")
                                         <div class="invalid-feedback">
                                             {{ $message }}
@@ -345,7 +393,7 @@
                                             id="password"
                                             class="form-control @error("password") is-invalid @enderror"
                                             name="password"
-                                            placeholder="••••••••••••"
+                                            placeholder="********"
                                             required
                                         />
                                         <span
@@ -353,12 +401,12 @@
                                         >
                                             <i class="bx bx-hide"></i>
                                         </span>
-                                        @error("password")
-                                            <div class="invalid-feedback">
-                                                {{ $message }}
-                                            </div>
-                                        @enderror
                                     </div>
+                                    @error("password")
+                                        <div class="invalid-feedback d-block">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Konfirmasi Password -->
@@ -375,7 +423,7 @@
                                             id="password_confirmation"
                                             class="form-control"
                                             name="password_confirmation"
-                                            placeholder="••••••••••••"
+                                            placeholder="********"
                                             required
                                         />
                                         <span
@@ -386,13 +434,49 @@
                                     </div>
                                 </div>
 
+                                <!-- hCaptcha -->
+                                <div class="mb-3">
+                                    <div class="h-captcha" 
+                                         data-sitekey="{{ config('services.hcaptcha.site_key', env('HCAPTCHA_SITE_KEY')) }}"
+                                         data-theme="light"
+                                         data-size="normal">
+                                    </div>
+                                    @error('h-captcha-response')
+                                        <div class="text-danger mt-2">
+                                            <small>{{ $message }}</small>
+                                        </div>
+                                    @enderror
+                                </div>
+
+                                <!-- Terms Agreement -->
+                                {{-- <div class="mb-3">
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            id="terms"
+                                            name="terms"
+                                            required
+                                            {{ old('terms') ? 'checked' : '' }}
+                                        />
+                                        <label class="form-check-label" for="terms">
+                                            <small>
+                                                Saya setuju dengan 
+                                                <a href="#" target="_blank" class="text-primary">Syarat dan Ketentuan</a> 
+                                                serta 
+                                                <a href="#" target="_blank" class="text-primary">Kebijakan Privasi</a>
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div> --}}
+
                                 <button
+                                    id="registerBtn"
                                     class="btn btn-primary d-grid w-100"
-                                    style="
-                                        background-color: #26355d;
-                                        border-color: #26355d;
-                                    "
+                                    style="background-color: #26355d; border-color: #26355d;"
+                                    type="submit"
                                 >
+                                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
                                     Daftar Sekarang
                                 </button>
                             </form>
@@ -423,6 +507,22 @@
 
         <script>
             $(document).ready(function () {
+                // Handle form submission with loading state
+                $('#formAuthentication').on('submit', function(e) {
+                    const submitBtn = $('#registerBtn');
+                    const spinner = submitBtn.find('.spinner-border');
+                    
+                    // Show loading state
+                    submitBtn.prop('disabled', true);
+                    spinner.removeClass('d-none');
+                    submitBtn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Mendaftar...');
+                });
+
+                // Reset button state on page load (in case of validation errors)
+                const submitBtn = $('#registerBtn');
+                submitBtn.prop('disabled', false);
+                submitBtn.html('Daftar Sekarang');
+
                 // Fetch provinces
                 $.ajax({
                     url: '{{ route("api.wilayah.provinces") }}',
