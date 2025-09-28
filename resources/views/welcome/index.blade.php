@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Kepala Dapur</title>
+        <title>Kelola Dapur</title>
         <link
             href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
             rel="stylesheet"
@@ -15,7 +15,7 @@
         />
         <link
             rel="shortcut icon"
-            href="play-tailwind-1.0.0/assets/images/favicon.png"
+            href="play-tailwind-1.0.0/assets/images/logo/logo_kelola_dapur_white.svg"
             type="image/x-icon"
         />
         <link
@@ -244,7 +244,7 @@
                             <h1
                                 class="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]"
                             >
-                                Mengelola Dapur dengan teratur,ciptakan hasil yang optimal
+                                Mulai Sekarang
                             </h1>
                             <p
                                 class="mx-auto mb-9 max-w-[600px] text-base font-medium text-white sm:text-lg sm:leading-[1.44]"
@@ -1625,7 +1625,7 @@
                                         class="mb-4 sm:mb-8 sm:h-[400px] md:h-[540px] lg:h-[400px] xl:h-[500px]"
                                     >
                                         <img
-                                            src="./play-tailwind-1.0.0/assets/images/about/about-image-01.jpg"
+                                            src="./play-tailwind-1.0.0/assets/images/about/about_keloladapur1.png"
                                             alt="about image"
                                             class="object-cover object-center w-full h-full"
                                         />
@@ -1639,7 +1639,7 @@
                                         class="mb-4 sm:mb-8 sm:h-[220px] md:h-[346px] lg:mb-4 lg:h-[225px] xl:mb-8 xl:h-[310px]"
                                     >
                                         <img
-                                            src="./play-tailwind-1.0.0/assets/images/about/about-image-02.jpg"
+                                            src="./play-tailwind-1.0.0/assets/images/about/about_keloladapur2.png"
                                             alt="about image"
                                             class="object-cover object-center w-full h-full"
                                         />
@@ -1652,17 +1652,17 @@
                                             <span
                                                 class="block text-5xl font-extrabold text-white"
                                             >
-                                                09
+                                                Tingkatkan
                                             </span>
                                             <span
                                                 class="block text-base font-semibold text-white"
                                             >
-                                                We have
+                                                Dapur Yang Anda Kelola
                                             </span>
                                             <span
                                                 class="block text-base font-medium text-white text-opacity-70"
                                             >
-                                                Years of experience
+                                                Lebih Terorganisir Dengan Aplikasi Kami
                                             </span>
                                         </div>
                                         <div>
@@ -2040,12 +2040,12 @@
                             <span
                                 class="block mb-2 text-lg font-semibold text-primary"
                             >
-                                FAQ
+                                Pertanyaan Yang Sering Ditanyakan
                             </span>
                             <h2
                                 class="mb-3 text-3xl font-bold leading-[1.2] text-dark dark:text-white sm:text-4xl md:text-[40px]"
                             >
-                                Any Questions? Look Here
+                                Memikirkan sesuatu? 
                             </h2>
                             <p
                                 class="mx-auto max-w-[485px] text-base text-body-color dark:text-dark-6"
@@ -2188,16 +2188,13 @@
                                 <h3
                                     class="mb-6 text-xl font-semibold text-dark dark:text-white sm:text-2xl lg:text-xl xl:text-2xl"
                                 >
-                                    Is TailGrids Well-documented?
+                                    Apakah ada pembaharuan di masa depan?
                                 </h3>
                                 <p
                                     class="text-base text-body-color dark:text-dark-6"
                                 >
-                                    It takes 2-3 weeks to get your first blog
-                                    post ready. That includes the in-depth
-                                    research & creation of your monthly content
-                                    ui/ux strategy that we do writing your first
-                                    blog post.
+                                    Tentu saja akan terdapat pembaruan fitur di masa mendatang, terutama tentang kebutuhan dapur
+                                    yang akan memudahkan pengelolaan dapur anda.
                                 </p>
                             </div>
                         </div>
@@ -2789,102 +2786,116 @@
         </section>
         <!-- ====== FAQ Section End -->
 
-        <!-- ====== Contact Start ====== -->
-        <section id="contact" class="relative py-20 md:py-[120px]">
-            <div
-                class="absolute top-0 left-0 w-full h-full -z-1 dark:bg-dark"
-            ></div>
-            <div
-                class="absolute left-0 top-0 -z-1 h-1/2 w-full bg-[#E9F9FF] dark:bg-dark-700 lg:h-[45%] xl:h-1/2"
-            ></div>
-            <div class="container px-4 mx-auto">
-                <div class="flex flex-wrap items-center -mx-4">
-                    <div class="w-full px-4 lg:w-7/12 xl:w-8/12">
-                        <div class="ud-contact-content-wrapper">
-                            <div class="ud-contact-title mb-12 lg:mb-[150px]">
-                                <span
-                                    class="block mb-6 text-base font-medium text-dark dark:text-white"
-                                >
-                                    CONTACT US
-                                </span>
-                                <h2
-                                    class="max-w-[260px] text-[35px] font-semibold leading-[1.14] text-dark dark:text-white"
-                                >
-                                    Let's talk about your problem.
-                                </h2>
+      <!-- ====== Contact Start ====== -->
+    <section id="contact" class="relative py-20 md:py-[120px]">
+        <!-- Single color background using original colors -->
+        <div class="absolute top-0 left-0 w-full h-full -z-10 bg-[#E9F9FF] dark:bg-dark-700"></div>
+        
+        <div class="container px-4 mx-auto">
+            <div class="flex flex-wrap items-start -mx-4">
+                <!-- Left side - Title -->
+                <div class="w-full px-4 lg:w-7/12 xl:w-8/12">
+                    <div class="ud-contact-content-wrapper">
+                        <div class="ud-contact-title mb-12 lg:mb-[150px]">
+                            <span class="block mb-6 text-base font-medium text-dark dark:text-white">
+                                HUBUNGI KAMI
+                            </span>
+                            <h2 class="max-w-[275px] text-[35px] font-semibold leading-[1.14] text-dark dark:text-white">
+                                Ada pertanyaan? kami bantu omzet dapur Anda dengan cara yang lebih sederhana.
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right side - Contact Info -->
+                <div class="w-full px-4 lg:w-5/12 xl:w-4/12">
+                    <div class="space-y-12">
+                        <!-- Our Location -->
+                        <div class="flex w-full max-w-full">
+                            <div class="mr-6 text-[32px] text-primary dark:text-white transition-colors">
+                                <svg width="29" height="35" viewBox="0 0 29 35" class="fill-current">
+                                    <path d="M14.5 0.710938C6.89844 0.710938 0.664062 6.72656 0.664062 14.0547C0.664062 19.9062 9.03125 29.5859 12.6406 33.5234C13.1328 34.0703 13.7891 34.3437 14.5 34.3437C15.2109 34.3437 15.8672 34.0703 16.3594 33.5234C19.9688 29.6406 28.3359 19.9062 28.3359 14.0547C28.3359 6.67188 22.1016 0.710938 14.5 0.710938ZM14.9375 32.2109C14.6641 32.4844 14.2812 32.4844 14.0625 32.2109C11.3828 29.3125 2.57812 19.3594 2.57812 14.0547C2.57812 7.71094 7.9375 2.625 14.5 2.625C21.0625 2.625 26.4219 7.76562 26.4219 14.0547C26.4219 19.3594 17.6172 29.2578 14.9375 32.2109Z"/>
+                                    <path d="M14.5 8.58594C11.2734 8.58594 8.59375 11.2109 8.59375 14.4922C8.59375 17.7188 11.2187 20.3984 14.5 20.3984C17.7812 20.3984 20.4062 17.7734 20.4062 14.4922C20.4062 11.2109 17.7266 8.58594 14.5 8.58594ZM14.5 18.4297C12.3125 18.4297 10.5078 16.625 10.5078 14.4375C10.5078 12.25 12.3125 10.4453 14.5 10.4453C16.6875 10.4453 18.4922 12.25 18.4922 14.4375C18.4922 16.625 16.6875 18.4297 14.5 18.4297Z"/>
+                                </svg>
                             </div>
-                            <div
-                                class="flex flex-wrap justify-between mb-12 lg:mb-0"
-                            >
-                                <div class="mb-8 flex w-[330px] max-w-full">
-                                    <div class="mr-6 text-[32px] text-primary">
-                                        <svg
-                                            width="29"
-                                            height="35"
-                                            viewBox="0 0 29 35"
-                                            class="fill-current"
-                                        >
-                                            <path
-                                                d="M14.5 0.710938C6.89844 0.710938 0.664062 6.72656 0.664062 14.0547C0.664062 19.9062 9.03125 29.5859 12.6406 33.5234C13.1328 34.0703 13.7891 34.3437 14.5 34.3437C15.2109 34.3437 15.8672 34.0703 16.3594 33.5234C19.9688 29.6406 28.3359 19.9062 28.3359 14.0547C28.3359 6.67188 22.1016 0.710938 14.5 0.710938ZM14.9375 32.2109C14.6641 32.4844 14.2812 32.4844 14.0625 32.2109C11.3828 29.3125 2.57812 19.3594 2.57812 14.0547C2.57812 7.71094 7.9375 2.625 14.5 2.625C21.0625 2.625 26.4219 7.76562 26.4219 14.0547C26.4219 19.3594 17.6172 29.2578 14.9375 32.2109Z"
-                                            />
-                                            <path
-                                                d="M14.5 8.58594C11.2734 8.58594 8.59375 11.2109 8.59375 14.4922C8.59375 17.7188 11.2187 20.3984 14.5 20.3984C17.7812 20.3984 20.4062 17.7734 20.4062 14.4922C20.4062 11.2109 17.7266 8.58594 14.5 8.58594ZM14.5 18.4297C12.3125 18.4297 10.5078 16.625 10.5078 14.4375C10.5078 12.25 12.3125 10.4453 14.5 10.4453C16.6875 10.4453 18.4922 12.25 18.4922 14.4375C18.4922 16.625 16.6875 18.4297 14.5 18.4297Z"
-                                            />
+                            <div>
+                                <h5 class="mb-[18px] text-lg font-semibold text-dark dark:text-white">
+                                    Alamat
+                                </h5>
+                                <p class="mb-4 text-base text-body-color dark:text-dark-6">
+                                    Jl. Jalan No. 123, Semarang
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- How Can We Help -->
+                        <div class="flex w-full max-w-full">
+                            <div class="mr-6 text-[32px] text-primary dark:text-white transition-colors">
+                                <svg width="34" height="25" viewBox="0 0 34 25" class="fill-current">
+                                    <path d="M30.5156 0.960938H3.17188C1.42188 0.960938 0 2.38281 0 4.13281V20.9219C0 22.6719 1.42188 24.0938 3.17188 24.0938H30.5156C32.2656 24.0938 33.6875 22.6719 33.6875 20.9219V4.13281C33.6875 2.38281 32.2656 0.960938 30.5156 0.960938ZM30.5156 2.875C30.7891 2.875 31.0078 2.92969 31.2266 3.09375L17.6094 11.3516C17.1172 11.625 16.5703 11.625 16.0781 11.3516L2.46094 3.09375C2.67969 2.98438 2.89844 2.875 3.17188 2.875H30.5156ZM30.5156 22.125H3.17188C2.51562 22.125 1.91406 21.5781 1.91406 20.8672V5.00781L15.0391 12.9922C15.5859 13.3203 16.1875 13.4844 16.7891 13.4844C17.3906 13.4844 17.9922 13.3203 18.5391 12.9922L31.6641 5.00781V20.8672C31.7734 21.5781 31.1719 22.125 30.5156 22.125Z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h5 class="mb-[18px] text-lg font-semibold text-dark dark:text-white">
+                                    Email
+                                </h5>
+                                {{-- <p class="text-base text-body-color dark:text-dark-6">
+                                    support@keloladapur.com
+                                </p> --}}
+                                <p class="mt-1 mb-4 text-base text-body-color dark:text-dark-6">
+                                    support@keloladapur.com
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Connect With Us -->
+                        <div class="flex w-full max-w-full">
+                            <div class="mr-6 text-[32px] text-primary dark:text-white transition-colors">
+                                <svg width="32" height="32" viewBox="0 0 24 24" class="fill-current">
+                                    <path d="M16.36,14c0.08-0.66,0.14-1.32,0.14-2c0-0.68-0.06-1.34-0.14-2h3.38c0.16,0.64,0.26,1.31,0.26,2s-0.1,1.36-0.26,2 H16.36z M14.59,19.56c0.19-0.45,0.36-0.96,0.49-1.56h2.64C16.74,18.92,15.74,19.34,14.59,19.56z M14.34,14 c0.08-0.66,0.14-1.32,0.14-2c0-0.68-0.06-1.34-0.14-2H9.66c-0.08,0.66-0.14,1.32-0.14,2c0,0.68,0.06,1.34,0.14,2H14.34z M12,19.96c-0.83-1.2-1.5-2.53-1.91-3.96h3.82C13.5,17.43,12.83,18.76,12,19.96z M8,8H5.08C6.03,6.8,7.57,5.9,9.4,5.35 C8.95,6.05,8.59,6.85,8.32,7.69C8.22,7.8,8.11,7.9,8,8z M5.08,16H8c0.11,0.26,0.22,0.49,0.32,0.69 c0.27,0.8,0.63,1.6,1.08,2.31C7.57,18.1,6.03,17.2,5.08,16z M4.26,14C4.1,13.36,4,12.69,4,12s0.1-1.36,0.26-2h3.38 c-0.08,0.66-0.14,1.32-0.14,2c0,0.68,0.06,1.34,0.14,2H4.26z M12,4.03c0.83,1.2,1.5,2.54,1.91,3.97h-3.82 C10.5,6.57,11.17,5.23,12,4.03z M18.92,8h-2.95c-0.32-1.25-0.78-2.45-1.38-3.56C15.84,5.23,17.66,6.45,18.92,8z M6.4,4.44 C5.81,5.55,5.35,6.75,5.03,8H2.08C3.34,6.45,5.16,5.23,6.4,4.44z M2.08,16H5c0.32,1.25,0.78,2.45,1.38,3.56 C5.16,18.77,3.34,17.55,2.08,16z M9.4,18.65c0.19-0.45,0.36-0.96,0.49-1.56H7.25C7.74,18.01,8.59,18.42,9.4,18.65z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h5 class="mb-[18px] text-lg font-semibold text-dark dark:text-white">
+                                    Sosial Media
+                                </h5>
+                                <!-- Instagram -->
+                                <div class="mb-1 flex items-center">
+                                    <a href="#" class="text-primary dark:text-white transition-colors mr-3">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" class="fill-current">
+                                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                                         </svg>
-                                    </div>
-                                    <div>
-                                        <h5
-                                            class="mb-[18px] text-lg font-semibold text-dark dark:text-white"
-                                        >
-                                            Our Location
-                                        </h5>
-                                        <p
-                                            class="text-base text-body-color dark:text-dark-6"
-                                        >
-                                            401 Broadway, 24th Floor, Orchard
-                                            Cloud View, London
-                                        </p>
-                                    </div>
+                                    </a>
+                                    <span class="text-base text-body-color dark:text-dark-6">Instagram</span>
                                 </div>
-                                <div class="mb-8 flex w-[330px] max-w-full">
-                                    <div class="mr-6 text-[32px] text-primary">
-                                        <svg
-                                            width="34"
-                                            height="25"
-                                            viewBox="0 0 34 25"
-                                            class="fill-current"
-                                        >
-                                            <path
-                                                d="M30.5156 0.960938H3.17188C1.42188 0.960938 0 2.38281 0 4.13281V20.9219C0 22.6719 1.42188 24.0938 3.17188 24.0938H30.5156C32.2656 24.0938 33.6875 22.6719 33.6875 20.9219V4.13281C33.6875 2.38281 32.2656 0.960938 30.5156 0.960938ZM30.5156 2.875C30.7891 2.875 31.0078 2.92969 31.2266 3.09375L17.6094 11.3516C17.1172 11.625 16.5703 11.625 16.0781 11.3516L2.46094 3.09375C2.67969 2.98438 2.89844 2.875 3.17188 2.875H30.5156ZM30.5156 22.125H3.17188C2.51562 22.125 1.91406 21.5781 1.91406 20.8672V5.00781L15.0391 12.9922C15.5859 13.3203 16.1875 13.4844 16.7891 13.4844C17.3906 13.4844 17.9922 13.3203 18.5391 12.9922L31.6641 5.00781V20.8672C31.7734 21.5781 31.1719 22.125 30.5156 22.125Z"
-                                            />
+                                
+                                <!-- WhatsApp -->
+                                <div class="mb-1 flex items-center">
+                                    <a href="#" class="text-primary dark:text-white transition-colors mr-3">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" class="fill-current">
+                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
                                         </svg>
-                                    </div>
-                                    <div>
-                                        <h5
-                                            class="mb-[18px] text-lg font-semibold text-dark dark:text-white"
-                                        >
-                                            How Can We Help?
-                                        </h5>
-                                        <p
-                                            class="text-base text-body-color dark:text-dark-6"
-                                        >
-                                            info@yourdomain.com
-                                        </p>
-                                        <p
-                                            class="mt-1 text-base text-body-color dark:text-dark-6"
-                                        >
-                                            contact@yourdomain.com
-                                        </p>
-                                    </div>
+                                    </a>
+                                    <span class="text-base text-body-color dark:text-dark-6">WhatsApp</span>
+                                </div>
+                                
+                                <!-- TikTok -->
+                                <div class="mb-1 flex items-center">
+                                    <a href="#" class="text-primary dark:text-white transition-colors mr-3">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" class="fill-current">
+                                            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                                        </svg>
+                                    </a>
+                                    <span class="text-base text-body-color dark:text-dark-6">TikTok</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-        <!-- ====== Contact End ====== -->
-
+            </div>          
+        </div>
+    </section>
+    <!-- ====== Contact End ====== -->
         <!-- ====== Brands Section Start -->
         {{--
             <section class="pb-20 dark:bg-dark">
@@ -2980,15 +2991,19 @@
                                 />
                             </a>
                             <p class="mb-8 max-w-[270px] text-base text-gray-7">
-                                We create digital experiences for brands and
-                                companies by using technology.
+                                Dari Dapur untuk Dapur
+                                Kita berhak mendapatkan kemampuan maksimal.
+                                Dibuat khusus untuk kebutuhan Pencatatan Kelola Dapur skala kecil hingga besar.
                             </p>
                             <div class="flex items-center -mx-3">
                                 <a
                                     href="javascript:void(0)"
                                     class="px-3 text-gray-7 hover:text-white"
                                 >
-                                    <svg
+                                    <svg width="18" height="18" viewBox="0 0 24 24" class="fill-current">
+                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                    </svg>
+                                    {{-- <svg
                                         width="22"
                                         height="22"
                                         viewBox="0 0 22 22"
@@ -2999,13 +3014,16 @@
                                         <path
                                             d="M16.294 8.86875H14.369H13.6815V8.18125V6.05V5.3625H14.369H15.8128C16.1909 5.3625 16.5003 5.0875 16.5003 4.675V1.03125C16.5003 0.653125 16.2253 0.34375 15.8128 0.34375H13.3034C10.5878 0.34375 8.69714 2.26875 8.69714 5.12187V8.1125V8.8H8.00964H5.67214C5.19089 8.8 4.74402 9.17812 4.74402 9.72812V12.2031C4.74402 12.6844 5.12214 13.1313 5.67214 13.1313H7.94089H8.62839V13.8188V20.7281C8.62839 21.2094 9.00652 21.6562 9.55652 21.6562H12.7878C12.994 21.6562 13.1659 21.5531 13.3034 21.4156C13.4409 21.2781 13.544 21.0375 13.544 20.8312V13.8531V13.1656H14.2659H15.8128C16.2596 13.1656 16.6034 12.8906 16.6721 12.4781V12.4438V12.4094L17.1534 10.0375C17.1878 9.79688 17.1534 9.52187 16.9471 9.24687C16.8784 9.075 16.569 8.90312 16.294 8.86875Z"
                                         />
-                                    </svg>
+                                    </svg> --}}
                                 </a>
                                 <a
                                     href="javascript:void(0)"
                                     class="px-3 text-gray-7 hover:text-white"
                                 >
-                                    <svg
+                                    <svg width="18" height="18" viewBox="0 0 24 24" class="fill-current">
+                                        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                                    </svg>
+                                    {{-- <svg
                                         width="22"
                                         height="22"
                                         viewBox="0 0 22 22"
@@ -3016,13 +3034,16 @@
                                         <path
                                             d="M20.1236 5.91236C20.2461 5.76952 20.0863 5.58286 19.905 5.64972C19.5004 5.79896 19.1306 5.8974 18.5837 5.95817C19.2564 5.58362 19.5693 5.04828 19.8237 4.39259C19.885 4.23443 19.7 4.09092 19.5406 4.16647C18.8931 4.47345 18.1945 4.70121 17.4599 4.83578C16.7338 4.11617 15.6988 3.6665 14.5539 3.6665C12.3554 3.6665 10.5725 5.32454 10.5725 7.36908C10.5725 7.65933 10.6081 7.94206 10.6752 8.21276C7.51486 8.06551 4.6968 6.71359 2.73896 4.64056C2.60477 4.49848 2.36128 4.51734 2.27772 4.69063C2.05482 5.15296 1.93056 5.66584 1.93056 6.20582C1.93056 7.49014 2.6332 8.62331 3.70132 9.28732C3.22241 9.27293 2.76441 9.17961 2.34234 9.02125C2.13684 8.94416 1.90127 9.07964 1.92888 9.28686C2.14084 10.8781 3.42915 12.1909 5.09205 12.5011C4.75811 12.586 4.40639 12.6311 4.04253 12.6311C3.95431 12.6311 3.86685 12.6284 3.78019 12.6231C3.55967 12.6094 3.38044 12.8067 3.47499 12.9954C4.09879 14.2404 5.44575 15.1096 7.0132 15.1367C5.65077 16.13 3.93418 16.7218 2.06882 16.7218C1.83882 16.7218 1.74015 17.0175 1.9442 17.1178C3.52016 17.8924 5.31487 18.3332 7.22182 18.3332C14.545 18.3332 18.549 12.6914 18.549 7.79843C18.549 7.63827 18.545 7.47811 18.5377 7.31945C19.1321 6.92012 19.6664 6.44528 20.1236 5.91236Z"
                                         />
-                                    </svg>
+                                    </svg> --}}
                                 </a>
                                 <a
                                     href="javascript:void(0)"
                                     class="px-3 text-gray-7 hover:text-white"
                                 >
-                                    <svg
+                                    <svg width="18" height="18" viewBox="0 0 24 24" class="fill-current">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                                    </svg>
+                                    {{-- <svg
                                         width="22"
                                         height="22"
                                         viewBox="0 0 22 22"
@@ -3039,9 +3060,9 @@
                                         <path
                                             d="M16.0276 4.96777C15.6432 4.96777 15.318 5.29304 15.318 5.67745C15.318 6.06186 15.6432 6.38713 16.0276 6.38713C16.412 6.38713 16.7373 6.06186 16.7373 5.67745C16.7373 5.29304 16.4416 4.96777 16.0276 4.96777Z"
                                         />
-                                    </svg>
+                                    </svg> --}}
                                 </a>
-                                <a
+                                {{-- <a
                                     href="javascript:void(0)"
                                     class="px-3 text-gray-7 hover:text-white"
                                 >
@@ -3057,7 +3078,7 @@
                                             d="M18.8065 1.8335H3.16399C2.42474 1.8335 1.83334 2.42489 1.83334 3.16414V18.8362C1.83334 19.5459 2.42474 20.1668 3.16399 20.1668H18.7473C19.4866 20.1668 20.078 19.5754 20.078 18.8362V3.13457C20.1371 2.42489 19.5457 1.8335 18.8065 1.8335ZM7.24464 17.4168H4.55379V8.69371H7.24464V17.4168ZM5.88443 7.48135C4.99733 7.48135 4.31721 6.77167 4.31721 5.91414C4.31721 5.05661 5.0269 4.34694 5.88443 4.34694C6.74196 4.34694 7.45163 5.05661 7.45163 5.91414C7.45163 6.77167 6.8011 7.48135 5.88443 7.48135ZM17.4463 17.4168H14.7554V13.1883C14.7554 12.183 14.7258 10.8523 13.336 10.8523C11.9167 10.8523 11.7097 11.976 11.7097 13.0996V17.4168H9.01884V8.69371H11.6506V9.90608H11.6801C12.0645 9.1964 12.9221 8.48672 14.2527 8.48672C17.0027 8.48672 17.5054 10.2609 17.5054 12.6856V17.4168H17.4463Z"
                                         />
                                     </svg>
-                                </a>
+                                </a> --}}
                             </div>
                         </div>
                     </div>
@@ -3071,7 +3092,7 @@
                             <ul>
                                 <li>
                                     <a
-                                        href="javascript:void(0)"
+                                        href="/welcome"
                                         class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
                                     >
                                         Home
@@ -3079,15 +3100,7 @@
                                 </li>
                                 <li>
                                     <a
-                                        href="javascript:void(0)"
-                                        class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
-                                    >
-                                        Features
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="javascript:void(0)"
+                                        href="#about"
                                         class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
                                     >
                                         About
@@ -3095,10 +3108,34 @@
                                 </li>
                                 <li>
                                     <a
-                                        href="javascript:void(0)"
+                                        href="#features"
                                         class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
                                     >
-                                        Testimonial
+                                        Features
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="#pricing"
+                                        class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
+                                    >
+                                        Pricing
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="#faq"
+                                        class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
+                                    >
+                                        FAQ
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="#contact"
+                                        class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
+                                    >
+                                        Contact
                                     </a>
                                 </li>
                             </ul>
@@ -3114,125 +3151,39 @@
                             <ul>
                                 <li>
                                     <a
-                                        href="javascript:void(0)"
+                                        href="#features"
                                         class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
                                     >
-                                        How it works
+                                        Transaksi
                                     </a>
                                 </li>
                                 <li>
                                     <a
-                                        href="javascript:void(0)"
+                                        href="#features"
                                         class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
                                     >
-                                        Privacy policy
+                                        Kelola Menu
                                     </a>
                                 </li>
                                 <li>
                                     <a
-                                        href="javascript:void(0)"
+                                        href="#features"
                                         class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
                                     >
-                                        Terms of Service
+                                        Kelola Stok
                                     </a>
                                 </li>
                                 <li>
                                     <a
-                                        href="javascript:void(0)"
+                                        href="#features"
                                         class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
                                     >
-                                        Refund policy
+                                        Pelaporan
                                     </a>
                                 </li>
                             </ul>
                         </div>
                     </div>
-                    <div
-                        class="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12"
-                    >
-                        <div class="w-full mb-10">
-                            <h4 class="text-lg font-semibold text-white mb-9">
-                                Our Products
-                            </h4>
-                            <ul>
-                                <li>
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
-                                    >
-                                        LineIcons
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
-                                    >
-                                        Ecommerce HTML
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
-                                    >
-                                        TailAdmin
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="inline-block mb-3 text-base text-gray-7 hover:text-primary"
-                                    >
-                                        PlainAdmin
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="w-full px-4 md:w-2/3 lg:w-6/12 xl:w-3/12">
-                        <div class="w-full mb-10">
-                            <h4 class="text-lg font-semibold text-white mb-9">
-                                Latest blog
-                            </h4>
-                            <div class="flex flex-col gap-8">
-                                <a
-                                    href="blog-details.html"
-                                    class="group flex items-center gap-[22px]"
-                                >
-                                    <div class="overflow-hidden rounded-sm">
-                                        <img
-                                            src="./play-tailwind-1.0.0/assets/images/blog/blog-footer-01.jpg"
-                                            alt="blog"
-                                        />
-                                    </div>
-                                    <span
-                                        class="max-w-[180px] text-base text-gray-7 group-hover:text-white"
-                                    >
-                                        I think really important to design
-                                        with...
-                                    </span>
-                                </a>
-                                <a
-                                    href="blog-details.html"
-                                    class="group flex items-center gap-[22px]"
-                                >
-                                    <div class="overflow-hidden rounded-sm">
-                                        <img
-                                            src="./play-tailwind-1.0.0/assets/images/blog/blog-footer-02.jpg"
-                                            alt="blog"
-                                        />
-                                    </div>
-                                    <span
-                                        class="max-w-[180px] text-base text-gray-7 group-hover:text-white"
-                                    >
-                                        Recognizing the need is the primary...
-                                    </span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="mt-12 border-t border-[#8890A4]/40 py-8 lg:mt-[60px]">
@@ -3240,7 +3191,7 @@
                     <div class="flex flex-wrap -mx-4">
                         <div class="w-full px-4 md:w-2/3 lg:w-1/2">
                             <div class="my-1">
-                                <div
+                                {{-- <div
                                     class="flex items-center justify-center -mx-3 md:justify-start"
                                 >
                                     <a
@@ -3261,7 +3212,7 @@
                                     >
                                         Terms of service
                                     </a>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                         <div class="w-full px-4 md:w-1/3 lg:w-1/2">
@@ -3271,14 +3222,14 @@
                                 <p class="text-base text-gray-7">
                                     Designed and Developed by
                                     <a
-                                        href="https://tailgrids.com"
+                                        href="#"
                                         rel="nofollow noopner"
                                         target="_blank"
                                         class="text-gray-1 hover:underline"
                                     >
-                                        TailGrids and UIdeck
+                                        First Studio
                                     </a>
-                                    . Distributed by
+                                    {{-- . Distributed by
                                     <a
                                         href="https://themewagon.com"
                                         rel="nofollow noopner"
@@ -3286,7 +3237,7 @@
                                         class="text-gray-1 hover:underline"
                                     >
                                         ThemeWagon
-                                    </a>
+                                    </a> --}}
                                 </p>
                             </div>
                         </div>
