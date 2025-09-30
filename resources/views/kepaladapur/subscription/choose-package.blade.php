@@ -279,17 +279,19 @@
                                 Silakan transfer ke rekening berikut:
                             </p>
                             <ul class="mb-2">
-                                <li>
+                                {{--
+                                    <li>
                                     <strong>Bank BCA:</strong>
                                     1234567890 a.n. PT Dapur Sistem
-                                </li>
-                                <li>
+                                    </li>
+                                    <li>
                                     <strong>Bank Mandiri:</strong>
                                     9876543210 a.n. PT Dapur Sistem
-                                </li>
+                                    </li>
+                                --}}
                                 <li>
                                     <strong>Bank BRI:</strong>
-                                    5555666677 a.n. PT Dapur Sistem
+                                    067801021372500 a.n. Mihammad Khoirul Anam
                                 </li>
                             </ul>
                             <p class="mb-0">

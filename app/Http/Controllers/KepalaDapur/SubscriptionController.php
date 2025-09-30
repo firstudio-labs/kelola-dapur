@@ -151,4 +151,16 @@ class SubscriptionController extends Controller
         return redirect()->route('kepala-dapur.subscription.index', $dapur)
             ->with('success', 'Request subscription berhasil dibatalkan');
     }
+
+    public function invoice(Dapur $dapur, SubscriptionRequest $subscriptionRequest)
+    {
+        // Pastikan subscription request milik dapur ini dan sudah approved
+        if ($subscriptionRequest->id_dapur !== $dapur->id_dapur || $subscriptionRequest->status !== 'approved') {
+            abort(404);
+        }
+
+        $subscriptionRequest->load(['package', 'promoCode', 'dapur']);
+
+        return view('kepaladapur.subscription.invoice', compact('dapur', 'subscriptionRequest'));
+    }
 }

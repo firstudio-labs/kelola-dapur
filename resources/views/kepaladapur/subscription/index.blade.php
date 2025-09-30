@@ -277,13 +277,29 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <a
-                                                href="{{ route("kepala-dapur.subscription.show", [$dapur, $request]) }}"
-                                                class="btn btn-sm btn-outline-primary"
-                                            >
-                                                <i class="bx bx-show me-1"></i>
-                                                Detail
-                                            </a>
+                                            <div class="d-flex gap-1">
+                                                <a
+                                                    href="{{ route("kepala-dapur.subscription.show", [$dapur, $request]) }}"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                >
+                                                    <i
+                                                        class="bx bx-show me-1"
+                                                    ></i>
+                                                    Detail
+                                                </a>
+                                                @if ($request->status === "approved")
+                                                    <a
+                                                        href="{{ route("kepala-dapur.subscription.invoice", [$dapur, $request]) }}"
+                                                        class="btn btn-sm btn-outline-success"
+                                                        target="_blank"
+                                                    >
+                                                        <i
+                                                            class="bx bx-printer me-1"
+                                                        ></i>
+                                                        Print
+                                                    </a>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

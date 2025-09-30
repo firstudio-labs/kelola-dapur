@@ -70,9 +70,9 @@ Route::get('/welcome', function () {
     return view('welcome.index', compact('subscriptionPackages'));
 })->name('welcome');
 
-// Guest 
+// Guest
 Route::middleware('guest')->group(function () {
-    // Login 
+    // Login
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 
@@ -95,7 +95,7 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Dashboard 
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/switch/{dapur}', [DashboardController::class, 'switchDapur'])->name('dashboard.switch-dapur');
 
@@ -333,6 +333,10 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur', 'check.subscription'])
             Route::get('/', [StockItemController::class, 'index'])->name('index');
         });
 
+        // Invoice
+        Route::get('/subscription/{subscriptionRequest}/invoice', [SubscriptionController::class, 'invoice'])
+            ->name('subscription.invoice');
+
         // Users Management - Requires active subscription
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [KepalaDapurUserController::class, 'index'])->name('index');
@@ -442,6 +446,8 @@ Route::middleware(['auth', 'role:kepala_dapur', 'check.subscription'])->prefix('
         Route::get('/laporan-kekurangan/{transaksi}/export-pdf', [KepalaDapurLaporanKekuranganStockController::class, 'exportKekuranganPdf'])->name('export-pdf');
         Route::get('/laporan-kekurangan/{transaksi}/export-csv', [KepalaDapurLaporanKekuranganStockController::class, 'exportKekuranganCsv'])->name('export-csv');
     });
+
+
 
     // Profile routes - Always accessible
     Route::get('/edit-profil', [KepalaDapurUserController::class, 'editKepalaDapur'])->name('edit-profil');
