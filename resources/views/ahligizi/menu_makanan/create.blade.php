@@ -1,6 +1,6 @@
-@extends("template_ahli_gizi.layout")
+@extends('template_ahli_gizi.layout')
 
-@section("content")
+@section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <!-- Header -->
         <div class="row">
@@ -8,18 +8,12 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <nav class="d-flex align-items-center mb-2">
-                            <a
-                                href="{{ route("ahli-gizi.dashboard") }}"
-                                class="text-muted me-2"
-                            >
+                            <a href="{{ route('ahli-gizi.dashboard') }}" class="text-muted me-2">
                                 <i class="bx bx-home-alt me-1"></i>
                                 Dashboard
                             </a>
                             <i class="bx bx-chevron-right me-2"></i>
-                            <a
-                                href="{{ route("ahli-gizi.menu-makanan.index") }}"
-                                class="text-muted me-2"
-                            >
+                            <a href="{{ route('ahli-gizi.menu-makanan.index') }}" class="text-muted me-2">
                                 Kelola Menu Makanan
                             </a>
                             <i class="bx bx-chevron-right me-2"></i>
@@ -37,13 +31,8 @@
         <!-- Form -->
         <div class="card mb-4">
             <div class="card-body">
-                <form
-                    id="menu-form"
-                    action="{{ route("ahli-gizi.menu-makanan.store") }}"
-                    method="POST"
-                    enctype="multipart/form-data"
-                    class="row g-4"
-                >
+                <form id="menu-form" action="{{ route('ahli-gizi.menu-makanan.store') }}" method="POST"
+                    enctype="multipart/form-data" class="row g-4">
                     @csrf
 
                     <!-- Menu Information -->
@@ -56,16 +45,10 @@
                                     Nama Menu
                                     <span class="text-danger">*</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    name="nama_menu"
-                                    id="nama_menu"
-                                    required
-                                    class="form-control @error("nama_menu") is-invalid @enderror"
-                                    placeholder="Contoh: Nasi Goreng Spesial"
-                                    value="{{ old("nama_menu") }}"
-                                />
-                                @error("nama_menu")
+                                <input type="text" name="nama_menu" id="nama_menu" required
+                                    class="form-control @error('nama_menu') is-invalid @enderror"
+                                    placeholder="Contoh: Nasi Goreng Spesial" value="{{ old('nama_menu') }}" />
+                                @error('nama_menu')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
@@ -78,23 +61,17 @@
                                     Kategori
                                     <span class="text-danger">*</span>
                                 </label>
-                                <select
-                                    name="kategori"
-                                    id="kategori"
-                                    required
-                                    class="form-select @error("kategori") is-invalid @enderror"
-                                >
+                                <select name="kategori" id="kategori" required
+                                    class="form-select @error('kategori') is-invalid @enderror">
                                     <option value="">Pilih Kategori</option>
                                     @foreach (App\Models\MenuMakanan::KATEGORI_OPTIONS as $value => $label)
-                                        <option
-                                            value="{{ $value }}"
-                                            {{ old("kategori") == $value ? "selected" : "" }}
-                                        >
+                                        <option value="{{ $value }}"
+                                            {{ old('kategori') == $value ? 'selected' : '' }}>
                                             {{ $label }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @error("kategori")
+                                @error('kategori')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
@@ -107,27 +84,17 @@
                                     Status
                                     <span class="text-danger">*</span>
                                 </label>
-                                <select
-                                    name="is_active"
-                                    id="is_active"
-                                    required
-                                    class="form-select @error("is_active") is-invalid @enderror"
-                                >
+                                <select name="is_active" id="is_active" required
+                                    class="form-select @error('is_active') is-invalid @enderror">
                                     <option value="">Pilih Status</option>
-                                    <option
-                                        value="1"
-                                        {{ old("is_active") == "1" ? "selected" : "" }}
-                                    >
+                                    <option value="1" {{ old('is_active') == '1' ? 'selected' : '' }}>
                                         Active
                                     </option>
-                                    <option
-                                        value="0"
-                                        {{ old("is_active") == "0" ? "selected" : "" }}
-                                    >
+                                    <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>
                                         Inactive
                                     </option>
                                 </select>
-                                @error("is_active")
+                                @error('is_active')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
@@ -139,16 +106,10 @@
                                 <label for="deskripsi" class="form-label">
                                     Deskripsi
                                 </label>
-                                <textarea
-                                    name="deskripsi"
-                                    id="deskripsi"
-                                    rows="3"
-                                    class="form-control @error("deskripsi") is-invalid @enderror"
-                                    placeholder="Deskripsi singkat tentang menu ini"
-                                >
-{{ old("deskripsi") }}</textarea
-                                >
-                                @error("deskripsi")
+                                <textarea name="deskripsi" id="deskripsi" rows="3" class="form-control @error('deskripsi') is-invalid @enderror"
+                                    placeholder="Deskripsi singkat tentang menu ini">
+    {{ old('deskripsi') }}</textarea>
+                                @error('deskripsi')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
@@ -160,14 +121,9 @@
                                 <label for="gambar_menu" class="form-label">
                                     Gambar Menu
                                 </label>
-                                <input
-                                    type="file"
-                                    name="gambar_menu"
-                                    id="gambar_menu"
-                                    accept="image/*"
-                                    class="form-control @error("gambar_menu") is-invalid @enderror"
-                                />
-                                @error("gambar_menu")
+                                <input type="file" name="gambar_menu" id="gambar_menu" accept="image/*"
+                                    class="form-control @error('gambar_menu') is-invalid @enderror" />
+                                @error('gambar_menu')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
@@ -202,46 +158,32 @@
                                                         *
                                                     </span>
                                                 </label>
-                                                <select
-                                                    name="bahan_menu[0][id_template_item]"
-                                                    class="form-select template-select @error("bahan_menu.0.id_template_item") is-invalid @enderror"
-                                                    required
-                                                >
+                                                <select name="bahan_menu[0][id_template_item]"
+                                                    class="form-select template-select @error('bahan_menu.0.id_template_item') is-invalid @enderror"
+                                                    required>
                                                     <option value="">
                                                         Pilih Bahan
                                                     </option>
                                                 </select>
-                                                @error("bahan_menu.0.id_template_item")
-                                                    <div
-                                                        class="invalid-feedback"
-                                                    >
+                                                @error('bahan_menu.0.id_template_item')
+                                                    <div class="invalid-feedback">
                                                         {{ $message }}
                                                     </div>
                                                 @enderror
                                             </div>
                                             <div class="col-md-3">
-                                                <label
-                                                    class="form-label jumlah-label"
-                                                >
+                                                <label class="form-label jumlah-label">
                                                     Jumlah per Porsi
                                                     <span class="text-danger">
                                                         *
                                                     </span>
                                                 </label>
-                                                <input
-                                                    type="number"
-                                                    name="bahan_menu[0][jumlah_per_porsi]"
-                                                    step="0.0001"
-                                                    min="0.0001"
-                                                    required
-                                                    class="form-control jumlah-input"
+                                                <input type="number" name="bahan_menu[0][jumlah_per_porsi]" step="0.0001"
+                                                    min="0.0001" required class="form-control jumlah-input"
                                                     placeholder="Contoh: 0.5"
-                                                    value="{{ old("bahan_menu.0.jumlah_per_porsi") }}"
-                                                />
-                                                @error("bahan_menu.0.jumlah_per_porsi")
-                                                    <div
-                                                        class="invalid-feedback"
-                                                    >
+                                                    value="{{ old('bahan_menu.0.jumlah_per_porsi') }}" />
+                                                @error('bahan_menu.0.jumlah_per_porsi')
+                                                    <div class="invalid-feedback">
                                                         {{ $message }}
                                                     </div>
                                                 @enderror
@@ -250,24 +192,13 @@
                                                 <label class="form-label">
                                                     Bahan Basah
                                                 </label>
-                                                <div
-                                                    class="form-check form-switch mt-2"
-                                                >
-                                                    <input
-                                                        class="form-check-input bahan-basah-checkbox"
-                                                        type="checkbox"
-                                                        name="bahan_menu[0][is_bahan_basah]"
-                                                        value="1"
+                                                <div class="form-check form-switch mt-2">
+                                                    <input class="form-check-input bahan-basah-checkbox" type="checkbox"
+                                                        name="bahan_menu[0][is_bahan_basah]" value="1"
                                                         id="bahan_basah_0"
-                                                        {{ old("bahan_menu.0.is_bahan_basah") ? "checked" : "" }}
-                                                    />
-                                                    <label
-                                                        class="form-check-label"
-                                                        for="bahan_basah_0"
-                                                    >
-                                                        <small
-                                                            class="text-muted"
-                                                        >
+                                                        {{ old('bahan_menu.0.is_bahan_basah') ? 'checked' : '' }} />
+                                                    <label class="form-check-label" for="bahan_basah_0">
+                                                        <small class="text-muted">
                                                             +7%
                                                         </small>
                                                     </label>
@@ -276,13 +207,8 @@
                                                     Berat matang +7%
                                                 </small>
                                             </div>
-                                            <div
-                                                class="col-md-2 d-flex align-items-end"
-                                            >
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-danger w-100 remove-bahan"
-                                                >
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <button type="button" class="btn btn-danger w-100 remove-bahan">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             </div>
@@ -291,21 +217,14 @@
                                 </div>
                             </div>
                         </div>
-                        <button
-                            type="button"
-                            id="add-bahan"
-                            class="btn btn-primary mt-3"
-                        >
+                        <button type="button" id="add-bahan" class="btn btn-primary mt-3">
                             Tambah Bahan
                         </button>
                     </div>
 
                     <!-- Submit Button -->
                     <div class="col-12 d-flex justify-content-end mt-4">
-                        <a
-                            href="{{ route("ahli-gizi.menu-makanan.index") }}"
-                            class="btn btn-outline-secondary me-2"
-                        >
+                        <a href="{{ route('ahli-gizi.menu-makanan.index') }}" class="btn btn-outline-secondary me-2">
                             Batal
                         </a>
                         <button type="submit" class="btn btn-primary">
@@ -324,30 +243,20 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4">
-                        <img
-                            id="preview-gambar"
-                            src="{{ asset("images/menu/default-menu.jpg") }}"
-                            alt="Preview Gambar"
-                            class="img-fluid rounded mb-3"
-                        />
+                        <img id="preview-gambar" src="{{ asset('images/menu/default-menu.jpg') }}" alt="Preview Gambar"
+                            class="img-fluid rounded mb-3" />
                     </div>
                     <div class="col-md-8">
                         <div class="d-flex align-items-center mb-2">
                             <h4 id="preview-nama" class="me-3">Nama Menu</h4>
-                            <span
-                                id="preview-kategori-badge"
-                                class="badge bg-label-secondary"
-                            >
+                            <span id="preview-kategori-badge" class="badge bg-label-secondary">
                                 Kategori
                             </span>
                         </div>
                         <p id="preview-deskripsi">
                             Deskripsi menu akan tampil di sini...
                         </p>
-                        <span
-                            id="preview-status-badge"
-                            class="badge bg-label-secondary"
-                        >
+                        <span id="preview-status-badge" class="badge bg-label-secondary">
                             Status
                         </span>
                         <h6 class="mt-3">Bahan-bahan:</h6>
@@ -388,20 +297,12 @@
                     (tanpa: gram, ml)
                 </li>
             </ul>
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
 
     <!-- Choices.js CSS -->
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" />
 
     <!-- Custom Choices.js Styling -->
     <style>
@@ -412,26 +313,33 @@
             padding: 0.5rem;
             font-size: 0.875rem;
         }
+
         .choices__list--dropdown {
             border: 1px solid #dee2e6;
             border-radius: 0.375rem;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
+
         .choices__list--dropdown .choices__item--selectable.is-highlighted {
             background-color: #f8f9fa;
         }
+
         .choices[data-type*='select-one'] .choices__inner {
             padding-bottom: 0;
         }
+
         .is-invalid .choices__inner {
             border-color: #dc3545;
         }
+
         .bahan-row .card {
             transition: all 0.3s ease;
         }
+
         .bahan-row .remove-bahan {
             height: 38px;
         }
+
         .bahan-basah-info {
             background-color: #e3f2fd;
             border-left: 4px solid #2196f3;
@@ -446,21 +354,19 @@
 
     <!-- JavaScript for Dynamic Form, Unit Conversion, and Preview -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             let bahanIndex = 1;
 
             const templateOptionsData =
-                {!!
-                    json_encode(
-                        $templateItems->map(function ($item) {
-                            return [
-                                "value" => $item->id_template_item,
-                                "label" => $item->nama_bahan,
-                                "satuan" => $item->satuan ?? "",
-                            ];
-                        }),
-                    )
-                !!};
+                {!! json_encode(
+                    $templateItems->map(function ($item) {
+                        return [
+                            'value' => $item->id_template_item,
+                            'label' => $item->nama_bahan,
+                            'satuan' => $item->satuan ?? '',
+                        ];
+                    }),
+                ) !!};
 
             const namaInput = document.getElementById('nama_menu');
             const kategoriSelect = document.getElementById('kategori');
@@ -481,10 +387,8 @@
             const previewBahanList =
                 document.getElementById('preview-bahan-list');
 
-            // Store Choices instances
             let choicesInstances = [];
 
-            // Function to get display unit from original unit
             function getDisplayUnit(originalUnit) {
                 if (!originalUnit) return '';
                 const unit = originalUnit.toLowerCase();
@@ -493,29 +397,73 @@
                 return originalUnit;
             }
 
-            // Function to populate select options
-            function populateSelectOptions(selectElement) {
-                // Clear existing options except the first placeholder
+            function getSelectedTemplateIds() {
+                const selectedIds = [];
+                document.querySelectorAll('.template-select').forEach(select => {
+                    if (select.value) {
+                        selectedIds.push(parseInt(select.value));
+                    }
+                });
+                return selectedIds;
+            }
+
+            function getAvailableOptions(currentSelectValue = null) {
+                const selectedIds = getSelectedTemplateIds();
+                return templateOptionsData.filter(item => {
+                    return item.value == currentSelectValue || !selectedIds.includes(item.value);
+                });
+            }
+
+            function updateAllSelectOptions() {
+                document.querySelectorAll('.template-select').forEach(select => {
+                    const currentValue = select.value;
+                    const choicesInstance = choicesInstances.find(item => item.element === select);
+
+                    if (choicesInstance) {
+                        // Get available options
+                        const availableOptions = getAvailableOptions(currentValue);
+
+                        // Clear and set new choices
+                        choicesInstance.instance.clearChoices();
+                        choicesInstance.instance.setChoices(
+                            availableOptions.map(item => ({
+                                value: item.value,
+                                label: item.label,
+                                selected: item.value == currentValue,
+                                customProperties: {
+                                    satuan: item.satuan
+                                }
+                            })),
+                            'value',
+                            'label',
+                            true
+                        );
+                    }
+                });
+            }
+
+            function populateSelectOptions(selectElement, currentValue = null) {
                 while (selectElement.children.length > 1) {
                     selectElement.removeChild(selectElement.lastChild);
                 }
 
-                // Add all template options
-                templateOptionsData.forEach((item) => {
+                const availableOptions = getAvailableOptions(currentValue);
+
+                availableOptions.forEach((item) => {
                     const option = document.createElement('option');
                     option.value = item.value;
                     option.textContent = item.label;
                     option.dataset.satuan = item.satuan;
+                    if (item.value == currentValue) {
+                        option.selected = true;
+                    }
                     selectElement.appendChild(option);
                 });
             }
 
-            // Function to initialize Choices.js
             function initializeChoices(selectElement) {
-                // Populate options first
                 populateSelectOptions(selectElement);
 
-                // Initialize Choices.js
                 const choices = new Choices(selectElement, {
                     searchEnabled: true,
                     placeholderValue: 'Pilih Bahan',
@@ -530,7 +478,6 @@
                     },
                 });
 
-                // Store instance for cleanup
                 choicesInstances.push({
                     element: selectElement,
                     instance: choices,
@@ -539,7 +486,6 @@
                 return choices;
             }
 
-            // Function to update input label and placeholder based on selected ingredient
             function updateInputUnit(
                 selectElement,
                 inputElement,
@@ -587,11 +533,11 @@
                             inputElement.value = originalValue * 1000;
                         } else {
                             inputElement.value =
-                                originalValue % 1 === 0
-                                    ? originalValue.toString()
-                                    : originalValue
-                                          .toString()
-                                          .replace(/\.?0+$/, '');
+                                originalValue % 1 === 0 ?
+                                originalValue.toString() :
+                                originalValue
+                                .toString()
+                                .replace(/\.?0+$/, '');
                         }
                     }
                 }
@@ -611,7 +557,6 @@
                 }
             }
 
-            // Initialize for initial row
             const initialSelect = document.querySelector('.template-select');
             const initialInput = document.querySelector('.jumlah-input');
             const initialLabel = document.querySelector('.jumlah-label');
@@ -620,13 +565,13 @@
             );
 
             if (initialSelect) {
-                // Initialize Choices.js for initial select
                 const initialChoices = initializeChoices(initialSelect);
 
                 updateInputUnit(initialSelect, initialInput, initialLabel);
 
                 initialSelect.addEventListener('change', () => {
                     updateInputUnit(initialSelect, initialInput, initialLabel);
+                    updateAllSelectOptions();
                     updatePreview();
                 });
                 initialInput.addEventListener('input', updatePreview);
@@ -635,94 +580,84 @@
                 }
             }
 
-            // Add new bahan row
-            document
-                .getElementById('add-bahan')
-                .addEventListener('click', function () {
-                    const container =
-                        document.getElementById('bahan-container');
-                    const row = document.createElement('div');
-                    row.className = 'col-12 bahan-row';
-                    row.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-5">
-                            <label class="form-label">Template Bahan <span class="text-danger">*</span></label>
-                            <select name="bahan_menu[${bahanIndex}][id_template_item]" class="form-select template-select" required>
-                                <option value="">Pilih Bahan</option>
-                            </select>
+            document.getElementById('add-bahan').addEventListener('click', function() {
+                const container = document.getElementById('bahan-container');
+                const row = document.createElement('div');
+                row.className = 'col-12 bahan-row';
+                row.innerHTML = `
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Template Bahan <span class="text-danger">*</span></label>
+                        <select name="bahan_menu[${bahanIndex}][id_template_item]" class="form-select template-select" required>
+                            <option value="">Pilih Bahan</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label jumlah-label">Jumlah per Porsi <span class="text-danger">*</span></label>
+                        <input type="number" name="bahan_menu[${bahanIndex}][jumlah_per_porsi]" step="0.0001" min="0.0001" required class="form-control jumlah-input" placeholder="Contoh: 0.5">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Bahan Basah</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input bahan-basah-checkbox" type="checkbox" name="bahan_menu[${bahanIndex}][is_bahan_basah]" value="1" id="bahan_basah_${bahanIndex}">
+                            <label class="form-check-label" for="bahan_basah_${bahanIndex}">
+                                <small class="text-muted">+7%</small>
+                            </label>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label jumlah-label">Jumlah per Porsi <span class="text-danger">*</span></label>
-                            <input type="number" name="bahan_menu[${bahanIndex}][jumlah_per_porsi]" step="0.0001" min="0.0001" required class="form-control jumlah-input" placeholder="Contoh: 0.5">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Bahan Basah</label>
-                            <div class="form-check form-switch mt-2">
-                                <input class="form-check-input bahan-basah-checkbox" type="checkbox" name="bahan_menu[${bahanIndex}][is_bahan_basah]" value="1" id="bahan_basah_${bahanIndex}">
-                                <label class="form-check-label" for="bahan_basah_${bahanIndex}">
-                                    <small class="text-muted">+7%</small>
-                                </label>
-                            </div>
-                            <small class="text-muted">Berat matang +7%</small>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="button" class="btn btn-danger w-100 remove-bahan"><i class="bx bx-trash"></i></button>
-                        </div>
+                        <small class="text-muted">Berat matang +7%</small>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger w-100 remove-bahan"><i class="bx bx-trash"></i></button>
                     </div>
                 </div>
             </div>
-        `;
-                    container.appendChild(row);
+        </div>
+    `;
+                container.appendChild(row);
 
-                    // Get new elements
-                    const newSelect = row.querySelector('.template-select');
-                    const newInput = row.querySelector('.jumlah-input');
-                    const newLabel = row.querySelector('.jumlah-label');
-                    const newCheckbox = row.querySelector(
-                        '.bahan-basah-checkbox',
-                    );
+                const newSelect = row.querySelector('.template-select');
+                const newInput = row.querySelector('.jumlah-input');
+                const newLabel = row.querySelector('.jumlah-label');
+                const newCheckbox = row.querySelector('.bahan-basah-checkbox');
 
-                    // Initialize Choices.js for new select
-                    const newChoices = initializeChoices(newSelect);
+                populateSelectOptions(newSelect);
+                const newChoices = initializeChoices(newSelect);
 
-                    // Add event listeners
-                    newSelect.addEventListener('change', () => {
-                        updateInputUnit(newSelect, newInput, newLabel);
-                        updatePreview();
-                    });
-                    newInput.addEventListener('input', updatePreview);
-                    if (newCheckbox) {
-                        newCheckbox.addEventListener('change', updatePreview);
-                    }
-
-                    bahanIndex++;
+                newSelect.addEventListener('change', () => {
+                    updateInputUnit(newSelect, newInput, newLabel);
+                    updateAllSelectOptions(); // Tambahkan ini
                     updatePreview();
                 });
+                newInput.addEventListener('input', updatePreview);
+                if (newCheckbox) {
+                    newCheckbox.addEventListener('change', updatePreview);
+                }
+
+                bahanIndex++;
+                updatePreview();
+            });
 
             // Remove bahan row
-            document.addEventListener('click', function (e) {
+            document.addEventListener('click', function(e) {
                 if (e.target.closest('.remove-bahan')) {
                     const row = e.target.closest('.bahan-row');
                     if (document.querySelectorAll('.bahan-row').length > 1) {
-                        // Find and destroy Choices instance for this row
-                        const selectElement =
-                            row.querySelector('.template-select');
+                        const selectElement = row.querySelector('.template-select');
                         const choicesInstance = choicesInstances.find(
                             (item) => item.element === selectElement,
                         );
                         if (choicesInstance) {
                             choicesInstance.instance.destroy();
-                            // Remove from array
-                            const index =
-                                choicesInstances.indexOf(choicesInstance);
+                            const index = choicesInstances.indexOf(choicesInstance);
                             if (index > -1) {
                                 choicesInstances.splice(index, 1);
                             }
                         }
 
                         row.remove();
+                        updateAllSelectOptions();
                         updatePreview();
                     }
                 }
@@ -731,7 +666,7 @@
             // Handle form submit for conversion
             document
                 .getElementById('menu-form')
-                .addEventListener('submit', function (e) {
+                .addEventListener('submit', function(e) {
                     e.preventDefault();
 
                     const inputs = document.querySelectorAll('.jumlah-input');
@@ -762,11 +697,11 @@
                 });
 
             // Handle input changes for preview
-            namaInput.addEventListener('input', function () {
+            namaInput.addEventListener('input', function() {
                 previewNama.textContent = this.value || 'Nama Menu';
             });
 
-            kategoriSelect.addEventListener('change', function () {
+            kategoriSelect.addEventListener('change', function() {
                 const badge = previewKategoriBadge;
                 const kategoriClasses = {
                     Karbohidrat: 'bg-label-primary',
@@ -784,12 +719,12 @@
                 }
             });
 
-            deskripsiInput.addEventListener('input', function () {
+            deskripsiInput.addEventListener('input', function() {
                 previewDeskripsi.textContent =
                     this.value || 'Deskripsi menu akan tampil di sini...';
             });
 
-            statusSelect.addEventListener('change', function () {
+            statusSelect.addEventListener('change', function() {
                 const badge = previewStatusBadge;
                 if (this.value === '1') {
                     badge.textContent = 'Active';
@@ -803,17 +738,17 @@
                 }
             });
 
-            gambarInput.addEventListener('change', function () {
+            gambarInput.addEventListener('change', function() {
                 const file = this.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = function (e) {
+                    reader.onload = function(e) {
                         previewGambar.src = e.target.result;
                     };
                     reader.readAsDataURL(file);
                 } else {
                     previewGambar.src =
-                        '{{ asset("images/menu/default-menu.jpg") }}';
+                        '{{ asset('images/menu/default-menu.jpg') }}';
                 }
             });
 
@@ -846,7 +781,7 @@
                             if (!originalSatuan) {
                                 const foundItem = templateOptionsData.find(
                                     (item) =>
-                                        item.value == selectedOption.value,
+                                    item.value == selectedOption.value,
                                 );
                                 displayUnit = getDisplayUnit(
                                     foundItem ? foundItem.satuan : '',
@@ -886,7 +821,8 @@
 
                         if (isBasah) {
                             // Format untuk bahan basah: Nama - Berat Mentah unit Bahan Matang - Berat Matang unit per porsi **Bahan Basah +7%**
-                            li.innerHTML = `${ingredientName} - ${formattedValue} ${displayUnit} Bahan Matang - ${finalValue} ${displayUnit} per porsi <span class="badge bg-label-info ms-2">Bahan Basah +7%</span>`;
+                            li.innerHTML =
+                                `${ingredientName} - ${formattedValue} ${displayUnit} Bahan Matang - ${finalValue} ${displayUnit} per porsi <span class="badge bg-label-info ms-2">Bahan Basah +7%</span>`;
                         } else {
                             // Format untuk bahan biasa: Nama - Berat unit per porsi
                             li.innerHTML = `${ingredientName} - ${formattedValue} ${displayUnit} per porsi`;

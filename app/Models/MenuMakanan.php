@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class MenuMakanan extends Model
@@ -59,7 +60,9 @@ class MenuMakanan extends Model
             return asset('images/menu/default-menu.jpg');
         }
 
-        if (Storage::disk('public')->exists('menu/' . $this->gambar_menu)) {
+        $storagePath = 'menu/' . $this->gambar_menu;
+
+        if (Storage::disk('public')->exists($storagePath)) {
             return asset('storage/menu/' . $this->gambar_menu);
         }
 
