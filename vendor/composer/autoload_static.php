@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8
+class ComposerStaticInit7dc21aec50bad78e8f54a9ef8098ef16
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -325,13 +325,13 @@ class ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8
         ),
         'Spatie\\LaravelIgnition\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/laravel-ignition',
-            1 => __DIR__ . '/..' . '/spatie/laravel-ignition/src',
+            0 => __DIR__ . '/..' . '/spatie/laravel-ignition/src',
+            1 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/laravel-ignition',
         ),
         'Spatie\\Ignition\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/ignition',
-            1 => __DIR__ . '/..' . '/spatie/ignition/src',
+            0 => __DIR__ . '/..' . '/spatie/ignition/src',
+            1 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/ignition',
         ),
         'Spatie\\FlareClient\\' => 
         array (
@@ -7204,10 +7204,10 @@ class ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit7dc21aec50bad78e8f54a9ef8098ef16::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit7dc21aec50bad78e8f54a9ef8098ef16::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit7dc21aec50bad78e8f54a9ef8098ef16::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit7dc21aec50bad78e8f54a9ef8098ef16::$classMap;
 
         }, null, ClassLoader::class);
     }

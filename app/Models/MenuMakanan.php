@@ -52,15 +52,14 @@ class MenuMakanan extends Model
         return $this->hasMany(DetailTransaksiDapur::class, 'id_menu');
     }
 
-    // Image handling
     public function getGambarUrlAttribute(): ?string
     {
         if (!$this->gambar_menu) {
             return asset('images/menu/default-menu.jpg');
         }
 
-        if (Storage::disk('public')->exists('menu/' . $this->gambar_menu)) {
-            return asset('storage/menu/' . $this->gambar_menu);
+        if (file_exists(public_path('storage/' . $this->gambar_menu))) {
+            return asset('storage/' . $this->gambar_menu);
         }
 
         if (file_exists(public_path('images/menu/' . $this->gambar_menu))) {
@@ -69,6 +68,7 @@ class MenuMakanan extends Model
 
         return asset('images/menu/default-menu.jpg');
     }
+
 
     public function getGambarFullPathAttribute(): ?string
     {
