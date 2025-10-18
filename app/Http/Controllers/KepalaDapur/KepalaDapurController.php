@@ -29,7 +29,6 @@ class KepalaDapurController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-
         if (!$user->isKepalaDapur($dapur->id_dapur)) {
             abort(403, 'Anda tidak memiliki akses ke dashboard ini untuk dapur ini');
         }
@@ -378,12 +377,12 @@ class KepalaDapurController extends Controller
             $alerts[] = [
                 'type' => $subscriptionStatus['is_expired'] ? 'critical' : 'warning',
                 'category' => 'subscription',
-                'title' => $subscriptionStatus['is_expired'] ? 'Langganan Berakhir' : 'Langganan Segera Berakhir',
+                'title' => $subscriptionStatus['is_expired'] ? 'Status Berlangganan :' : 'Anda Tidak Berlangganan!',
                 'message' => $subscriptionStatus['is_expired'] ?
-                    'Langganan telah berakhir, beberapa fitur tidak tersedia' :
+                    'Anda Tidak Berlangganan!' :
                     "Langganan berakhir dalam {$subscriptionStatus['days_left']} hari",
                 'action_text' => 'Perpanjang Sekarang',
-                'action_url' => route('kepala-dapur.subscription.create', $dapur),
+                'action_url' => route('kepala-dapur.subscription.choose-package', $dapur),
                 'icon' => 'bx-crown',
             ];
         }
@@ -440,7 +439,7 @@ class KepalaDapurController extends Controller
                 'icon' => 'bx-crown',
                 'color' => 'danger',
                 'priority' => 1,
-                'url' => route('kepala-dapur.subscription.create', $dapur),
+                'url' => route('kepala-dapur.subscription.choose-package', $dapur),
                 'badge' => 'URGENT',
             ];
         }

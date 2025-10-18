@@ -206,7 +206,6 @@ class MenuMakanan extends Model
             return false;
         }
 
-        // Check if all required ingredients are available in the dapur's stock
         foreach ($this->bahanMenu as $bahan) {
             $stockItem = \App\Models\StockItem::where('id_dapur', $dapurId)
                 ->where('id_template_item', $bahan->id_template_item)
