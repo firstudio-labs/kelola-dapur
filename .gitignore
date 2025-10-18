@@ -1,19 +1,39 @@
-/.phpunit.cache
+# Laravel / PHP
+/vendor
 /node_modules
+/public/storage
 /public/build
 /public/hot
-/public/storage
+/.phpunit.cache
 /storage/*.key
 /storage
-/vendor
 .env
 .env.backup
 .env.production
 Homestead.json
 Homestead.yaml
 auth.json
+
+# Logs & Debug
 npm-debug.log
 yarn-error.log
-/.fleet
+phpunit.xml
+*.log
+*.cache
+
+# IDE / Editor
 /.idea
 /.vscode
+/.fleet
+
+# OS / System files
+.DS_Store
+Thumbs.db
+
+# Optional: if using npm / yarn build artifacts
+/public/js
+/public/css
+/public/img
+
+# Optional: ignore coverage reports
+/coverage
