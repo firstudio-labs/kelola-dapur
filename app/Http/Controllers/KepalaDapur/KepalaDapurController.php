@@ -22,7 +22,7 @@ class KepalaDapurController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:kepala_dapur']);
+        // $this->middleware(['auth', 'role:kepala_dapur']);
     }
 
     public function dashboard(Request $request, Dapur $dapur)
