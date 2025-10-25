@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class MenuMakanan extends Model
@@ -58,8 +59,10 @@ class MenuMakanan extends Model
             return asset('images/menu/default-menu.jpg');
         }
 
-        if (file_exists(public_path('storage/' . $this->gambar_menu))) {
-            return asset('storage/' . $this->gambar_menu);
+        $storagePath = 'menu/' . $this->gambar_menu;
+
+        if (Storage::disk('public')->exists($storagePath)) {
+            return asset('storage/menu/' . $this->gambar_menu);
         }
 
         if (file_exists(public_path('images/menu/' . $this->gambar_menu))) {
@@ -203,7 +206,6 @@ class MenuMakanan extends Model
             return false;
         }
 
-        // Check if all required ingredients are available in the dapur's stock
         foreach ($this->bahanMenu as $bahan) {
             $stockItem = \App\Models\StockItem::where('id_dapur', $dapurId)
                 ->where('id_template_item', $bahan->id_template_item)

@@ -1,72 +1,39 @@
-<aside
-    id="layout-menu"
-    class="layout-menu menu-vertical menu bg-menu-theme d-none d-lg-block"
->
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <!-- Brand + Toggle -->
-    <div
-        class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2"
-    >
+    <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
         <!-- Logo -->
-        <a
-            href="/"
-            class="app-brand-link d-flex align-items-center text-decoration-none"
-        >
+        <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
             <span class="app-brand-logo demo">
-                <img
-                    src="{{ asset("logo_kelola_dapur_black.png") }}"
-                    alt="Logo"
-                    style="height: 45px; width: auto"
-                />
+                <img src="{{ asset('logo_kelola_dapur_black.png') }}" alt="Logo" style="height: 45px; width: auto" />
             </span>
-            {{-- <span class="demo fw-bolder ms-4 fs-4">Super Admin</span> --}}
         </a>
     </div>
 
-    <!-- Menu Utama -->
-    <ul class="menu-inner py-1">
-        <!-- User dropdown -->
+    <!-- Menu Container with flex layout -->
+    <div class="menu-container d-flex flex-column h-100">
+        <!-- User Profile Section - Moved to Top of Menu -->
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
-                <a
-                    class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
-                    href="javascript:void(0);"
-                    data-bs-toggle="dropdown"
+                <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
+                    href="javascript:void(0);" data-bs-toggle="dropdown"
                     style="
                         background: rgba(255, 255, 255, 0.15);
                         transition: all 0.3s ease;
                         border: 1px solid rgba(255, 255, 255, 0.2);
                     "
                     onmouseover="this.style.background='rgba(255,255,255,0.25)'"
-                    onmouseout="this.style.background='rgba(255,255,255,0.15)'"
-                >
+                    onmouseout="this.style.background='rgba(255,255,255,0.15)'">
                     <div class="avatar avatar-online me-3">
-                        <img
-                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
-                            alt
-                            class="w-px-40 h-auto rounded-circle"
-                        />
+                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
+                            class="w-px-40 h-auto rounded-circle" />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
-                            {{ auth()->user()->nama ?? "Unknown" }}
+                            {{ auth()->user()->nama ?? 'Unknown' }}
                         </div>
                         <small class="text-muted">
-                            {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
+                            {{ ucfirst(str_replace('_', ' ', session('role_type') ?? 'Unknown')) }}
                         </small>
-                        @if (session("subscription_status") && session("subscription_status") !== "active")
-                            <small class="text-warning d-block">
-                                <i class="bx bx-warning-alt bx-xs"></i>
-                                @if (session("subscription_status") === "expired")
-                                    Subscription Expired
-                                @elseif (session("subscription_status") === "expiring_soon")
-                                    Expires in
-                                    {{ session("subscription_days_left", 0) }}
-                                    days
-                                @else
-                                    {{ ucfirst(str_replace("_", " ", session("subscription_status"))) }}
-                                @endif
-                            </small>
-                        @endif
                     </div>
                     <i class="bx bx-chevron-up user-chevron"></i>
                 </a>
@@ -76,12 +43,17 @@
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
-                                        <img
-                                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
-                                            alt
-                                            class="w-px-40 h-auto rounded-circle"
-                                        />
+                                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
+                                            class="w-px-40 h-auto rounded-circle" />
                                     </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold d-block">
+                                        {{ auth()->user()->nama ?? 'Unknown' }}
+                                    </span>
+                                    <small class="text-muted">
+                                        {{ ucfirst(str_replace('_', ' ', session('role_type') ?? 'Unknown')) }}
+                                    </small>
                                 </div>
                             </div>
                         </a>
@@ -89,19 +61,8 @@
                     <li>
                         <div class="dropdown-divider"></div>
                     </li>
-                    {{--
-                        <li>
-                        <a
-                        class="dropdown-item"
-                        href="{{ route("kepala-dapur.edit-profil") }}"
-                        >
-                        <i class="bx bx-edit me-2"></i>
-                        <span class="align-middle">Edit Profil</span>
-                        </a>
-                        </li>
-                    --}}
                     <li>
-                        <form action="{{ route("logout") }}" method="POST">
+                        <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <button type="submit" class="dropdown-item">
                                 <i class="bx bx-power-off me-2"></i>
@@ -112,436 +73,513 @@
                 </ul>
             </div>
         </div>
-        <!-- Dashboard -->
-        <li
-            class="menu-item {{ request()->routeIs("dashboard") ? "active" : "" }}"
-        >
-            <a href="{{ route("dashboard") }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Dashboard</div>
-            </a>
-        </li>
 
-        <!-- Admin -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Admin</span>
-        </li>
+        <!-- Menu Utama -->
+        <ul class="menu-inner py-1 flex-grow-1">
+            <!-- Dashboard -->
+            <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                    <div data-i18n="Dashboard">Dashboard</div>
+                </a>
+            </li>
 
-        <!-- Dapur -->
-        <li
-            class="menu-item {{ request()->routeIs("superadmin.dapur.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-buildings"></i>
-                <div>Dapur</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.dapur.index") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.dapur.index") }}"
-                        class="menu-link"
-                    >
-                        <div>Daftar Dapur</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <!-- Admin Header -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Admin</span>
+            </li>
 
-        <!-- Menu Makanan -->
-        <li
-            class="menu-item {{ request()->routeIs("superadmin.menu-makanan.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-food-menu"></i>
-                <div>Menu Makanan</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.menu-makanan.index") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.menu-makanan.index") }}"
-                        class="menu-link"
-                    >
-                        <div>Daftar Menu Makanan</div>
-                    </a>
-                </li>
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.menu-makanan.create") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.menu-makanan.create") }}"
-                        class="menu-link"
-                    >
-                        <div>Tambah Menu Makanan</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <!-- Dapur -->
+            <li class="menu-item {{ request()->routeIs('superadmin.dapur.*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-buildings"></i>
+                    <div data-i18n="Dapur">Dapur</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('superadmin.dapur.index') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.dapur.index') }}" class="menu-link">
+                            <div data-i18n="Daftar Dapur">Daftar Dapur</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- Template Bahan -->
-        <li
-            class="menu-item {{ request()->routeIs("superadmin.template-items.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-package"></i>
-                <div>Template Bahan</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.template-items.index") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.template-items.index") }}"
-                        class="menu-link"
-                    >
-                        <div>Daftar Template Bahan</div>
-                    </a>
-                </li>
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.template-items.create") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.template-items.create") }}"
-                        class="menu-link"
-                    >
-                        <div>Tambah Template Bahan</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <!-- Menu Makanan -->
+            <li class="menu-item {{ request()->routeIs('superadmin.menu-makanan.*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-food-menu"></i>
+                    <div data-i18n="Menu Makanan">Menu Makanan</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('superadmin.menu-makanan.index') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.menu-makanan.index') }}" class="menu-link">
+                            <div data-i18n="Daftar Menu Makanan">Daftar Menu Makanan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('superadmin.menu-makanan.create') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.menu-makanan.create') }}" class="menu-link">
+                            <div data-i18n="Tambah Menu Makanan">Tambah Menu Makanan</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- Subscription Packages -->
-        <li
-            class="menu-item {{ request()->routeIs("superadmin.subscription-packages.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-credit-card"></i>
-                <div>Paket Subscription</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.subscription-packages.index") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.subscription-packages.index") }}"
-                        class="menu-link"
-                    >
-                        <div>Daftar Paket</div>
-                    </a>
-                </li>
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.subscription-packages.create") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.subscription-packages.create") }}"
-                        class="menu-link"
-                    >
-                        <div>Tambah Paket</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <!-- Template Bahan -->
+            <li class="menu-item {{ request()->routeIs('superadmin.template-items.*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-package"></i>
+                    <div data-i18n="Template Bahan">Template Bahan</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('superadmin.template-items.index') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.template-items.index') }}" class="menu-link">
+                            <div data-i18n="Daftar Template Bahan">Daftar Template Bahan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('superadmin.template-items.create') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.template-items.create') }}" class="menu-link">
+                            <div data-i18n="Tambah Template Bahan">Tambah Template Bahan</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- Promo Codes -->
-        <li
-            class="menu-item {{ request()->routeIs("superadmin.promo-codes.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-purchase-tag"></i>
-                <div>Kode Promo</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.promo-codes.index") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.promo-codes.index") }}"
-                        class="menu-link"
-                    >
-                        <div>Daftar Kode Promo</div>
-                    </a>
-                </li>
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.promo-codes.create") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.promo-codes.create") }}"
-                        class="menu-link"
-                    >
-                        <div>Tambah Kode Promo</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <!-- Subscription Packages -->
+            <li class="menu-item {{ request()->routeIs('superadmin.subscription-packages.*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                    <div data-i18n="Paket Subscription">Paket Subscription</div>
+                </a>
+                <ul class="menu-sub">
+                    <li
+                        class="menu-item {{ request()->routeIs('superadmin.subscription-packages.index') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.subscription-packages.index') }}" class="menu-link">
+                            <div data-i18n="Daftar Paket">Daftar Paket</div>
+                        </a>
+                    </li>
+                    <li
+                        class="menu-item {{ request()->routeIs('superadmin.subscription-packages.create') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.subscription-packages.create') }}" class="menu-link">
+                            <div data-i18n="Tambah Paket">Tambah Paket</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- Subscription Requests -->
-        <li
-            class="menu-item {{ request()->routeIs("superadmin.subscription-requests.*") ? "active open" : "" }}"
-        >
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-receipt"></i>
-                <div>Request Subscription</div>
-            </a>
-            <ul class="menu-sub">
-                <li
-                    class="menu-item {{ request()->routeIs("superadmin.subscription-requests.index") ? "active" : "" }}"
-                >
-                    <a
-                        href="{{ route("superadmin.subscription-requests.index") }}"
-                        class="menu-link"
-                    >
-                        <div>Daftar Request</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-    </ul>
+            <!-- Promo Codes -->
+            <li class="menu-item {{ request()->routeIs('superadmin.promo-codes.*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-purchase-tag"></i>
+                    <div data-i18n="Kode Promo">Kode Promo</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('superadmin.promo-codes.index') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.promo-codes.index') }}" class="menu-link">
+                            <div data-i18n="Daftar Kode Promo">Daftar Kode Promo</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('superadmin.promo-codes.create') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.promo-codes.create') }}" class="menu-link">
+                            <div data-i18n="Tambah Kode Promo">Tambah Kode Promo</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-    <style>
-        /* Sidebar Styling */
+            <!-- Subscription Requests -->
+            <li class="menu-item {{ request()->routeIs('superadmin.subscription-requests.*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-receipt"></i>
+                    <div data-i18n="Request Subscription">Request Subscription</div>
+                </a>
+                <ul class="menu-sub">
+                    <li
+                        class="menu-item {{ request()->routeIs('superadmin.subscription-requests.index') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.subscription-requests.index') }}" class="menu-link">
+                            <div data-i18n="Daftar Request">Daftar Request</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</aside>
+
+<!-- Mobile Menu Toggle Button (tampil hanya di mobile) -->
+<button class="btn btn-primary position-fixed d-lg-none" id="mobileMenuToggle"
+    style="
+        top: 10px;
+        left: 10px;
+        z-index: 1050;
+        border-radius: 4px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    ">
+    <i class="bx bx-chevron-right bx-sm align-middle"></i>
+</button>
+
+<!-- Overlay untuk mobile -->
+<div class="layout-overlay d-lg-none" id="layoutOverlay" style="display: none"></div>
+
+<style>
+    /* CSS untuk toggle sidebar */
+    .layout-menu {
+        transition:
+            width 0.3s ease-in-out,
+            transform 0.3s ease-in-out;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 260px;
+        z-index: 1045;
+        display: block !important;
+        transform: translateX(0);
+    }
+
+    /* Tablet & Mobile: Sidebar hidden by default, show with toggle */
+    @media (max-width: 991.98px) {
         .layout-menu {
-            width: 260px;
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            z-index: 1000;
-            transition: all 0.3s ease-in-out;
+            transform: translateX(-100%);
+        }
+
+        .layout-menu.show {
+            transform: translateX(0);
+        }
+    }
+
+    /* Desktop: Always visible */
+    @media (min-width: 992px) {
+        .layout-menu {
+            transform: translateX(0) !important;
+            display: block !important;
+        }
+    }
+
+    /* Menu container styling */
+    .menu-container {
+        height: calc(100vh - 80px);
+        min-height: 500px;
+        overflow-y: auto;
+    }
+
+    /* User profile section styling */
+    .user-profile-section {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        flex-shrink: 0;
+        min-height: 60px;
+    }
+
+    /* State ketika sidebar collapsed */
+    .layout-menu.collapsed {
+        width: 78px;
+    }
+
+    /* Sembunyikan text saat collapsed */
+    .layout-menu.collapsed .app-brand-text,
+    .layout-menu.collapsed .menu-header-text,
+    .layout-menu.collapsed .menu-link>div:not(.menu-icon) {
+        display: none;
+    }
+
+    /* User profile collapsed state - hanya tampilkan avatar */
+    .layout-menu.collapsed .user-profile-section .user-info,
+    .layout-menu.collapsed .user-profile-section .user-chevron {
+        display: none;
+    }
+
+    /* Show only avatar when collapsed */
+    .layout-menu.collapsed .user-profile-section .nav-link {
+        justify-content: center;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: none;
+    }
+
+    .layout-menu.collapsed .user-profile-section .avatar {
+        margin: 0;
+        transform: scale(1.1);
+    }
+
+    /* Pastikan user profile section tetap terlihat */
+    .layout-menu .user-profile-section {
+        display: block !important;
+        position: relative;
+        z-index: 1;
+        order: -1;
+    }
+
+    /* Sembunyikan submenu saat collapsed */
+    .layout-menu.collapsed .menu-sub {
+        display: none !important;
+    }
+
+    /* Submenu styling */
+    .menu-sub {
+        display: none;
+        padding-left: 1rem;
+    }
+
+    .menu-item.open .menu-sub {
+        display: block;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 991.98px) {
+
+        /* Reset collapsed state di mobile */
+        .layout-menu.collapsed {
+            width: 260px !important;
+            transform: translateX(-100%);
+        }
+
+        .layout-menu.collapsed.show {
             transform: translateX(0);
         }
 
-        .layout-menu.collapsed {
-            width: 60px;
-        }
-
-        .layout-menu.collapsed .menu-inner,
-        .layout-menu.collapsed .menu-header-text,
+        /* Tampilkan kembali semua elemen di mobile */
         .layout-menu.collapsed .app-brand-text,
-        .layout-menu.collapsed .menu-sub {
-            display: none;
+        .layout-menu.collapsed .menu-header-text,
+        .layout-menu.collapsed .menu-link>div:not(.menu-icon) {
+            display: block;
         }
 
-        .layout-menu.collapsed .app-brand-logo {
-            margin: 0 auto;
+        /* Mobile user profile styling */
+        .layout-menu.collapsed .user-profile-section .user-info,
+        .layout-menu.collapsed .user-profile-section .user-chevron {
+            display: block;
         }
 
-        .layout-menu.collapsed .menu-link {
-            justify-content: center;
+        .layout-menu.collapsed .user-profile-section .nav-link {
+            justify-content: flex-start;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.15) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .layout-menu.collapsed .menu-icon {
-            margin-right: 0;
+        .layout-menu.collapsed .user-profile-section .avatar {
+            margin-right: 0.75rem;
+            transform: none;
         }
 
-        /* Mobile menu */
-        @media (max-width: 991.98px) {
-            .layout-menu {
-                transform: translateX(-100%);
-                width: 260px !important;
-                z-index: 1050;
-                top: auto;
-            }
-
-            .layout-menu.show {
-                transform: translateX(0);
-                top: auto;
-            }
-
-            .layout-menu.collapsed .layout-menu-toggle i {
-                transform: none;
-            }
-
-            .layout-menu.collapsed .app-brand {
-                justify-content: space-between;
-                position: static;
-            }
-
-            .layout-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 1040;
-            }
-
-            /* Style tombol mobile agar mirip desktop */
-            #mobileMenuToggle {
-                background: var(--bs-primary);
-                color: white;
-                transition: all 0.3s ease-in-out;
-            }
-
-            #mobileMenuToggle:hover {
-                background: var(--bs-primary-dark);
-            }
-
-            /* Rotate ikon saat sidebar terbuka di mobile */
-            .layout-menu.show + #mobileMenuToggle i {
-                transform: rotate(180deg);
-            }
+        .layout-menu.collapsed .app-brand {
+            justify-content: space-between;
+            padding-left: 1rem;
+            padding-right: 1rem;
         }
 
-        /* Adjust main content */
-        .layout-page {
-            padding-left: 260px;
-            transition: padding-left 0.3s ease-in-out;
+        .layout-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
         }
 
+        /* Style tombol mobile agar mirip desktop */
+        #mobileMenuToggle {
+            background: var(--bs-primary);
+            color: white;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #mobileMenuToggle:hover {
+            background: var(--bs-primary-dark);
+        }
+
+        /* Rotate ikon saat sidebar terbuka di mobile */
+        .layout-menu.show+#mobileMenuToggle i {
+            transform: rotate(180deg);
+        }
+    }
+
+    /* Adjust main content */
+    .layout-page {
+        padding-left: 260px;
+        transition: padding-left 0.3s ease-in-out;
+    }
+
+    .layout-page.sidebar-collapsed {
+        padding-left: 78px;
+    }
+
+    @media (max-width: 991.98px) {
+
+        .layout-page,
         .layout-page.sidebar-collapsed {
-            padding-left: 60px;
+            padding-left: 0 !important;
         }
+    }
 
-        @media (max-width: 991.98px) {
-            .layout-page {
-                padding-left: 0 !important;
-            }
-        }
-    </style>
+    /* Enhanced hover animations */
+    .layout-menu {
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const sidebar = document.getElementById('layout-menu');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const mobileMenuToggle =
-                document.getElementById('mobileMenuToggle');
-            const layoutOverlay = document.getElementById('layoutOverlay');
-            const layoutPage =
-                document.querySelector('.layout-page') || document.body;
+    .layout-menu .menu-link {
+        transition: all 0.2s ease-in-out;
+    }
 
-            // Desktop toggle functionality
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', function () {
-                    sidebar.classList.toggle('collapsed');
-                    layoutPage.classList.toggle('sidebar-collapsed');
+    .layout-menu:not(.collapsed) .menu-link:hover {
+        transform: translateX(4px);
+        background: rgba(255, 255, 255, 0.1);
+    }
 
-                    // Simpan state ke localStorage
-                    const isCollapsed = sidebar.classList.contains('collapsed');
-                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+    /* Smooth text reveal animation */
+    .layout-menu.collapsed .app-brand-text,
+    .layout-menu.collapsed .menu-header-text,
+    .layout-menu.collapsed .menu-link>div:not(.menu-icon) {
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
 
-                    // Tutup semua submenu saat sidebar collapsed
-                    if (isCollapsed) {
-                        document
-                            .querySelectorAll('.menu-item.open')
-                            .forEach(function (item) {
-                                item.classList.remove('open');
-                            });
-                    }
-                });
-            }
+    .layout-menu:not(.collapsed) .app-brand-text,
+    .layout-menu:not(.collapsed) .menu-header-text,
+    .layout-menu:not(.collapsed) .menu-link>div:not(.menu-icon) {
+        opacity: 1;
+        transform: translateX(0);
+        transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+    }
 
-            // Hover functionality for desktop
-            if (sidebar) {
-                sidebar.addEventListener('mouseenter', function () {
-                    if (window.innerWidth >= 992) {
-                        // Hanya aktif di desktop
-                        sidebar.classList.remove('collapsed');
-                        layoutPage.classList.remove('sidebar-collapsed');
-                    }
-                });
+    /* Icon animations */
+    .menu-icon {
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
 
-                sidebar.addEventListener('mouseleave', function () {
-                    if (window.innerWidth >= 992) {
-                        // Hanya aktif di desktop
-                        const savedState =
-                            localStorage.getItem('sidebarCollapsed');
-                        if (savedState === 'true') {
-                            sidebar.classList.add('collapsed');
-                            layoutPage.classList.add('sidebar-collapsed');
-                        }
-                    }
-                });
-            }
+    .layout-menu:hover .menu-icon {
+        transform: scale(1.05);
+    }
 
-            // Mobile toggle functionality
-            if (mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', function () {
-                    sidebar.classList.remove('d-none');
-                    sidebar.classList.toggle('show');
-                    layoutOverlay.style.display = sidebar.classList.contains(
-                        'show',
-                    )
-                        ? 'block'
-                        : 'none';
-                });
-            }
+    /* Submenu slide animation */
+    .menu-sub {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
+    }
 
-            // Close mobile menu when clicking overlay
-            if (layoutOverlay) {
-                layoutOverlay.addEventListener('click', function () {
-                    sidebar.classList.remove('show');
-                    layoutOverlay.style.display = 'none';
-                });
-            }
+    .menu-item.open .menu-sub {
+        max-height: 500px;
+        opacity: 1;
+        transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
 
-            // Restore sidebar state from localStorage
-            const savedState = localStorage.getItem('sidebarCollapsed');
-            if (savedState === 'true' && window.innerWidth >= 992) {
-                sidebar.classList.add('collapsed');
-                layoutPage.classList.add('sidebar-collapsed');
-            }
+    /* User profile hover enhancement */
+    .user-profile-section .nav-link {
+        transition: all 0.3s ease;
+    }
 
-            // Handle submenu toggles
-            document
-                .querySelectorAll('.menu-toggle')
-                .forEach(function (toggle) {
-                    toggle.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
+    .user-profile-section .nav-link:hover {
+        background: rgba(255, 255, 255, 0.25) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
 
-                        // Jangan buka submenu jika sidebar collapsed
-                        if (sidebar.classList.contains('collapsed')) {
-                            return;
-                        }
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('layout-menu');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const layoutOverlay = document.getElementById('layoutOverlay');
+        const layoutPage = document.querySelector('.layout-page') || document.body;
 
-                        const menuItem = this.closest('.menu-item');
-                        const isCurrentlyOpen =
-                            menuItem.classList.contains('open');
+        // Desktop toggle functionality
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                layoutPage.classList.toggle('sidebar-collapsed');
 
-                        // Tutup semua submenu lain di level yang sama
-                        const parent = menuItem.parentElement;
-                        parent
-                            .querySelectorAll('.menu-item.open')
-                            .forEach(function (openItem) {
-                                if (openItem !== menuItem) {
-                                    openItem.classList.remove('open');
-                                }
-                            });
+                // Simpan state ke localStorage
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
 
-                        // Toggle submenu saat ini
-                        if (isCurrentlyOpen) {
-                            menuItem.classList.remove('open');
-                        } else {
-                            menuItem.classList.add('open');
-                        }
+                // Tutup semua submenu saat sidebar collapsed
+                if (isCollapsed) {
+                    document.querySelectorAll('.menu-item.open').forEach(function(item) {
+                        item.classList.remove('open');
                     });
+                }
+            });
+        }
+
+        // Mobile toggle functionality
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+                layoutOverlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+            });
+        }
+
+        // Close mobile menu when clicking overlay
+        if (layoutOverlay) {
+            layoutOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('show');
+                layoutOverlay.style.display = 'none';
+            });
+        }
+
+        // Restore sidebar state from localStorage - Start expanded by default on desktop
+        const savedState = localStorage.getItem('sidebarCollapsed');
+        if (window.innerWidth >= 992) {
+            // Ensure sidebar is expanded by default on desktop
+            sidebar.classList.remove('collapsed');
+            layoutPage.classList.remove('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', 'false');
+        }
+
+        // Handle submenu toggles
+        document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Don't open submenu if sidebar is collapsed (desktop)
+                if (sidebar.classList.contains('collapsed') && window.innerWidth >= 992) {
+                    return;
+                }
+
+                const menuItem = this.closest('.menu-item');
+                const isCurrentlyOpen = menuItem.classList.contains('open');
+
+                // Close all other submenus at the same level
+                const parent = menuItem.parentElement;
+                parent.querySelectorAll('.menu-item.open').forEach(function(openItem) {
+                    if (openItem !== menuItem) {
+                        openItem.classList.remove('open');
+                    }
                 });
 
-            // Handle window resize
-            window.addEventListener('resize', function () {
-                if (window.innerWidth >= 992) {
-                    // Desktop mode
-                    sidebar.classList.remove('show');
-                    layoutOverlay.style.display = 'none';
-                    // Terapkan state dari localStorage
-                    const savedState = localStorage.getItem('sidebarCollapsed');
-                    if (savedState === 'true') {
-                        sidebar.classList.add('collapsed');
-                        layoutPage.classList.add('sidebar-collapsed');
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        layoutPage.classList.remove('sidebar-collapsed');
-                    }
+                // Toggle current submenu
+                if (isCurrentlyOpen) {
+                    menuItem.classList.remove('open');
                 } else {
-                    // Mobile mode
-                    sidebar.classList.remove('collapsed');
-                    layoutPage.classList.remove('sidebar-collapsed');
+                    menuItem.classList.add('open');
                 }
             });
         });
-    </script>
-</aside>
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 992) {
+                // Desktop mode
+                sidebar.classList.remove('show');
+                layoutOverlay.style.display = 'none';
+
+                sidebar.classList.remove('collapsed');
+                layoutPage.classList.remove('sidebar-collapsed');
+            } else {
+                // Mobile mode
+                sidebar.classList.remove('collapsed');
+                layoutPage.classList.remove('sidebar-collapsed');
+            }
+        });
+    });
+</script>

@@ -26,9 +26,8 @@ class MenuMakananController extends Controller
     public function create()
     {
         $templateItems = TemplateItem::orderBy('nama_bahan', 'asc')->get();
-        $currentDapur = Auth::user()->userRole->dapur ?? null;
 
-        return view('superadmin.menu_makanan.create', compact('templateItems', 'currentDapur'));
+        return view('superadmin.menu_makanan.create', compact('templateItems'));
     }
 
     public function store(Request $request)
@@ -53,7 +52,7 @@ class MenuMakananController extends Controller
             'bahan_menu.required' => 'Minimal harus ada 1 bahan menu',
             'bahan_menu.*.id_template_item.required' => 'Template bahan harus dipilih',
             'bahan_menu.*.jumlah_per_porsi.required' => 'Jumlah per porsi harus diisi',
-            'bahan_menu.*.jumlah_per_porsi.numeric' => 'Jumlah per porsi harus berupa angka',
+            'bahan_menu.*.jumlah_per_porsi.min' => 'Jumlah per porsi minimal 0.0001',
         ]);
 
         if ($validator->fails()) {
@@ -62,31 +61,28 @@ class MenuMakananController extends Controller
                 ->withInput();
         }
 
-        $data = $validator->validated();
-        $data['slug'] = Str::slug($data['nama_menu']);
-        $data['id_dapur'] = Auth::user()->userRole->id_dapur ?? null;
-
+        $gambarMenu = null;
         if ($request->hasFile('gambar_menu')) {
-            $data['gambar_menu'] = $request->file('gambar_menu')->store('menu_makanan', 'public');
-            $data['gambar_url'] = Storage::url($data['gambar_menu']);
+            $file = $request->file('gambar_menu');
+            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('public/menu', $filename);
+            $gambarMenu = $filename;
         }
 
-        $menuMakanan = MenuMakanan::create([
-            'nama_menu' => $data['nama_menu'],
-            'slug' => $data['slug'],
-            'deskripsi' => $data['deskripsi'],
-            'kategori' => $data['kategori'],
-            'gambar_menu' => $data['gambar_menu'] ?? null,
-            'gambar_url' => $data['gambar_url'] ?? null,
-            'is_active' => $data['is_active'],
-            'id_dapur' => $data['id_dapur'],
+        $menu = MenuMakanan::create([
+            'nama_menu' => $request->nama_menu,
+            'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
+            'gambar_menu' => $gambarMenu,
+            'is_active' => $request->is_active,
+            'created_by_dapur_id' => null,
         ]);
 
-        foreach ($data['bahan_menu'] as $bahan) {
-            $menuMakanan->bahanMenu()->create([
+        foreach ($request->bahan_menu as $bahan) {
+            $menu->bahanMenu()->create([
                 'id_template_item' => $bahan['id_template_item'],
                 'jumlah_per_porsi' => $bahan['jumlah_per_porsi'],
-                'is_bahan_basah' => $bahan['is_bahan_basah'] ?? false,
+                'is_bahan_basah' => isset($bahan['is_bahan_basah']) ? (bool)$bahan['is_bahan_basah'] : false
             ]);
         }
 
@@ -104,9 +100,8 @@ class MenuMakananController extends Controller
     {
         $menuMakanan->load(['bahanMenu.templateItem']);
         $templateItems = TemplateItem::orderBy('nama_bahan', 'asc')->get();
-        $currentDapur = Auth::user()->userRole->dapur ?? null;
 
-        return view('superadmin.menu_makanan.edit', compact('menuMakanan', 'templateItems', 'currentDapur'));
+        return view('superadmin.menu_makanan.edit', compact('menuMakanan', 'templateItems'));
     }
 
     public function update(Request $request, MenuMakanan $menuMakanan)
@@ -131,6 +126,7 @@ class MenuMakananController extends Controller
             'bahan_menu.required' => 'Minimal harus ada 1 bahan menu',
             'bahan_menu.*.id_template_item.required' => 'Template bahan harus dipilih',
             'bahan_menu.*.jumlah_per_porsi.required' => 'Jumlah per porsi harus diisi',
+            'bahan_menu.*.jumlah_per_porsi.min' => 'Jumlah per porsi minimal 0.0001',
         ]);
 
         if ($validator->fails()) {
@@ -139,33 +135,32 @@ class MenuMakananController extends Controller
                 ->withInput();
         }
 
-        $data = $validator->validated();
-        $data['slug'] = Str::slug($data['nama_menu']);
-
+        $gambarMenu = $menuMakanan->gambar_menu;
         if ($request->hasFile('gambar_menu')) {
             if ($menuMakanan->gambar_menu) {
-                Storage::disk('public')->delete($menuMakanan->gambar_menu);
+                $menuMakanan->deleteGambar();
             }
-            $data['gambar_menu'] = $request->file('gambar_menu')->store('menu_makanan', 'public');
-            $data['gambar_url'] = Storage::url($data['gambar_menu']);
+
+            $file = $request->file('gambar_menu');
+            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('public/menu', $filename);
+            $gambarMenu = $filename;
         }
 
         $menuMakanan->update([
-            'nama_menu' => $data['nama_menu'],
-            'slug' => $data['slug'],
-            'deskripsi' => $data['deskripsi'],
-            'kategori' => $data['kategori'],
-            'gambar_menu' => $data['gambar_menu'] ?? $menuMakanan->gambar_menu,
-            'gambar_url' => $data['gambar_url'] ?? $menuMakanan->gambar_url,
-            'is_active' => $data['is_active'],
+            'nama_menu' => $request->nama_menu,
+            'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
+            'gambar_menu' => $gambarMenu,
+            'is_active' => $request->is_active,
         ]);
 
         $menuMakanan->bahanMenu()->delete();
-        foreach ($data['bahan_menu'] as $bahan) {
+        foreach ($request->bahan_menu as $bahan) {
             $menuMakanan->bahanMenu()->create([
                 'id_template_item' => $bahan['id_template_item'],
                 'jumlah_per_porsi' => $bahan['jumlah_per_porsi'],
-                'is_bahan_basah' => $bahan['is_bahan_basah'] ?? false,
+                'is_bahan_basah' => isset($bahan['is_bahan_basah']) ? (bool)$bahan['is_bahan_basah'] : false
             ]);
         }
 
@@ -181,7 +176,7 @@ class MenuMakananController extends Controller
         }
 
         if ($menuMakanan->gambar_menu) {
-            Storage::disk('public')->delete($menuMakanan->gambar_menu);
+            $menuMakanan->deleteGambar();
         }
 
         $menuMakanan->delete();
@@ -229,12 +224,78 @@ class MenuMakananController extends Controller
             ->when($search, function ($query, $search) {
                 return $query->where('nama_menu', 'like', "%{$search}%");
             })
-            ->select('id_menu', 'nama_menu', 'gambar_url')
+            ->select('id_menu', 'nama_menu', 'gambar_menu', 'deskripsi')
             ->orderBy('nama_menu', 'asc')
             ->limit(20)
             ->get();
 
-        return response()->json($menus);
+        $formattedMenus = $menus->map(function ($menu) {
+            return [
+                'id_menu' => $menu->id_menu,
+                'nama_menu' => $menu->nama_menu,
+                'gambar_url' => $menu->gambar_url,
+                'deskripsi' => $menu->deskripsi
+            ];
+        });
+
+        return response()->json($formattedMenus);
+    }
+
+    public function detail($id)
+    {
+        try {
+            $menu = MenuMakanan::with(['bahanMenu.templateItem'])
+                ->find($id);
+
+            if (!$menu) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Menu tidak ditemukan'
+                ], 404);
+            }
+
+            if (!$menu->is_active) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Menu tidak aktif'
+                ], 400);
+            }
+
+            $menuData = [
+                'id_menu' => $menu->id_menu,
+                'nama_menu' => $menu->nama_menu,
+                'gambar' => $menu->gambar_url,
+                'deskripsi' => $menu->deskripsi,
+                'kategori' => $menu->kategori,
+                'is_active' => $menu->is_active,
+                'bahan_menu' => $menu->bahanMenu->map(function ($bahan) {
+                    return [
+                        'id_bahan_menu' => $bahan->id_bahan_menu,
+                        'id_template_item' => $bahan->id_template_item,
+                        'nama_bahan' => $bahan->templateItem->nama_bahan,
+                        'jumlah_per_porsi' => $bahan->jumlah_per_porsi,
+                        'satuan' => $bahan->templateItem->satuan,
+                        'is_bahan_basah' => $bahan->is_bahan_basah,
+                        'template_item' => [
+                            'id_template_item' => $bahan->templateItem->id_template_item,
+                            'nama_bahan' => $bahan->templateItem->nama_bahan,
+                            'satuan' => $bahan->templateItem->satuan,
+                            'keterangan' => $bahan->templateItem->keterangan
+                        ]
+                    ];
+                })
+            ];
+
+            return response()->json([
+                'success' => true,
+                'menu' => $menuData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getMenuDetails(MenuMakanan $menu)

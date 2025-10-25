@@ -1,46 +1,15 @@
-<aside
-    id="layout-menu"
-    class="layout-menu menu-vertical menu bg-menu-theme d-none d-lg-block"
->
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme d-none d-lg-block">
     <!-- Brand + Toggle -->
-    <div
-        class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2"
-    >
+    <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
         <!-- Logo -->
-        <a
-            href="/"
-            class="app-brand-link d-flex align-items-center text-decoration-none"
-        >
+        <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
             <span class="app-brand-logo demo">
-                <img
-                    src="{{ asset("logo_kelola_dapur_black.png") }}"
-                    alt="Logo"
-                    style="height: 45px; width: auto"
-                />
+                <img src="{{ asset('logo_kelola_dapur_black.png') }}" alt="Logo" style="height: 45px; width: auto" />
             </span>
             {{-- <span class="app-brand-text demo fw-bolder ms-4 fs-3">
                 Ahli Gizi
             </span> --}}
         </a>
-
-        <!-- Desktop Toggle Button -->
-        <button
-            class="btn btn-outline-secondary d-none d-lg-inline-flex layout-menu-toggle"
-            id="sidebarToggle"
-            style="
-                border: none;
-                background: transparent;
-                color: inherit;
-                width: 32px;
-                height: 32px;
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.3s ease-in-out;
-            "
-        >
-            <i class="bx bx-chevron-left bx-sm"></i>
-        </button>
     </div>
 
     <!-- Menu Container with flex layout -->
@@ -48,43 +17,37 @@
         <!-- User Profile Section - Moved to Top of Menu -->
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
-                <a
-                    class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
-                    href="javascript:void(0);"
-                    data-bs-toggle="dropdown"
+                <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
+                    href="javascript:void(0);" data-bs-toggle="dropdown"
                     style="
                         background: rgba(255, 255, 255, 0.15);
                         transition: all 0.3s ease;
                         border: 1px solid rgba(255, 255, 255, 0.2);
                     "
                     onmouseover="this.style.background='rgba(255,255,255,0.25)'"
-                    onmouseout="this.style.background='rgba(255,255,255,0.15)'"
-                >
+                    onmouseout="this.style.background='rgba(255,255,255,0.15)'">
                     <div class="avatar avatar-online me-3">
-                        <img
-                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
-                            alt
-                            class="w-px-40 h-auto rounded-circle"
-                        />
+                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
+                            class="w-px-40 h-auto rounded-circle" />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
-                            {{ auth()->user()->nama ?? "Unknown" }}
+                            {{ auth()->user()->nama ?? 'Unknown' }}
                         </div>
                         <small class="text-muted">
-                            {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
+                            {{ ucfirst(str_replace('_', ' ', session('role_type') ?? 'Unknown')) }}
                         </small>
-                        @if (session("subscription_status") && session("subscription_status") !== "active")
+                        @if (session('subscription_status') && session('subscription_status') !== 'active')
                             <small class="text-warning d-block">
                                 <i class="bx bx-warning-alt bx-xs"></i>
-                                @if (session("subscription_status") === "expired")
+                                @if (session('subscription_status') === 'expired')
                                     Subscription Expired
-                                @elseif (session("subscription_status") === "expiring_soon")
+                                @elseif (session('subscription_status') === 'expiring_soon')
                                     Expires in
-                                    {{ session("subscription_days_left", 0) }}
+                                    {{ session('subscription_days_left', 0) }}
                                     days
                                 @else
-                                    {{ ucfirst(str_replace("_", " ", session("subscription_status"))) }}
+                                    {{ ucfirst(str_replace('_', ' ', session('subscription_status'))) }}
                                 @endif
                             </small>
                         @endif
@@ -97,28 +60,25 @@
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
-                                        <img
-                                            src="{{ asset("admin/assets/img/avatars/1.png") }}"
-                                            alt
-                                            class="w-px-40 h-auto rounded-circle"
-                                        />
+                                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
+                                            class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
                                     <span class="fw-semibold d-block">
-                                        {{ auth()->user()->nama ?? "Unknown" }}
+                                        {{ auth()->user()->nama ?? 'Unknown' }}
                                     </span>
                                     <small class="text-muted">
-                                        {{ ucfirst(str_replace("_", " ", session("role_type") ?? "Unknown")) }}
+                                        {{ ucfirst(str_replace('_', ' ', session('role_type') ?? 'Unknown')) }}
                                     </small>
-                                    @if (session("subscription_end"))
+                                    @if (session('subscription_end'))
                                         <small class="text-info d-block">
                                             Dapur:
-                                            {{ session("dapur_name") ?? "Tidak Tersedia" }}
+                                            {{ session('dapur_name') ?? 'Tidak Tersedia' }}
                                         </small>
                                         <small class="text-muted d-block">
                                             Expires:
-                                            {{ \Carbon\Carbon::parse(session("subscription_end"))->format("d M Y") }}
+                                            {{ \Carbon\Carbon::parse(session('subscription_end'))->format('d M Y') }}
                                         </small>
                                     @endif
                                 </div>
@@ -129,7 +89,7 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <form action="{{ route("logout") }}" method="POST">
+                        <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <button type="submit" class="dropdown-item">
                                 <i class="bx bx-power-off me-2"></i>
@@ -142,31 +102,28 @@
         </div>
 
         @php
-            $isSubscriptionActive = session("is_subscription_active", false);
-            $subscriptionStatus = session("subscription_status");
-            $idDapur = session("id_dapur");
+            $isSubscriptionActive = session('is_subscription_active', false);
+            $subscriptionStatus = session('subscription_status');
+            $idDapur = session('id_dapur');
         @endphp
 
         <!-- Subscription Status Alert -->
-        @if (! $isSubscriptionActive && $subscriptionStatus)
+        @if (!$isSubscriptionActive && $subscriptionStatus)
             <div class="px-3 mb-3">
-                <div
-                    class="alert alert-warning alert-dismissible fade show py-2 px-3"
-                    role="alert"
-                    style="font-size: 0.875rem; line-height: 1.2"
-                >
+                <div class="alert alert-warning alert-dismissible fade show py-2 px-3" role="alert"
+                    style="font-size: 0.875rem; line-height: 1.2">
                     <div class="d-flex align-items-start">
                         <i class="bx bx-info-circle me-2 mt-1"></i>
                         <div>
-                            @if ($subscriptionStatus === "expired")
+                            @if ($subscriptionStatus === 'expired')
                                 <strong>Subscription Expired!</strong>
                                 <br />
                                 <small>Contact Kepala Dapur to renew</small>
-                            @elseif ($subscriptionStatus === "expiring_soon")
+                            @elseif ($subscriptionStatus === 'expiring_soon')
                                 <strong>Subscription Expiring!</strong>
                                 <br />
                                 <small>
-                                    {{ session("subscription_days_left", 0) }}
+                                    {{ session('subscription_days_left', 0) }}
                                     days remaining
                                 </small>
                             @else
@@ -183,13 +140,9 @@
         <!-- Menu Utama -->
         <ul class="menu-inner py-1 flex-grow-1">
             <!-- Dashboard - Always accessible -->
-            <li
-                class="menu-item {{ request()->routeIs("dashboard") ? "active" : "" }}"
-            >
-                <a
-                    href="{{ route("dashboard", request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
-                    class="menu-link"
-                >
+            <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
+                    class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
                     <div data-i18n="Dashboard">Dashboard</div>
                 </a>
@@ -202,33 +155,24 @@
                 </li>
 
                 <!-- Menu Makanan -->
-                <li
-                    class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.*") ? "active open" : "" }}"
-                >
+                <li class="menu-item {{ request()->routeIs('ahli-gizi.menu-makanan.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-food-menu"></i>
                         <div data-i18n="Menu Makanan">Menu Makanan</div>
                     </a>
                     <ul class="menu-sub">
-                        <li
-                            class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.index") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("ahli-gizi.menu-makanan.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                                class="menu-link"
-                            >
+                        <li class="menu-item {{ request()->routeIs('ahli-gizi.menu-makanan.index') ? 'active' : '' }}">
+                            <a href="{{ route('ahli-gizi.menu-makanan.index', ['dapur' => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                                class="menu-link">
                                 <div data-i18n="Daftar Menu Makanan">
                                     Daftar Menu Makanan
                                 </div>
                             </a>
                         </li>
                         <li
-                            class="menu-item {{ request()->routeIs("ahli-gizi.menu-makanan.create") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("ahli-gizi.menu-makanan.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                                class="menu-link"
-                            >
+                            class="menu-item {{ request()->routeIs('ahli-gizi.menu-makanan.create') ? 'active' : '' }}">
+                            <a href="{{ route('ahli-gizi.menu-makanan.create', ['dapur' => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                                class="menu-link">
                                 <div data-i18n="Tambah Menu Makanan">
                                     Tambah Menu Makanan
                                 </div>
@@ -238,33 +182,23 @@
                 </li>
 
                 <!-- Transaksi Dapur -->
-                <li
-                    class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.*") ? "active open" : "" }}"
-                >
+                <li class="menu-item {{ request()->routeIs('ahli-gizi.transaksi.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-cart"></i>
                         <div data-i18n="Transaksi Dapur">Transaksi Dapur</div>
                     </a>
                     <ul class="menu-sub">
-                        <li
-                            class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.index") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("ahli-gizi.transaksi.index", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                                class="menu-link"
-                            >
+                        <li class="menu-item {{ request()->routeIs('ahli-gizi.transaksi.index') ? 'active' : '' }}">
+                            <a href="{{ route('ahli-gizi.transaksi.index', ['dapur' => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                                class="menu-link">
                                 <div data-i18n="Daftar Transaksi">
                                     Daftar Transaksi
                                 </div>
                             </a>
                         </li>
-                        <li
-                            class="menu-item {{ request()->routeIs("ahli-gizi.transaksi.create") ? "active" : "" }}"
-                        >
-                            <a
-                                href="{{ route("ahli-gizi.transaksi.create", ["dapur" => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
-                                class="menu-link"
-                            >
+                        <li class="menu-item {{ request()->routeIs('ahli-gizi.transaksi.create') ? 'active' : '' }}">
+                            <a href="{{ route('ahli-gizi.transaksi.create', ['dapur' => request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)]) }}"
+                                class="menu-link">
                                 <div data-i18n="Buat Transaksi">
                                     Buat Transaksi
                                 </div>
@@ -283,23 +217,16 @@
                 <!-- Disabled menu items with tooltips -->
                 @php
                     $disabledMenus = [
-                        "Menu Makanan" => "bx-food-menu",
-                        "Transaksi Dapur" => "bx-cart",
+                        'Menu Makanan' => 'bx-food-menu',
+                        'Transaksi Dapur' => 'bx-cart',
                     ];
                 @endphp
 
                 @foreach ($disabledMenus as $menuName => $icon)
-                    <li
-                        class="menu-item disabled"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="right"
-                        title="Subscription required to access this feature"
-                    >
-                        <a
-                            href="javascript:void(0);"
-                            class="menu-link text-muted"
-                            style="cursor: not-allowed; opacity: 0.6"
-                        >
+                    <li class="menu-item disabled" data-bs-toggle="tooltip" data-bs-placement="right"
+                        title="Subscription required to access this feature">
+                        <a href="javascript:void(0);" class="menu-link text-muted"
+                            style="cursor: not-allowed; opacity: 0.6">
                             <i class="menu-icon tf-icons bx {{ $icon }}"></i>
                             <div>{{ $menuName }}</div>
                             <i class="bx bx-lock-alt ms-auto text-warning"></i>
@@ -312,9 +239,7 @@
 </aside>
 
 <!-- Mobile Menu Toggle Button (tampil hanya di mobile) -->
-<button
-    class="btn btn-primary d-lg-none position-fixed"
-    id="mobileMenuToggle"
+<button class="btn btn-primary d-lg-none position-fixed" id="mobileMenuToggle"
     style="
         top: 10px;
         left: 10px;
@@ -326,38 +251,22 @@
         align-items: center;
         justify-content: center;
         font-size: 14px;
-    "
->
+    ">
     <i class="bx bx-chevron-right bx-sm align-middle"></i>
 </button>
 
 <!-- Overlay untuk mobile -->
-<div
-    class="layout-overlay d-lg-none"
-    id="layoutOverlay"
-    style="display: none"
-></div>
+<div class="layout-overlay d-lg-none" id="layoutOverlay" style="display: none"></div>
 
 <!-- Subscription Expired Modal -->
-<div
-    class="modal fade"
-    id="subscriptionExpiredModal"
-    tabindex="-1"
-    aria-labelledby="subscriptionExpiredModalLabel"
-    aria-hidden="true"
->
+<div class="modal fade" id="subscriptionExpiredModal" tabindex="-1" aria-labelledby="subscriptionExpiredModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div
-            class="modal-content border-0 shadow-lg"
-            style="border-radius: 0.5rem; overflow: hidden"
-        >
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 0.5rem; overflow: hidden">
             <div class="modal-header bg-gradient-danger text-white p-4">
                 <div class="d-flex align-items-center">
                     <i class="bx bx-error-circle bx-md me-3"></i>
-                    <h5
-                        class="modal-title mb-0"
-                        id="subscriptionExpiredModalLabel"
-                    >
+                    <h5 class="modal-title mb-0" id="subscriptionExpiredModalLabel">
                         Subscription Expired
                     </h5>
                 </div>
@@ -365,8 +274,7 @@
             <div class="modal-body p-4 text-center">
                 <div class="mb-3">
                     <i
-                        class="bx bx-time-five bx-lg text-danger mb-3 animate__animated animate__pulse animate__infinite"
-                    ></i>
+                        class="bx bx-time-five bx-lg text-danger mb-3 animate__animated animate__pulse animate__infinite"></i>
                     <h6 class="fw-semibold">
                         Your Dapur Subscription Has Expired
                     </h6>
@@ -375,10 +283,8 @@
                         your Kepala Dapur to renew the subscription.
                     </p>
                 </div>
-                <div
-                    class="alert alert-info bg-light-info border-0 d-flex align-items-center justify-content-center p-3"
-                    role="alert"
-                >
+                <div class="alert alert-info bg-light-info border-0 d-flex align-items-center justify-content-center p-3"
+                    role="alert">
                     <i class="bx bx-info-circle me-2"></i>
                     <small>
                         Renew now to continue managing menus and transactions!
@@ -386,11 +292,7 @@
                 </div>
             </div>
             <div class="modal-footer border-0 p-3 justify-content-center">
-                <button
-                    type="button"
-                    class="btn btn-primary px-4"
-                    data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">
                     Understood
                 </button>
             </div>
@@ -414,16 +316,21 @@
 
     /* Menu container styling */
     .menu-container {
-        height: calc(100vh - 80px); /* Adjust based on brand height */
-        min-height: 500px; /* Ensure minimum height */
-        overflow-y: auto; /* Allow scrolling if content is too long */
+        height: calc(100vh - 80px);
+        /* Adjust based on brand height */
+        min-height: 500px;
+        /* Ensure minimum height */
+        overflow-y: auto;
+        /* Allow scrolling if content is too long */
     }
 
     /* User profile section styling */
     .user-profile-section {
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        flex-shrink: 0; /* Prevent shrinking */
-        min-height: 60px; /* Reduced height for better positioning */
+        flex-shrink: 0;
+        /* Prevent shrinking */
+        min-height: 60px;
+        /* Reduced height for better positioning */
     }
 
     /* Disabled menu items styling */
@@ -471,7 +378,7 @@
     /* Sembunyikan text saat collapsed */
     .layout-menu.collapsed .app-brand-text,
     .layout-menu.collapsed .menu-header-text,
-    .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
+    .layout-menu.collapsed .menu-link>div:not(.menu-icon) {
         display: none;
     }
 
@@ -491,7 +398,8 @@
 
     .layout-menu.collapsed .user-profile-section .avatar {
         margin: 0;
-        transform: scale(1.1); /* Slightly larger avatar for visibility */
+        transform: scale(1.1);
+        /* Slightly larger avatar for visibility */
     }
 
     /* Hide subscription alert when collapsed */
@@ -504,7 +412,8 @@
         display: block !important;
         position: relative;
         z-index: 1;
-        order: -1; /* Move to top of menu-container */
+        order: -1;
+        /* Move to top of menu-container */
     }
 
     /* Posisikan tombol toggle di samping logo saat collapsed */
@@ -575,7 +484,7 @@
         /* Tampilkan kembali semua elemen di mobile */
         .layout-menu.collapsed .app-brand-text,
         .layout-menu.collapsed .menu-header-text,
-        .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
+        .layout-menu.collapsed .menu-link>div:not(.menu-icon) {
             display: block;
         }
 
@@ -654,7 +563,7 @@
         }
 
         /* Rotate ikon saat sidebar terbuka di mobile */
-        .layout-menu.show + #mobileMenuToggle i {
+        .layout-menu.show+#mobileMenuToggle i {
             transform: rotate(180deg);
         }
     }
@@ -743,7 +652,7 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('layout-menu');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -756,14 +665,14 @@
             const tooltipTriggerList = [].slice.call(
                 document.querySelectorAll('[data-bs-toggle="tooltip"]'),
             );
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         }
 
         // Desktop toggle functionality
         if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', function () {
+            sidebarToggle.addEventListener('click', function() {
                 sidebar.classList.toggle('collapsed');
                 layoutPage.classList.toggle('sidebar-collapsed');
 
@@ -775,7 +684,7 @@
                 if (isCollapsed) {
                     document
                         .querySelectorAll('.menu-item.open')
-                        .forEach(function (item) {
+                        .forEach(function(item) {
                             item.classList.remove('open');
                         });
                 }
@@ -784,18 +693,18 @@
 
         // Mobile toggle functionality
         if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', function () {
+            mobileMenuToggle.addEventListener('click', function() {
                 sidebar.classList.remove('d-none');
                 sidebar.classList.toggle('show');
-                layoutOverlay.style.display = sidebar.classList.contains('show')
-                    ? 'block'
-                    : 'none';
+                layoutOverlay.style.display = sidebar.classList.contains('show') ?
+                    'block' :
+                    'none';
             });
         }
 
         // Close mobile menu when clicking overlay
         if (layoutOverlay) {
-            layoutOverlay.addEventListener('click', function () {
+            layoutOverlay.addEventListener('click', function() {
                 sidebar.classList.remove('show');
                 layoutOverlay.style.display = 'none';
             });
@@ -811,8 +720,8 @@
         }
 
         // Handle submenu toggles - only allow when subscription is active
-        document.querySelectorAll('.menu-toggle').forEach(function (toggle) {
-            toggle.addEventListener('click', function (e) {
+        document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -837,7 +746,7 @@
                 const parent = menuItem.parentElement;
                 parent
                     .querySelectorAll('.menu-item.open')
-                    .forEach(function (openItem) {
+                    .forEach(function(openItem) {
                         if (openItem !== menuItem) {
                             openItem.classList.remove('open');
                         }
@@ -855,15 +764,14 @@
         // Handle disabled menu item clicks - show notification about contacting Kepala Dapur
         document
             .querySelectorAll('.menu-item.disabled .menu-link')
-            .forEach(function (link) {
-                link.addEventListener('click', function (e) {
+            .forEach(function(link) {
+                link.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
 
                     // Show a modal notification about contacting Kepala Dapur
                     const subscriptionModal = new bootstrap.Modal(
-                        document.getElementById('subscriptionExpiredModal'),
-                        {
+                        document.getElementById('subscriptionExpiredModal'), {
                             backdrop: 'static',
                             keyboard: false,
                         },
@@ -873,15 +781,14 @@
             });
 
         // Auto-show modal if completely expired
-        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+        const subscriptionStatus = '{{ $subscriptionStatus ?? '' }}';
         const isSubscriptionActive =
-            {{ $isSubscriptionActive ? "true" : "false" }};
+            {{ $isSubscriptionActive ? 'true' : 'false' }};
 
         if (!isSubscriptionActive && subscriptionStatus === 'expired') {
-            setTimeout(function () {
+            setTimeout(function() {
                 const subscriptionModal = new bootstrap.Modal(
-                    document.getElementById('subscriptionExpiredModal'),
-                    {
+                    document.getElementById('subscriptionExpiredModal'), {
                         backdrop: 'static',
                         keyboard: false,
                     },
@@ -891,7 +798,7 @@
         }
 
         // Handle window resize
-        window.addEventListener('resize', function () {
+        window.addEventListener('resize', function() {
             if (window.innerWidth >= 992) {
                 // Desktop mode
                 sidebar.classList.remove('show');
@@ -914,8 +821,8 @@
     // Function to handle subscription-related features for Ahli Gizi
     function initializeSubscriptionFeatures() {
         const isSubscriptionActive =
-            {{ $isSubscriptionActive ? "true" : "false" }};
-        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
+            {{ $isSubscriptionActive ? 'true' : 'false' }};
+        const subscriptionStatus = '{{ $subscriptionStatus ?? '' }}';
 
         // Add warning styles to user profile when subscription issues exist
         if (subscriptionStatus === 'expiring_soon') {
@@ -1062,8 +969,7 @@
     // Additional utility functions for Ahli Gizi
     function showSubscriptionNotification() {
         const subscriptionModal = new bootstrap.Modal(
-            document.getElementById('subscriptionExpiredModal'),
-            {
+            document.getElementById('subscriptionExpiredModal'), {
                 backdrop: 'static',
                 keyboard: false,
             },
@@ -1075,13 +981,13 @@
     window.showSubscriptionNotification = showSubscriptionNotification;
 
     // Initialize subscription status monitoring for Ahli Gizi
-    document.addEventListener('DOMContentLoaded', function () {
-        const subscriptionStatus = '{{ $subscriptionStatus ?? "" }}';
-        const daysLeft = {{ session("subscription_days_left", 0) }};
+    document.addEventListener('DOMContentLoaded', function() {
+        const subscriptionStatus = '{{ $subscriptionStatus ?? '' }}';
+        const daysLeft = {{ session('subscription_days_left', 0) }};
 
         // Show expiration warning for Ahli Gizi users
         if (subscriptionStatus === 'expiring_soon' && daysLeft <= 5) {
-            setTimeout(function () {
+            setTimeout(function() {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         title: 'Subscription Expiring Soon!',

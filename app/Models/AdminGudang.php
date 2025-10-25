@@ -19,7 +19,6 @@ class AdminGudang extends Model
     {
         return $this->belongsTo(UserRole::class, 'id_user_role')->where('role_type', 'admin_gudang');
     }
-
     public function user()
     {
         return $this->hasOneThrough(
