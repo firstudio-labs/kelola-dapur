@@ -17,7 +17,7 @@
     class="light-style layout-menu-fixed"
     dir="ltr"
     data-theme="theme-default"
-    data-assets-path="{{ asset("admin") }}/assets/"
+    data-assets-path="{{ asset('admin') }}/assets/"
     data-template="vertical-menu-template-free"
 >
     <head>
@@ -46,12 +46,12 @@
             href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css"
         />
 
-        @stack("styles")
+        @stack('styles')
 
         <!-- Favicon -->
         <link
             rel="icon"
-            href="{{ asset("admin") }}/assets/img/favicon/favicon.ico"
+            href="{{ asset('admin') }}/assets/img/favicon/favicon.ico"
         />
 
         <!-- Fonts -->
@@ -65,31 +65,31 @@
         <!-- Icons. Uncomment required icon fonts -->
         <link
             rel="stylesheet"
-            href="{{ asset("admin") }}/assets/vendor/fonts/boxicons.css"
+            href="{{ asset('admin') }}/assets/vendor/fonts/boxicons.css"
         />
 
         <!-- Core CSS -->
         <link
             rel="stylesheet"
-            href="{{ asset("admin") }}/assets/vendor/css/core.css"
+            href="{{ asset('admin') }}/assets/vendor/css/core.css"
         />
         <link
             rel="stylesheet"
-            href="{{ asset("admin") }}/assets/vendor/css/theme-default.css"
+            href="{{ asset('admin') }}/assets/vendor/css/theme-default.css"
         />
         <link
             rel="stylesheet"
-            href="{{ asset("admin") }}/assets/css/demo.css"
+            href="{{ asset('admin') }}/assets/css/demo.css"
         />
 
         <!-- Vendors CSS -->
         <link
             rel="stylesheet"
-            href="{{ asset("admin") }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css"
+            href="{{ asset('admin') }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css"
         />
         <link
             rel="stylesheet"
-            href="{{ asset("admin") }}/assets/vendor/libs/apex-charts/apex-charts.css"
+            href="{{ asset('admin') }}/assets/vendor/libs/apex-charts/apex-charts.css"
         />
 
         <script src="https://cdn.tailwindcss.com"></script>
@@ -99,11 +99,23 @@
         />
 
         <!-- Helpers -->
-        <script src="{{ asset("admin") }}/assets/vendor/js/helpers.js"></script>
+        <script src="{{ asset('admin') }}/assets/vendor/js/helpers.js"></script>
 
         <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
         <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-        <script src="{{ asset("admin") }}/assets/js/config.js"></script>
+        <script src="{{ asset('admin') }}/assets/js/config.js"></script>
+        <style>
+            .badge {
+                animation: none !important;
+            }
+            .badge.bg-primary,
+            .badge.bg-success,
+            .badge.bg-label-primary,
+            .badge.bg-label-info {
+                animation: none !important;
+                transition: none !important;
+            }
+        </style>
     </head>
 
     <body>
@@ -111,19 +123,19 @@
         <div class="layout-wrapper layout-content-navbar">
             <div class="layout-container">
                 <!-- Menu -->
-                @include("template_kepala_dapur.sidebar")
+                @include('template_kepala_dapur.sidebar')
                 <!-- / Menu -->
 
                 <!-- Layout container -->
                 <div class="layout-page">
                     <!-- Navbar -->
-                    @include("template_kepala_dapur.navbar")
+                    @include('template_kepala_dapur.navbar')
                     <!-- / Navbar -->
 
                     <!-- Content wrapper -->
                     <div class="content-wrapper">
                         <!-- Content -->
-                        @yield("content")
+                        @yield('content')
                         <!-- / Content -->
 
                         <div class="content-backdrop fade"></div>
@@ -139,35 +151,32 @@
         <!-- / Layout wrapper -->
 
         <!-- Core JS -->
-        @yield("script")
+        @yield('script')
         <!-- build:js assets/vendor/js/core.js -->
-        <script src="{{ asset("admin") }}/assets/vendor/libs/jquery/jquery.js"></script>
-        <script src="{{ asset("admin") }}/assets/vendor/libs/popper/popper.js"></script>
-        <script src="{{ asset("admin") }}/assets/vendor/js/bootstrap.js"></script>
-        <script src="{{ asset("admin") }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+        <script src="{{ asset('admin') }}/assets/vendor/libs/jquery/jquery.js"></script>
+        <script src="{{ asset('admin') }}/assets/vendor/libs/popper/popper.js"></script>
+        <script src="{{ asset('admin') }}/assets/vendor/js/bootstrap.js"></script>
+        <script src="{{ asset('admin') }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
 
-        <script src="{{ asset("admin") }}/assets/vendor/js/menu.js"></script>
+        <script src="{{ asset('admin') }}/assets/vendor/js/menu.js"></script>
         <!-- endbuild -->
 
         <!-- Vendors JS -->
-        <script src="{{ asset("admin") }}/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+        <script src="{{ asset('admin') }}/assets/vendor/libs/apex-charts/apexcharts.js"></script>
 
         <!-- Main JS -->
-        <script src="{{ asset("admin") }}/assets/js/main.js"></script>
+        <script src="{{ asset('admin') }}/assets/js/main.js"></script>
 
         <!-- Page JS -->
-        <script src="{{ asset("admin") }}/assets/js/dashboards-analytics.js"></script>
+        <script src="{{ asset('admin') }}/assets/js/dashboards-analytics.js"></script>
 
         <!-- Leaflet JS -->
-        <script
-            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-            crossorigin=""
-        ></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
         <script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
 
-        @stack("js-internal")
-        @yield("scripts")
-        @stack("scripts")
+        @stack('js-internal')
+        @yield('scripts')
+        @stack('scripts')
     </body>
 </html>
