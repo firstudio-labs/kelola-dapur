@@ -51,9 +51,6 @@ class KepalaDapurController extends Controller
             // Transaction Performance
             'transactionPerformance' => $this->getTransactionPerformance($dapur),
 
-            // Team Management Overview
-            'teamOverview' => $this->getTeamOverview($dapur),
-
             // Recent Activities Timeline
             'recentActivities' => $this->getRecentActivitiesTimeline($dapur),
 
@@ -216,28 +213,7 @@ class KepalaDapurController extends Controller
     /**
      * Get comprehensive team overview
      */
-    private function getTeamOverview(Dapur $dapur): array
-    {
-        $kepalaDapur = $dapur->kepalaDapur()->with('user')->get();
-        $adminGudang = $dapur->adminGudang()->with('user')->get();
-        $ahliGizi = $dapur->ahliGizi()->with('user')->get();
 
-        return [
-            'summary' => [
-                'total_members' => $kepalaDapur->count() + $adminGudang->count() + $ahliGizi->count(),
-                'kepala_dapur_count' => $kepalaDapur->count(),
-                'admin_gudang_count' => $adminGudang->count(),
-                'ahli_gizi_count' => $ahliGizi->count(),
-            ],
-            'members' => [
-                'kepala_dapur' => $kepalaDapur,
-                'admin_gudang' => $adminGudang,
-                'ahli_gizi' => $ahliGizi,
-            ],
-            'recent_additions' => $this->getRecentTeamAdditions($dapur),
-            'team_performance' => $this->getTeamPerformanceMetrics($dapur),
-        ];
-    }
 
     /**
      * Get enhanced recent activities timeline
@@ -756,87 +732,7 @@ class KepalaDapurController extends Controller
             ->toArray();
     }
 
-    private function getRecentTeamAdditions(Dapur $dapur): array
-    {
-        $recentMembers = collect();
 
-        // Recent Kepala Dapur
-        $recentKD = $dapur->kepalaDapur()->with('user')
-            ->where('created_at', '>=', now()->subDays(30))
-            ->get()
-            ->map(function ($member) {
-                return [
-                    'name' => $member->user->nama,
-                    'role' => 'Kepala Dapur',
-                    'joined_at' => $member->created_at,
-                ];
-            });
-
-        // Recent Admin Gudang
-        $recentAG = $dapur->adminGudang()->with('user')
-            ->where('created_at', '>=', now()->subDays(30))
-            ->get()
-            ->map(function ($member) {
-                return [
-                    'name' => $member->user->nama,
-                    'role' => 'Admin Gudang',
-                    'joined_at' => $member->created_at,
-                ];
-            });
-
-        // Recent Ahli Gizi
-        $recentAhliGizi = $dapur->ahliGizi()->with('user')
-            ->where('created_at', '>=', now()->subDays(30))
-            ->get()
-            ->map(function ($member) {
-                return [
-                    'name' => $member->user->nama,
-                    'role' => 'Ahli Gizi',
-                    'joined_at' => $member->created_at,
-                ];
-            });
-
-        return $recentMembers->merge($recentKD)
-            ->merge($recentAG)
-            ->merge($recentAhliGizi)
-            ->sortByDesc('joined_at')
-            ->take(5)
-            ->values()
-            ->toArray();
-    }
-
-    private function getTeamPerformanceMetrics(Dapur $dapur): array
-    {
-        // Admin Gudang Performance
-        $adminPerformance = $dapur->adminGudang()
-            ->with(['approvalStockItems' => function ($query) {
-                $query->whereMonth('created_at', now()->month);
-            }])
-            ->get()
-            ->map(function ($admin) {
-                return [
-                    'name' => $admin->user->nama ?? 'N/A',
-                    'requests_made' => $admin->approvalStockItems->count(),
-                    'role' => 'Admin Gudang'
-                ];
-            });
-
-        // Ahli Gizi Performance
-        $ahliGiziPerformance = $dapur->ahliGizi()
-            ->with(['approvalTransaksi' => function ($query) {
-                $query->whereMonth('created_at', now()->month);
-            }])
-            ->get()
-            ->map(function ($ahliGizi) {
-                return [
-                    'name' => $ahliGizi->user->nama ?? 'N/A',
-                    'transactions_created' => $ahliGizi->approvalTransaksi->count(),
-                    'role' => 'Ahli Gizi'
-                ];
-            });
-
-        return $adminPerformance->merge($ahliGiziPerformance)->toArray();
-    }
 
     private function getStockTurnoverMetrics(Dapur $dapur): array
     {

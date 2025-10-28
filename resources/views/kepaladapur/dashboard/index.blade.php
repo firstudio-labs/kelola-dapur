@@ -282,14 +282,7 @@
                                 <h3 class="mb-0 text-info">
                                     {{ $statistics['team_members'] }}
                                 </h3>
-                                <small class="text-muted">
-                                    KD:
-                                    {{ $teamOverview['summary']['kepala_dapur_count'] }}
-                                    | AG:
-                                    {{ $teamOverview['summary']['admin_gudang_count'] }}
-                                    | AhliGizi:
-                                    {{ $teamOverview['summary']['ahli_gizi_count'] }}
-                                </small>
+
                             </div>
                             <div class="avatar flex-shrink-0">
                                 <span class="avatar-initial rounded bg-label-info">
