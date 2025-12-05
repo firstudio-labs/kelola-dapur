@@ -1,0 +1,22 @@
+/* Menonaktifkan animasi pada semua badge */
+.badge,
+.badge.bg-label-success,
+.badge.bg-label-danger,
+.badge.bg-label-warning,
+.badge.bg-label-info,
+.badge.bg-label-secondary,
+.badge.bg-label-primary,
+.badge.bg-label-light,
+.badge.bg-label-dark,
+.badge.bg-label-gray,
+[class*="bg-label"] {
+    transition: none !important;
+    animation: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    -webkit-animation: none !important;
+    -moz-animation: none !important;
+    -o-animation: none !important;
+}
+

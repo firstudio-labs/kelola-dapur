@@ -819,7 +819,9 @@ class KepalaDapurController extends Controller
                     'requests_made' => $admin->approvalStockItems->count(),
                     'role' => 'Admin Gudang'
                 ];
-            });
+            })
+            ->values()
+            ->toBase(); // paksa ke base collection agar tidak mencari getKey pada array
 
         // Ahli Gizi Performance
         $ahliGiziPerformance = $dapur->ahliGizi()
@@ -833,7 +835,9 @@ class KepalaDapurController extends Controller
                     'transactions_created' => $ahliGizi->approvalTransaksi->count(),
                     'role' => 'Ahli Gizi'
                 ];
-            });
+            })
+            ->values()
+            ->toBase();
 
         return $adminPerformance->merge($ahliGiziPerformance)->toArray();
     }
@@ -952,7 +956,7 @@ class KepalaDapurController extends Controller
                 'workload' => $pendingRequests,
                 'role' => 'Admin Gudang'
             ];
-        });
+        })->values()->toBase();
 
         // Ahli Gizi workload
         $ahliGiziWorkload = $dapur->ahliGizi()->with('user')->get()->map(function ($ahliGizi) use ($dapur) {
@@ -965,7 +969,7 @@ class KepalaDapurController extends Controller
                 'workload' => $pendingTransactions,
                 'role' => 'Ahli Gizi'
             ];
-        });
+        })->values()->toBase();
 
         return $adminWorkload->merge($ahliGiziWorkload)->toArray();
     }

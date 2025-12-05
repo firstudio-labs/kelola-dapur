@@ -110,6 +110,10 @@
             rel="stylesheet"
             href="{{ asset("admin") }}/assets/css/demo.css"
         />
+        <link
+            rel="stylesheet"
+            href="{{ asset("admin") }}/assets/css/custom-badge.css"
+        />
 
         <!-- Vendors CSS -->
         <link
