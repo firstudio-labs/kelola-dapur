@@ -181,7 +181,7 @@
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.approvals.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.approvals.index', ['dapur' => $idDapur]) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-check-circle"></i>
-                        <div data-i18n="Approval Stok">Approval Stok</div>
+                        <div data-i18n="Approval Stok">Laporan Stok</div>
                         @if (isset($pendingApprovalsCount) && $pendingApprovalsCount > 0)
                             <span class="badge bg-danger ms-2">
                                 {{ $pendingApprovalsCount }}
@@ -196,7 +196,7 @@
                         class="menu-link">
                         <i class="menu-icon tf-icons bx bx-file"></i>
                         <div data-i18n="Approval Transaksi">
-                            Approval Transaksi
+                            Laporan Transaksi
                         </div>
                         @if (isset($pendingTransaksiCount) && $pendingTransaksiCount > 0)
                             <span class="badge bg-danger ms-2">
@@ -230,7 +230,7 @@
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.template-items.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-package"></i>
-                        <div data-i18n="Template Bahan">Template Bahan</div>
+                        <div data-i18n="Template Bahan">Kelola Template Bahan</div>
                     </a>
                     <ul class="menu-sub">
                         <li
@@ -366,25 +366,89 @@
     </div>
 </aside>
 
-<!-- Mobile Menu Toggle Button (tampil hanya di mobile) -->
-<button class="btn btn-primary d-lg-none position-fixed" id="mobileMenuToggle"
-    style="
-        top: 10px;
-        left: 10px;
-        z-index: 1050;
-        border-radius: 4px;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-    ">
-    <i class="bx bx-chevron-right bx-sm align-middle"></i>
-</button>
+<!-- Bottom Navigation untuk Mobile/Tablet -->
+<nav class="mobile-bottom-nav d-lg-none" id="mobileBottomNav">
+    <div class="bottom-nav-container">
+        @php
+            $mainMenus = [];
+            
+            // Menu Akun (selalu ada)
+            $akunSubmenu = [
+                ['type' => 'link', 'label' => 'Edit', 'url' => route('kepala-dapur.edit-profil')],
+                ['type' => 'logout', 'label' => 'Logout', 'url' => route('logout'), 'method' => 'POST'],
+            ];
+            
+            if ($isSubscriptionActive) {
+                $mainMenus = [
+                    ['icon' => 'bx-user', 'label' => 'Akun', 'hasSubmenu' => true, 'submenu' => $akunSubmenu],
+                    ['route' => 'kepala-dapur.dashboard', 'icon' => 'bx-home-circle', 'label' => 'Dashboard', 'param' => ['dapur' => $idDapur]],
+                    ['icon' => 'bx-file', 'label' => 'Laporan', 'hasSubmenu' => true, 'submenu' => [
+                        ['type' => 'link', 'label' => 'Laporan Stok', 'url' => route('kepala-dapur.approvals.index', ['dapur' => $idDapur])],
+                        ['type' => 'link', 'label' => 'Laporan Transaksi', 'url' => route('kepala-dapur.approval-transaksi.index', ['dapur' => $idDapur])],
+                        ['type' => 'link', 'label' => 'Laporan Kekurangan Stok', 'url' => route('kepala-dapur.laporan-kekurangan.index')],
+                    ]],
+                    ['icon' => 'bx-cog', 'label' => 'Management', 'hasSubmenu' => true, 'submenu' => [
+                        ['type' => 'link', 'label' => 'Kelola Template Bahan', 'url' => route('kepala-dapur.template-items.index')],
+                        ['type' => 'link', 'label' => 'Kelola Menu Makanan', 'url' => route('kepala-dapur.menu-makanan.index')],
+                        ['type' => 'link', 'label' => 'Kelola User', 'url' => route('kepala-dapur.users.index', ['dapur' => $idDapur])],
+                    ]],
+                    ['icon' => 'bx-credit-card', 'label' => 'Subscription', 'hasSubmenu' => true, 'submenu' => [
+                        ['type' => 'link', 'label' => 'Daftar Request', 'url' => route('kepala-dapur.subscription.index', $idDapur)],
+                        ['type' => 'link', 'label' => 'Buat Request Baru', 'url' => route('kepala-dapur.subscription.choose-package', $idDapur)],
+                    ]],
+                ];
+            } else {
+                $mainMenus = [
+                    ['icon' => 'bx-user', 'label' => 'Akun', 'hasSubmenu' => true, 'submenu' => $akunSubmenu],
+                    ['route' => 'kepala-dapur.dashboard', 'icon' => 'bx-home-circle', 'label' => 'Dashboard', 'param' => ['dapur' => $idDapur]],
+                    ['icon' => 'bx-credit-card', 'label' => 'Subscription', 'hasSubmenu' => true, 'submenu' => [
+                        ['type' => 'link', 'label' => 'Daftar Request', 'url' => route('kepala-dapur.subscription.index', $idDapur)],
+                        ['type' => 'link', 'label' => 'Buat Request Baru', 'url' => route('kepala-dapur.subscription.choose-package', $idDapur)],
+                    ]],
+                ];
+            }
+        @endphp
 
-<!-- Overlay untuk mobile -->
-<div class="layout-overlay d-lg-none" id="layoutOverlay" style="display: none"></div>
+        @foreach ($mainMenus as $menu)
+            @if(isset($menu['hasSubmenu']) && $menu['hasSubmenu'])
+                @php
+                    // Build submenu with full URLs
+                    $submenuWithUrls = [];
+                    foreach($menu['submenu'] as $sub) {
+                        $submenuWithUrls[] = [
+                            'label' => $sub['label'],
+                            'url' => $sub['url'],
+                            'type' => $sub['type'] ?? 'link',
+                            'method' => $sub['method'] ?? 'GET',
+                            'isActive' => isset($sub['url']) && request()->url() === $sub['url']
+                        ];
+                    }
+                @endphp
+                <a href="javascript:void(0);" 
+                   class="bottom-nav-item {{ (isset($menu['route']) && request()->routeIs($menu['route'] . '*')) ? 'active' : '' }}"
+                   data-submenu-popup="true"
+                   data-menu-label="{{ $menu['label'] }}"
+                   data-submenu='@json($submenuWithUrls)'>
+                    <i class="bx {{ $menu['icon'] }}"></i>
+                    <span class="bottom-nav-label">{{ $menu['label'] }}</span>
+                    @if(isset($menu['badge']) && $menu['badge'])
+                        <span class="bottom-nav-badge">{{ $menu['badge'] }}</span>
+                    @endif
+                </a>
+            @else
+                <a href="{{ route($menu['route'], $menu['param']) }}" 
+                   class="bottom-nav-item {{ request()->routeIs($menu['route'] . '*') ? 'active' : '' }}"
+                   @if(isset($menu['warning']) && $menu['warning']) data-bs-toggle="tooltip" data-bs-placement="top" title="Subscription required" @endif>
+                    <i class="bx {{ $menu['icon'] }}"></i>
+                    <span class="bottom-nav-label">{{ $menu['label'] }}</span>
+                    @if(isset($menu['badge']) && $menu['badge'])
+                        <span class="bottom-nav-badge">{{ $menu['badge'] }}</span>
+                    @endif
+                </a>
+            @endif
+        @endforeach
+    </div>
+</nav>
 
 
 
@@ -558,106 +622,230 @@
         display: block;
     }
 
-    /* Mobile styles */
+    /* Mobile styles - Sidebar disembunyikan, bottom nav ditampilkan */
     @media (max-width: 991.98px) {
         .layout-menu {
-            transform: translateX(-100%);
-            width: 260px !important;
-            transition: transform 0.3s ease-in-out;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .layout-menu.show {
-            transform: translateX(0);
-        }
-
-        .layout-menu.collapsed {
-            width: 260px !important;
-            transform: translateX(-100%);
-        }
-
-        .layout-menu.collapsed.show {
-            transform: translateX(0);
-        }
-
-        .layout-menu.collapsed .app-brand-text,
-        .layout-menu.collapsed .menu-header-text,
-        .layout-menu.collapsed .menu-link>div:not(.menu-icon) {
-            display: block;
-        }
-
-        .layout-menu.collapsed .alert {
-            display: block;
-        }
-
-        .layout-menu.collapsed .user-profile-section .user-info,
-        .layout-menu.collapsed .user-profile-section .user-chevron {
-            display: block;
-        }
-
-        .layout-menu.collapsed .user-profile-section .nav-link {
-            justify-content: flex-start;
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.15) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .layout-menu.collapsed .user-profile-section .avatar {
-            margin-right: 0.75rem;
-            transform: none;
-        }
-
-        .layout-menu.collapsed .app-brand {
-            justify-content: space-between;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        .layout-menu.collapsed .layout-menu-toggle {
-            position: static;
-            background: transparent;
-            color: inherit;
-            border-radius: 0;
-            width: auto;
-            height: auto;
-            display: flex;
-            transform: none;
-            font-size: inherit;
-            right: auto;
-            top: auto;
-        }
-
-        .layout-menu.collapsed .layout-menu-toggle i {
-            transform: none;
-        }
-
-        .layout-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-        }
-
-        #mobileMenuToggle {
-            background: var(--bs-primary);
-            color: white;
-            transition: all 0.3s ease-in-out;
-        }
-
-        #mobileMenuToggle:hover {
-            background: var(--bs-primary-dark);
-        }
-
-        .layout-menu.show+#mobileMenuToggle i {
-            transform: rotate(180deg);
+            display: none !important;
         }
 
         .layout-page {
             padding-left: 0 !important;
+            padding-bottom: 70px !important; /* Space untuk bottom nav */
+        }
+
+        /* Bottom Navigation Styles */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: #fff;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+        }
+
+        .bottom-nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .bottom-nav-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 60px;
+            padding: 8px 4px;
+            text-decoration: none;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .bottom-nav-item i {
+            font-size: 24px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .bottom-nav-label {
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--bs-primary, #696cff);
+        }
+
+        .bottom-nav-item.active i {
+            transform: scale(1.1);
+        }
+
+        .bottom-nav-item:active {
+            background-color: rgba(105, 108, 255, 0.1);
+            transform: scale(0.95);
+        }
+
+        .bottom-nav-badge {
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 18px;
+            text-align: center;
+            line-height: 14px;
+        }
+
+        /* Safe area untuk iPhone dengan notch */
+        @supports (padding: max(0px)) {
+            .mobile-bottom-nav {
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Submenu Popup Drawer */
+        .submenu-popup {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1060;
+            max-height: 70vh;
+            overflow-y: auto;
+            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+
+        .submenu-popup.show {
+            bottom: 70px;
+        }
+
+        .submenu-popup-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 1;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .submenu-popup-header h5 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .submenu-popup-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .submenu-popup-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #333;
+        }
+
+        .submenu-popup-body {
+            padding: 10px 0;
+        }
+
+        .submenu-item {
+            display: block;
+            padding: 16px 20px;
+            text-decoration: none;
+            color: #333;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .submenu-item:last-child {
+            border-bottom: none;
+        }
+
+        .submenu-item:hover,
+        .submenu-item:active {
+            background: rgba(105, 108, 255, 0.05);
+            color: var(--bs-primary, #696cff);
+        }
+
+        .submenu-item.active {
+            background: rgba(105, 108, 255, 0.1);
+            color: var(--bs-primary, #696cff);
+            font-weight: 500;
+        }
+
+        .submenu-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--bs-primary, #696cff);
+        }
+
+        .submenu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1059;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .submenu-overlay.show {
+            opacity: 1;
+            visibility: visible;
         }
     }
 
@@ -675,11 +863,17 @@
 
         .layout-page {
             padding-left: 260px;
+            padding-bottom: 0 !important;
             transition: padding-left 0.3s ease-in-out;
         }
 
         .layout-page.sidebar-collapsed {
             padding-left: 78px;
+        }
+
+        /* Hide bottom nav di desktop */
+        .mobile-bottom-nav {
+            display: none !important;
         }
     }
 
@@ -753,8 +947,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('layout-menu');
         const sidebarToggle = document.getElementById('sidebarToggle');
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const layoutOverlay = document.getElementById('layoutOverlay');
         const layoutPage =
             document.querySelector('.layout-page') || document.body;
 
@@ -789,23 +981,7 @@
             });
         }
 
-        // Mobile toggle functionality
-        if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('show');
-                layoutOverlay.style.display = sidebar.classList.contains('show') ?
-                    'block' :
-                    'none';
-            });
-        }
-
-        // Close mobile menu when clicking overlay
-        if (layoutOverlay) {
-            layoutOverlay.addEventListener('click', function() {
-                sidebar.classList.remove('show');
-                layoutOverlay.style.display = 'none';
-            });
-        }
+        // Mobile bottom navigation - tidak perlu toggle karena selalu visible
 
         // Handle submenu toggles - only allow when subscription is active
         document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
@@ -888,18 +1064,141 @@
         // Handle window resize
         window.addEventListener('resize', function() {
             if (window.innerWidth >= 992) {
-                // Desktop mode
-                sidebar.classList.remove('show');
-                layoutOverlay.style.display = 'none';
+                // Desktop mode - restore sidebar
+                sidebar.style.display = 'flex';
             } else {
-                // Mobile mode
-                sidebar.classList.remove('collapsed');
-                layoutPage.classList.remove('sidebar-collapsed');
-                if (!sidebar.classList.contains('show')) {
-                    layoutOverlay.style.display = 'none';
-                }
+                // Mobile mode - hide sidebar, show bottom nav
+                sidebar.style.display = 'none';
             }
         });
+
+        // Initialize bottom nav tooltips
+        if (window.innerWidth < 992 && typeof bootstrap !== 'undefined') {
+            const tooltipTriggerList = [].slice.call(
+                document.querySelectorAll('#mobileBottomNav [data-bs-toggle="tooltip"]'),
+            );
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        // Handle submenu popup
+        document.querySelectorAll('[data-submenu-popup="true"]').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const submenuData = JSON.parse(this.getAttribute('data-submenu'));
+                const menuLabel = this.getAttribute('data-menu-label');
+                showSubmenuPopup(menuLabel, submenuData);
+            });
+        });
+
+        // Function to show submenu popup
+        function showSubmenuPopup(title, submenuItems) {
+            // Remove existing popup if any
+            const existingPopup = document.getElementById('submenuPopup');
+            if (existingPopup) {
+                existingPopup.remove();
+            }
+
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'submenu-overlay';
+            overlay.id = 'submenuOverlay';
+            overlay.addEventListener('click', function() {
+                closeSubmenuPopup();
+            });
+
+            // Create popup
+            const popup = document.createElement('div');
+            popup.className = 'submenu-popup';
+            popup.id = 'submenuPopup';
+
+            // Create header
+            const header = document.createElement('div');
+            header.className = 'submenu-popup-header';
+            header.innerHTML = `
+                <h5>${title}</h5>
+                <button class="submenu-popup-close" onclick="closeSubmenuPopup()">
+                    <i class="bx bx-x"></i>
+                </button>
+            `;
+
+            // Create body
+            const body = document.createElement('div');
+            body.className = 'submenu-popup-body';
+            
+            submenuItems.forEach(function(submenu) {
+                const submenuItem = document.createElement(submenu.type === 'logout' ? 'button' : 'a');
+                submenuItem.className = 'submenu-item';
+                
+                if (submenu.type === 'logout') {
+                    submenuItem.type = 'button';
+                    submenuItem.textContent = submenu.label;
+                    submenuItem.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        closeSubmenuPopup();
+                        
+                        // Create and submit logout form
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = submenu.url;
+                        
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        form.appendChild(csrfToken);
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+                    });
+                } else {
+                    submenuItem.href = submenu.url;
+                    submenuItem.textContent = submenu.label;
+                    
+                    if (submenu.isActive) {
+                        submenuItem.classList.add('active');
+                    }
+
+                    submenuItem.addEventListener('click', function(e) {
+                        closeSubmenuPopup();
+                        // Navigation will happen via href
+                    });
+                }
+
+                body.appendChild(submenuItem);
+            });
+
+            popup.appendChild(header);
+            popup.appendChild(body);
+            document.body.appendChild(overlay);
+            document.body.appendChild(popup);
+
+            // Trigger animation
+            setTimeout(function() {
+                overlay.classList.add('show');
+                popup.classList.add('show');
+            }, 10);
+        }
+
+        // Function to close submenu popup
+        function closeSubmenuPopup() {
+            const popup = document.getElementById('submenuPopup');
+            const overlay = document.getElementById('submenuOverlay');
+            
+            if (popup) {
+                popup.classList.remove('show');
+                if (overlay) overlay.classList.remove('show');
+                
+                setTimeout(function() {
+                    if (popup) popup.remove();
+                    if (overlay) overlay.remove();
+                }, 300);
+            }
+        }
+
+        // Make function globally available
+        window.closeSubmenuPopup = closeSubmenuPopup;
 
         // Initialize subscription-related functionality
         initializeSubscriptionFeatures();

@@ -20,12 +20,21 @@ class ApprovalStockItem extends Model
         'satuan',
         'status',
         'keterangan',
-        'approved_at'
+        'approved_at',
+        'jam_kedatangan',
+        'tanggal_produksi',
+        'tanggal_expired',
+        'suhu_bahan_makanan',
+        'warna_bahan_makanan',
+        'foto_bahan'
     ];
 
     protected $casts = [
         'jumlah' => 'decimal:3',
         'approved_at' => 'datetime',
+        'tanggal_produksi' => 'date',
+        'tanggal_expired' => 'date',
+        'suhu_bahan_makanan' => 'decimal:2',
     ];
 
     // Relationships
@@ -50,7 +59,14 @@ class ApprovalStockItem extends Model
         $this->approved_at = now();
 
         if ($this->save()) {
-            return $this->stockItem->addStock($this->jumlah);
+            // Update stock dengan tanggal_restok secara eksplisit
+            $stockItem = $this->stockItem;
+            $currentStock = (float) $stockItem->jumlah;
+            return StockItem::where('id_stock_item', $stockItem->id_stock_item)
+                ->update([
+                    'jumlah' => $currentStock + $this->jumlah,
+                    'tanggal_restok' => now()
+                ]);
         }
         return false;
     }

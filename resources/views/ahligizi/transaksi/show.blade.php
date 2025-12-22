@@ -337,6 +337,7 @@
                                             <th>Nama Bahan</th>
                                             <th>Kebutuhan</th>
                                             <th>Stok Gudang</th>
+                                            <th>Estimasi Stok Gudang</th>
                                             <th>Perbandingan</th>
                                             <th>Status</th>
                                         </tr>
@@ -359,6 +360,7 @@
                                                         "satuan_stok" => $satuan,
                                                     ];
                                                 $stockTersedia = (float) ($stockInfo["stock_tersedia"] ?? 0);
+                                                $estimasiStok = $stockTersedia - $totalKebutuhan;
                                             @endphp
 
                                             <tr>
@@ -370,6 +372,12 @@
                                                 <td>
                                                     {{ number_format($stockTersedia, 2) }}
                                                     {{ $stockInfo["satuan_stok"] }}
+                                                </td>
+                                                <td>
+                                                    <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
+                                                        {{ number_format($estimasiStok, 2) }}
+                                                        {{ $stockInfo["satuan_stok"] }}
+                                                    </span>
                                                 </td>
                                                 <td
                                                     class="stock-comparison-total-{{ $idTemplate }}"
@@ -432,6 +440,7 @@
                                                 <th>Nama Bahan</th>
                                                 <th>Kebutuhan</th>
                                                 <th>Stok Gudang</th>
+                                                <th>Estimasi Stok Gudang</th>
                                                 <th>Perbandingan</th>
                                                 <th>Status</th>
                                             </tr>
@@ -454,6 +463,7 @@
                                                             "satuan_stok" => $satuan,
                                                         ];
                                                     $stockTersedia = (float) ($stockInfo["stock_tersedia"] ?? 0);
+                                                    $estimasiStok = $stockTersedia - $totalKebutuhan;
                                                 @endphp
 
                                                 <tr>
@@ -465,6 +475,12 @@
                                                     <td>
                                                         {{ number_format($stockTersedia, 2) }}
                                                         {{ $stockInfo["satuan_stok"] }}
+                                                    </td>
+                                                    <td>
+                                                        <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
+                                                            {{ number_format($estimasiStok, 2) }}
+                                                            {{ $stockInfo["satuan_stok"] }}
+                                                        </span>
                                                     </td>
                                                     <td
                                                         class="stock-comparison-{{ $idTemplate }}"
@@ -531,6 +547,7 @@
                                                 <th>Nama Bahan</th>
                                                 <th>Kebutuhan</th>
                                                 <th>Stok Gudang</th>
+                                                <th>Estimasi Stok Gudang</th>
                                                 <th>Perbandingan</th>
                                                 <th>Status</th>
                                             </tr>
@@ -553,6 +570,7 @@
                                                             "satuan_stok" => $satuan,
                                                         ];
                                                     $stockTersedia = (float) ($stockInfo["stock_tersedia"] ?? 0);
+                                                    $estimasiStok = $stockTersedia - $totalKebutuhan;
                                                 @endphp
 
                                                 <tr>
@@ -564,6 +582,12 @@
                                                     <td>
                                                         {{ number_format($stockTersedia, 2) }}
                                                         {{ $stockInfo["satuan_stok"] }}
+                                                    </td>
+                                                    <td>
+                                                        <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
+                                                            {{ number_format($estimasiStok, 2) }}
+                                                            {{ $stockInfo["satuan_stok"] }}
+                                                        </span>
                                                     </td>
                                                     <td
                                                         class="stock-comparison-kecil-{{ $idTemplate }}"

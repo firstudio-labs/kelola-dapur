@@ -28,6 +28,17 @@
                             {{ $dapur->nama_dapur }}
                         </p>
                     </div>
+                    <div class="d-flex gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-success btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#exportStockModal"
+                        >
+                            <i class="bx bx-download me-1"></i>
+                            Export CSV
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -287,6 +298,7 @@
                                     <th>Satuan</th>
                                     <th>Status</th>
                                     <th>Tanggal Restok Terakhir</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -346,6 +358,18 @@
                                             @endphp
 
                                             {{ $latestRestockDate ? $latestRestockDate->format("d M Y") : "-" }}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a
+                                                    href="{{ route("kepala-dapur.stock.show", [$dapur, $stockItem]) }}"
+                                                    class="btn btn-sm btn-outline-primary action-btn"
+                                                    data-bs-toggle="tooltip"
+                                                    title="Lihat Detail & Riwayat"
+                                                >
+                                                    <i class="bx bx-show"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -411,6 +435,20 @@
         .choices.is-disabled .choices__inner {
             background-color: #f8f9fa;
         }
+        .action-btn {
+            min-width: 40px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition:
+                transform 0.2s ease,
+                opacity 0.2s ease;
+        }
+        .action-btn:hover:not(.disabled) {
+            transform: scale(1.1);
+            opacity: 0.9;
+        }
         .table td {
             vertical-align: middle;
         }
@@ -421,7 +459,174 @@
             align-items: center;
             justify-content: center;
         }
+        .form-check-input:checked {
+            background-color: #696cff;
+            border-color: #696cff;
+        }
+        #rentangWaktuGroup {
+            display: none;
+        }
+        .modal-close-btn {
+            background-color: #fff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 0;
+            font-size: 24px;
+            line-height: 1;
+            color: #000;
+            transition: background-color 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            background-color: #f0f0f0;
+        }
+        .modal-close-btn span {
+            display: block;
+            color: #000;
+            font-weight: 400;
+        }
     </style>
+
+    <!-- Export Stock Modal -->
+    <div class="modal fade" id="exportStockModal" tabindex="-1" aria-labelledby="exportStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportStockModalLabel">
+                        <i class="bx bx-download me-2"></i>
+                        Export Data Stok
+                    </h5>
+                    <button type="button" class="modal-close-btn" data-bs-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('kepala-dapur.stock.export', $dapur) }}" method="POST" id="exportStockForm">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Format File</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="format" id="formatCSV" value="csv" checked>
+                                    <label class="form-check-label" for="formatCSV">
+                                        CSV
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="format" id="formatXLSX" value="xlsx">
+                                    <label class="form-check-label" for="formatXLSX">
+                                        XLSX (Excel)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Pilih Stok</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="pilih_stok" id="pilihSemua" value="semua" checked>
+                                    <label class="form-check-label" for="pilihSemua">
+                                        Semua Stok
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="pilih_stok" id="pilihBeberapa" value="beberapa">
+                                    <label class="form-check-label" for="pilihBeberapa">
+                                        Pilih Beberapa Stok
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="pilihStokGroup" style="display: none; max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 10px;">
+                            @foreach($allStockItems as $item)
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input stock-checkbox" type="checkbox" name="stock_ids[]" value="{{ $item->id_stock_item }}" id="stock_{{ $item->id_stock_item }}">
+                                    <label class="form-check-label" for="stock_{{ $item->id_stock_item }}">
+                                        {{ $item->templateItem->nama_bahan }}
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Pilih Periode</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="periode" id="periodeSemua" value="semua" checked>
+                                <label class="form-check-label" for="periodeSemua">
+                                    Semua Data
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="periode" id="periodeTanggal" value="tanggal">
+                                <label class="form-check-label" for="periodeTanggal">
+                                    Tanggal Tertentu
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="periode" id="periodeRentang" value="rentang">
+                                <label class="form-check-label" for="periodeRentang">
+                                    Rentang Waktu
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="tanggalTertentuGroup" style="display: none;">
+                            <label for="tanggalTertentu" class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" id="tanggalTertentu" name="tanggal">
+                        </div>
+
+                        <div class="row mb-3" id="rentangWaktuGroup" style="display: none;">
+                            <div class="col-md-6">
+                                <label for="tanggalAwal" class="form-label">Tanggal Awal</label>
+                                <input type="date" class="form-control" id="tanggalAwal" name="tanggal_awal">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tanggalAkhir" class="form-label">Tanggal Akhir</label>
+                                <input type="date" class="form-control" id="tanggalAkhir" name="tanggal_akhir">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kolom History</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="include_history_permintaan" id="includeHistoryPermintaan" value="1" checked>
+                                <label class="form-check-label" for="includeHistoryPermintaan">
+                                    Riwayat Permintaan Stok (Kolom 7)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="include_history_transaksi" id="includeHistoryTransaksi" value="1" checked>
+                                <label class="form-check-label" for="includeHistoryTransaksi">
+                                    History Penggunaan Transaksi (Kolom 8)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <i class="bx bx-info-circle me-2"></i>
+                            <small>
+                                Export akan mencakup data stok sesuai pilihan. Kolom yang diexport: No, Nama Bahan, Keterangan, Stok, Status, Restok Terakhir, dan History (jika dipilih).
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bx bx-download me-1"></i>
+                            Export
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
@@ -437,6 +642,91 @@
                     itemSelectText: '',
                     shouldSort: false,
                 });
+            });
+
+            // Initialize Bootstrap tooltips
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(
+                tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl)
+            );
+
+            const pilihStokRadios = document.querySelectorAll('input[name="pilih_stok"]');
+            const pilihStokGroup = document.getElementById('pilihStokGroup');
+            const periodeRadios = document.querySelectorAll('input[name="periode"]');
+            const tanggalTertentuGroup = document.getElementById('tanggalTertentuGroup');
+            const rentangWaktuGroup = document.getElementById('rentangWaktuGroup');
+            const tanggalTertentu = document.getElementById('tanggalTertentu');
+            const tanggalAwal = document.getElementById('tanggalAwal');
+            const tanggalAkhir = document.getElementById('tanggalAkhir');
+
+            pilihStokRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'beberapa') {
+                        pilihStokGroup.style.display = 'block';
+                    } else {
+                        pilihStokGroup.style.display = 'none';
+                        document.querySelectorAll('.stock-checkbox').forEach(cb => cb.checked = false);
+                    }
+                });
+            });
+
+            periodeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'tanggal') {
+                        tanggalTertentuGroup.style.display = 'block';
+                        rentangWaktuGroup.style.display = 'none';
+                        tanggalTertentu.required = true;
+                        tanggalAwal.required = false;
+                        tanggalAkhir.required = false;
+                    } else if (this.value === 'rentang') {
+                        tanggalTertentuGroup.style.display = 'none';
+                        rentangWaktuGroup.style.display = 'block';
+                        tanggalTertentu.required = false;
+                        tanggalAwal.required = true;
+                        tanggalAkhir.required = true;
+                    } else {
+                        tanggalTertentuGroup.style.display = 'none';
+                        rentangWaktuGroup.style.display = 'none';
+                        tanggalTertentu.required = false;
+                        tanggalAwal.required = false;
+                        tanggalAkhir.required = false;
+                    }
+                });
+            });
+
+            document.getElementById('exportStockForm').addEventListener('submit', function(e) {
+                const pilihStok = document.querySelector('input[name="pilih_stok"]:checked').value;
+                
+                if (pilihStok === 'beberapa') {
+                    const checkedBoxes = document.querySelectorAll('.stock-checkbox:checked');
+                    if (checkedBoxes.length === 0) {
+                        e.preventDefault();
+                        alert('Mohon pilih minimal satu stok untuk diexport.');
+                        return false;
+                    }
+                }
+                
+                const selectedPeriode = document.querySelector('input[name="periode"]:checked').value;
+                
+                if (selectedPeriode === 'tanggal' && !tanggalTertentu.value) {
+                    e.preventDefault();
+                    alert('Mohon pilih tanggal terlebih dahulu.');
+                    return false;
+                }
+                
+                if (selectedPeriode === 'rentang') {
+                    if (!tanggalAwal.value || !tanggalAkhir.value) {
+                        e.preventDefault();
+                        alert('Mohon pilih tanggal awal dan tanggal akhir.');
+                        return false;
+                    }
+                    
+                    if (new Date(tanggalAwal.value) > new Date(tanggalAkhir.value)) {
+                        e.preventDefault();
+                        alert('Tanggal awal tidak boleh lebih besar dari tanggal akhir.');
+                        return false;
+                    }
+                }
             });
         });
     </script>

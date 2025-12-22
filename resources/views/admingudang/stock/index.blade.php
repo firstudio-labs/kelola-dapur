@@ -26,7 +26,7 @@
                             {{ $dapur->nama_dapur }}
                         </p>
                     </div>
-                    <div class="d-flex gap-2">
+                    <!-- <div class="d-flex gap-2">
                         <a
                             href="{{ route("admin-gudang.stock.export", $dapur) }}"
                             class="btn btn-success btn-sm"
@@ -34,7 +34,7 @@
                             <i class="bx bx-download me-1"></i>
                             Export CSV
                         </a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -443,118 +443,7 @@
     </div>
 
     <!-- Request Stock Modal -->
-    <div
-        class="modal fade"
-        id="requestStockModal"
-        tabindex="-1"
-        aria-labelledby="requestStockModalLabel"
-        aria-hidden="true"
-    >
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="requestStockModalLabel">
-                        Ajukan Tambah Stok
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                    ></button>
-                </div>
-                <form id="requestStockForm" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Nama Bahan</label>
-                            <input
-                                type="text"
-                                id="modalBahanName"
-                                class="form-control"
-                                readonly
-                            />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Stok Saat Ini</label>
-                            <div class="input-group">
-                                <input
-                                    type="text"
-                                    id="modalCurrentStock"
-                                    class="form-control"
-                                    readonly
-                                />
-                                <span
-                                    class="input-group-text"
-                                    id="modalCurrentSatuan"
-                                ></span>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="jumlah" class="form-label">
-                                Jumlah Penambahan
-                                <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <input
-                                    type="number"
-                                    name="jumlah"
-                                    id="jumlah"
-                                    class="form-control @error("jumlah") is-invalid @enderror"
-                                    step="0.001"
-                                    min="0.1"
-                                    max="999999.999"
-                                    required
-                                    placeholder="0.000"
-                                />
-                                <span
-                                    class="input-group-text"
-                                    id="modalSatuan"
-                                ></span>
-                            </div>
-                            @error("jumlah")
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="keterangan" class="form-label">
-                                Keterangan
-                            </label>
-                            <textarea
-                                name="keterangan"
-                                id="keterangan"
-                                class="form-control @error("keterangan") is-invalid @enderror"
-                                rows="3"
-                                maxlength="500"
-                                placeholder="Alasan penambahan stok (opsional)..."
-                            ></textarea>
-                            @error("keterangan")
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-
-                            <div class="form-text">Maksimal 500 karakter</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                        >
-                            Batal
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            Ajukan Permintaan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    @include('partials.request-stock-modal')
 
     <!-- Choices.js CSS -->
     <link
@@ -635,11 +524,6 @@
 
             // Handle request stock modal
             const requestStockModal = document.getElementById('requestStockModal');
-            const requestStockForm = document.getElementById('requestStockForm');
-            const modalBahanName = document.getElementById('modalBahanName');
-            const modalCurrentStock = document.getElementById('modalCurrentStock');
-            const modalCurrentSatuan = document.getElementById('modalCurrentSatuan');
-            const modalSatuan = document.getElementById('modalSatuan');
 
             if (requestStockModal) {
                 requestStockModal.addEventListener('show.bs.modal', function (event) {
@@ -649,21 +533,10 @@
                     const currentStock = button.getAttribute('data-current-stock');
                     const satuan = button.getAttribute('data-satuan');
 
-                    // Update modal content with clean number format
-                    modalBahanName.value = bahanName;
-                    modalCurrentStock.value = parseFloat(parseFloat(currentStock).toFixed(3));
-                    modalCurrentSatuan.textContent = satuan;
-                    modalSatuan.textContent = satuan;
-
-                    // Update form action
-                    const actionUrl = '{{ route("admin-gudang.stock.request", [$dapur, ":stockId"]) }}';
-                    requestStockForm.action = actionUrl.replace(':stockId', stockId);
-
-                    // Reset form
-                    requestStockForm.reset();
-                    // Restore non-input values
-                    modalBahanName.value = bahanName;
-                    modalCurrentStock.value = parseFloat(parseFloat(currentStock).toFixed(3));
+                    // Call the update function from partial
+                    if (window.updateRequestStockModal) {
+                        window.updateRequestStockModal(stockId, bahanName, currentStock, satuan);
+                    }
                 });
             }
 

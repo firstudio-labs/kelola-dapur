@@ -380,16 +380,18 @@ class TransaksiDapurController extends Controller
 
         DB::beginTransaction();
         try {
+            // Auto-approve jika stok cukup
             $success = $transaksi->submitForApproval(
                 $ahliGizi->id_ahli_gizi,
                 $kepalaDapur->id_kepala_dapur,
-                $request->keterangan_pengajuan
+                $request->keterangan_pengajuan,
+                true // auto-approve = true
             );
 
             if ($success) {
                 DB::commit();
                 return redirect()->route('ahli-gizi.transaksi.show', $transaksi)
-                    ->with('success', 'Input Paket Menu berhasil diajukan untuk persetujuan Kepala Dapur.');
+                    ->with('success', 'Input Paket Menu berhasil dibuat dan disetujui langsung.');
             }
 
             DB::rollBack();
@@ -435,6 +437,70 @@ class TransaksiDapurController extends Controller
 
         return redirect()->back()
             ->with('error', 'Gagal membuat laporan kekurangan stock.');
+    }
+
+    public function createTransactionNow(Request $request, TransaksiDapur $transaksi)
+    {
+        $user = Auth::user();
+        $ahliGizi = AhliGizi::whereHas('userRole', function ($query) use ($user) {
+            $query->where('id_user', $user->id_user);
+        })->first();
+
+        if (!$ahliGizi || $transaksi->created_by !== $user->id_user || $transaksi->id_dapur !== $ahliGizi->id_dapur) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($transaksi->status !== 'draft') {
+            return redirect()->route('ahli-gizi.transaksi.show', $transaksi)
+                ->with('error', 'Input Paket Menu sudah diproses.');
+        }
+
+        if ($transaksi->detailTransaksiDapur()->where('tipe_porsi', 'besar')->count() === 0) {
+            return redirect()->route('ahli-gizi.transaksi.edit-porsi-besar', $transaksi)
+                ->with('error', 'Input Paket Menu harus memiliki minimal 1 porsi besar.');
+        }
+
+        $request->validate([
+            'keterangan_pengajuan' => 'nullable|string|max:500'
+        ]);
+
+        $kepalaDapur = KepalaDapur::where('id_dapur', $transaksi->id_dapur)->first();
+        if (!$kepalaDapur) {
+            return redirect()->back()
+                ->with('error', 'Kepala dapur tidak ditemukan untuk dapur ini.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $result = $transaksi->createTransactionNow(
+                $ahliGizi->id_ahli_gizi,
+                $kepalaDapur->id_kepala_dapur,
+                $request->keterangan_pengajuan
+            );
+
+            if ($result['success']) {
+                DB::commit();
+                $message = 'Transaksi berhasil dibuat dan disetujui langsung.';
+                if (count($result['shortages']) > 0) {
+                    $message .= ' Laporan kekurangan stock telah dibuat dan dikirim ke Kepala Dapur.';
+                }
+                return redirect()->route('ahli-gizi.transaksi.show', $transaksi)
+                    ->with('success', $message);
+            }
+
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', $result['message'] ?? 'Gagal membuat transaksi.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating transaction now: ' . $e->getMessage(), [
+                'transaksi_id' => $transaksi->id_transaksi,
+                'user_id' => $user->id_user,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->with('error', 'Terjadi error: ' . $e->getMessage());
+        }
     }
 
     public function show(TransaksiDapur $transaksi)

@@ -10,6 +10,7 @@ use App\Models\Dapur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StockItemController extends Controller
 {
@@ -127,6 +128,11 @@ class StockItemController extends Controller
         $pendingRequests = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)
             ->where('status', 'pending')->count();
 
+        $roleType = 'admin_gudang';
+        $routePrefix = 'admin-gudang';
+        $layoutTemplate = 'template_admin_gudang.layout';
+        $stockIndexLabel = 'Kelola Stok';
+
         return view('admingudang.stock.show', compact(
             'stockItem',
             'dapur',
@@ -134,7 +140,11 @@ class StockItemController extends Controller
             'totalRequests',
             'approvedRequests',
             'rejectedRequests',
-            'pendingRequests'
+            'pendingRequests',
+            'roleType',
+            'routePrefix',
+            'layoutTemplate',
+            'stockIndexLabel'
         ));
     }
 
@@ -153,13 +163,30 @@ class StockItemController extends Controller
 
         $request->validate([
             'jumlah' => 'required|numeric|min:0.1|max:2000000000',
-            'keterangan' => 'nullable|string|max:500'
+            'keterangan' => 'nullable|string|max:500',
+            'jam_kedatangan' => 'nullable|date_format:H:i',
+            'tanggal_produksi' => 'nullable|date',
+            'tanggal_expired' => 'nullable|date|after_or_equal:tanggal_produksi',
+            'suhu_bahan_makanan' => 'nullable|numeric|min:-50|max:100',
+            'warna_bahan_makanan' => 'nullable|string|max:50',
+            'foto_bahan' => 'nullable|image|mimes:jpeg,jpg,png|max:5120'
         ], [
             'jumlah.required' => 'Jumlah harus diisi',
             'jumlah.numeric' => 'Jumlah harus berupa angka',
             'jumlah.min' => 'Jumlah minimal 0.1',
             'jumlah.max' => 'Jumlah maksimal 2000000000',
-            'keterangan.max' => 'Keterangan maksimal 500 karakter'
+            'keterangan.max' => 'Keterangan maksimal 500 karakter',
+            'jam_kedatangan.date_format' => 'Format jam kedatangan tidak valid (HH:MM)',
+            'tanggal_produksi.date' => 'Tanggal produksi tidak valid',
+            'tanggal_expired.date' => 'Tanggal expired tidak valid',
+            'tanggal_expired.after_or_equal' => 'Tanggal expired harus sama atau setelah tanggal produksi',
+            'suhu_bahan_makanan.numeric' => 'Suhu harus berupa angka',
+            'suhu_bahan_makanan.min' => 'Suhu minimal -50°C',
+            'suhu_bahan_makanan.max' => 'Suhu maksimal 100°C',
+            'warna_bahan_makanan.max' => 'Warna maksimal 50 karakter',
+            'foto_bahan.image' => 'File harus berupa gambar',
+            'foto_bahan.mimes' => 'Format gambar harus jpeg, jpg, atau png',
+            'foto_bahan.max' => 'Ukuran gambar maksimal 5MB'
         ]);
 
         try {
@@ -177,20 +204,47 @@ class StockItemController extends Controller
                 throw new \Exception('Tidak ada kepala dapur yang ditemukan untuk dapur ini.');
             }
 
-            ApprovalStockItem::create([
+            // Handle foto upload dan compress ke webp
+            $fotoPath = null;
+            if ($request->hasFile('foto_bahan')) {
+                $fotoPath = $this->processAndStoreImage($request->file('foto_bahan'), $dapur->id_dapur, $stockItem->id_stock_item);
+            }
+
+            // Buat approval dengan status approved (auto approve)
+            $approval = ApprovalStockItem::create([
                 'id_admin_gudang' => $adminGudang->id_admin_gudang,
                 'id_kepala_dapur' => $kepalaDapur->id_kepala_dapur,
                 'id_stock_item' => $stockItem->id_stock_item,
                 'jumlah' => $request->jumlah,
                 'satuan' => $stockItem->templateItem->satuan,
-                'status' => 'pending',
-                'keterangan' => $request->keterangan
+                'status' => 'approved', // Auto approve
+                'keterangan' => $request->keterangan,
+                'jam_kedatangan' => $request->jam_kedatangan ? $request->jam_kedatangan . ':00' : null,
+                'tanggal_produksi' => $request->tanggal_produksi,
+                'tanggal_expired' => $request->tanggal_expired,
+                'suhu_bahan_makanan' => $request->suhu_bahan_makanan,
+                'warna_bahan_makanan' => $request->warna_bahan_makanan,
+                'foto_bahan' => $fotoPath,
+                'approved_at' => now() // Set approved_at langsung
             ]);
+
+            // Update stock langsung karena auto approve
+            // Pastikan hanya stock item yang spesifik yang diupdate dengan menggunakan where clause
+            $currentStock = (float) $stockItem->jumlah;
+            StockItem::where('id_stock_item', $stockItem->id_stock_item)
+                ->where('id_dapur', $dapur->id_dapur)
+                ->update([
+                    'jumlah' => $currentStock + $request->jumlah,
+                    'tanggal_restok' => now()
+                ]);
+            
+            // Refresh model untuk mendapatkan data terbaru
+            $stockItem->refresh();
 
             DB::commit();
 
             return redirect()->route('admin-gudang.stock.show', [$dapur, $stockItem])
-                ->with('success', 'Permintaan penambahan stok berhasil diajukan ke kepala dapur.');
+                ->with('success', 'Permintaan penambahan stok berhasil disetujui dan stok telah ditambahkan.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -266,5 +320,91 @@ class StockItemController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Process and store image, convert to WebP format
+     */
+    private function processAndStoreImage($file, $dapurId, $stockItemId)
+    {
+        try {
+            // Create directory path
+            $directory = "stock_items/{$dapurId}/{$stockItemId}";
+            $filename = time() . '_' . uniqid() . '.webp';
+
+            // Get image resource based on mime type
+            $mimeType = $file->getMimeType();
+            $image = null;
+
+            switch ($mimeType) {
+                case 'image/jpeg':
+                case 'image/jpg':
+                    $image = imagecreatefromjpeg($file->getRealPath());
+                    break;
+                case 'image/png':
+                    $image = imagecreatefrompng($file->getRealPath());
+                    break;
+                default:
+                    throw new \Exception('Format gambar tidak didukung');
+            }
+
+            if (!$image) {
+                throw new \Exception('Gagal memproses gambar');
+            }
+
+            // Get original dimensions
+            $width = imagesx($image);
+            $height = imagesy($image);
+
+            // Calculate new dimensions (max 1920px width, maintain aspect ratio)
+            $maxWidth = 1920;
+            $newWidth = $width;
+            $newHeight = $height;
+
+            if ($width > $maxWidth) {
+                $newWidth = $maxWidth;
+                $newHeight = (int) ($height * ($maxWidth / $width));
+            }
+
+            // Create resized image
+            $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+            // Preserve transparency for PNG
+            if ($mimeType === 'image/png') {
+                imagealphablending($resizedImage, false);
+                imagesavealpha($resizedImage, true);
+                $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+                imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+            }
+
+            // Resize image
+            imagecopyresampled(
+                $resizedImage,
+                $image,
+                0, 0, 0, 0,
+                $newWidth,
+                $newHeight,
+                $width,
+                $height
+            );
+
+            // Save as WebP (quality 85 for good balance)
+            $fullPath = storage_path('app/public/' . $directory);
+            if (!file_exists($fullPath)) {
+                mkdir($fullPath, 0755, true);
+            }
+
+            $webpPath = $fullPath . '/' . $filename;
+            imagewebp($resizedImage, $webpPath, 85);
+
+            // Clean up
+            imagedestroy($image);
+            imagedestroy($resizedImage);
+
+            // Return relative path for database storage
+            return $directory . '/' . $filename;
+        } catch (\Exception $e) {
+            throw new \Exception('Gagal memproses gambar: ' . $e->getMessage());
+        }
     }
 }

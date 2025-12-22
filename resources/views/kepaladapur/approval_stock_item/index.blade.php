@@ -26,17 +26,6 @@
                         </p>
                     </div>
                     <div class="d-flex gap-2">
-                        @if ($pendingApprovals > 0)
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#bulkActionModal"
-                            >
-                                <i class="bx bx-check-double me-1"></i>
-                                Aksi Massal
-                            </button>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -317,35 +306,10 @@
         <div class="card">
             <div class="card-body">
                 @if ($approvals->isNotEmpty())
-                    <!-- Bulk Action Checkboxes -->
-                    @if ($approvals->where("status", "pending")->count() > 0)
-                        <div class="mb-3 d-flex align-items-center">
-                            <input
-                                type="checkbox"
-                                id="select-all"
-                                class="form-check-input me-2"
-                            />
-                            <label for="select-all" class="form-check-label">
-                                Pilih Semua Pending
-                            </label>
-                            <div class="ms-auto">
-                                <span id="selected-count" class="text-muted">
-                                    0 dipilih
-                                </span>
-                            </div>
-                        </div>
-                    @endif
-
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    @if ($approvals->where("status", "pending")->count() > 0)
-                                        <th width="50">
-                                            <i class="bx bx-check-square"></i>
-                                        </th>
-                                    @endif
-
                                     <th>No</th>
                                     <th>Tanggal Permintaan</th>
                                     <th>Bahan</th>
@@ -360,18 +324,6 @@
                                     <tr
                                         class="{{ $approval->isPending() ? "table-warning-subtle" : "" }}"
                                     >
-                                        @if ($approvals->where("status", "pending")->count() > 0)
-                                            <td>
-                                                @if ($approval->isPending())
-                                                    <input
-                                                        type="checkbox"
-                                                        class="form-check-input bulk-checkbox"
-                                                        value="{{ $approval->id_approval_stock_item }}"
-                                                    />
-                                                @endif
-                                            </td>
-                                        @endif
-
                                         <td>
                                             {{ $approvals->firstItem() + $index }}
                                         </td>
@@ -468,46 +420,31 @@
                                         </td>
                                         <td>
                                             <div class="d-flex gap-1">
-                                                <a
-                                                    href="{{ route("kepala-dapur.approvals.show", [$dapur, $approval]) }}"
+                                                    <button
+                                                        type="button"
                                                     class="btn btn-sm btn-outline-primary action-btn"
-                                                    data-bs-toggle="tooltip"
+                                                        data-bs-toggle="modal"
+                                                    data-bs-target="#approvalStockDetailModal"
+                                                    data-approval-data="{{ json_encode([
+                                                        'tanggal_permintaan' => $approval->created_at->format('d M Y H:i'),
+                                                        'jumlah_diminta' => rtrim(rtrim(number_format($approval->jumlah, 3), '0'), '.') . ' ' . $approval->satuan,
+                                                        'status' => $approval->status,
+                                                        'tanggal_diproses' => $approval->approved_at ? $approval->approved_at->format('d M Y H:i') : '-',
+                                                        'nama_pemohon' => $approval->adminGudang->user->nama ?? 'Admin Gudang',
+                                                        'nama_pemroses' => $approval->kepalaDapur && $approval->kepalaDapur->user ? $approval->kepalaDapur->user->nama : null,
+                                                        'jam_kedatangan' => $approval->jam_kedatangan ? substr($approval->jam_kedatangan, 0, 5) : null,
+                                                        'tanggal_produksi' => $approval->tanggal_produksi ? $approval->tanggal_produksi->format('d/m/Y') : null,
+                                                        'tanggal_expired' => $approval->tanggal_expired ? $approval->tanggal_expired->format('d/m/Y') : null,
+                                                        'suhu' => $approval->suhu_bahan_makanan,
+                                                        'warna' => $approval->warna_bahan_makanan,
+                                                        'foto_bahan' => $approval->foto_bahan ? asset('storage/' . $approval->foto_bahan) : null,
+                                                        'keterangan' => $approval->keterangan
+                                                    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                    onclick="showApprovalStockDetailModal(JSON.parse(this.getAttribute('data-approval-data')))"
                                                     title="Lihat Detail"
                                                 >
                                                     <i class="bx bx-show"></i>
-                                                </a>
-                                                @if ($approval->isPending())
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-sm btn-outline-success action-btn"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#approveModal"
-                                                        data-approval-id="{{ $approval->id_approval_stock_item }}"
-                                                        data-bahan-name="{{ $approval->stockItem->templateItem->nama_bahan }}"
-                                                        data-jumlah="{{ $approval->jumlah }}"
-                                                        data-satuan="{{ $approval->satuan }}"
-                                                        data-admin-name="{{ $approval->adminGudang->user->nama ?? "Admin Gudang" }}"
-                                                        title="Setujui"
-                                                    >
-                                                        <i
-                                                            class="bx bx-check"
-                                                        ></i>
                                                     </button>
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-sm btn-outline-danger action-btn"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#rejectModal"
-                                                        data-approval-id="{{ $approval->id_approval_stock_item }}"
-                                                        data-bahan-name="{{ $approval->stockItem->templateItem->nama_bahan }}"
-                                                        data-jumlah="{{ $approval->jumlah }}"
-                                                        data-satuan="{{ $approval->satuan }}"
-                                                        data-admin-name="{{ $approval->adminGudang->user->nama ?? "Admin Gudang" }}"
-                                                        title="Tolak"
-                                                    >
-                                                        <i class="bx bx-x"></i>
-                                                    </button>
-                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -545,326 +482,8 @@
         </div>
     </div>
 
-    <!-- Approve Modal -->
-    <div
-        class="modal fade"
-        id="approveModal"
-        tabindex="-1"
-        aria-labelledby="approveModalLabel"
-        aria-hidden="true"
-    >
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="approveModalLabel">
-                        Setujui Permintaan Stok
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                    ></button>
-                </div>
-                <form id="approveForm" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="alert alert-info">
-                            <i class="bx bx-info-circle me-2"></i>
-                            Dengan menyetujui permintaan ini, stok akan otomatis
-                            ditambahkan ke sistem.
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nama Bahan</label>
-                            <input
-                                type="text"
-                                id="approveBahanName"
-                                class="form-control"
-                                readonly
-                            />
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label">
-                                    Jumlah Permintaan
-                                </label>
-                                <div class="input-group">
-                                    <input
-                                        type="text"
-                                        id="approveJumlah"
-                                        class="form-control"
-                                        readonly
-                                    />
-                                    <span
-                                        class="input-group-text"
-                                        id="approveSatuan"
-                                    ></span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Diminta Oleh</label>
-                                <input
-                                    type="text"
-                                    id="approveAdminName"
-                                    class="form-control"
-                                    readonly
-                                />
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="keterangan_approval" class="form-label">
-                                Catatan Approval (Opsional)
-                            </label>
-                            <textarea
-                                name="keterangan_approval"
-                                id="keterangan_approval"
-                                class="form-control"
-                                rows="3"
-                                maxlength="500"
-                                placeholder="Tambahkan catatan jika diperlukan..."
-                            ></textarea>
-                            <div class="form-text">Maksimal 500 karakter</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                        >
-                            Batal
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bx bx-check me-1"></i>
-                            Setujui Permintaan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reject Modal -->
-    <div
-        class="modal fade"
-        id="rejectModal"
-        tabindex="-1"
-        aria-labelledby="rejectModalLabel"
-        aria-hidden="true"
-    >
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="rejectModalLabel">
-                        Tolak Permintaan Stok
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                    ></button>
-                </div>
-                <form id="rejectForm" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="alert alert-warning">
-                            <i class="bx bx-error-circle me-2"></i>
-                            Pastikan Anda memberikan alasan yang jelas untuk
-                            penolakan ini.
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nama Bahan</label>
-                            <input
-                                type="text"
-                                id="rejectBahanName"
-                                class="form-control"
-                                readonly
-                            />
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label">
-                                    Jumlah Permintaan
-                                </label>
-                                <div class="input-group">
-                                    <input
-                                        type="text"
-                                        id="rejectJumlah"
-                                        class="form-control"
-                                        readonly
-                                    />
-                                    <span
-                                        class="input-group-text"
-                                        id="rejectSatuan"
-                                    ></span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Diminta Oleh</label>
-                                <input
-                                    type="text"
-                                    id="rejectAdminName"
-                                    class="form-control"
-                                    readonly
-                                />
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="alasan_penolakan" class="form-label">
-                                Alasan Penolakan
-                                <span class="text-danger">*</span>
-                            </label>
-                            <textarea
-                                name="alasan_penolakan"
-                                id="alasan_penolakan"
-                                class="form-control @error("alasan_penolakan") is-invalid @enderror"
-                                rows="4"
-                                maxlength="500"
-                                required
-                                placeholder="Jelaskan alasan penolakan permintaan ini..."
-                            >
-{{ old("alasan_penolakan") }}</textarea
-                            >
-                            @error("alasan_penolakan")
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-
-                            <div class="form-text">
-                                Wajib diisi. Maksimal 500 karakter
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                        >
-                            Batal
-                        </button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bx bx-x me-1"></i>
-                            Tolak Permintaan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bulk Action Modal -->
-    <div
-        class="modal fade"
-        id="bulkActionModal"
-        tabindex="-1"
-        aria-labelledby="bulkActionModalLabel"
-        aria-hidden="true"
-    >
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="bulkActionModalLabel">
-                        Aksi Massal
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                    ></button>
-                </div>
-                <form
-                    action="{{ route("kepala-dapur.approvals.bulk-action", $dapur) }}"
-                    method="POST"
-                    id="bulkActionForm"
-                >
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Pilih Aksi</label>
-                            <div class="form-check">
-                                <input
-                                    class="form-check-input"
-                                    type="radio"
-                                    name="bulk_action"
-                                    id="bulk_approve"
-                                    value="approve"
-                                    required
-                                />
-                                <label
-                                    class="form-check-label"
-                                    for="bulk_approve"
-                                >
-                                    <i
-                                        class="bx bx-check text-success me-1"
-                                    ></i>
-                                    Setujui Semua Permintaan Terpilih
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input
-                                    class="form-check-input"
-                                    type="radio"
-                                    name="bulk_action"
-                                    id="bulk_reject"
-                                    value="reject"
-                                    required
-                                />
-                                <label
-                                    class="form-check-label"
-                                    for="bulk_reject"
-                                >
-                                    <i class="bx bx-x text-danger me-1"></i>
-                                    Tolak Semua Permintaan Terpilih
-                                </label>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="bulk_keterangan" class="form-label">
-                                Keterangan
-                            </label>
-                            <textarea
-                                name="bulk_keterangan"
-                                id="bulk_keterangan"
-                                class="form-control"
-                                rows="3"
-                                maxlength="500"
-                                placeholder="Catatan untuk semua permintaan yang dipilih..."
-                            ></textarea>
-                            <div class="form-text">Maksimal 500 karakter</div>
-                        </div>
-                        <div class="alert alert-info">
-                            <i class="bx bx-info-circle me-2"></i>
-                            <span id="bulk-selection-info">
-                                Pilih permintaan dari tabel terlebih dahulu.
-                            </span>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            class="btn btn-primary"
-                            id="bulk-action-submit"
-                            disabled
-                        >
-                            <i class="bx bx-check-double me-1"></i>
-                            Proses Permintaan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Approval Stock Detail Modal -->
+    @include('partials.approval-stock-detail-modal')
 
     <!-- Choices.js CSS -->
     <link
@@ -901,13 +520,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition:
-                transform 0.2s ease,
-                opacity 0.2s ease;
+            transition: opacity 0.2s ease;
         }
         .action-btn:hover:not(.disabled) {
-            transform: scale(1.1);
-            opacity: 0.9;
+            opacity: 0.8;
         }
         .table td {
             vertical-align: middle;
@@ -919,27 +535,41 @@
             align-items: center;
             justify-content: center;
         }
-        .avatar-sm .avatar-initial {
-            width: 32px;
-            height: 32px;
-            font-size: 12px;
-        }
         .table-warning-subtle {
             background-color: rgba(255, 243, 205, 0.3) !important;
         }
         .pulse {
-            animation: pulse 2s infinite;
+            animation: pulse 3s infinite;
         }
         @keyframes pulse {
-            0% {
+            0%, 100% {
                 opacity: 1;
             }
             50% {
-                opacity: 0.5;
+                opacity: 0.7;
             }
-            100% {
-                opacity: 1;
-            }
+        }
+        /* Ensure button close is visible - completely static, no hover effects */
+        .modal-header .btn-close,
+        .alert .btn-close,
+        .modal-header .btn-close:hover,
+        .modal-header .btn-close:focus,
+        .modal-header .btn-close:active,
+        .alert .btn-close:hover,
+        .alert .btn-close:focus,
+        .alert .btn-close:active {
+            opacity: 1 !important;
+            filter: none !important;
+            background-size: 1em !important;
+            padding: 0.5em !important;
+            background-color: #ffffff !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") !important;
+            border: 1px solid #dee2e6 !important;
+            border-radius: 0.375rem !important;
+            transition: none !important;
+            transform: none !important;
+            box-shadow: none !important;
+            outline: none !important;
         }
     </style>
 
@@ -965,118 +595,6 @@
                 tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl)
             );
 
-            // Handle approve modal
-            const approveModal = document.getElementById('approveModal');
-            const approveForm = document.getElementById('approveForm');
-
-            if (approveModal) {
-                approveModal.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
-                    const approvalId = button.getAttribute('data-approval-id');
-                    const bahanName = button.getAttribute('data-bahan-name');
-                    const jumlah = button.getAttribute('data-jumlah');
-                    const satuan = button.getAttribute('data-satuan');
-                    const adminName = button.getAttribute('data-admin-name');
-
-                    document.getElementById('approveBahanName').value = bahanName;
-                    document.getElementById('approveJumlah').value = parseFloat(jumlah).toFixed(3);
-                    document.getElementById('approveSatuan').textContent = satuan;
-                    document.getElementById('approveAdminName').value = adminName;
-
-                    const actionUrl = '{{ route('kepala-dapur.approvals.approve', [$dapur, ':approvalId']) }}';
-                    approveForm.action = actionUrl.replace(':approvalId', approvalId);
-
-                    // Reset form
-                    document.getElementById('keterangan_approval').value = '';
-                });
-            }
-
-            // Handle reject modal
-            const rejectModal = document.getElementById('rejectModal');
-            const rejectForm = document.getElementById('rejectForm');
-
-            if (rejectModal) {
-                rejectModal.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
-                    const approvalId = button.getAttribute('data-approval-id');
-                    const bahanName = button.getAttribute('data-bahan-name');
-                    const jumlah = button.getAttribute('data-jumlah');
-                    const satuan = button.getAttribute('data-satuan');
-                    const adminName = button.getAttribute('data-admin-name');
-
-                    document.getElementById('rejectBahanName').value = bahanName;
-                    document.getElementById('rejectJumlah').value = parseFloat(jumlah).toFixed(3);
-                    document.getElementById('rejectSatuan').textContent = satuan;
-                    document.getElementById('rejectAdminName').value = adminName;
-
-                    const actionUrl = '{{ route('kepala-dapur.approvals.reject', [$dapur, ':approvalId']) }}';
-                    rejectForm.action = actionUrl.replace(':approvalId', approvalId);
-
-                    // Reset form
-                    document.getElementById('alasan_penolakan').value = '';
-                });
-            }
-
-            // Handle bulk actions
-            const selectAllCheckbox = document.getElementById('select-all');
-            const bulkCheckboxes = document.querySelectorAll('.bulk-checkbox');
-            const selectedCountSpan = document.getElementById('selected-count');
-            const bulkActionSubmit = document.getElementById('bulk-action-submit');
-            const bulkSelectionInfo = document.getElementById('bulk-selection-info');
-            const bulkActionForm = document.getElementById('bulkActionForm');
-
-            function updateBulkSelection() {
-                const checkedBoxes = document.querySelectorAll('.bulk-checkbox:checked');
-                const count = checkedBoxes.length;
-
-                if (selectedCountSpan) {
-                    selectedCountSpan.textContent = count + ' dipilih';
-                }
-
-                if (bulkActionSubmit) {
-                    bulkActionSubmit.disabled = count === 0;
-                }
-
-                if (bulkSelectionInfo) {
-                    bulkSelectionInfo.textContent = count > 0 
-                        ? `${count} permintaan dipilih untuk diproses.`
-                        : 'Pilih permintaan dari tabel terlebih dahulu.';
-                }
-
-                // Update hidden input with selected IDs
-                const existingInput = bulkActionForm.querySelector('input[name="approval_ids[]"]');
-                if (existingInput) {
-                    existingInput.remove();
-                }
-
-                checkedBoxes.forEach(checkbox => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'approval_ids[]';
-                    input.value = checkbox.value;
-                    bulkActionForm.appendChild(input);
-                });
-            }
-
-            if (selectAllCheckbox) {
-                selectAllCheckbox.addEventListener('change', function () {
-                    bulkCheckboxes.forEach(checkbox => {
-                        checkbox.checked = this.checked;
-                    });
-                    updateBulkSelection();
-                });
-            }
-
-            bulkCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', updateBulkSelection);
-            });
-
-            // Show validation error modals
-            @if($errors->has('alasan_penolakan'))
-                const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
-                rejectModal.show();
-            @endif
-
             // Auto-hide alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert-dismissible');
             alerts.forEach(alert => {
@@ -1085,6 +603,25 @@
                     bsAlert.close();
                 }, 5000);
             });
+        });
+
+        // Function to show approval stock detail modal
+        function showApprovalStockDetailModal(data) {
+            // Cleanup any existing backdrops before showing new modal
+            if (window.cleanupModalBackdrop) {
+                window.cleanupModalBackdrop();
+            }
+            
+            if (window.showApprovalStockDetail) {
+                window.showApprovalStockDetail(data);
+            }
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (window.cleanupModalBackdrop) {
+                window.cleanupModalBackdrop();
+            }
         });
     </script>
 @endsection

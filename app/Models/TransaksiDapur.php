@@ -28,7 +28,6 @@ class TransaksiDapur extends Model
         'total_porsi' => 'decimal:0',
     ];
 
-    // Relationships
     public function dapur()
     {
         return $this->belongsTo(Dapur::class, 'id_dapur');
@@ -54,7 +53,6 @@ class TransaksiDapur extends Model
         return $this->hasMany(LaporanKekuranganStock::class, 'id_transaksi');
     }
 
-    // Helper methods 
     public function getPorsiBesar()
     {
         return $this->detailTransaksiDapur()->where('tipe_porsi', 'besar')->get();
@@ -219,7 +217,7 @@ class TransaksiDapur extends Model
         return $stockCheck;
     }
 
-    public function createShortageReport(): bool
+    public function createShortageReport(bool $autoResolve = false): bool
     {
         $stockCheck = $this->checkAllStockAvailability();
 
@@ -229,14 +227,15 @@ class TransaksiDapur extends Model
 
         $this->laporanKekuranganStock()->delete();
 
+        $status = $autoResolve ? 'resolved' : 'pending';
         foreach ($stockCheck['shortages'] as $shortage) {
-            LaporanKekuranganStock::createFromShortage($this->id_transaksi, $shortage);
+            LaporanKekuranganStock::createFromShortage($this->id_transaksi, $shortage, $status);
         }
 
         return true;
     }
 
-    public function submitForApproval(int $ahliGiziId, int $kepalaDapurId, string $keterangan = null): bool
+    public function submitForApproval(int $ahliGiziId, int $kepalaDapurId, string $keterangan = null, bool $autoApprove = false): bool
     {
         if ($this->status !== 'draft') {
             return false;
@@ -249,16 +248,79 @@ class TransaksiDapur extends Model
             return false;
         }
 
+        $approvalStatus = $autoApprove ? 'approved' : 'pending';
+        
         $approval = ApprovalTransaksi::create([
             'id_transaksi' => $this->id_transaksi,
             'id_ahli_gizi' => $ahliGiziId,
             'id_kepala_dapur' => $kepalaDapurId,
             'keterangan' => $keterangan,
-            'status' => 'pending'
+            'status' => $approvalStatus,
+            'approved_at' => $autoApprove ? now() : null
+        ]);
+
+        if ($autoApprove) {
+            $this->status = 'processing';
+            $this->save();
+            $result = $this->processTransaction();
+            return $result['success'];
+        } else {
+            $this->status = 'processing';
+            return $this->save();
+        }
+    }
+
+    public function createTransactionNow(int $ahliGiziId, int $kepalaDapurId, string $keterangan = null): array
+    {
+        $result = [
+            'success' => false,
+            'message' => '',
+            'shortages' => []
+        ];
+
+        if ($this->status !== 'draft') {
+            $result['message'] = 'Transaksi hanya bisa dibuat dari status draft';
+            return $result;
+        }
+
+        $stockCheck = $this->checkAllStockAvailability();
+
+        if (!$stockCheck['can_produce']) {
+            $this->createShortageReport(false);
+            $result['shortages'] = $stockCheck['shortages'];
+        }
+
+        $approval = ApprovalTransaksi::create([
+            'id_transaksi' => $this->id_transaksi,
+            'id_ahli_gizi' => $ahliGiziId,
+            'id_kepala_dapur' => $kepalaDapurId,
+            'keterangan' => $keterangan,
+            'status' => 'approved',
+            'approved_at' => now()
         ]);
 
         $this->status = 'processing';
-        return $this->save();
+        $this->save();
+        
+        if ($stockCheck['can_produce']) {
+            $processResult = $this->processTransaction();
+            
+            if ($processResult['success']) {
+                $result['success'] = true;
+                $result['message'] = 'Transaksi berhasil dibuat dan disetujui langsung';
+            } else {
+                $result['message'] = $processResult['message'];
+                $result['shortages'] = $processResult['shortages'];
+            }
+        } else {
+            $this->status = 'completed';
+            $this->save();
+            
+            $result['success'] = true;
+            $result['message'] = 'Transaksi berhasil dibuat dan disetujui langsung. Laporan kekurangan stok telah dibuat dan dikirim ke Kepala Dapur.';
+        }
+
+        return $result;
     }
 
     public function processTransaction(): array
@@ -369,9 +431,6 @@ class TransaksiDapur extends Model
         };
     }
 
-    /**
-     * Get detailed menu information for this transaction
-     */
     public function getMenuDetails(): array
     {
         $menuDetails = [];
@@ -391,9 +450,6 @@ class TransaksiDapur extends Model
         return $menuDetails;
     }
 
-    /**
-     * Create stock snapshots for this transaction
-     */
     public function createStockSnapshots(int $approvalId): bool
     {
         try {

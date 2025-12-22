@@ -110,25 +110,16 @@ class UserController extends Controller
         }
     }
 
-    public function show(Request $request, $dapurId, $userId)
+    public function show(Request $request, Dapur $dapur, User $user)
     {
         Log::info('Show User Attempt - Debug Parameters', [
-            'dapurId_parameter' => $dapurId,
-            'userId_parameter' => $userId,
+            'dapur_id' => $dapur->id_dapur,
+            'user_id' => $user->id_user,
             'all_route_parameters' => $request->route()->parameters(),
-            'current_dapur_from_request' => $request->current_dapur ? $request->current_dapur->id_dapur : 'not_set',
             'url' => $request->fullUrl()
         ]);
 
         try {
-            $dapur = $request->current_dapur;
-
-            $user = User::where('id_user', $userId)->first();
-
-            if (!$user) {
-                Log::warning('User not found', ['user_id' => $userId]);
-                return redirect()->back()->with('error', "User dengan ID {$userId} tidak ditemukan.");
-            }
 
             $user->load('userRole');
 
@@ -159,7 +150,7 @@ class UserController extends Controller
             }
 
             Log::info('User access granted', [
-                'user_id' => $userId,
+                'user_id' => $user->id_user,
                 'user_name' => $user->nama,
                 'role_type' => $user->userRole->role_type,
                 'dapur_id' => $dapur->id_dapur
@@ -169,33 +160,22 @@ class UserController extends Controller
         } catch (Exception $e) {
             Log::error('Failed to show user', [
                 'error' => $e->getMessage(),
-                'user_id' => $userId ?? 'not_set',
-                'dapur_id' => $request->current_dapur->id_dapur ?? 'not_set',
+                'user_id' => $user->id_user ?? 'not_set',
+                'dapur_id' => $dapur->id_dapur ?? 'not_set',
             ]);
             return redirect()->back()->with('error', 'Gagal memuat detail user: ' . $e->getMessage());
         }
     }
 
-    public function edit(Request $request, $dapurId, $userId)
+    public function edit(Request $request, Dapur $dapur, User $user)
     {
         Log::info('Edit User Attempt', [
-            'dapurId_parameter' => $dapurId,
-            'userId_parameter' => $userId,
-            'dapur_id' => $request->current_dapur->id_dapur ?? 'not_set',
+            'dapur_id' => $dapur->id_dapur,
+            'user_id' => $user->id_user,
         ]);
 
         try {
-            $dapur = $request->current_dapur;
             $current_user = auth()->user();
-
-            $user = User::where('id_user', $userId)->first();
-
-            if (!$user) {
-                Log::warning('Edit User: User not found', [
-                    'user_id' => $userId
-                ]);
-                return redirect()->back()->with('error', "User dengan ID {$userId} tidak ditemukan.");
-            }
 
             $user->load('userRole');
 
@@ -228,7 +208,7 @@ class UserController extends Controller
             $roles = ['admin_gudang' => 'Admin Gudang', 'ahli_gizi' => 'Ahli Gizi'];
 
             Log::info('Edit User: Access granted', [
-                'user_id' => $userId,
+                'user_id' => $user->id_user,
                 'user_name' => $user->nama,
                 'role_type' => $user->userRole->role_type,
                 'dapur_id' => $dapur->id_dapur
@@ -238,23 +218,16 @@ class UserController extends Controller
         } catch (Exception $e) {
             Log::error('Failed to edit user', [
                 'error' => $e->getMessage(),
-                'user_id' => $userId ?? 'not_set',
-                'dapur_id' => $request->current_dapur->id_dapur ?? 'not_set',
+                'user_id' => $user->id_user ?? 'not_set',
+                'dapur_id' => $dapur->id_dapur ?? 'not_set',
             ]);
             return redirect()->back()->with('error', 'Gagal memuat form edit user: ' . $e->getMessage());
         }
     }
 
-    public function update(Request $request, $dapurId, $userId)
+    public function update(Request $request, Dapur $dapur, User $user)
     {
         try {
-            $dapur = $request->current_dapur;
-
-            $user = User::where('id_user', $userId)->first();
-
-            if (!$user) {
-                return redirect()->back()->with('error', "User dengan ID {$userId} tidak ditemukan.");
-            }
 
             $user->load('userRole');
 
@@ -276,14 +249,14 @@ class UserController extends Controller
                 'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id_user, 'id_user')],
                 'password' => 'nullable|string|min:8|confirmed',
                 'role_type' => ['required', Rule::in(['admin_gudang', 'ahli_gizi'])],
-                'is_active' => 'boolean',
+                'is_active' => 'sometimes|boolean',
             ]);
 
             $user->update([
                 'nama' => $validated['nama'],
                 'username' => $validated['username'],
                 'email' => $validated['email'],
-                'is_active' => $validated['is_active'] ?? true,
+                'is_active' => $request->has('is_active') ? $request->boolean('is_active') : false,
             ]);
 
             if (!empty($validated['password'])) {
@@ -292,14 +265,17 @@ class UserController extends Controller
 
             $userRole = $user->userRole;
             if ($userRole->role_type !== $validated['role_type']) {
-                if ($userRole->role_type === 'admin_gudang') {
-                    $userRole->adminGudang()->delete();
-                } elseif ($userRole->role_type === 'ahli_gizi') {
-                    $userRole->ahliGizi()->delete();
+                // Hapus relasi lama
+                if ($userRole->role_type === 'admin_gudang' && $userRole->adminGudang) {
+                    $userRole->adminGudang->delete();
+                } elseif ($userRole->role_type === 'ahli_gizi' && $userRole->ahliGizi) {
+                    $userRole->ahliGizi->delete();
                 }
 
+                // Update role type
                 $userRole->update(['role_type' => $validated['role_type']]);
 
+                // Buat relasi baru
                 if ($validated['role_type'] === 'admin_gudang') {
                     AdminGudang::create([
                         'id_user_role' => $userRole->id_user_role,
@@ -321,31 +297,20 @@ class UserController extends Controller
         }
     }
 
-    public function destroy(Request $request, $dapurId, $userId)
+    public function destroy(Request $request, Dapur $dapur, User $user)
     {
         Log::info('Destroy User Attempt', [
-            'dapurId_parameter' => $dapurId,
-            'userId_parameter' => $userId,
-            'dapur_id' => $request->current_dapur->id_dapur ?? 'not_set',
+            'dapur_id' => $dapur->id_dapur,
+            'user_id' => $user->id_user,
         ]);
 
         try {
-            $dapur = $request->current_dapur;
-
-            $user = User::where('id_user', $userId)->first();
-
-            if (!$user) {
-                Log::warning('Destroy User: User not found', [
-                    'user_id' => $userId
-                ]);
-                return redirect()->back()->with('error', "User dengan ID {$userId} tidak ditemukan.");
-            }
 
             $user->load('userRole');
 
             if (!$user->userRole) {
                 Log::warning('Destroy User: User has no role', [
-                    'user_id' => $userId,
+                    'user_id' => $user->id_user,
                     'user_name' => $user->nama
                 ]);
                 return redirect()->back()->with('error', "User {$user->nama} tidak memiliki role yang ditetapkan.");
@@ -353,7 +318,7 @@ class UserController extends Controller
 
             if ($user->userRole->id_dapur != $dapur->id_dapur) {
                 Log::warning('Destroy User: User not in this dapur', [
-                    'user_id' => $userId,
+                    'user_id' => $user->id_user,
                     'user_dapur_id' => $user->userRole->id_dapur,
                     'current_dapur_id' => $dapur->id_dapur
                 ]);
@@ -362,24 +327,25 @@ class UserController extends Controller
 
             if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi'])) {
                 Log::warning('Destroy User: User has wrong role type', [
-                    'user_id' => $userId,
+                    'user_id' => $user->id_user,
                     'role_type' => $user->userRole->role_type,
                     'allowed_roles' => ['admin_gudang', 'ahli_gizi']
                 ]);
                 return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang atau ahli gizi.");
             }
 
-            if ($user->userRole->role_type === 'admin_gudang') {
-                $user->userRole->adminGudang()->delete();
-            } elseif ($user->userRole->role_type === 'ahli_gizi') {
-                $user->userRole->ahliGizi()->delete();
+            // Hapus relasi role spesifik
+            if ($user->userRole->role_type === 'admin_gudang' && $user->userRole->adminGudang) {
+                $user->userRole->adminGudang->delete();
+            } elseif ($user->userRole->role_type === 'ahli_gizi' && $user->userRole->ahliGizi) {
+                $user->userRole->ahliGizi->delete();
             }
 
             $user->userRole()->delete();
             $user->delete();
 
             Log::info('User deleted successfully', [
-                'user_id' => $userId,
+                'user_id' => $user->id_user,
                 'user_name' => $user->nama,
                 'dapur_id' => $dapur->id_dapur
             ]);
@@ -388,8 +354,8 @@ class UserController extends Controller
         } catch (Exception $e) {
             Log::error('Failed to delete user', [
                 'error' => $e->getMessage(),
-                'user_id' => $userId ?? 'not_set',
-                'dapur_id' => $request->current_dapur->id_dapur ?? 'not_set',
+                'user_id' => $user->id_user ?? 'not_set',
+                'dapur_id' => $dapur->id_dapur ?? 'not_set',
             ]);
             return redirect()->back()->with('error', 'Gagal menghapus user: ' . $e->getMessage());
         }

@@ -357,7 +357,9 @@
                                             <tr>
                                                 <th>Nama Bahan</th>
                                                 <th>Kebutuhan</th>
-                                                <th>Kebutuhan : Stok</th>
+                                                <th>Stok Gudang</th>
+                                                <th>Estimasi Stok Gudang</th>
+                                                <th>Perbandingan</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
@@ -370,6 +372,20 @@
                                                     <td>
                                                         {{ number_format($bahan["total_kebutuhan"], 2) }}
                                                         {{ $bahan["satuan"] }}
+                                                    </td>
+                                                    <td
+                                                        class="stock-available-{{ $idTemplate }}"
+                                                    >
+                                                        <span class="text-muted">
+                                                            Memuat...
+                                                        </span>
+                                                    </td>
+                                                    <td
+                                                        class="stock-estimate-{{ $idTemplate }}"
+                                                    >
+                                                        <span class="text-muted">
+                                                            Memuat...
+                                                        </span>
                                                     </td>
                                                     <td
                                                         class="stock-comparison-{{ $idTemplate }}"
@@ -418,7 +434,9 @@
                                             <tr>
                                                 <th>Nama Bahan</th>
                                                 <th>Kebutuhan</th>
-                                                <th>Kebutuhan : Stok</th>
+                                                <th>Stok Gudang</th>
+                                                <th>Estimasi Stok Gudang</th>
+                                                <th>Perbandingan</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
@@ -431,6 +449,20 @@
                                                     <td>
                                                         {{ number_format($bahan["total_kebutuhan"], 2) }}
                                                         {{ $bahan["satuan"] }}
+                                                    </td>
+                                                    <td
+                                                        class="stock-available-kecil-{{ $idTemplate }}"
+                                                    >
+                                                        <span class="text-muted">
+                                                            Memuat...
+                                                        </span>
+                                                    </td>
+                                                    <td
+                                                        class="stock-estimate-kecil-{{ $idTemplate }}"
+                                                    >
+                                                        <span class="text-muted">
+                                                            Memuat...
+                                                        </span>
                                                     </td>
                                                     <td
                                                         class="stock-comparison-kecil-{{ $idTemplate }}"
@@ -488,7 +520,9 @@
                                         <tr>
                                             <th>Nama Bahan</th>
                                             <th>Total Kebutuhan</th>
-                                            <th>Kebutuhan : Stok</th>
+                                            <th>Stok Gudang</th>
+                                            <th>Estimasi Stok Gudang</th>
+                                            <th>Perbandingan</th>
                                             <th>Status Stock</th>
                                             <th>Detail</th>
                                         </tr>
@@ -527,6 +561,20 @@
                                                     </span>
                                                 </td>
                                                 <td
+                                                    class="stock-available-total-{{ $idTemplate }}"
+                                                >
+                                                    <span class="text-muted">
+                                                        Memuat...
+                                                    </span>
+                                                </td>
+                                                <td
+                                                    class="stock-estimate-total-{{ $idTemplate }}"
+                                                >
+                                                    <span class="text-muted">
+                                                        Memuat...
+                                                    </span>
+                                                </td>
+                                                <td
                                                     class="stock-comparison-total-{{ $idTemplate }}"
                                                 >
                                                     <span class="text-muted">
@@ -561,7 +609,7 @@
                                                 id="detail-{{ $idTemplate }}"
                                             >
                                                 <td
-                                                    colspan="5"
+                                                    colspan="7"
                                                     class="bg-light"
                                                 >
                                                     <div class="p-3">
@@ -819,11 +867,33 @@
                                         @csrf
                                         <button
                                             type="submit"
-                                            class="btn btn-warning d-none"
+                                            class="btn btn-warning d-none me-2"
                                             id="submitReportBtn"
                                         >
                                             <i class="bx bx-file-plus me-1"></i>
                                             Buat Laporan Kekurangan
+                                        </button>
+                                    </form>
+                                    <form
+                                        action="{{ route("ahli-gizi.transaksi.create-transaction-now", $transaksi) }}"
+                                        method="POST"
+                                        class="d-inline"
+                                        id="createTransactionNowForm"
+                                    >
+                                        @csrf
+                                        <input
+                                            type="hidden"
+                                            name="keterangan_pengajuan"
+                                            id="keterangan_pengajuan_hidden"
+                                            value=""
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary d-none"
+                                            id="createTransactionNowBtn"
+                                        >
+                                            <i class="bx bx-check-circle me-1"></i>
+                                            Buat Transaksi Sekarang
                                         </button>
                                     </form>
                                 </div>
@@ -862,6 +932,23 @@
                         // Remove event listener to prevent loop
                         this.removeEventListener('submit', arguments.callee);
                         this.submit();
+                    }
+                }
+            });
+
+            // Form submission untuk create transaction now
+            document.getElementById('createTransactionNowForm').addEventListener('submit', function(e) {
+                // Copy keterangan dari textarea ke hidden input
+                const keteranganTextarea = document.getElementById('keterangan_pengajuan');
+                const keteranganHidden = document.getElementById('keterangan_pengajuan_hidden');
+                if (keteranganTextarea && keteranganHidden) {
+                    keteranganHidden.value = keteranganTextarea.value;
+                }
+
+                const stockAlert = document.getElementById('stockAlert');
+                if (stockAlert && stockAlert.style.display !== 'none') {
+                    if (!confirm('Transaksi akan dibuat dan disetujui langsung. Laporan kekurangan stok akan dibuat dan dikirim ke Kepala Dapur. Lanjutkan?')) {
+                        e.preventDefault();
                     }
                 }
             });
@@ -905,14 +992,17 @@
                         // Atur visibilitas tombol berdasarkan kondisi stok
                         if (!data.can_produce && data.shortages.length > 0) {
                             showStockAlert(data.shortages);
-                            // Tampilkan tombol Buat Laporan Kekurangan, sembunyikan Ajukan Persetujuan
+                            // Tampilkan 2 tombol: Buat Laporan Kekurangan dan Buat Transaksi Sekarang
+                            // Sembunyikan Ajukan Persetujuan
                             submitReportBtn.classList.remove('d-none');
+                            document.getElementById('createTransactionNowBtn').classList.remove('d-none');
                             submitApprovalBtn.classList.add('d-none');
                         } else {
                             hideStockAlert();
-                            // Tampilkan tombol Ajukan Persetujuan, sembunyikan Buat Laporan Kekurangan
+                            // Tampilkan tombol Ajukan Persetujuan, sembunyikan yang lain
                             submitApprovalBtn.classList.remove('d-none');
                             submitReportBtn.classList.add('d-none');
+                            document.getElementById('createTransactionNowBtn').classList.add('d-none');
                         }
                     } else {
                         console.error('Error:', data.message);
@@ -920,6 +1010,7 @@
                         // Default: Tampilkan Ajukan Persetujuan jika error
                         submitApprovalBtn.classList.remove('d-none');
                         submitReportBtn.classList.add('d-none');
+                        document.getElementById('createTransactionNowBtn').classList.add('d-none');
                     }
                 })
                 .catch(error => {
@@ -928,6 +1019,7 @@
                     // Default: Tampilkan Ajukan Persetujuan jika error
                     submitApprovalBtn.classList.remove('d-none');
                     submitReportBtn.classList.add('d-none');
+                    document.getElementById('createTransactionNowBtn').classList.add('d-none');
                 })
                 .finally(() => {
                     checkBtn.disabled = false;
@@ -952,17 +1044,35 @@
             function updateSingleStockDisplay(templateId, data, kebutuhan) {
                 const stockInfo = data.stock_data[templateId] || { stock_tersedia: 0, sufficient: false, debug: 'unknown', satuan_stok: '' };
                 const stockTersedia = parseFloat(stockInfo.stock_tersedia) || 0.0;
+                const estimasiStok = stockTersedia - parseFloat(kebutuhan);
                 console.log(`Debug for ${templateId} (${stockInfo.nama_bahan}):`, {
                     debug: stockInfo.debug,
                     stock_tersedia: stockTersedia,
                     satuan: stockInfo.satuan_stok
                 });
 
+                const availableEl = document.querySelector('.stock-available-total-' + templateId);
+                if (availableEl) {
+                    availableEl.innerHTML = `
+                        <span class="fw-semibold">${stockTersedia.toFixed(2)} ${stockInfo.satuan_stok}</span>
+                    `;
+                }
+
                 const comparisonEl = document.querySelector('.stock-comparison-total-' + templateId);
                 if (comparisonEl) {
                     comparisonEl.innerHTML = `
                         <span class="fw-semibold">${parseFloat(kebutuhan).toFixed(2)} : ${stockTersedia.toFixed(2)}</span>
                         <small class="text-muted d-block">Kebutuhan : Stok Gudang</small>
+                    `;
+                }
+
+                const estimateEl = document.querySelector('.stock-estimate-total-' + templateId);
+                if (estimateEl) {
+                    const estimateClass = estimasiStok < 0 ? 'text-danger' : (estimasiStok == 0 ? 'text-warning' : 'text-success');
+                    estimateEl.innerHTML = `
+                        <span class="${estimateClass}">
+                            ${estimasiStok.toFixed(2)} ${stockInfo.satuan_stok}
+                        </span>
                     `;
                 }
 
@@ -983,17 +1093,35 @@
             function updateSingleStockDisplayForType(templateId, typePrefix, data, kebutuhan) {
                 const stockInfo = data.stock_data[templateId] || { stock_tersedia: 0, sufficient: false, debug: 'unknown', satuan_stok: '' };
                 const stockTersedia = parseFloat(stockInfo.stock_tersedia) || 0.0;
+                const estimasiStok = stockTersedia - parseFloat(kebutuhan);
                 console.log(`Debug for ${typePrefix}${templateId} (${stockInfo.nama_bahan}):`, {
                     debug: stockInfo.debug,
                     stock_tersedia: stockTersedia,
                     satuan: stockInfo.satuan_stok
                 });
 
+                const availableEl = document.querySelector('.stock-available-' + typePrefix + templateId);
+                if (availableEl) {
+                    availableEl.innerHTML = `
+                        <span class="fw-semibold">${stockTersedia.toFixed(2)} ${stockInfo.satuan_stok}</span>
+                    `;
+                }
+
                 const comparisonEl = document.querySelector('.stock-comparison-' + typePrefix + templateId);
                 if (comparisonEl) {
                     comparisonEl.innerHTML = `
                         <span class="fw-semibold">${parseFloat(kebutuhan).toFixed(2)} : ${stockTersedia.toFixed(2)}</span>
                         <small class="text-muted d-block">Kebutuhan : Stok</small>
+                    `;
+                }
+
+                const estimateEl = document.querySelector('.stock-estimate-' + typePrefix + templateId);
+                if (estimateEl) {
+                    const estimateClass = estimasiStok < 0 ? 'text-danger' : (estimasiStok == 0 ? 'text-warning' : 'text-success');
+                    estimateEl.innerHTML = `
+                        <span class="${estimateClass}">
+                            ${estimasiStok.toFixed(2)} ${stockInfo.satuan_stok}
+                        </span>
                     `;
                 }
 

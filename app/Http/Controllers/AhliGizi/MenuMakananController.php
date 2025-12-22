@@ -296,12 +296,19 @@ class MenuMakananController extends Controller
     public function getActiveMenus(Request $request)
     {
         $search = $request->get('search');
+        $kategori = $request->get('kategori');
 
-        $menus = MenuMakanan::active()
-            ->when($search, function ($query, $search) {
-                return $query->where('nama_menu', 'like', "%{$search}%");
-            })
-            ->select('id_menu', 'nama_menu', 'gambar_menu', 'deskripsi')
+        $query = MenuMakanan::active();
+
+        if ($search) {
+            $query->where('nama_menu', 'like', "%{$search}%");
+        }
+
+        if ($kategori && $kategori !== 'all' && $kategori !== '') {
+            $query->where('kategori', $kategori);
+        }
+
+        $menus = $query->select('id_menu', 'nama_menu', 'gambar_menu', 'deskripsi', 'kategori')
             ->orderBy('nama_menu', 'asc')
             ->limit(20)
             ->get();
@@ -311,7 +318,8 @@ class MenuMakananController extends Controller
                 'id_menu' => $menu->id_menu,
                 'nama_menu' => $menu->nama_menu,
                 'gambar_url' => $menu->gambar_url,
-                'deskripsi' => $menu->deskripsi
+                'deskripsi' => $menu->deskripsi,
+                'kategori' => $menu->kategori
             ];
         });
 

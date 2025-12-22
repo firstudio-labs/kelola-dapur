@@ -266,7 +266,7 @@ class KepalaDapurController extends Controller
                     'created_at' => $approval->created_at,
                     'icon' => $this->getActivityIcon('stock_approval', $approval->status),
                     'color' => $this->getActivityColor($approval->status),
-                    'url' => route('kepala-dapur.approvals.show', [$dapur, $approval]),
+                    'url' => '#', // Modal detail, tidak perlu route
                 ];
             });
 

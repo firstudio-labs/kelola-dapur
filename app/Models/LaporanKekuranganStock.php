@@ -41,7 +41,7 @@ class LaporanKekuranganStock extends Model
     }
 
     // Helper methods
-    public static function createFromShortage(int $transaksiId, array $shortageData): self
+    public static function createFromShortage(int $transaksiId, array $shortageData, string $status = 'pending'): self
     {
         return self::create([
             'id_transaksi' => $transaksiId,
@@ -50,7 +50,7 @@ class LaporanKekuranganStock extends Model
             'jumlah_tersedia' => $shortageData['available'],
             'jumlah_kurang' => $shortageData['shortage'],
             'satuan' => $shortageData['satuan'],
-            'status' => 'pending'
+            'status' => $status
         ]);
     }
 

@@ -337,19 +337,36 @@
                                             </h5>
                                             <button
                                                 type="button"
-                                                class="btn-close"
+                                                class="btn btn-sm"
+                                                style="background: white; color: black; border: 1px solid #ddd; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
                                                 data-bs-dismiss="modal"
                                                 aria-label="Close"
-                                            ></button>
+                                            >
+                                                <span style="font-size: 18px; font-weight: bold;">×</span>
+                                            </button>
                                         </div>
                                         <div class="modal-body">
-                                            <div class="mb-3">
-                                                <input
-                                                    type="text"
-                                                    class="form-control"
-                                                    id="menuSearch"
-                                                    placeholder="Cari menu..."
-                                                />
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <input
+                                                        type="text"
+                                                        class="form-control"
+                                                        id="menuSearch"
+                                                        placeholder="Cari menu..."
+                                                    />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <select
+                                                        class="form-control"
+                                                        id="kategoriFilter"
+                                                    >
+                                                        <option value="all">Semua Kategori</option>
+                                                        <option value="Karbohidrat">Karbohidrat</option>
+                                                        <option value="Lauk">Lauk</option>
+                                                        <option value="Sayur">Sayur</option>
+                                                        <option value="Tambahan">Tambahan</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                             <div
                                                 class="row"
@@ -405,10 +422,13 @@
                         <h5 class="modal-title">Peringatan Duplikat Menu</h5>
                         <button
                             type="button"
-                            class="btn-close"
+                            class="btn btn-sm"
+                            style="background: white; color: black; border: 1px solid #ddd; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
                             data-bs-dismiss="modal"
                             aria-label="Close"
-                        ></button>
+                        >
+                            <span style="font-size: 18px; font-weight: bold;">×</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         <p>
@@ -446,7 +466,17 @@
             });
 
             $('#menuSearch').on('input', function () {
-                fetchMenus($(this).val());
+                const searchVal = $(this).val();
+                const kategoriVal = $('#kategoriFilter').val();
+                console.log('Search input changed:', { search: searchVal, kategori: kategoriVal });
+                fetchMenus(searchVal, kategoriVal);
+            });
+
+            $('#kategoriFilter').on('change', function () {
+                const searchVal = $('#menuSearch').val();
+                const kategoriVal = $(this).val();
+                console.log('Kategori filter changed:', { search: searchVal, kategori: kategoriVal });
+                fetchMenus(searchVal, kategoriVal);
             });
 
             $(document).on('change', '.porsi-input', function () {
@@ -462,18 +492,30 @@
         function openMenuModal(index) {
             currentMenuIndex = index;
             $('#menuSearch').val('');
-            fetchMenus('');
+            $('#kategoriFilter').val('all');
+            fetchMenus('', 'all');
             $('#menuModal').modal('show');
         }
 
-        function fetchMenus(searchTerm) {
+        function fetchMenus(searchTerm, kategori) {
+            const searchValue = searchTerm || '';
+            const kategoriValue = kategori || 'all';
+            
+            console.log('Fetching menus with:', { search: searchValue, kategori: kategoriValue });
+            
             $.ajax({
                 url: '{{ route("ahli-gizi.menu-makanan.active-menus") }}',
-                data: { search: searchTerm },
+                method: 'GET',
+                data: { 
+                    search: searchValue,
+                    kategori: kategoriValue
+                },
                 success: function (response) {
+                    console.log('Menus received:', response);
                     renderMenuList(response);
                 },
                 error: function (xhr) {
+                    console.error('Error fetching menus:', xhr);
                     alert('Gagal memuat menu: ' + (xhr.responseJSON?.message || 'Unknown error'));
                 },
             });
@@ -484,6 +526,13 @@
             menuList.empty();
             menus.forEach((menu) => {
                 const isSelected = selectedMenus.includes(menu.id_menu);
+                const kategoriBadgeClass = {
+                    'Karbohidrat': 'bg-label-primary',
+                    'Lauk': 'bg-label-success',
+                    'Sayur': 'bg-label-info',
+                    'Tambahan': 'bg-label-warning'
+                }[menu.kategori] || 'bg-label-secondary';
+                
                 const menuHtml = `
                     <div class="col-md-6 mb-3 menu-item" data-id="${menu.id_menu}" data-name="${menu.nama_menu}">
                         <div class="card menu-card h-100 ${isSelected ? 'border-warning' : ''}" style="cursor: pointer">
@@ -499,7 +548,10 @@
                                                </div>`
                                     }
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1">${menu.nama_menu}</h6>
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <h6 class="mb-0">${menu.nama_menu}</h6>
+                                            ${menu.kategori ? `<span class="badge ${kategoriBadgeClass}">${menu.kategori}</span>` : ''}
+                                        </div>
                                         <p class="text-muted small mb-2">${menu.deskripsi ? menu.deskripsi.substring(0, 50) : ''}</p>
                                         <div class="mt-2">
                                             <small class="text-muted">Bahan:</small>

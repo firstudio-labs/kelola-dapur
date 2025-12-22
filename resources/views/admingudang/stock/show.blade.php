@@ -1,4 +1,10 @@
-@extends("template_admin_gudang.layout")
+@php
+    $layoutTemplate = $layoutTemplate ?? 'template_admin_gudang.layout';
+    $routePrefix = $routePrefix ?? 'admin-gudang';
+    $stockIndexLabel = $stockIndexLabel ?? 'Kelola Stok';
+    $roleType = $roleType ?? 'admin_gudang';
+@endphp
+@extends($layoutTemplate)
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -9,7 +15,7 @@
                     <div>
                         <nav class="d-flex align-items-center mb-2">
                             <a
-                                href="{{ route("admin-gudang.dashboard", $dapur) }}"
+                                href="{{ route($routePrefix . ".dashboard", $dapur) }}"
                                 class="text-muted me-2"
                             >
                                 <i class="bx bx-home-alt me-1"></i>
@@ -17,10 +23,10 @@
                             </a>
                             <i class="bx bx-chevron-right me-2"></i>
                             <a
-                                href="{{ route("admin-gudang.stock.index", $dapur) }}"
+                                href="{{ route($routePrefix . ".stock.index", $dapur) }}"
                                 class="text-muted me-2"
                             >
-                                Kelola Stok
+                                {{ $stockIndexLabel }}
                             </a>
                             <i class="bx bx-chevron-right me-2"></i>
                             <span class="text-dark">
@@ -38,21 +44,23 @@
                     </div>
                     <div class="d-flex gap-2">
                         <a
-                            href="{{ route("admin-gudang.stock.index", $dapur) }}"
+                            href="{{ route($routePrefix . ".stock.index", $dapur) }}"
                             class="btn btn-outline-secondary btn-sm"
                         >
                             <i class="bx bx-arrow-back me-1"></i>
                             Kembali
                         </a>
-                        <button
-                            type="button"
-                            class="btn btn-success btn-sm"
-                            data-bs-toggle="modal"
-                            data-bs-target="#requestStockModal"
-                        >
-                            <i class="bx bx-plus-circle me-1"></i>
-                            Ajukan Tambah Stok
-                        </button>
+                        @if($roleType === 'admin_gudang')
+                            <button
+                                type="button"
+                                class="btn btn-success btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#requestStockModal"
+                            >
+                                <i class="bx bx-plus-circle me-1"></i>
+                                Ajukan Tambah Stok
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -329,18 +337,20 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
+                                    <th style="width: 50px;">No</th>
                                     <th>Tanggal Permintaan</th>
-                                    <th>Jumlah Diminta</th>
-                                    <th>Diminta Oleh</th>
-                                    <th>Diproses Oleh</th>
+                                    <th>Jumlah</th>
                                     <th>Status</th>
-                                    <th>Tanggal Diproses</th>
-                                    <th>Keterangan</th>
+                                    <th>Diminta Oleh</th>
+                                    <th style="width: 80px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($approvalHistory as $history)
+                                @foreach ($approvalHistory as $index => $history)
                                     <tr>
+                                        <td>
+                                            {{ $approvalHistory->firstItem() + $index }}
+                                        </td>
                                         <td>
                                             <div class="d-flex flex-column">
                                                 <span class="fw-medium">
@@ -360,62 +370,6 @@
                                             </small>
                                         </td>
                                         <td>
-                                            <div
-                                                class="d-flex align-items-center"
-                                            >
-                                                <div
-                                                    class="avatar avatar-sm me-2"
-                                                >
-                                                    <span
-                                                        class="avatar-initial rounded-circle bg-label-info"
-                                                    >
-                                                        {{ strtoupper(substr($history->adminGudang->user->nama ?? "AG", 0, 2)) }}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span class="fw-medium">
-                                                        {{ $history->adminGudang->user->nama ?? "Admin Gudang" }}
-                                                    </span>
-                                                    <br />
-                                                    <small class="text-muted">
-                                                        Admin Gudang
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @if ($history->kepalaDapur && $history->kepalaDapur->user)
-                                                <div
-                                                    class="d-flex align-items-center"
-                                                >
-                                                    <div
-                                                        class="avatar avatar-sm me-2"
-                                                    >
-                                                        <span
-                                                            class="avatar-initial rounded-circle bg-label-primary"
-                                                        >
-                                                            {{ strtoupper(substr($history->kepalaDapur->user->nama, 0, 2)) }}
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <span class="fw-medium">
-                                                            {{ $history->kepalaDapur->user->nama }}
-                                                        </span>
-                                                        <br />
-                                                        <small
-                                                            class="text-muted"
-                                                        >
-                                                            Kepala Dapur
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <span class="text-muted">
-                                                    -
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td>
                                             @php
                                                 $statusClass = match ($history->status) {
                                                     "approved" => "bg-label-success",
@@ -431,41 +385,50 @@
                                                 };
                                             @endphp
 
-                                            <span
-                                                class="badge {{ $statusClass }}"
-                                            >
+                                            <span class="badge {{ $statusClass }}">
                                                 {{ $statusText }}
                                             </span>
                                         </td>
                                         <td>
-                                            @if ($history->approved_at)
-                                                <div class="d-flex flex-column">
-                                                    <span class="fw-medium">
-                                                        {{ $history->approved_at->format("d M Y") }}
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2">
+                                                    <span class="avatar-initial rounded-circle bg-label-info">
+                                                        {{ strtoupper(substr($history->adminGudang->user->nama ?? "AG", 0, 2)) }}
                                                     </span>
-                                                    <small class="text-muted">
-                                                        {{ $history->approved_at->format("H:i") }}
-                                                    </small>
                                                 </div>
-                                            @else
-                                                <span class="text-muted">
-                                                    -
-                                                </span>
-                                            @endif
+                                                <div>
+                                                    <span class="fw-medium">
+                                                        {{ $history->adminGudang->user->nama ?? "Admin Gudang" }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            @if ($history->keterangan)
-                                                <span
-                                                    data-bs-toggle="tooltip"
-                                                    title="{{ $history->keterangan }}"
-                                                >
-                                                    {{ Str::limit($history->keterangan, 30) }}
-                                                </span>
-                                            @else
-                                                <span class="text-muted">
-                                                    -
-                                                </span>
-                                            @endif
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#approvalStockDetailModal"
+                                                data-approval-data="{{ json_encode([
+                                                    'tanggal_permintaan' => $history->created_at->format('d M Y H:i'),
+                                                    'jumlah_diminta' => rtrim(rtrim(number_format($history->jumlah, 3), '0'), '.') . ' ' . $stockItem->templateItem->satuan,
+                                                    'status' => $history->status,
+                                                    'tanggal_diproses' => $history->approved_at ? $history->approved_at->format('d M Y H:i') : '-',
+                                                    'nama_pemohon' => $history->adminGudang->user->nama ?? 'Admin Gudang',
+                                                    'nama_pemroses' => $history->kepalaDapur && $history->kepalaDapur->user ? $history->kepalaDapur->user->nama : null,
+                                                    'jam_kedatangan' => $history->jam_kedatangan ? substr($history->jam_kedatangan, 0, 5) : null,
+                                                    'tanggal_produksi' => $history->tanggal_produksi ? $history->tanggal_produksi->format('d/m/Y') : null,
+                                                    'tanggal_expired' => $history->tanggal_expired ? $history->tanggal_expired->format('d/m/Y') : null,
+                                                    'suhu' => $history->suhu_bahan_makanan,
+                                                    'warna' => $history->warna_bahan_makanan,
+                                                    'foto_bahan' => $history->foto_bahan ? asset('storage/' . $history->foto_bahan) : null,
+                                                    'keterangan' => $history->keterangan
+                                                ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                onclick="showApprovalStockDetailModal(JSON.parse(this.getAttribute('data-approval-data')))"
+                                                title="Lihat Detail"
+                                            >
+                                                <i class="bx bx-show"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -488,15 +451,17 @@
                             Belum ada permintaan penambahan stok untuk bahan
                             ini.
                         </p>
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#requestStockModal"
-                        >
-                            <i class="bx bx-plus me-1"></i>
-                            Buat Permintaan Pertama
-                        </button>
+                        @if($roleType === 'admin_gudang')
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#requestStockModal"
+                            >
+                                <i class="bx bx-plus me-1"></i>
+                                Buat Permintaan Pertama
+                            </button>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -504,150 +469,12 @@
     </div>
 
     <!-- Request Stock Modal -->
-    <div
-        class="modal fade"
-        id="requestStockModal"
-        tabindex="-1"
-        aria-labelledby="requestStockModalLabel"
-        aria-hidden="true"
-    >
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="requestStockModalLabel">
-                        Ajukan Tambah Stok
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                    ></button>
-                </div>
-                <form
-                    action="{{ route("admin-gudang.stock.request", [$dapur, $stockItem]) }}"
-                    method="POST"
-                >
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Nama Bahan</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="{{ $stockItem->templateItem->nama_bahan }}"
-                                readonly
-                            />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Stok Saat Ini</label>
-                            <div class="input-group">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    value="{{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}"
-                                    readonly
-                                />
-                                <span class="input-group-text">
-                                    {{ $stockItem->templateItem->satuan }}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="jumlah" class="form-label">
-                                Jumlah Penambahan
-                                <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <input
-                                    type="number"
-                                    name="jumlah"
-                                    id="jumlah"
-                                    class="form-control @error("jumlah") is-invalid @enderror"
-                                    step="0.001"
-                                    min="0.1"
-                                    max="2000000000"
-                                    required
-                                    placeholder="0.000"
-                                    value="{{ old("jumlah") }}"
-                                />
-                                <span class="input-group-text">
-                                    {{ $stockItem->templateItem->satuan }}
-                                </span>
-                            </div>
-                            @error("jumlah")
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="keterangan" class="form-label">
-                                Keterangan
-                            </label>
-                            <textarea
-                                name="keterangan"
-                                id="keterangan"
-                                class="form-control @error("keterangan") is-invalid @enderror"
-                                rows="3"
-                                maxlength="500"
-                                placeholder="Alasan penambahan stok (opsional)..."
-                            >
-{{ old("keterangan") }}</textarea
-                            >
-                            @error("keterangan")
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
+    @if($roleType === 'admin_gudang')
+        @include('partials.request-stock-modal')
+    @endif
 
-                            <div class="form-text">Maksimal 500 karakter</div>
-                        </div>
-
-                        <!-- Preview Section -->
-                        <div class="bg-light rounded p-3">
-                            <h6 class="mb-2">Preview Permintaan:</h6>
-                            <div class="row">
-                                <div class="col-6">
-                                    <small class="text-muted">
-                                        Stok Saat Ini:
-                                    </small>
-                                    <div class="fw-medium">
-                                        {{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}
-                                        {{ $stockItem->templateItem->satuan }}
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted">
-                                        Stok Setelah Disetujui:
-                                    </small>
-                                    <div
-                                        class="fw-medium text-success"
-                                        id="previewStock"
-                                    >
-                                        -
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                        >
-                            Batal
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bx bx-send me-1"></i>
-                            Ajukan Permintaan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Approval Stock Detail Modal -->
+    @include('partials.approval-stock-detail-modal')
 
     <!-- Custom Styling -->
     <style>
@@ -689,33 +516,6 @@
                 tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl)
             );
 
-            // Handle request stock modal
-            const requestStockModal = document.getElementById('requestStockModal');
-            const jumlahInput = document.getElementById('jumlah');
-            const previewStock = document.getElementById('previewStock');
-            const currentStock = {{ $stockItem->jumlah }};
-            const satuan = '{{ $stockItem->templateItem->satuan }}';
-
-            // Update preview when amount changes
-            if (jumlahInput && previewStock) {
-                function updatePreview() {
-                    const additionalAmount = parseFloat(jumlahInput.value) || 0;
-                    const newStock = currentStock + additionalAmount;
-                    previewStock.textContent = parseFloat(newStock.toFixed(3)) + ' ' + satuan;
-                }
-
-                jumlahInput.addEventListener('input', updatePreview);
-
-                // Initialize preview
-                updatePreview();
-            }
-
-            // Show modal if there are validation errors
-            @if($errors->any())
-                const modal = new bootstrap.Modal(requestStockModal);
-                modal.show();
-            @endif
-
             // Auto-hide alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert-dismissible');
             alerts.forEach(alert => {
@@ -724,6 +524,32 @@
                     bsAlert.close();
                 }, 5000);
             });
+            
+            // Cleanup any stuck modal backdrops on page load
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        });
+
+        // Function to show approval stock detail modal
+        function showApprovalStockDetailModal(data) {
+            // Cleanup any existing backdrops before showing new modal
+            if (window.cleanupModalBackdrop) {
+                window.cleanupModalBackdrop();
+            }
+            
+            if (window.showApprovalStockDetail) {
+                window.showApprovalStockDetail(data);
+            }
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (window.cleanupModalBackdrop) {
+                window.cleanupModalBackdrop();
+            }
         });
     </script>
 @endsection

@@ -331,6 +331,8 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur', 'check.subscription'])
         // Stok
         Route::prefix('stock')->name('stock.')->group(function () {
             Route::get('/', [StockItemController::class, 'index'])->name('index');
+            Route::get('/{stockItem}', [StockItemController::class, 'show'])->name('show');
+            Route::post('/export', [StockItemController::class, 'export'])->name('export');
         });
 
         // Invoice
@@ -503,6 +505,7 @@ Route::middleware(['auth', 'role:ahli_gizi', 'check.subscription'])->prefix('ahl
 
         Route::post('/{transaksi}/ajukan-persetujuan', [AhliGiziTransaksiDapurController::class, 'submitApproval'])->name('submit-approval');
         Route::post('/{transaksi}/laporkan-kekurangan', [AhliGiziTransaksiDapurController::class, 'createShortageReport'])->name('create-shortage-report');
+        Route::post('/{transaksi}/buat-transaksi-sekarang', [AhliGiziTransaksiDapurController::class, 'createTransactionNow'])->name('create-transaction-now');
 
         Route::get('/{transaksi}/detail', [AhliGiziTransaksiDapurController::class, 'show'])->name('show');
         Route::delete('/{transaksi}/hapus', [AhliGiziTransaksiDapurController::class, 'destroy'])->name('destroy');
