@@ -16,10 +16,17 @@ class TemplateItem extends Model
     protected $fillable = [
         'nama_bahan',
         'satuan',
-        'keterangan'
+        'keterangan',
+        'kandungan_gizi',
+        'jenis_bahan'
     ];
 
-    // Relationships
+    protected $casts = [
+        'kandungan_gizi' => 'array',
+        'jenis_bahan' => 'array'
+    ];
+
+    
     public function stockItems(): HasMany
     {
         return $this->hasMany(StockItem::class, 'id_template_item');
@@ -30,7 +37,7 @@ class TemplateItem extends Model
         return $this->hasMany(BahanMenu::class, 'id_template_item');
     }
 
-    // Helper methods
+    
     public function getStockByDapur(int $dapurId)
     {
         return $this->stockItems()->where('id_dapur', $dapurId)->first();

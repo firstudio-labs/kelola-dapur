@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class MenuMakananController extends Controller
 {
@@ -64,8 +66,16 @@ class MenuMakananController extends Controller
         $gambarMenu = null;
         if ($request->hasFile('gambar_menu')) {
             $file = $request->file('gambar_menu');
-            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/menu', $filename);
+            $filename = time() . '_' . Str::random(10) . '.webp';
+            
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file->getRealPath());
+            
+            if ($image->width() > 1200) {
+                $image->scaleDown(width: 1200);
+            }
+            
+            Storage::put('public/menu/' . $filename, (string) $image->toWebp(80));
             $gambarMenu = $filename;
         }
 
@@ -142,8 +152,16 @@ class MenuMakananController extends Controller
             }
 
             $file = $request->file('gambar_menu');
-            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/menu', $filename);
+            $filename = time() . '_' . Str::random(10) . '.webp';
+            
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file->getRealPath());
+            
+            if ($image->width() > 1200) {
+                $image->scaleDown(width: 1200);
+            }
+            
+            Storage::put('public/menu/' . $filename, (string) $image->toWebp(80));
             $gambarMenu = $filename;
         }
 

@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use App\Models\KategoriPrasarana;
+use App\Models\ItemPrasarana;
 
 class DapurController extends Controller
 {
@@ -52,26 +58,36 @@ class DapurController extends Controller
 
     public function dapurCreate()
     {
-        return view('superadmin.dapur.create');
+        $kategoriPrasarana = KategoriPrasarana::with('items')->where('is_active', true)->get();
+        return view('superadmin.dapur.create', compact('kategoriPrasarana'));
     }
 
     public function dapurStore(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'nama_dapur' => 'required|string|max:255|unique:dapur,nama_dapur',
+            'no_registrasi_sppg' => 'nullable|string|max:100',
+            'nik_pemilik' => 'nullable|string|max:16',
+            'tag_lokasi' => 'nullable|string',
+            'foto_bangunan' => 'nullable|image|max:2048', 
             'provinsi' => 'required|string|max:255',
             'kabupaten_kota' => 'required|string|max:255',
             'alamat' => 'required|string|max:500',
             'telepon' => 'nullable|string|max:14',
             'status' => 'required|in:active,inactive',
+            'prasarana' => 'nullable|array',
+            'prasarana.*' => 'exists:item_prasarana,id_item'
         ], [
             'nama_dapur.required' => 'Nama dapur harus diisi',
+            'nama_dapur.unique' => 'Nama dapur sudah digunakan',
             'provinsi.required' => 'Provinsi harus dipilih',
             'kabupaten_kota.required' => 'Kabupaten/Kota harus dipilih',
             'alamat.required' => 'Alamat dapur harus diisi',
-            'nama_dapur.unique' => 'Nama dapur sudah digunakan',
             'status.required' => 'Status harus dipilih',
             'status.in' => 'Status tidak valid',
+            'foto_bangunan.image' => 'File harus berupa gambar',
+            'foto_bangunan.max' => 'Ukuran gambar maksimal 2MB',
+            'prasarana.*.exists' => 'Item prasarana tidak valid',
         ]);
 
         if ($validator->fails()) {
@@ -82,13 +98,43 @@ class DapurController extends Controller
 
         $wilayah = $request->kabupaten_kota . ', ' . $request->provinsi;
 
-        Dapur::create([
+        $fotoBangunanPath = null;
+        if ($request->hasFile('foto_bangunan')) {
+            $file = $request->file('foto_bangunan');
+            $filename = time() . '_' . Str::random(10) . '.webp';
+            
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file->getRealPath());
+            
+            if ($image->width() > 1920) {
+                $image->scaleDown(width: 1920);
+            }
+            
+            Storage::put('public/dapur/' . $filename, (string) $image->toWebp(80));
+            $fotoBangunanPath = 'dapur/' . $filename;
+        }
+
+        $dapur = Dapur::create([
             'nama_dapur' => $request->nama_dapur,
             'wilayah' => $wilayah,
             'alamat' => $request->alamat,
             'telepon' => $request->telepon,
             'status' => $request->status,
+            'no_registrasi_sppg' => $request->no_registrasi_sppg,
+            'nik_pemilik' => $request->nik_pemilik,
+            'foto_bangunan' => $fotoBangunanPath,
+            'tag_lokasi' => $request->tag_lokasi,
         ]);
+
+        if ($request->has('prasarana') && is_array($request->prasarana)) {
+            foreach ($request->prasarana as $itemId) {
+                \App\Models\DapurPrasarana::create([
+                    'id_dapur' => $dapur->id_dapur,
+                    'id_item' => $itemId,
+                    'is_available' => true
+                ]);
+            }
+        }
 
         return redirect()->route('superadmin.dapur.index')
             ->with('success', 'Dapur berhasil ditambahkan');
@@ -110,13 +156,19 @@ class DapurController extends Controller
 
     public function dapurEdit(Dapur $dapur)
     {
-        return view('superadmin.dapur.edit', compact('dapur'));
+        $dapur->load('prasarana');
+        $kategoriPrasarana = KategoriPrasarana::with('items')->where('is_active', true)->get();
+        return view('superadmin.dapur.edit', compact('dapur', 'kategoriPrasarana'));
     }
 
     public function dapurUpdate(Request $request, Dapur $dapur)
     {
         $validator = Validator::make($request->all(), [
             'nama_dapur' => 'required|string|max:255|unique:dapur,nama_dapur,' . $dapur->id_dapur . ',id_dapur',
+            'no_registrasi_sppg' => 'nullable|string|max:100',
+            'nik_pemilik' => 'nullable|string|max:16',
+            'tag_lokasi' => 'nullable|string',
+            'foto_bangunan' => 'nullable|image|max:2048', 
             'provinsi' => 'required|string|max:255',
             'kabupaten_kota' => 'required|string|max:255',
             'kecamatan' => 'required|string|max:255',
@@ -124,6 +176,8 @@ class DapurController extends Controller
             'alamat' => 'required|string|max:500',
             'telepon' => 'nullable|string|max:20|regex:/^[0-9+\-\s()]+$/',
             'status' => 'required|in:active,inactive',
+            'prasarana' => 'nullable|array',
+            'prasarana.*' => 'exists:item_prasarana,id_item'
         ], [
             'nama_dapur.required' => 'Nama dapur harus diisi',
             'nama_dapur.unique' => 'Nama dapur sudah digunakan',
@@ -136,6 +190,9 @@ class DapurController extends Controller
             'telepon.regex' => 'Format nomor telepon tidak valid',
             'status.required' => 'Status harus dipilih',
             'status.in' => 'Status tidak valid',
+            'foto_bangunan.image' => 'File harus berupa gambar',
+            'foto_bangunan.max' => 'Ukuran gambar maksimal 2MB',
+            'prasarana.*.exists' => 'Item prasarana tidak valid',
         ]);
 
         if ($validator->fails()) {
@@ -145,10 +202,30 @@ class DapurController extends Controller
         }
 
         try {
-            // Extract wilayah data from hidden form fields or API lookup
+            
             $wilayahData = $this->extractWilayahDataForUpdate($request, $dapur);
 
-            // Update dapur dengan data yang sudah divalidasi
+            $fotoBangunanPath = $dapur->foto_bangunan;
+            if ($request->hasFile('foto_bangunan')) {
+                if ($dapur->foto_bangunan && Storage::exists('public/' . $dapur->foto_bangunan)) {
+                    Storage::delete('public/' . $dapur->foto_bangunan);
+                }
+
+                $file = $request->file('foto_bangunan');
+                $filename = time() . '_' . Str::random(10) . '.webp';
+                
+                $manager = new ImageManager(new Driver());
+                $image = $manager->read($file->getRealPath());
+                
+                if ($image->width() > 1920) {
+                    $image->scaleDown(width: 1920);
+                }
+                
+                Storage::put('public/dapur/' . $filename, (string) $image->toWebp(80));
+                $fotoBangunanPath = 'dapur/' . $filename;
+            }
+
+            
             $dapur->update([
                 'nama_dapur' => trim($request->nama_dapur),
                 'province_code' => $wilayahData['province_code'],
@@ -162,7 +239,23 @@ class DapurController extends Controller
                 'alamat' => trim($request->alamat),
                 'telepon' => $request->telepon ? trim($request->telepon) : null,
                 'status' => $request->status,
+                'no_registrasi_sppg' => $request->no_registrasi_sppg,
+                'nik_pemilik' => $request->nik_pemilik,
+                'foto_bangunan' => $fotoBangunanPath,
+                'tag_lokasi' => $request->tag_lokasi,
             ]);
+
+            
+            $dapur->prasarana()->delete();
+            if ($request->has('prasarana') && is_array($request->prasarana)) {
+                foreach ($request->prasarana as $itemId) {
+                    \App\Models\DapurPrasarana::create([
+                        'id_dapur' => $dapur->id_dapur,
+                        'id_item' => $itemId,
+                        'is_available' => true
+                    ]);
+                }
+            }
 
             return redirect()->route('superadmin.dapur.index')
                 ->with('success', 'Dapur berhasil diperbarui');
@@ -198,7 +291,7 @@ class DapurController extends Controller
 
     private function extractWilayahData(Request $request): array
     {
-        // If codes are sent via hidden inputs (recommended approach)
+        
         if ($request->filled(['province_code', 'regency_code', 'district_code', 'village_code'])) {
             return [
                 'province_code' => $request->province_code,
@@ -218,7 +311,7 @@ class DapurController extends Controller
 
     private function extractWilayahDataForUpdate(Request $request, Dapur $dapur): array
     {
-        // Check if we  new codes from the form
+        
         if ($request->filled(['province_code', 'regency_code', 'district_code', 'village_code'])) {
             return [
                 'province_code' => $request->province_code,

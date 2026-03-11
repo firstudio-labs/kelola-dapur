@@ -16,7 +16,12 @@ class Dapur extends Model
 
     protected $fillable = [
         'nama_dapur',
-        // 'wilayah',
+        
+        'no_registrasi_sppg',
+        'nik_pemilik',
+        'foto_bangunan',
+        'tag_lokasi',
+        'Province_code', 
         'province_code',
         'province_name',
         'regency_code',
@@ -40,7 +45,7 @@ class Dapur extends Model
         return 'id_dapur';
     }
 
-    // Relationships
+    
     public function kepalaDapur(): HasMany
     {
         return $this->hasMany(KepalaDapur::class, 'id_dapur');
@@ -54,6 +59,11 @@ class Dapur extends Model
     public function ahliGizi(): HasMany
     {
         return $this->hasMany(AhliGizi::class, 'id_dapur');
+    }
+
+    public function distributor(): HasMany
+    {
+        return $this->hasMany(Distributor::class, 'id_dapur');
     }
 
     public function stockItems(): HasMany
@@ -86,7 +96,12 @@ class Dapur extends Model
             ->latest('tanggal_request');
     }
 
-    // Helper methods
+    public function prasarana(): HasMany
+    {
+        return $this->hasMany(DapurPrasarana::class, 'id_dapur');
+    }
+
+    
     public function isActive(): bool
     {
         return $this->status === 'active' &&
@@ -152,7 +167,7 @@ class Dapur extends Model
             ->where('users.is_active', true);
     }
 
-    // Wilayah helper methods
+    
     public function getFullWilayahAttribute(): string
     {
         $parts = [
@@ -162,7 +177,7 @@ class Dapur extends Model
             $this->province_name
         ];
 
-        // Filter out null or empty values and join with commas
+        
         $filteredParts = array_filter($parts, fn($part) => !is_null($part) && $part !== '');
         return $filteredParts ? implode(', ', $filteredParts) : '';
     }
@@ -189,7 +204,7 @@ class Dapur extends Model
         ];
     }
 
-    // Scope methods for filtering by wilayah
+    
     public function scopeByProvince($query, $provinceCode)
     {
         return $query->where('province_code', $provinceCode);
@@ -210,7 +225,7 @@ class Dapur extends Model
         return $query->where('village_code', $villageCode);
     }
 
-    // Search scope for wilayah
+    
     public function scopeSearchWilayah($query, $search)
     {
         return $query->where(function ($q) use ($search) {

@@ -3,7 +3,24 @@
 @section("content")
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible mb-4" role="alert">
+                <i class="bx bx-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        @if(session('warning'))
+            <div class="alert alert-warning alert-dismissible mb-4" role="alert">
+                <i class="bx bx-error me-2"></i>{{ session('warning') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible mb-4" role="alert">
+                <i class="bx bx-x-circle me-2"></i>{{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -29,7 +46,6 @@
                                     </p>
                                 </div>
                             </div>
-                            <!-- Progress Steps -->
                             <div class="d-flex align-items-center">
                                 <div class="step-indicator">
                                     <span class="badge bg-success me-2">1</span>
@@ -43,8 +59,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Informasi Paket -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -175,8 +189,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Detail Menu -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -191,8 +203,6 @@
                             $porsiBesar = $transaksi->detailTransaksiDapur->where("tipe_porsi", "besar");
                             $porsiKecil = $transaksi->detailTransaksiDapur->where("tipe_porsi", "kecil");
                         @endphp
-
-                        <!-- Porsi Besar -->
                         @if ($porsiBesar->count() > 0)
                             <h6 class="text-success mb-3">Menu Porsi Besar</h6>
                             <div class="row mb-4">
@@ -250,8 +260,6 @@
                                 @endforeach
                             </div>
                         @endif
-
-                        <!-- Porsi Kecil -->
                         @if ($porsiKecil->count() > 0)
                             <h6 class="text-warning mb-3">Menu Porsi Kecil</h6>
                             <div class="row mb-4">
@@ -313,8 +321,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Kebutuhan Bahan -->
         @if (! empty($bahanKebutuhan))
             <div class="row mb-4">
                 <div class="col-12">
@@ -328,7 +334,6 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            <!-- Total Kebutuhan -->
                             <h6 class="mb-3">Total Kebutuhan Bahan</h6>
                             <div class="table-responsive mb-4">
                                 <table class="table table-bordered">
@@ -427,8 +432,6 @@
                                     </tbody>
                                 </table>
                             </div>
-
-                            <!-- Porsi Besar -->
                             @if (! empty($bahanBesar))
                                 <h6 class="text-success mb-3">
                                     Kebutuhan Bahan Porsi Besar
@@ -534,8 +537,6 @@
                                     </table>
                                 </div>
                             @endif
-
-                            <!-- Porsi Kecil -->
                             @if (! empty($bahanKecil))
                                 <h6 class="text-warning mb-3">
                                     Kebutuhan Bahan Porsi Kecil
@@ -646,8 +647,6 @@
                 </div>
             </div>
         @endif
-
-        <!-- Laporan Kekurangan -->
         @if ($transaksi->laporanKekuranganStock->isNotEmpty())
             <div class="row mb-4">
                 <div class="col-12">
@@ -713,8 +712,6 @@
                 </div>
             </div>
         @endif
-
-        <!-- Stock Alert (if any shortages) -->
         @if (! empty($shortages))
             <div class="row mb-4">
                 <div class="col-12">
@@ -765,5 +762,126 @@
                 </div>
             </div>
         @endif
+
+        @if ($transaksi->orderProduksi)
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="bx bx-check-shield me-2"></i>
+                                Status Produksi & Distribusi
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-4 mb-md-0">
+                                    <h6 class="fw-semibold">
+                                        Status Produksi
+                                    </h6>
+                                    @php
+                                        $mapStatusProduksi = [
+                                            'stok_kurang' => ['badge' => 'bg-danger', 'icon' => 'bx-error-circle', 'text' => 'Stok Kurang'],
+                                            'belum_dibuat' => ['badge' => 'bg-secondary', 'icon' => 'bx-time', 'text' => 'Belum Dibuat'],
+                                            'sedang_dibuat' => ['badge' => 'bg-warning', 'icon' => 'bx-loader-circle', 'text' => 'Sedang Dibuat'],
+                                            'selesai' => ['badge' => 'bg-success', 'icon' => 'bx-check-circle', 'text' => 'Selesai']
+                                        ];
+                                        $prodStatusData = $mapStatusProduksi[$transaksi->orderProduksi->status] ?? ['badge' => 'bg-secondary', 'icon' => 'bx-help-circle', 'text' => 'Unknown'];
+                                    @endphp
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="avatar avatar-sm me-3">
+                                            <span class="avatar-initial rounded-circle {{ $prodStatusData['badge'] }}">
+                                                <i class="bx {{ $prodStatusData['icon'] }}"></i>
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 text-muted">Status</p>
+                                            <h6 class="mb-0">{{ $prodStatusData['text'] }}</h6>
+                                        </div>
+                                    </div>
+                                    
+                                    @if ($transaksi->orderProduksi->status === 'selesai' && $transaksi->orderProduksi->dokumentasi->count() > 0)
+                                        <div class="mt-3">
+                                            <p class="mb-2 text-muted small">Dokumentasi Produksi:</p>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach ($transaksi->orderProduksi->dokumentasi as $dok)
+                                                    <a href="{{ $dok->url }}" target="_blank">
+                                                        <img src="{{ $dok->url }}" alt="Dokumentasi Produksi" class="rounded border" style="width: 80px; height: 80px; object-fit: cover;">
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-semibold">
+                                        Status Distribusi
+                                    </h6>
+                                    @if ($transaksi->orderProduksi->distribusiOrder)
+                                        @php
+                                            $orderDistribusi = $transaksi->orderProduksi->distribusiOrder;
+                                            $mapStatusDistribusi = [
+                                                'belum_dikirim' => ['badge' => 'bg-secondary', 'icon' => 'bx-time', 'text' => 'Belum Dikirim'],
+                                                'sedang_dikirim' => ['badge' => 'bg-warning', 'icon' => 'bx-car', 'text' => 'Sedang Dikirim'],
+                                                'sudah_dikirim' => ['badge' => 'bg-success', 'icon' => 'bx-check-double', 'text' => 'Sudah Dikirim']
+                                            ];
+                                            $distStatusData = $mapStatusDistribusi[$orderDistribusi->status] ?? ['badge' => 'bg-secondary', 'icon' => 'bx-help-circle', 'text' => 'Unknown'];
+                                        @endphp
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="avatar avatar-sm me-3">
+                                                <span class="avatar-initial rounded-circle {{ $distStatusData['badge'] }}">
+                                                    <i class="bx {{ $distStatusData['icon'] }}"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0 text-muted">Status</p>
+                                                <h6 class="mb-0">{{ $distStatusData['text'] }}</h6>
+                                            </div>
+                                        </div>
+                                        
+                                        @if ($orderDistribusi->status === 'sudah_dikirim' && $orderDistribusi->dokumentasi->count() > 0)
+                                            <div class="mt-3">
+                                                <p class="mb-2 text-muted small">Dokumentasi Distribusi:</p>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach ($orderDistribusi->dokumentasi as $dok)
+                                                        <a href="{{ $dok->url }}" target="_blank">
+                                                            <img src="{{ $dok->url }}" alt="Dokumentasi Distribusi" class="rounded border" style="width: 80px; height: 80px; object-fit: cover;">
+                                                        </a>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="alert alert-secondary mb-0 py-2">
+                                            <p class="mb-0 small"><i class="bx bx-info-circle me-1"></i> Data distribusi belum tersedia.</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <a href="{{ route('ahli-gizi.transaksi.index') }}" class="btn btn-outline-secondary">
+                            <i class="bx bx-arrow-back me-1"></i>
+                            Kembali ke Daftar
+                        </a>
+                        <form action="{{ route('ahli-gizi.transaksi.create-next', $transaksi) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bx bx-plus-circle me-1"></i>
+                                Buat Transaksi Selanjutnya
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection

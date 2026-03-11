@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        /** @var User $user */
+        
         $user = Auth::user();
 
         if ($user->isSuperAdmin()) {
@@ -46,7 +46,7 @@ class DashboardController extends Controller
 
     public function switchDapur(Request $request, Dapur $dapur)
     {
-        /** @var User $user */
+        
         $user = Auth::user();
 
         if (!$user->isSuperAdmin() && !$this->userHasAccessToDapur($user, $dapur)) {
@@ -74,7 +74,8 @@ class DashboardController extends Controller
     {
         return $user->isKepalaDapur($dapur->id_dapur) ||
             $user->isAdminGudang($dapur->id_dapur) ||
-            $user->isAhliGizi($dapur->id_dapur);
+            $user->isAhliGizi($dapur->id_dapur) ||
+            $user->isProduksi($dapur->id_dapur);
     }
 
     private function redirectToRoleDashboard(User $user, Dapur $dapur)
@@ -88,6 +89,10 @@ class DashboardController extends Controller
                 return redirect()->route('admin-gudang.dashboard', ['dapur' => $dapur->id_dapur]);
             case 'ahli_gizi':
                 return redirect()->route('ahli-gizi.dashboard', ['dapur' => $dapur->id_dapur]);
+            case 'produksi':
+                return redirect()->route('produksi.dashboard');
+            case 'penerima_mbg':
+                return redirect()->route('penerima-mbg.dashboard');
             default:
                 abort(403, 'Role tidak valid untuk dapur ini');
         }

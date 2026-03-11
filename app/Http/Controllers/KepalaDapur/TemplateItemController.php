@@ -30,9 +30,15 @@ class TemplateItemController extends Controller
 
     public function create()
     {
-        $satuans = ['kg', 'liter', 'pcs'];
-        // $satuans = ['kg', 'gram', 'liter', 'ml', 'pcs', 'pack', 'botol', 'kaleng', 'ikat', 'buah'];
-        return view('kepaladapur.template_item.create', compact('satuans'));
+        $satuans = ['kg', 'gram', 'liter', 'ml', 'pcs', 'pack', 'botol', 'kaleng', 'ikat', 'buah'];
+        $kandunganGiziEnum = ['Protein', 'Karbohidrat', 'Lemak', 'Vitamin', 'Omega', 'Mineral'];
+        $jenisBahanEnum = [
+            'Serealia dan olahannya', 'Kacang dan olahannya', 'Umbi dan sejenisnya', 
+            'Daging', 'Unggas', 'Ikan dan seafood', 'Telur', 'Susu', 'Sayuran', 
+            'Buah-buahan', 'Bumbu dan rempah', 'Gula dan madu', 'Beras dan makanan pokok', 'Air mineral dan air kemasan'
+        ];
+
+        return view('kepaladapur.template_item.create', compact('satuans', 'kandunganGiziEnum', 'jenisBahanEnum'));
     }
 
     public function store(Request $request)
@@ -40,7 +46,9 @@ class TemplateItemController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_bahan' => 'required|string|max:100|unique:template_items,nama_bahan',
             'satuan' => 'required|in:kg,gram,liter,ml,pcs,pack,botol,kaleng,ikat,buah',
-            'keterangan' => 'nullable|string|max:500'
+            'keterangan' => 'nullable|string|max:500',
+            'kandungan_gizi' => 'nullable|array',
+            'jenis_bahan' => 'nullable|array'
         ], [
             'nama_bahan.required' => 'Nama bahan harus diisi',
             'nama_bahan.unique' => 'Nama bahan sudah ada',
@@ -57,7 +65,9 @@ class TemplateItemController extends Controller
         TemplateItem::create([
             'nama_bahan' => $request->nama_bahan,
             'satuan' => $request->satuan,
-            'keterangan' => $request->keterangan
+            'keterangan' => $request->keterangan,
+            'kandungan_gizi' => $request->kandungan_gizi,
+            'jenis_bahan' => $request->jenis_bahan
         ]);
 
         return redirect()->route('kepala-dapur.template-items.index')
@@ -73,8 +83,15 @@ class TemplateItemController extends Controller
 
     public function edit(TemplateItem $templateItem)
     {
-        $satuans = ['kg', 'liter', 'pcs'];
-        return view('kepaladapur.template_item.edit', compact('templateItem', 'satuans'));
+        $satuans = ['kg', 'gram', 'liter', 'ml', 'pcs', 'pack', 'botol', 'kaleng', 'ikat', 'buah'];
+        $kandunganGiziEnum = ['Protein', 'Karbohidrat', 'Lemak', 'Vitamin', 'Omega', 'Mineral'];
+        $jenisBahanEnum = [
+            'Serealia dan olahannya', 'Kacang dan olahannya', 'Umbi dan sejenisnya', 
+            'Daging', 'Unggas', 'Ikan dan seafood', 'Telur', 'Susu', 'Sayuran', 
+            'Buah-buahan', 'Bumbu dan rempah', 'Gula dan madu', 'Beras dan makanan pokok', 'Air mineral dan air kemasan'
+        ];
+
+        return view('kepaladapur.template_item.edit', compact('templateItem', 'satuans', 'kandunganGiziEnum', 'jenisBahanEnum'));
     }
 
     public function update(Request $request, TemplateItem $templateItem)
@@ -82,7 +99,9 @@ class TemplateItemController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_bahan' => 'required|string|max:100|unique:template_items,nama_bahan,' . $templateItem->id_template_item . ',id_template_item',
             'satuan' => 'required|in:kg,gram,liter,ml,pcs,pack,botol,kaleng,ikat,buah',
-            'keterangan' => 'nullable|string|max:500'
+            'keterangan' => 'nullable|string|max:500',
+            'kandungan_gizi' => 'nullable|array',
+            'jenis_bahan' => 'nullable|array'
         ], [
             'nama_bahan.required' => 'Nama bahan harus diisi',
             'nama_bahan.unique' => 'Nama bahan sudah ada',
@@ -99,7 +118,9 @@ class TemplateItemController extends Controller
         $templateItem->update([
             'nama_bahan' => $request->nama_bahan,
             'satuan' => $request->satuan,
-            'keterangan' => $request->keterangan
+            'keterangan' => $request->keterangan,
+            'kandungan_gizi' => $request->kandungan_gizi,
+            'jenis_bahan' => $request->jenis_bahan
         ]);
 
         return redirect()->route('kepala-dapur.template-items.index')

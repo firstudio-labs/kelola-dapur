@@ -3,7 +3,6 @@
 @section("content")
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -29,7 +28,6 @@
                                     </p>
                                 </div>
                             </div>
-                            <!-- Progress Steps -->
                             <div class="d-flex align-items-center">
                                 <div class="step-indicator">
                                     <span class="badge bg-success me-2">1</span>
@@ -43,8 +41,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Informasi Paket -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -58,17 +54,6 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <table class="table table-borderless mb-0">
-                                    {{--
-                                        <tr>
-                                        <td
-                                        class="fw-semibold"
-                                        style="width: 40%"
-                                        >
-                                        Nama Paket:
-                                        </td>
-                                        <td>{{ $transaksi->nama_paket }}</td>
-                                        </tr>
-                                    --}}
                                     <tr>
                                         <td class="fw-semibold">
                                             Tanggal Transaksi:
@@ -153,8 +138,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Detail Menu -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -169,8 +152,6 @@
                             $porsiBesar = $transaksi->detailTransaksiDapur->where("tipe_porsi", "besar");
                             $porsiKecil = $transaksi->detailTransaksiDapur->where("tipe_porsi", "kecil");
                         @endphp
-
-                        <!-- Porsi Besar -->
                         @if ($porsiBesar->count() > 0)
                             <h6 class="text-success mb-3">Menu Porsi Besar</h6>
                             <div class="row mb-4">
@@ -228,8 +209,6 @@
                                 @endforeach
                             </div>
                         @endif
-
-                        <!-- Porsi Kecil -->
                         @if ($porsiKecil->count() > 0)
                             <h6 class="text-warning mb-3">Menu Porsi Kecil</h6>
                             <div class="row mb-4">
@@ -338,8 +317,6 @@
                     }
                 }
             @endphp
-
-            <!-- Kebutuhan Bahan Porsi Besar -->
             @if (! empty($bahanBesar))
                 <div class="row mb-3">
                     <div class="col-12">
@@ -415,8 +392,6 @@
                     </div>
                 </div>
             @endif
-
-            <!-- Kebutuhan Bahan Porsi Kecil -->
             @if (! empty($bahanKecil))
                 <div class="row mb-3">
                     <div class="col-12">
@@ -492,8 +467,6 @@
                     </div>
                 </div>
             @endif
-
-            <!-- Total Kebutuhan Bahan -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
@@ -677,8 +650,6 @@
                 </div>
             </div>
         @endif
-
-        <!-- Stock Alert -->
         <div id="stockAlert" class="row mb-4" style="display: none">
             <div class="col-12">
                 <div class="alert alert-danger">
@@ -700,7 +671,6 @@
                 </div>
             </div>
         </div>
-        <!-- Instructions Alert -->
         <div class="alert alert-info alert-dismissible" role="alert">
             <h6 class="alert-heading mb-2">
                 Informasi Laporan Kekurangan Stok
@@ -733,7 +703,6 @@
                 aria-label="Close"
             ></button>
         </div>
-        <!-- Laporan Kekurangan yang Sudah Ada -->
         @if ($transaksi->laporanKekuranganStock->count() > 0)
             <div class="row mb-4">
                 <div class="col-12">
@@ -804,101 +773,51 @@
                 </div>
             </div>
         @endif
-
-        <!-- Form Pengajuan -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="bx bx-send me-2"></i>
-                            Pengajuan Persetujuan
+                            Pengajuan & Pembuatan Transaksi
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form
-                            action="{{ route("ahli-gizi.transaksi.submit-approval", $transaksi) }}"
-                            method="POST"
-                            id="submitForm"
-                        >
-                            @csrf
-                            <div class="mb-3">
-                                <label
-                                    for="keterangan_pengajuan"
-                                    class="form-label"
-                                >
-                                    Keterangan Pengajuan
-                                    <span class="text-muted">(Opsional)</span>
-                                </label>
-                                <textarea
-                                    class="form-control"
-                                    id="keterangan_pengajuan"
-                                    name="keterangan_pengajuan"
-                                    rows="3"
-                                    placeholder="Tambahkan catatan khusus untuk Kepala Dapur..."
-                                ></textarea>
-                            </div>
-
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <a
-                                        href="{{ route("ahli-gizi.transaksi.edit-porsi-besar", $transaksi) }}"
-                                        class="btn btn-outline-secondary"
-                                    >
-                                        <i class="bx bx-arrow-back me-1"></i>
-                                        Kembali ke Edit
-                                    </a>
-                                </div>
-                                <div>
-                                    <button
-                                        type="submit"
-                                        class="btn btn-success me-2"
-                                        id="submitApprovalBtn"
-                                    >
-                                        <i class="bx bx-check me-1"></i>
-                                        Ajukan Persetujuan
+                        <div class="mb-3">
+                            <label for="keterangan_pengajuan" class="form-label">
+                                Keterangan <span class="text-muted">(Opsional)</span>
+                            </label>
+                            <textarea
+                                class="form-control"
+                                id="keterangan_pengajuan"
+                                rows="3"
+                                placeholder="Tambahkan catatan khusus..."
+                            ></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <a href="{{ route('ahli-gizi.transaksi.edit-porsi-besar', $transaksi) }}"
+                                class="btn btn-outline-secondary">
+                                <i class="bx bx-arrow-back me-1"></i> Kembali ke Edit
+                            </a>
+                            <div class="d-flex gap-2">
+                                <form action="{{ route('ahli-gizi.transaksi.submit-approval', $transaksi) }}"
+                                    method="POST" id="submitForm">
+                                    @csrf
+                                    <input type="hidden" name="keterangan_pengajuan" id="keterangan_pengajuan_approval" value="">
+                                    <button type="submit" class="btn btn-success d-none" id="submitApprovalBtn">
+                                        <i class="bx bx-check me-1"></i> Ajukan Persetujuan
                                     </button>
-                                    <form
-                                        action="{{ route("ahli-gizi.transaksi.create-shortage-report", $transaksi) }}"
-                                        method="POST"
-                                        class="d-inline"
-                                        id="shortageReportForm"
-                                    >
-                                        @csrf
-                                        <button
-                                            type="submit"
-                                            class="btn btn-warning d-none me-2"
-                                            id="submitReportBtn"
-                                        >
-                                            <i class="bx bx-file-plus me-1"></i>
-                                            Buat Laporan Kekurangan
-                                        </button>
-                                    </form>
-                                    <form
-                                        action="{{ route("ahli-gizi.transaksi.create-transaction-now", $transaksi) }}"
-                                        method="POST"
-                                        class="d-inline"
-                                        id="createTransactionNowForm"
-                                    >
-                                        @csrf
-                                        <input
-                                            type="hidden"
-                                            name="keterangan_pengajuan"
-                                            id="keterangan_pengajuan_hidden"
-                                            value=""
-                                        />
-                                        <button
-                                            type="submit"
-                                            class="btn btn-primary d-none"
-                                            id="createTransactionNowBtn"
-                                        >
-                                            <i class="bx bx-check-circle me-1"></i>
-                                            Buat Transaksi Sekarang
-                                        </button>
-                                    </form>
-                                </div>
+                                </form>
+                                <form action="{{ route('ahli-gizi.transaksi.create-transaction-now', $transaksi) }}"
+                                    method="POST" id="createTransactionNowForm">
+                                    @csrf
+                                    <input type="hidden" name="keterangan_pengajuan" id="keterangan_pengajuan_hidden" value="">
+                                    <button type="submit" class="btn btn-primary" id="createTransactionNowBtn">
+                                        <i class="bx bx-check-circle me-1"></i> Buat Transaksi Sekarang
+                                    </button>
+                                </form>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -907,38 +826,23 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // CSRF Token untuk Ajax
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-            // Check stock on page load
             checkStock();
 
-            // Check stock button
-            document.getElementById('checkStockBtn').addEventListener('click', function() {
+            document.getElementById('checkStockBtn')?.addEventListener('click', function() {
                 checkStock();
             });
 
-            // Create report button
-            document.getElementById('createReportBtn')?.addEventListener('click', function() {
-                document.getElementById('shortageReportForm').submit();
-            });
-
-            // Form submission with stock validation
-            document.getElementById('submitForm').addEventListener('submit', function(e) {
-                const stockAlert = document.getElementById('stockAlert');
-                if (stockAlert && stockAlert.style.display !== 'none') {
-                    e.preventDefault();
-                    if (confirm('Stock tidak mencukupi! Laporan Kekurangan Akan Diajukan Ke Kepala Dapur')) {
-                        // Remove event listener to prevent loop
-                        this.removeEventListener('submit', arguments.callee);
-                        this.submit();
-                    }
+            document.getElementById('submitForm')?.addEventListener('submit', function(e) {
+                const keteranganTextarea = document.getElementById('keterangan_pengajuan');
+                const keteranganApproval = document.getElementById('keterangan_pengajuan_approval');
+                if (keteranganTextarea && keteranganApproval) {
+                    keteranganApproval.value = keteranganTextarea.value;
                 }
             });
 
-            // Form submission untuk create transaction now
-            document.getElementById('createTransactionNowForm').addEventListener('submit', function(e) {
-                // Copy keterangan dari textarea ke hidden input
+            document.getElementById('createTransactionNowForm')?.addEventListener('submit', function(e) {
                 const keteranganTextarea = document.getElementById('keterangan_pengajuan');
                 const keteranganHidden = document.getElementById('keterangan_pengajuan_hidden');
                 if (keteranganTextarea && keteranganHidden) {
@@ -947,7 +851,7 @@
 
                 const stockAlert = document.getElementById('stockAlert');
                 if (stockAlert && stockAlert.style.display !== 'none') {
-                    if (!confirm('Transaksi akan dibuat dan disetujui langsung. Laporan kekurangan stok akan dibuat dan dikirim ke Kepala Dapur. Lanjutkan?')) {
+                    if (!confirm('Stok tidak mencukupi. Laporan kekurangan akan dikirim ke Kepala Dapur. Transaksi tetap akan dibuat. Lanjutkan?')) {
                         e.preventDefault();
                     }
                 }
@@ -956,7 +860,7 @@
             function checkStock() {
                 const checkBtn = document.getElementById('checkStockBtn');
                 const submitApprovalBtn = document.getElementById('submitApprovalBtn');
-                const submitReportBtn = document.getElementById('submitReportBtn');
+                const createTransactionNowBtn = document.getElementById('createTransactionNowBtn');
 
                 checkBtn.disabled = true;
                 checkBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Memeriksa...';
@@ -992,34 +896,30 @@
                         // Atur visibilitas tombol berdasarkan kondisi stok
                         if (!data.can_produce && data.shortages.length > 0) {
                             showStockAlert(data.shortages);
-                            // Tampilkan 2 tombol: Buat Laporan Kekurangan dan Buat Transaksi Sekarang
+                            // Tampilkan Buat Transaksi Sekarang (dengan konfirmasi kekurangan)
                             // Sembunyikan Ajukan Persetujuan
-                            submitReportBtn.classList.remove('d-none');
-                            document.getElementById('createTransactionNowBtn').classList.remove('d-none');
+                            createTransactionNowBtn.classList.remove('d-none');
                             submitApprovalBtn.classList.add('d-none');
                         } else {
                             hideStockAlert();
-                            // Tampilkan tombol Ajukan Persetujuan, sembunyikan yang lain
-                            submitApprovalBtn.classList.remove('d-none');
-                            submitReportBtn.classList.add('d-none');
-                            document.getElementById('createTransactionNowBtn').classList.add('d-none');
+                            // Tampilkan tombol Buat Transaksi Sekarang, sembunyikan Ajukan Persetujuan
+                            createTransactionNowBtn.classList.remove('d-none');
+                            submitApprovalBtn.classList.add('d-none');
                         }
                     } else {
                         console.error('Error:', data.message);
                         showErrorMessage('Gagal memeriksa stock: ' + (data.message || 'Unknown error'));
-                        // Default: Tampilkan Ajukan Persetujuan jika error
-                        submitApprovalBtn.classList.remove('d-none');
-                        submitReportBtn.classList.add('d-none');
-                        document.getElementById('createTransactionNowBtn').classList.add('d-none');
+                        // Default: Tampilkan Buat Transaksi Sekarang
+                        createTransactionNowBtn.classList.remove('d-none');
+                        submitApprovalBtn.classList.add('d-none');
                     }
                 })
                 .catch(error => {
                     console.error('Error checking stock:', error);
                     showErrorMessage('Terjadi kesalahan saat memeriksa stock');
-                    // Default: Tampilkan Ajukan Persetujuan jika error
-                    submitApprovalBtn.classList.remove('d-none');
-                    submitReportBtn.classList.add('d-none');
-                    document.getElementById('createTransactionNowBtn').classList.add('d-none');
+                    // Default: Tampilkan Buat Transaksi Sekarang jika error
+                    createTransactionNowBtn.classList.remove('d-none');
+                    submitApprovalBtn.classList.add('d-none');
                 })
                 .finally(() => {
                     checkBtn.disabled = false;

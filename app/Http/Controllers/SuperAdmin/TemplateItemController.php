@@ -27,7 +27,9 @@ class TemplateItemController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_bahan' => 'required|string|max:100|unique:template_items,nama_bahan',
             'satuan' => 'required|in:kg,liter,pcs',
-            'keterangan' => 'nullable|string|max:500'
+            'keterangan' => 'nullable|string|max:500',
+            'kandungan_gizi' => 'nullable|array',
+            'jenis_bahan' => 'nullable|array'
         ], [
             'nama_bahan.required' => 'Nama bahan harus diisi',
             'nama_bahan.unique' => 'Nama bahan sudah ada',
@@ -43,7 +45,9 @@ class TemplateItemController extends Controller
         TemplateItem::create([
             'nama_bahan' => $request->nama_bahan,
             'satuan' => $request->satuan,
-            'keterangan' => $request->keterangan
+            'keterangan' => $request->keterangan,
+            'kandungan_gizi' => $request->kandungan_gizi,
+            'jenis_bahan' => $request->jenis_bahan
         ]);
 
         return redirect()->route('superadmin.template-items.index')
@@ -67,7 +71,9 @@ class TemplateItemController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_bahan' => 'required|string|max:100|unique:template_items,nama_bahan,' . $templateItem->id_template_item . ',id_template_item',
             'satuan' => 'required|string|max:20',
-            'keterangan' => 'nullable|string|max:500'
+            'keterangan' => 'nullable|string|max:500',
+            'kandungan_gizi' => 'nullable|array',
+            'jenis_bahan' => 'nullable|array'
         ], [
             'nama_bahan.required' => 'Nama bahan harus diisi',
             'nama_bahan.unique' => 'Nama bahan sudah ada',
@@ -83,7 +89,9 @@ class TemplateItemController extends Controller
         $templateItem->update([
             'nama_bahan' => $request->nama_bahan,
             'satuan' => $request->satuan,
-            'keterangan' => $request->keterangan
+            'keterangan' => $request->keterangan,
+            'kandungan_gizi' => $request->kandungan_gizi,
+            'jenis_bahan' => $request->jenis_bahan
         ]);
 
         return redirect()->route('superadmin.template-items.index')

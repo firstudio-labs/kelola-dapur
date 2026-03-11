@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Dapur;
 use App\Models\KepalaDapur;
+use App\Models\PenerimaMbg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +40,141 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
+    public function showRegistrationFormPenerima()
+    {
+        if (Auth::check()) {
+            return $this->redirectBasedOnRole();
+        }
+
+        $dapurList = Dapur::where('status', 'active')->orderBy('nama_dapur')->get();
+        return view('auth.register_penerima', compact('dapurList'));
+    }
+
+    public function registerPenerima(Request $request)
+    {
+        $key = 'register_penerima.' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return redirect()->back()
+                ->with('error', "Terlalu banyak percobaan. Coba lagi dalam {$seconds} detik.")
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
+
+        $validator = Validator::make($request->all(), [
+            'nama'                 => 'required|string|max:255',
+            'username'             => 'required|string|max:255|unique:users,username|regex:/^[a-zA-Z0-9_]+$/',
+            'email'                => 'required|email|max:255|unique:users,email',
+            'password'             => 'required|string|min:8|confirmed',
+            'id_dapur'             => 'required|exists:dapur,id_dapur',
+            'id_type'              => 'required|in:nik,nisn,no_registrasi',
+            'id_number'            => 'required|string|max:50',
+            'penanggung_jawab'     => 'required|string|max:255',
+            'province_code'        => 'required|string',
+            'province_name'        => 'required|string|max:100',
+            'regency_code'         => 'required|string',
+            'regency_name'         => 'required|string|max:100',
+            'district_code'        => 'nullable|string',
+            'district_name'        => 'nullable|string|max:100',
+            'village_code'         => 'nullable|string',
+            'village_name'         => 'nullable|string|max:100',
+            'alamat_detail'        => 'required|string|max:500',
+            'latitude'             => 'nullable|numeric|between:-90,90',
+            'longitude'            => 'nullable|numeric|between:-180,180',
+            'link_gmaps'           => 'nullable|url|max:500',
+            'foto_lokasi'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
+        ], [
+            'nama.required'             => 'Nama lengkap harus diisi',
+            'username.required'         => 'Username harus diisi',
+            'username.unique'           => 'Username sudah digunakan',
+            'email.required'            => 'Email harus diisi',
+            'email.unique'              => 'Email sudah terdaftar',
+            'id_dapur.required'         => 'Silakan pilih Dapur SPPG tujuan',
+            'id_dapur.exists'           => 'Dapur SPPG tidak ditemukan',
+            'id_number.required'        => 'Nomor identitas harus diisi',
+            'penanggung_jawab.required' => 'Penanggung jawab harus diisi',
+            'province_name.required'    => 'Provinsi harus dipilih',
+            'regency_name.required'     => 'Kabupaten/Kota harus dipilih',
+            'alamat_detail.required'    => 'Detail alamat harus diisi',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput($request->except('password', 'password_confirmation'));
+        }
+
+        RateLimiter::hit($key, 3600);
+        DB::beginTransaction();
+
+        try {
+            $user = User::create([
+                'nama'       => trim($request->nama),
+                'username'   => strtolower(trim($request->username)),
+                'email'      => strtolower(trim($request->email)),
+                'password'   => Hash::make($request->password),
+                'is_active'  => true,
+            ]);
+
+            $userRole = UserRole::create([
+                'id_user'   => $user->id_user,
+                'role_type' => 'penerima_mbg',
+                'id_dapur'  => $request->id_dapur,
+            ]);
+
+            $fotoPath = null;
+            if ($request->hasFile('foto_lokasi')) {
+                $img = $request->file('foto_lokasi');
+                $filename = time() . '_' . uniqid() . '.webp';
+                $path = 'penerima_mbg/foto_lokasi/' . $filename;
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                $image = $manager->read($img->getRealPath());
+                if ($image->width() > 1200) {
+                    $image->scale(width: 1200);
+                }
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $image->toWebp(80));
+                $fotoPath = $path;
+            }
+
+            PenerimaMbg::create([
+                'id_user_role'     => $userRole->id_user_role,
+                'id_dapur'         => $request->id_dapur,
+                'id_type'          => $request->id_type,
+                'id_number'        => $request->id_number,
+                'penanggung_jawab' => $request->penanggung_jawab,
+                'province_code'    => $request->province_code,
+                'province_name'    => $request->province_name,
+                'regency_code'     => $request->regency_code,
+                'regency_name'     => $request->regency_name,
+                'district_code'    => $request->district_code,
+                'district_name'    => $request->district_name,
+                'village_code'     => $request->village_code,
+                'village_name'     => $request->village_name,
+                'alamat_detail'    => $request->alamat_detail,
+                'latitude'         => $request->latitude,
+                'longitude'        => $request->longitude,
+                'link_gmaps'       => $request->link_gmaps,
+                'foto_lokasi'      => $fotoPath,
+                'jumlah_porsi'     => 1,
+                'status_approval'  => 'pending',
+            ]);
+
+            DB::commit();
+            RateLimiter::clear($key);
+
+            Log::info('Penerima MBG registered', ['user_id' => $user->id_user]);
+
+            Auth::login($user);
+            $user->load(['userRole']);
+
+            return redirect()->route('penerima-mbg.dashboard')
+                ->with('success', 'Pendaftaran berhasil! Pengajuan Anda sedang menunggu persetujuan dari Dapur SPPG.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Penerima MBG registration failed', ['error' => $e->getMessage()]);
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.')
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
+    }
+
     public function login(Request $request)
     {
         $key = 'login.' . $request->ip();
@@ -67,18 +203,15 @@ class AuthController extends Controller
                 ->withInput($request->except('password'));
         }
 
-        // Verify hCaptcha
         if (!$this->verifyCaptcha($request->input('h-captcha-response'))) {
             return redirect()->back()
-                ->withErrors(['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
+                ->with('errors', ['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
                 ->withInput($request->except('password'));
         }
 
-        // Check for super admin credentials first
         if ($this->checkSuperAdminCredentials($request->login, $request->password)) {
             RateLimiter::clear($key);
 
-            // Create or get super admin user session
             $this->loginSuperAdmin($request);
 
             Log::info('Super Admin logged in', [
@@ -93,7 +226,7 @@ class AuthController extends Controller
 
         $user = User::where($loginType, $request->login)
             ->where('is_active', true)
-            ->with(['userRole.dapur'])  // Eager load untuk efisiensi
+            ->with(['userRole.dapur'])
             ->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
@@ -102,7 +235,6 @@ class AuthController extends Controller
             Auth::login($user, $request->filled('remember'));
             $request->session()->regenerate();
 
-            // Store user session data including id_dapur
             $this->storeUserSessionData($request, $user);
 
             Log::info('User logged in', [
@@ -128,20 +260,13 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Check if the credentials match super admin
-     */
     private function checkSuperAdminCredentials($login, $password)
     {
         return $login === 'AnomID' && $password === 'Bosidrad123';
     }
 
-    /**
-     * Login as super admin
-     */
     private function loginSuperAdmin(Request $request)
     {
-        // Create session data for super admin
         $request->session()->regenerate();
         $request->session()->put('is_super_admin', true);
         $request->session()->put('user_id', 'super_admin');
@@ -149,20 +274,16 @@ class AuthController extends Controller
         $request->session()->put('username', 'AnomID');
         $request->session()->put('nama', 'Super Administrator');
 
-        // Set a flag that we're logged in as super admin
         session(['super_admin_logged_in' => true]);
     }
 
-    /**
-     * Verify hCaptcha response
-     */
     private function verifyCaptcha($response)
     {
         $secretKey = config('services.hcaptcha.secret_key', env('HCAPTCHA_SECRET_KEY'));
 
         if (!$secretKey) {
             Log::warning('hCaptcha secret key not configured');
-            return false; // In production, you might want to disable captcha if not configured
+            return false;
         }
 
         try {
@@ -255,7 +376,7 @@ class AuthController extends Controller
                 ->withInput($request->except('password', 'password_confirmation'));
         }
 
-        // Verify hCaptcha for registration too
+        
         if (!$this->verifyCaptcha($request->input('h-captcha-response'))) {
             return redirect()->back()
                 ->withErrors(['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
@@ -314,20 +435,7 @@ class AuthController extends Controller
 
             RateLimiter::clear($key);
 
-            // Log successful registration
-            Log::info('New user registered', [
-                'user_id' => $user->id_user,
-                'username' => $user->username,
-                'email' => $user->email,
-                'dapur_id' => $dapur->id_dapur,
-                'role' => 'kepala_dapur',
-                'ip' => $request->ip(),
-            ]);
-
-            // Login user and store session data
             Auth::login($user);
-
-            // Reload user with relationships for session data
             $user->load(['userRole.dapur']);
             $this->storeUserSessionData($request, $user);
 
@@ -361,7 +469,6 @@ class AuthController extends Controller
         ]);
 
         if ($isSuperAdmin) {
-            // Clear super admin session
             $request->session()->flush();
         } else {
             Auth::logout();
@@ -373,9 +480,6 @@ class AuthController extends Controller
         return redirect()->route('login')->with('success', 'Anda telah berhasil logout.');
     }
 
-    /**
-     * Store user session data including id_dapur and subscription info
-     */
     private function storeUserSessionData(Request $request, User $user)
     {
         if (!$user->userRole) {
@@ -388,7 +492,6 @@ class AuthController extends Controller
             'id_dapur' => $user->userRole->id_dapur,
         ];
 
-        // For non-super admin roles, store dapur and subscription info
         if ($user->userRole->role_type !== 'super_admin' && $user->userRole->dapur) {
             $dapur = $user->userRole->dapur;
 
@@ -399,7 +502,6 @@ class AuthController extends Controller
             $sessionData['is_subscription_active'] = $dapur->isActive();
         }
 
-        // Store all session data
         foreach ($sessionData as $key => $value) {
             $request->session()->put($key, $value);
         }
@@ -410,9 +512,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Update session data when subscription changes
-     */
     public function updateSubscriptionSession(Request $request, ?int $dapurId = null)
     {
         $user = Auth::user();
@@ -420,7 +519,7 @@ class AuthController extends Controller
             return;
         }
 
-        // If dapur ID is provided, use it; otherwise use current session dapur
+        
         $targetDapurId = $dapurId ?: session('id_dapur');
 
         if (!$targetDapurId) {
@@ -432,7 +531,6 @@ class AuthController extends Controller
             return;
         }
 
-        // Update subscription-related session data
         $request->session()->put('dapur_status', $dapur->status);
         $request->session()->put('subscription_end', $dapur->subscription_end);
         $request->session()->put('subscription_status', $dapur->getSubscriptionStatus());
@@ -447,12 +545,11 @@ class AuthController extends Controller
 
     private function redirectBasedOnRole()
     {
-        // Check if super admin session exists
         if (session('super_admin_logged_in')) {
             return redirect()->route('superadmin.dashboard');
         }
 
-        /** @var \App\Models\User $user */
+        
         $user = Auth::user();
 
         if (!$user->userRole) {
@@ -487,6 +584,22 @@ class AuthController extends Controller
                         ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
                 }
                 return redirect()->route('ahli-gizi.dashboard');
+            case 'produksi':
+                if ($user->userRole->dapur && $user->userRole->dapur->status !== 'active') {
+                    Auth::logout();
+                    return redirect()->route('login')
+                        ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
+                }
+                return redirect()->route('produksi.dashboard');
+            case 'distributor':
+                if ($user->userRole->dapur && $user->userRole->dapur->status !== 'active') {
+                    Auth::logout();
+                    return redirect()->route('login')
+                        ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
+                }
+                return redirect()->route('distributor.dashboard');
+            case 'penerima_mbg':
+                return redirect()->route('penerima-mbg.dashboard');
             default:
                 Auth::logout();
                 return redirect()->route('login')

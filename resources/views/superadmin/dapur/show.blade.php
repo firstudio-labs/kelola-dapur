@@ -178,8 +178,8 @@
         <!-- Dapur Information and Quick Actions -->
         <div class="row g-4 mb-4">
             <!-- Dapur Information -->
-            <div class="col-lg-0">
-                <div class="card">
+            <div class="col-lg-8">
+                <div class="card h-100">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Informasi Dapur</h5>
                         <small class="text-muted">
@@ -193,6 +193,16 @@
                                 Nama Dapur
                             </dt>
                             <dd class="col-sm-8">{{ $dapur->nama_dapur }}</dd>
+                            <dt class="col-sm-4 d-flex align-items-center">
+                                <i class="bx bx-barcode me-2"></i>
+                                No Registrasi SPPG
+                            </dt>
+                            <dd class="col-sm-8">{{ $dapur->no_registrasi_sppg ?: "Belum diset" }}</dd>
+                            <dt class="col-sm-4 d-flex align-items-center">
+                                <i class="bx bx-id-card me-2"></i>
+                                NIK Pemilik
+                            </dt>
+                            <dd class="col-sm-8">{{ $dapur->nik_pemilik ?: "Belum diset" }}</dd>
                             <dt class="col-sm-4 d-flex align-items-center">
                                 <i class="bx bx-user-circle me-2"></i>
                                 Kepala Dapur
@@ -213,6 +223,17 @@
                             </dt>
                             <dd class="col-sm-8">
                                 {{ $dapur->alamat ?: "Belum diset" }}
+                            </dd>
+                            <dt class="col-sm-4 d-flex align-items-center">
+                                <i class="bx bx-map-pin me-2"></i>
+                                Tag Lokasi (Map)
+                            </dt>
+                            <dd class="col-sm-8">
+                                @if($dapur->tag_lokasi)
+                                    <a href="{{ $dapur->tag_lokasi }}" target="_blank" class="text-primary"><i class="bx bx-link-external me-1"></i> Buka Peta</a>
+                                @else
+                                    Belum diset
+                                @endif
                             </dd>
                             <dt class="col-sm-4 d-flex align-items-center">
                                 <i class="bx bx-phone me-2"></i>
@@ -256,6 +277,73 @@
                                 {{ $dapur->updated_at->format("d M Y H:i") }}
                             </dd>
                         </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header border-bottom">
+                        <h5 class="card-title mb-0">Foto Bangunan</h5>
+                    </div>
+                    <div class="card-body p-0 d-flex flex-column align-items-center justify-content-center bg-lighter">
+                        @if($dapur->foto_bangunan)
+                            <img src="{{ Storage::url($dapur->foto_bangunan) }}" alt="Foto Bangunan" class="img-fluid" style="object-fit:cover; max-height:400px; width:100%;">
+                        @else
+                            <div class="p-5 text-center text-muted">
+                                <i class="bx bx-image bx-lg mb-2 text-lighter"></i>
+                                <p class="mb-0">Belum ada foto bangunan</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header border-bottom">
+                        <h5 class="card-title mb-0 d-flex align-items-center">
+                            <i class="bx bx-list-check me-2"></i> Kelengkapan Prasarana
+                        </h5>
+                    </div>
+                    <div class="card-body pt-4">
+                        @if($dapur->prasarana->count() > 0)
+                            <div class="row">
+                                @php
+                                    // Group items by category locally for display
+                                    $groupedPrasarana = $dapur->prasarana->map(function($p) {
+                                        return $p->item;
+                                    })->groupBy('id_kategori_prasarana');
+                                @endphp
+
+                                @foreach($groupedPrasarana as $categoryId => $items)
+                                    @php
+                                        $category = \App\Models\KategoriPrasarana::find($categoryId);
+                                    @endphp
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card shadow-none border h-100">
+                                            <div class="card-header bg-lighter py-2">
+                                                <h6 class="mb-0">{{ $category ? $category->nama_kategori : "Lainnya" }}</h6>
+                                            </div>
+                                            <div class="card-body p-3">
+                                                <ul class="list-unstyled mb-0">
+                                                    @foreach($items as $item)
+                                                        <li class="mb-2 d-flex align-items-center">
+                                                            <i class="bx bx-check-circle text-success me-2"></i> 
+                                                            {{ $item->nama_item }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <p class="text-muted mb-0">Belum ada kelengkapan prasarana yang di-checklist.</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

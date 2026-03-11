@@ -92,6 +92,36 @@
                         </p>
                     </div>
                 </div>
+
+                <!-- JSON Checklists Badges Start -->
+                <div class="row g-3 mt-2 pt-3 border-top">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Kandungan Gizi:</strong></p>
+                        @if(is_array($templateItem->kandungan_gizi) && count($templateItem->kandungan_gizi) > 0)
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach($templateItem->kandungan_gizi as $gizi)
+                                    <span class="badge bg-label-info">{{ $gizi }}</span>
+                                @endforeach
+                            </div>
+                        @else
+                            <span class="text-muted fst-italic">Belum ada data gizi</span>
+                        @endif
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Jenis Bahan:</strong></p>
+                        @if(is_array($templateItem->jenis_bahan) && count($templateItem->jenis_bahan) > 0)
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach($templateItem->jenis_bahan as $jenis)
+                                    <span class="badge bg-label-success">{{ $jenis }}</span>
+                                @endforeach
+                            </div>
+                        @else
+                            <span class="text-muted fst-italic">Belum ada klasifikasi jenis</span>
+                        @endif
+                    </div>
+                </div>
+                <!-- JSON Checklists Badges End -->
+
                 <div class="mt-4">
                     <a
                         href="{{ route("superadmin.template-items.edit", $templateItem) }}"

@@ -25,7 +25,7 @@ class SubscriptionController extends Controller
 
     public function choosePackage(Dapur $dapur)
     {
-        // Cek apakah sudah ada pending request
+        
         $pendingRequest = $dapur->pendingSubscriptionRequest;
         if ($pendingRequest) {
             return redirect()->route('kepala-dapur.subscription.index', $dapur)
@@ -42,10 +42,9 @@ class SubscriptionController extends Controller
         $request->validate([
             'id_package' => 'required|exists:subscription_packages,id_package',
             'kode_promo' => 'nullable|string',
-            'bukti_transfer' => 'nullable|image|max:2048' // max 2MB
+            'bukti_transfer' => 'nullable|image|max:2048' 
         ]);
 
-        // Validasi tidak ada pending request
         if ($dapur->pendingSubscriptionRequest) {
             return redirect()->back()
                 ->with('error', 'Anda masih memiliki request subscription yang belum diproses');
@@ -67,16 +66,24 @@ class SubscriptionController extends Controller
             }
         }
 
-        // Calculate pricing
         $pricing = SubscriptionRequest::calculatePrice($package, $dapur->id_dapur, $promoCode);
 
-        // Handle file upload
         $buktiTransferPath = null;
         if ($request->hasFile('bukti_transfer')) {
-            $buktiTransferPath = $request->file('bukti_transfer')->store('bukti-transfer', 'public');
+            $file = $request->file('bukti_transfer');
+            $filename = time() . '_' . uniqid() . '.webp';
+            
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $image = $manager->read($file->getRealPath());
+            
+            if ($image->width() > 1200) {
+                $image->scaleDown(width: 1200);
+            }
+            
+            \Illuminate\Support\Facades\Storage::put('public/bukti-transfer/' . $filename, (string) $image->toWebp(80));
+            $buktiTransferPath = 'bukti-transfer/' . $filename;
         }
 
-        // Create subscription request
         SubscriptionRequest::create([
             'id_dapur' => $dapur->id_dapur,
             'id_package' => $package->id_package,
@@ -129,7 +136,7 @@ class SubscriptionController extends Controller
 
     public function show(Dapur $dapur, SubscriptionRequest $subscriptionRequest)
     {
-        // Pastikan subscription request milik dapur ini
+        
         if ($subscriptionRequest->id_dapur !== $dapur->id_dapur) {
             abort(404);
         }
@@ -141,7 +148,7 @@ class SubscriptionController extends Controller
 
     public function cancel(Dapur $dapur, SubscriptionRequest $subscriptionRequest)
     {
-        // Pastikan subscription request milik dapur ini dan masih pending
+        
         if ($subscriptionRequest->id_dapur !== $dapur->id_dapur || $subscriptionRequest->status !== 'pending') {
             abort(404);
         }
@@ -154,7 +161,7 @@ class SubscriptionController extends Controller
 
     public function invoice(Dapur $dapur, SubscriptionRequest $subscriptionRequest)
     {
-        // Pastikan subscription request milik dapur ini dan sudah approved
+        
         if ($subscriptionRequest->id_dapur !== $dapur->id_dapur || $subscriptionRequest->status !== 'approved') {
             abort(404);
         }

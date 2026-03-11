@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TemplateItemsSeeder::class,
             SuperAdminSeeder::class,
+            PrasaranaSeeder::class,
         ]);
     }
 }

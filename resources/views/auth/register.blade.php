@@ -132,13 +132,29 @@
                                 </div>
                             @endif
 
-                            <h4 class="mb-2">
+                            <h4 class="mb-2 text-center">
                                 Bergabung dengan Kelola Dapur
                             </h4>
-                            <p class="mb-4">
-                                Daftar sekarang untuk mengelola MBG dapur anda
-                                sebagai Kepala Dapur
+                            <p class="mb-3 text-center">
+                                Pilih peran Anda untuk memulai pendaftaran
                             </p>
+
+                            <div class="row g-2 mb-4">
+                                <div class="col-6">
+                                    <a href="{{ route('register') }}" class="btn btn-primary w-100 py-2">
+                                        <i class="bx bx-store me-1"></i> <small>Kepala Dapur</small>
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <a href="{{ route('daftar-mbg') }}" class="btn btn-outline-primary w-100 py-2">
+                                        <i class="bx bx-user me-1"></i> <small>Penerima MBG</small>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="divider mb-4">
+                                <div class="divider-text">Detail Pendaftaran Kepala Dapur</div>
+                            </div>
 
                             <form
                                 id="formAuthentication"

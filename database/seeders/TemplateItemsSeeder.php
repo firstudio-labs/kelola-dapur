@@ -87,6 +87,6 @@ class TemplateItemsSeeder extends Seeder
             ],
         ];
 
-        DB::table('template_items')->insert($items);
+        DB::table('template_items')->upsert($items, ['nama_bahan'], ['satuan', 'keterangan', 'updated_at']);
     }
 }

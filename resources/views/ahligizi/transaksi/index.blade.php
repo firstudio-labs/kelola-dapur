@@ -222,7 +222,7 @@
                                         Kekurangan Stock
                                     </small>
                                     <h6 class="mb-0">
-                                        {{ $transaksi->filter(function ($t) { return $t->laporanKekuranganStock->isNotEmpty();})->count() }}
+                                        {{ $transaksi->filter(function ($t) { return $t->laporanKekuranganStock->where('status', 'pending')->isNotEmpty();})->count() }}
                                     </h6>
                                 </div>
                             </div>
@@ -244,7 +244,9 @@
                                     {{-- <th>Nama Paket</th> --}}
                                     <th>Tanggal Transaksi</th>
                                     <th>Total Porsi</th>
-                                    <th>Status</th>
+                                    <th>Status Transaksi</th>
+                                    <th>Status Produksi</th>
+                                    <th>Status Distribusi</th>
                                     <th>Kekurangan Stock</th>
                                     <th>Dibuat</th>
                                     <th>Aksi</th>
@@ -253,7 +255,10 @@
                             <tbody id="transaksi-table-body">
                                 @foreach ($transaksi as $item)
                                     @php
-                                        $hasShortage = $item->laporanKekuranganStock->isNotEmpty();
+                                        $pendingShortages = $item->laporanKekuranganStock->where('status', 'pending');
+                                        $hasPendingShortage = $pendingShortages->isNotEmpty();
+                                        $hasResolvedShortage = $item->laporanKekuranganStock->where('status', 'resolved')->isNotEmpty() && !$hasPendingShortage;
+                                        
                                         $statusClasses = [
                                             "draft" => "bg-label-warning",
                                             "pending_approval" => "bg-label-info",
@@ -301,15 +306,56 @@
                                             </span>
                                         </td>
                                         <td>
-                                            @if ($hasShortage)
+                                            @if ($item->orderProduksi)
+                                                @php
+                                                    $mapStatusProduksi = [
+                                                        'stok_kurang' => ['badge' => 'bg-label-danger', 'text' => 'Stok Kurang'],
+                                                        'belum_dibuat' => ['badge' => 'bg-label-secondary', 'text' => 'Belum Dibuat'],
+                                                        'sedang_dibuat' => ['badge' => 'bg-label-warning', 'text' => 'Sedang Dibuat'],
+                                                        'selesai' => ['badge' => 'bg-label-success', 'text' => 'Selesai']
+                                                    ];
+                                                    $prodData = $mapStatusProduksi[$item->orderProduksi->status] ?? ['badge' => 'bg-label-secondary', 'text' => 'Unknown'];
+                                                @endphp
+                                                <span class="badge {{ $prodData['badge'] }}">
+                                                    {{ $prodData['text'] }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($item->orderProduksi && $item->orderProduksi->distribusiOrder)
+                                                @php
+                                                    $orderDistribusi = $item->orderProduksi->distribusiOrder;
+                                                    $mapStatusDistribusi = [
+                                                        'belum_dikirim' => ['badge' => 'bg-label-secondary', 'text' => 'Belum Dikirim'],
+                                                        'sedang_dikirim' => ['badge' => 'bg-label-warning', 'text' => 'Sedang Dikirim'],
+                                                        'sudah_dikirim' => ['badge' => 'bg-label-success', 'text' => 'Sudah Dikirim']
+                                                    ];
+                                                    $distData = $mapStatusDistribusi[$orderDistribusi->status] ?? ['badge' => 'bg-label-secondary', 'text' => 'Unknown'];
+                                                @endphp
+                                                <span class="badge {{ $distData['badge'] }}">
+                                                    {{ $distData['text'] }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($hasPendingShortage)
                                                 <span
                                                     class="badge bg-label-danger"
                                                 >
                                                     <i
                                                         class="bx bx-error me-1"
                                                     ></i>
-                                                    {{ $item->laporanKekuranganStock->count() }}
+                                                    {{ $pendingShortages->count() }}
                                                     Item
+                                                </span>
+                                            @elseif ($hasResolvedShortage)
+                                                <span class="badge bg-label-success">
+                                                    <i class="bx bx-check me-1"></i>
+                                                    Diselesaikan
                                                 </span>
                                             @else
                                                 <span class="text-muted">
@@ -489,25 +535,21 @@
             });
 
             function filterTable() {
-                const searchText = searchInput.value.toLowerCase();
+                const searchText = searchInput ? searchInput.value.toLowerCase() : '';
                 const statusValue = statusChoices.getValue(true);
 
                 Array.from(rows).forEach((row) => {
-                    const searchData = row.getAttribute('data-search');
+                    const searchData = row.getAttribute('data-search') || '';
                     const statusData = row.getAttribute('data-status');
 
-                    const matchesSearch = searchText
-                        ? searchData.includes(searchText)
-                        : true;
-                    const matchesStatus =
-                        statusValue === 'all' || statusData === statusValue;
+                    const matchesSearch = searchText ? searchData.includes(searchText) : true;
+                    const matchesStatus = statusValue === 'all' || statusData === statusValue;
 
-                    row.style.display =
-                        matchesSearch && matchesStatus ? '' : 'none';
+                    row.style.display = matchesSearch && matchesStatus ? '' : 'none';
                 });
             }
 
-            searchInput.addEventListener('input', filterTable);
+            if (searchInput) searchInput.addEventListener('input', filterTable);
             statusFilter.addEventListener('change', filterTable);
 
             // Initialize Bootstrap tooltips

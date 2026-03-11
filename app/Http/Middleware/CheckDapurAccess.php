@@ -16,40 +16,33 @@ class CheckDapurAccess
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu');
         }
 
-        /** @var User $user */
         $user = auth()->user();
 
-        // Super admin selalu diizinkan
         if ($user->isSuperAdmin()) {
             return $next($request);
         }
 
-        // Validasi role yang diterima
-        $validRoles = ['kepala_dapur', 'admin_gudang', 'ahli_gizi'];
+        $validRoles = ['kepala_dapur', 'admin_gudang', 'ahli_gizi', 'penerima_mbg', 'produksi', 'distributor'];
         foreach ($roles as $role) {
             if (!in_array($role, $validRoles)) {
                 throw new \InvalidArgumentException("Invalid role: {$role}");
             }
         }
 
-        // Ambil dapur ID dengan prioritas yang konsisten
         $dapurId = $this->getDapurId($request);
         if (!$dapurId) {
             abort(400, 'ID Dapur tidak ditemukan');
         }
 
-        // Cache dapur untuk menghindari query berulang
         $dapur = $this->getCachedDapur($dapurId);
         if (!$dapur) {
             abort(404, 'Dapur tidak ditemukan atau tidak aktif');
         }
 
-        // Cek akses user
         if (!$this->hasRoleAccess($user, $dapurId, $roles)) {
             abort(403, 'Anda tidak memiliki akses untuk dapur ini');
         }
 
-        // Tambahkan data ke request
         $request->merge([
             'current_dapur' => $dapur,
             'user_role' => $user->getUserRole($dapurId)
@@ -60,26 +53,21 @@ class CheckDapurAccess
 
     private function getDapurId(Request $request): ?int
     {
-        // Prioritas: route parameter > query parameter
         $dapurParam = $request->route('dapur');
 
-        // Jika route parameter adalah instance model Dapur (route model binding)
         if ($dapurParam instanceof Dapur) {
             return $dapurParam->id_dapur;
         }
 
-        // Jika route parameter adalah integer
         if (is_numeric($dapurParam)) {
             return (int) $dapurParam;
         }
 
-        // Coba dari parameter lain
         $idDapurParam = $request->route('id_dapur');
         if (is_numeric($idDapurParam)) {
             return (int) $idDapurParam;
         }
 
-        // Coba dari query string
         $queryDapur = $request->input('id_dapur') ?? $request->input('dapur');
         if (is_numeric($queryDapur)) {
             return (int) $queryDapur;
@@ -90,12 +78,10 @@ class CheckDapurAccess
 
     private function getCachedDapur(int $dapurId): ?Dapur
     {
-        // Gunakan cache untuk menghindari query berulang dalam request yang sama
         return cache()->remember(
             "dapur.{$dapurId}",
-            300, // 5 menit
+            300, 
             fn() => Dapur::where('id_dapur', $dapurId)->first()
-            // fn() => Dapur::where('id_dapur', $dapurId)->where('status', 'active')->first()
         );
     }
 
@@ -106,6 +92,9 @@ class CheckDapurAccess
                 'kepala_dapur' => $user->isKepalaDapur($dapurId),
                 'admin_gudang' => $user->isAdminGudang($dapurId),
                 'ahli_gizi' => $user->isAhliGizi($dapurId),
+                'penerima_mbg' => $user->isPenerimaMbg($dapurId),
+                'produksi' => $user->isProduksi($dapurId),
+                'distributor' => $user->isDistributor($dapurId),
                 default => false
             };
 

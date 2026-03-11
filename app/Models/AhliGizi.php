@@ -12,7 +12,25 @@ class AhliGizi extends Model
     protected $table = 'ahli_gizi';
     protected $primaryKey = 'id_ahli_gizi';
 
-    protected $fillable = ['id_user_role', 'id_dapur'];
+    protected $fillable = [
+        'id_user_role', 
+        'id_dapur',
+        'nik_ahli_gizi',
+        'jabatan',
+        'alamat_detail',
+        'province_code',
+        'province_name',
+        'regency_code',
+        'regency_name',
+        'district_code',
+        'district_name',
+        'village_code',
+        'village_name',
+        'kontak_wa',
+        'pendidikan_terakhir',
+        'jenis_kelamin',
+        'foto_diri',
+    ];
 
     public function userRole()
     {
@@ -24,10 +42,10 @@ class AhliGizi extends Model
         return $this->hasOneThrough(
             User::class,
             UserRole::class,
-            'id_user_role', // Foreign key on ahli_gizi table
-            'id_user', // Foreign key on user_roles table
-            'id_user_role', // Local key on ahli_gizi table
-            'id_user' // Local key on user_roles table
+            'id_user_role', 
+            'id_user', 
+            'id_user_role', 
+            'id_user' 
         );
     }
 

@@ -105,7 +105,7 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="{{ route('kepala-dapur.edit-profil') }}">
+                        <a class="dropdown-item" href="{{ route('kepala-dapur.profile.edit', session('id_dapur')) }}">
                             <i class="bx bx-edit me-2"></i>
                             <span class="align-middle">Edit Profil</span>
                         </a>
@@ -226,6 +226,16 @@
                     <span class="menu-header-text">Konten</span>
                 </li>
 
+                <!-- Pengaturan Dapur -->
+                <li class="menu-item {{ request()->routeIs('kepala-dapur.pengaturan-dapur.*') ? 'active' : '' }}">
+                    <a href="{{ route('kepala-dapur.pengaturan-dapur.edit', ['dapur' => $idDapur]) }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-store"></i>
+                        <div data-i18n="Pengaturan Dapur">
+                            Pengaturan Dapur
+                        </div>
+                    </a>
+                </li>
+
                 <!-- Template Bahan -->
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.template-items.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -269,6 +279,26 @@
                     </a>
                 </li>
 
+                <!-- Kelengkapan Prasarana -->
+                <li class="menu-item {{ request()->routeIs('kepala-dapur.prasarana.*') ? 'active' : '' }}">
+                    <a href="{{ route('kepala-dapur.prasarana.index', ['dapur' => $idDapur]) }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-building-house"></i>
+                        <div data-i18n="Fasilitas & Prasarana">
+                            Fasilitas & Prasarana
+                        </div>
+                    </a>
+                </li>
+
+                <!-- Kelola Penerima MBG -->
+                <li class="menu-item {{ request()->routeIs('kepala-dapur.penerima-mbg.*') ? 'active' : '' }}">
+                    <a href="{{ route('kepala-dapur.penerima-mbg.index', ['dapur' => $idDapur]) }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-group"></i>
+                        <div data-i18n="Penerima MBG">
+                            Kelola Penerima MBG
+                        </div>
+                    </a>
+                </li>
+
                 <!-- Kelola User -->
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.users.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -306,6 +336,8 @@
                         'Laporan Kekurangan' => 'bx-error',
                         'Template Bahan' => 'bx-package',
                         'Menu Makanan' => 'bx-food-menu',
+                        'Prasarana' => 'bx-building-house',
+                        'Pengaturan Dapur' => 'bx-store',
                         'Kelola User' => 'bx-user',
                     ];
                 @endphp
@@ -374,7 +406,7 @@
             
             // Menu Akun (selalu ada)
             $akunSubmenu = [
-                ['type' => 'link', 'label' => 'Edit', 'url' => route('kepala-dapur.edit-profil')],
+                ['type' => 'link', 'label' => 'Edit', 'url' => route('kepala-dapur.profile.edit', $idDapur)],
                 ['type' => 'logout', 'label' => 'Logout', 'url' => route('logout'), 'method' => 'POST'],
             ];
             
@@ -388,8 +420,10 @@
                         ['type' => 'link', 'label' => 'Laporan Kekurangan Stok', 'url' => route('kepala-dapur.laporan-kekurangan.index')],
                     ]],
                     ['icon' => 'bx-cog', 'label' => 'Management', 'hasSubmenu' => true, 'submenu' => [
+                        ['type' => 'link', 'label' => 'Pengaturan Dapur', 'url' => route('kepala-dapur.pengaturan-dapur.edit', ['dapur' => $idDapur])],
                         ['type' => 'link', 'label' => 'Kelola Template Bahan', 'url' => route('kepala-dapur.template-items.index')],
                         ['type' => 'link', 'label' => 'Kelola Menu Makanan', 'url' => route('kepala-dapur.menu-makanan.index')],
+                        ['type' => 'link', 'label' => 'Fasilitas & Prasarana', 'url' => route('kepala-dapur.prasarana.index', ['dapur' => $idDapur])],
                         ['type' => 'link', 'label' => 'Kelola User', 'url' => route('kepala-dapur.users.index', ['dapur' => $idDapur])],
                     ]],
                     ['icon' => 'bx-credit-card', 'label' => 'Subscription', 'hasSubmenu' => true, 'submenu' => [
@@ -722,7 +756,7 @@
         }
 
         /* Safe area untuk iPhone dengan notch */
-        @supports (padding: max(0px)) {
+        @@supports (padding: max(0px)) {
             .mobile-bottom-nav {
                 padding-bottom: max(8px, env(safe-area-inset-bottom));
             }

@@ -28,7 +28,7 @@ class DapurRoleGuard
         'report.view' => ['kepala_dapur', 'admin_gudang', 'ahli_gizi'],
         'report.stock' => ['kepala_dapur', 'admin_gudang'],
 
-        'view' => ['kepala_dapur', 'admin_gudang', 'ahli_gizi'],
+        'view' => ['kepala_dapur', 'admin_gudang', 'ahli_gizi', 'distributor'],
     ];
 
     public function handle(Request $request, Closure $next, string $action = 'view'): Response
@@ -37,37 +37,37 @@ class DapurRoleGuard
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu');
         }
 
-        /** @var User $user */
+        
         $user = auth()->user();
 
-        // Super admin selalu diizinkan
+        
         if ($user->isSuperAdmin()) {
             return $next($request);
         }
 
-        // Validasi action
+        
         if (!isset($this->permissions[$action])) {
             throw new \InvalidArgumentException("Invalid action: {$action}");
         }
 
-        // Ambil dapur ID
+        
         $dapurId = $this->getDapurId($request);
         if (!$dapurId) {
             abort(400, 'ID Dapur tidak ditemukan');
         }
 
-        // Cache dapur
+        
         $dapur = $this->getCachedDapur($dapurId);
         if (!$dapur) {
             abort(404, 'Dapur tidak ditemukan atau tidak aktif');
         }
 
-        // Cek permission
+        
         if (!$this->checkPermission($user, $dapurId, $action)) {
             abort(403, 'Anda tidak memiliki izin untuk melakukan aksi ini');
         }
 
-        // Tambahkan data ke request
+        
         $request->merge([
             'current_dapur' => $dapur,
             'user_role' => $user->getUserRole($dapurId),

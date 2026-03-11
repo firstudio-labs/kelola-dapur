@@ -8,14 +8,14 @@
     <title>Kelola Dapur</title>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" />
-    <link rel="shortcut icon" href="play-tailwind-1.0.0/assets/images/logo/logo_kelola_dapur_white.svg"
+    <link rel="shortcut icon" href="{{ asset('play-tailwind-1.0.0/assets/images/logo/logo_kelola_dapur_white.svg') }}"
         type="image/x-icon" />
-    <link rel="stylesheet" href="play-tailwind-1.0.0/assets/css/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="play-tailwind-1.0.0/assets/css/animate.css" />
-    <link rel="stylesheet" href="./play-tailwind-1.0.0/src/css/tailwind.css" />
+    <link rel="stylesheet" href="{{ asset('play-tailwind-1.0.0/assets/css/swiper-bundle.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('play-tailwind-1.0.0/assets/css/animate.css') }}" />
+    <link rel="stylesheet" href="{{ asset('play-tailwind-1.0.0/src/css/tailwind.css') }}" />
 
     <!-- ==== WOW JS ==== -->
-    <script src="play-tailwind-1.0.0/assets/js/wow.min.js"></script>
+    <script src="{{ asset('play-tailwind-1.0.0/assets/js/wow.min.js') }}"></script>
     <script>
         new WOW().init();
     </script>
@@ -28,7 +28,7 @@
             <div class="relative flex items-center justify-between -mx-4">
                 <div class="max-w-full px-4 w-60">
                     <a href="index.html" class="block w-full py-5 navbar-logo">
-                        <img src="play-tailwind-1.0.0/assets/images/logo/logo_kelola_dapur_white.png" alt="logo"
+                        <img src="{{ asset('play-tailwind-1.0.0/assets/images/logo/logo_kelola_dapur_white.png') }}" alt="logo"
                             class="w-full header-logo" />
                     </a>
                 </div>
@@ -125,11 +125,11 @@
                             </span>
                         </label>
                         <div class="hidden sm:flex">
-                            <a href="login"
+                            <a href="{{ route('login') }}"
                                 class="loginBtn px-[22px] py-2 text-base font-medium text-white hover:opacity-70">
                                 Sign In
                             </a>
-                            <a href="register"
+                            <a href="{{ route('register') }}"
                                 class="px-6 py-2 text-base font-medium text-white duration-300 ease-in-out rounded-md bg-white/20 signUpBtn hover:bg-white/100 hover:text-dark">
                                 Sign Up
                             </a>
@@ -170,7 +170,7 @@
                 <div class="w-full px-4">
                     <div class="wow fadeInUp relative z-10 mx-auto max-w-[845px]" data-wow-delay=".25s">
                         <div class="mt-16">
-                            <img src="play-tailwind-1.0.0/assets/images/hero/hero-image.png" alt="hero"
+                            <img src="{{ asset('play-tailwind-1.0.0/assets/images/hero/hero-image.png') }}" alt="hero"
                                 class="max-w-full mx-auto rounded-t-xl rounded-tr-xl" />
                         </div>
                         <div class="absolute -left-9 bottom-0 z-[-1]">
@@ -800,6 +800,7 @@
             </div>
             <div class="flex flex-wrap justify-center -mx-4">
                 @forelse ($subscriptionPackages ?? [] as $package)
+                    @php /** @var \App\Models\SubscriptionPackage $package */ @endphp
                     <div class="w-full px-4 md:w-1/2 lg:w-1/3">
                         <div
                             class="relative z-10 px-8 py-10 mb-10 overflow-hidden bg-white rounded-xl shadow-pricing dark:bg-dark-2 sm:p-12 lg:px-6 lg:py-10 xl:p-14">
@@ -846,7 +847,7 @@
                             </div>
 
                             @if ($package->is_active)
-                                <a href="{{ route('kepala-dapur.subscription.choose-package', ['dapur' => session('selected_dapur_id', 1)]) }}?package={{ $package->id_subscription_package }}"
+                                <a href="{{ route('kepala-dapur.subscription.choose-package', ['dapur' => session('selected_dapur_id', 1)]) }}?package={{ $package->id_package }}"
                                     class="inline-block py-3 text-base font-medium text-center text-white transition rounded-md bg-primary px-7 hover:bg-blue-dark">
                                     Pilih Paket
                                 </a>
@@ -1297,60 +1298,60 @@
             >
             <a href="https://graygrids.com/">
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/graygrids.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}graygrids.svg"
             alt="graygrids"
             class="dark:hidden"
             />
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/graygrids-white.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}graygrids-white.svg"
             alt="graygrids"
             class="hidden dark:block"
             />
             </a>
             <a href="https://lineicons.com/">
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/lineicons.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}lineicons.svg"
             alt="lineicons"
             class="dark:hidden"
             />
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/lineicons-white.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}lineicons-white.svg"
             alt="graygrids"
             class="hidden dark:block"
             />
             </a>
             <a href="https://uideck.com/">
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/uideck.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}uideck.svg"
             alt="uideck"
             class="dark:hidden"
             />
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/uideck-white.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}uideck-white.svg"
             alt="graygrids"
             class="hidden dark:block"
             />
             </a>
             <a href="https://ayroui.com/">
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/ayroui.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}ayroui.svg"
             alt="ayroui"
             class="dark:hidden"
             />
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/ayroui-white.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}ayroui-white.svg"
             alt="graygrids"
             class="hidden dark:block"
             />
             </a>
             <a href="https://tailgrids.com/">
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/tailgrids.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}tailgrids.svg"
             alt="tailgrids"
             class="dark:hidden"
             />
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/tailgrids-white.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}tailgrids-white.svg"
             alt="graygrids"
             class="hidden dark:block"
             />
@@ -1368,7 +1369,7 @@
                 <div class="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-4/12 xl:w-3/12">
                     <div class="w-full mb-10">
                         <a href="javascript:void(0)" class="mb-6 inline-block max-w-[160px]">
-                            <img src="play-tailwind-1.0.0/assets/images/logo/logo_kelola_dapur_white.png"
+                            <img src="{{ asset('play-tailwind-1.0.0/assets/images/logo/') }}logo_kelola_dapur_white.png"
                                 alt="logo" class="max-w-full" />
                         </a>
                         <p class="mb-8 max-w-[270px] text-base text-gray-7">
@@ -1592,11 +1593,11 @@
 
             <div>
                 <span class="absolute left-0 top-0 z-[-1]">
-                    <img src="play-tailwind-1.0.0/assets/images/footer/shape-1.svg" alt="" />
+                    <img src="{{ asset('play-tailwind-1.0.0/assets/images/footer/') }}shape-1.svg" alt="" />
                 </span>
 
                 <span class="absolute bottom-0 right-0 z-[-1]">
-                    <img src="play-tailwind-1.0.0/assets/images/footer/shape-3.svg" alt="" />
+                    <img src="{{ asset('play-tailwind-1.0.0/assets/images/footer/') }}shape-3.svg" alt="" />
                 </span>
 
                 <span class="absolute right-0 top-0 z-[-1]">
@@ -1776,12 +1777,12 @@
             <span class="block w-px h-4 bg-stroke dark:bg-dark-3"></span>
             <span class="block w-full max-w-[88px]">
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/tailgrids.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}tailgrids.svg"
             alt="tailgrids"
             class="dark:hidden"
             />
             <img
-            src="./play-tailwind-1.0.0/assets/images/brands/tailgrids-white.svg"
+            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}tailgrids-white.svg"
             alt="tailgrids"
             class="hidden dark:block"
             />
@@ -1792,8 +1793,8 @@
 
     <!-- ====== All Scripts -->
 
-    <script src="play-tailwind-1.0.0/assets/js/swiper-bundle.min.js"></script>
-    <script src="play-tailwind-1.0.0/assets/js/main.js"></script>
+    <script src="{{ asset('play-tailwind-1.0.0/assets/js/') }}swiper-bundle.min.js"></script>
+    <script src="{{ asset('play-tailwind-1.0.0/assets/js/') }}main.js"></script>
     <script>
         // ==== for menu scroll
         const pageLink = document.querySelectorAll('.ud-menu-scroll');

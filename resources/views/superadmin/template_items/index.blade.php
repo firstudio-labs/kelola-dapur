@@ -119,6 +119,20 @@
                                     </td>
                                     <td class="fw-semibold">
                                         {{ $item->nama_bahan }}
+                                        @if(is_array($item->kandungan_gizi) || is_array($item->jenis_bahan))
+                                            <div class="mt-1 d-flex flex-wrap gap-1">
+                                                @if(is_array($item->kandungan_gizi))
+                                                    @foreach($item->kandungan_gizi as $gizi)
+                                                        <span class="badge bg-label-info" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">{{ $gizi }}</span>
+                                                    @endforeach
+                                                @endif
+                                                @if(is_array($item->jenis_bahan))
+                                                    @foreach($item->jenis_bahan as $jenis)
+                                                        <span class="badge bg-label-success" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">{{ $jenis }}</span>
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="text-center">
                                         <span class="badge bg-primary">

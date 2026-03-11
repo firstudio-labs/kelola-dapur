@@ -7,16 +7,18 @@ use App\Models\StockItem;
 use App\Models\TemplateItem;
 use App\Models\ApprovalStockItem;
 use App\Models\Dapur;
+use App\Models\TransaksiDapur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class StockItemController extends Controller
 {
     public function index(Request $request, Dapur $dapur)
     {
-        $user = Auth::user();
+        $user     = Auth::user();
         $userRole = $user->userRole;
 
         if (!$userRole || $userRole->role_type !== 'admin_gudang' || $userRole->id_dapur !== $dapur->id_dapur) {
@@ -62,7 +64,7 @@ class StockItemController extends Controller
             });
         }
 
-        $sortBy = $request->get('sort', 'nama_bahan');
+        $sortBy    = $request->get('sort', 'nama_bahan');
         $sortOrder = $request->get('order', 'asc');
 
         if ($sortBy === 'nama_bahan') {
@@ -73,13 +75,12 @@ class StockItemController extends Controller
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        $stockItems = $query->paginate(15)->appends($request->query());
+        $stockItems  = $query->paginate(15)->appends($request->query());
 
-        $totalItems = StockItem::where('id_dapur', $dapur->id_dapur)->count();
-        $habisStok = StockItem::where('id_dapur', $dapur->id_dapur)->where('jumlah', 0)->count();
-        $rendahStok = StockItem::where('id_dapur', $dapur->id_dapur)
-            ->where('jumlah', '>', 0)->where('jumlah', '<=', 10)->count();
-        $normalStok = StockItem::where('id_dapur', $dapur->id_dapur)->where('jumlah', '>', 10)->count();
+        $totalItems  = StockItem::where('id_dapur', $dapur->id_dapur)->count();
+        $habisStok   = StockItem::where('id_dapur', $dapur->id_dapur)->where('jumlah', 0)->count();
+        $rendahStok  = StockItem::where('id_dapur', $dapur->id_dapur)->where('jumlah', '>', 0)->where('jumlah', '<=', 10)->count();
+        $normalStok  = StockItem::where('id_dapur', $dapur->id_dapur)->where('jumlah', '>', 10)->count();
 
         $availableSatuans = TemplateItem::whereHas('stockItems', function ($query) use ($dapur) {
             $query->where('id_dapur', $dapur->id_dapur);
@@ -102,7 +103,7 @@ class StockItemController extends Controller
 
     public function show(Dapur $dapur, StockItem $stockItem)
     {
-        $user = Auth::user();
+        $user     = Auth::user();
         $userRole = $user->userRole;
 
         if (!$userRole || $userRole->role_type !== 'admin_gudang' || $userRole->id_dapur !== $dapur->id_dapur) {
@@ -120,18 +121,15 @@ class StockItemController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $totalRequests = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)->count();
-        $approvedRequests = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)
-            ->where('status', 'approved')->count();
-        $rejectedRequests = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)
-            ->where('status', 'rejected')->count();
-        $pendingRequests = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)
-            ->where('status', 'pending')->count();
+        $totalRequests    = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)->count();
+        $approvedRequests = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)->where('status', 'approved')->count();
+        $rejectedRequests = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)->where('status', 'rejected')->count();
+        $pendingRequests  = ApprovalStockItem::where('id_stock_item', $stockItem->id_stock_item)->where('status', 'pending')->count();
 
-        $roleType = 'admin_gudang';
-        $routePrefix = 'admin-gudang';
-        $layoutTemplate = 'template_admin_gudang.layout';
-        $stockIndexLabel = 'Kelola Stok';
+        $roleType         = 'admin_gudang';
+        $routePrefix      = 'admin-gudang';
+        $layoutTemplate   = 'template_admin_gudang.layout';
+        $stockIndexLabel  = 'Kelola Stok';
 
         return view('admingudang.stock.show', compact(
             'stockItem',
@@ -150,7 +148,7 @@ class StockItemController extends Controller
 
     public function requestStock(Request $request, Dapur $dapur, StockItem $stockItem)
     {
-        $user = Auth::user();
+        $user     = Auth::user();
         $userRole = $user->userRole;
 
         if (!$userRole || $userRole->role_type !== 'admin_gudang' || $userRole->id_dapur !== $dapur->id_dapur) {
@@ -162,31 +160,31 @@ class StockItemController extends Controller
         }
 
         $request->validate([
-            'jumlah' => 'required|numeric|min:0.1|max:2000000000',
-            'keterangan' => 'nullable|string|max:500',
-            'jam_kedatangan' => 'nullable|date_format:H:i',
-            'tanggal_produksi' => 'nullable|date',
-            'tanggal_expired' => 'nullable|date|after_or_equal:tanggal_produksi',
-            'suhu_bahan_makanan' => 'nullable|numeric|min:-50|max:100',
+            'jumlah'              => 'required|numeric|min:0.1|max:2000000000',
+            'keterangan'          => 'nullable|string|max:500',
+            'jam_kedatangan'      => 'nullable|date_format:H:i',
+            'tanggal_produksi'    => 'nullable|date',
+            'tanggal_expired'     => 'nullable|date|after_or_equal:tanggal_produksi',
+            'suhu_bahan_makanan'  => 'nullable|numeric|min:-50|max:100',
             'warna_bahan_makanan' => 'nullable|string|max:50',
-            'foto_bahan' => 'nullable|image|mimes:jpeg,jpg,png|max:5120'
+            'foto_bahan'          => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
         ], [
-            'jumlah.required' => 'Jumlah harus diisi',
-            'jumlah.numeric' => 'Jumlah harus berupa angka',
-            'jumlah.min' => 'Jumlah minimal 0.1',
-            'jumlah.max' => 'Jumlah maksimal 2000000000',
-            'keterangan.max' => 'Keterangan maksimal 500 karakter',
-            'jam_kedatangan.date_format' => 'Format jam kedatangan tidak valid (HH:MM)',
-            'tanggal_produksi.date' => 'Tanggal produksi tidak valid',
-            'tanggal_expired.date' => 'Tanggal expired tidak valid',
+            'jumlah.required'              => 'Jumlah harus diisi',
+            'jumlah.numeric'               => 'Jumlah harus berupa angka',
+            'jumlah.min'                   => 'Jumlah minimal 0.1',
+            'jumlah.max'                   => 'Jumlah maksimal 2000000000',
+            'keterangan.max'               => 'Keterangan maksimal 500 karakter',
+            'jam_kedatangan.date_format'   => 'Format jam kedatangan tidak valid (HH:MM)',
+            'tanggal_produksi.date'        => 'Tanggal produksi tidak valid',
+            'tanggal_expired.date'         => 'Tanggal expired tidak valid',
             'tanggal_expired.after_or_equal' => 'Tanggal expired harus sama atau setelah tanggal produksi',
-            'suhu_bahan_makanan.numeric' => 'Suhu harus berupa angka',
-            'suhu_bahan_makanan.min' => 'Suhu minimal -50°C',
-            'suhu_bahan_makanan.max' => 'Suhu maksimal 100°C',
-            'warna_bahan_makanan.max' => 'Warna maksimal 50 karakter',
-            'foto_bahan.image' => 'File harus berupa gambar',
-            'foto_bahan.mimes' => 'Format gambar harus jpeg, jpg, atau png',
-            'foto_bahan.max' => 'Ukuran gambar maksimal 5MB'
+            'suhu_bahan_makanan.numeric'   => 'Suhu harus berupa angka',
+            'suhu_bahan_makanan.min'       => 'Suhu minimal -50°C',
+            'suhu_bahan_makanan.max'       => 'Suhu maksimal 100°C',
+            'warna_bahan_makanan.max'      => 'Warna maksimal 50 karakter',
+            'foto_bahan.image'             => 'File harus berupa gambar',
+            'foto_bahan.mimes'             => 'Format gambar harus jpeg, jpg, atau png',
+            'foto_bahan.max'               => 'Ukuran gambar maksimal 5MB',
         ]);
 
         try {
@@ -204,44 +202,41 @@ class StockItemController extends Controller
                 throw new \Exception('Tidak ada kepala dapur yang ditemukan untuk dapur ini.');
             }
 
-            // Handle foto upload dan compress ke webp
             $fotoPath = null;
             if ($request->hasFile('foto_bahan')) {
                 $fotoPath = $this->processAndStoreImage($request->file('foto_bahan'), $dapur->id_dapur, $stockItem->id_stock_item);
             }
 
-            // Buat approval dengan status approved (auto approve)
-            $approval = ApprovalStockItem::create([
-                'id_admin_gudang' => $adminGudang->id_admin_gudang,
-                'id_kepala_dapur' => $kepalaDapur->id_kepala_dapur,
-                'id_stock_item' => $stockItem->id_stock_item,
-                'jumlah' => $request->jumlah,
-                'satuan' => $stockItem->templateItem->satuan,
-                'status' => 'approved', // Auto approve
-                'keterangan' => $request->keterangan,
-                'jam_kedatangan' => $request->jam_kedatangan ? $request->jam_kedatangan . ':00' : null,
-                'tanggal_produksi' => $request->tanggal_produksi,
-                'tanggal_expired' => $request->tanggal_expired,
-                'suhu_bahan_makanan' => $request->suhu_bahan_makanan,
+            ApprovalStockItem::create([
+                'id_admin_gudang'     => $adminGudang->id_admin_gudang,
+                'id_kepala_dapur'     => $kepalaDapur->id_kepala_dapur,
+                'id_stock_item'       => $stockItem->id_stock_item,
+                'jumlah'              => $request->jumlah,
+                'satuan'              => $stockItem->templateItem->satuan,
+                'status'              => 'approved',
+                'keterangan'          => $request->keterangan,
+                'jam_kedatangan'      => $request->jam_kedatangan ? $request->jam_kedatangan . ':00' : null,
+                'tanggal_produksi'    => $request->tanggal_produksi,
+                'tanggal_expired'     => $request->tanggal_expired,
+                'suhu_bahan_makanan'  => $request->suhu_bahan_makanan,
                 'warna_bahan_makanan' => $request->warna_bahan_makanan,
-                'foto_bahan' => $fotoPath,
-                'approved_at' => now() // Set approved_at langsung
+                'foto_bahan'          => $fotoPath,
+                'approved_at'         => now(),
             ]);
 
-            // Update stock langsung karena auto approve
-            // Pastikan hanya stock item yang spesifik yang diupdate dengan menggunakan where clause
             $currentStock = (float) $stockItem->jumlah;
             StockItem::where('id_stock_item', $stockItem->id_stock_item)
                 ->where('id_dapur', $dapur->id_dapur)
                 ->update([
-                    'jumlah' => $currentStock + $request->jumlah,
-                    'tanggal_restok' => now()
+                    'jumlah'          => $currentStock + $request->jumlah,
+                    'tanggal_restok'  => now(),
                 ]);
-            
-            // Refresh model untuk mendapatkan data terbaru
+
             $stockItem->refresh();
 
             DB::commit();
+
+            $this->checkAndActivatePendingTransactions($dapur->id_dapur);
 
             return redirect()->route('admin-gudang.stock.show', [$dapur, $stockItem])
                 ->with('success', 'Permintaan penambahan stok berhasil disetujui dan stok telah ditambahkan.');
@@ -253,7 +248,41 @@ class StockItemController extends Controller
         }
     }
 
-    private function ensureStockItemsExist(Dapur $dapur)
+    protected function checkAndActivatePendingTransactions(int $idDapur): void
+    {
+        $pendingTransactions = TransaksiDapur::where('id_dapur', $idDapur)
+            ->where('status', 'completed')
+            ->whereDoesntHave('orderProduksi')
+            ->with(['detailTransaksiDapur.menuMakanan.bahanMenu.templateItem'])
+            ->get();
+
+        foreach ($pendingTransactions as $transaksi) {
+            $stockCheck = $transaksi->checkStockWithReservations();
+            if ($stockCheck['can_produce']) {
+                $transaksi->laporanKekuranganStock()->where('status', 'pending')->update(['status' => 'resolved']);
+                $transaksi->sendToProduksi();
+                Log::info('Pending transaction activated after restock', ['id_transaksi' => $transaksi->id_transaksi]);
+            }
+        }
+
+        $stokKurangOrders = \App\Models\OrderProduksi::where('id_dapur', $idDapur)
+            ->where('status', \App\Models\OrderProduksi::STATUS_STOK_KURANG)
+            ->with(['transaksiDapur.detailTransaksiDapur.menuMakanan.bahanMenu.templateItem'])
+            ->get();
+
+        foreach ($stokKurangOrders as $order) {
+            $transaksi  = $order->transaksiDapur;
+            $stockCheck = $transaksi->checkStockWithReservations();
+            if ($stockCheck['can_produce']) {
+                $transaksi->laporanKekuranganStock()->where('status', 'pending')->update(['status' => 'resolved']);
+                $order->status = \App\Models\OrderProduksi::STATUS_BELUM_DIBUAT;
+                $order->save();
+                Log::info('Stok kurang order upgraded to belum_dibuat after restock', ['id_order' => $order->id_order, 'id_transaksi' => $transaksi->id_transaksi]);
+            }
+        }
+    }
+
+    private function ensureStockItemsExist(Dapur $dapur): void
     {
         $templateItems = TemplateItem::all();
 
@@ -264,12 +293,12 @@ class StockItemController extends Controller
 
             if (!$existingStock) {
                 StockItem::create([
-                    'id_dapur' => $dapur->id_dapur,
+                    'id_dapur'         => $dapur->id_dapur,
                     'id_template_item' => $templateItem->id_template_item,
-                    'jumlah' => 0,
-                    'satuan' => $templateItem->satuan,
-                    'tanggal_restok' => now(),
-                    'keterangan' => 'Auto-generated stock item'
+                    'jumlah'           => 0,
+                    'satuan'           => $templateItem->satuan,
+                    'tanggal_restok'   => now(),
+                    'keterangan'       => 'Auto-generated stock item',
                 ]);
             } else {
                 if ($existingStock->satuan !== $templateItem->satuan) {
@@ -281,7 +310,7 @@ class StockItemController extends Controller
 
     public function export(Dapur $dapur)
     {
-        $user = Auth::user();
+        $user     = Auth::user();
         $userRole = $user->userRole;
 
         if (!$userRole || $userRole->role_type !== 'admin_gudang' || $userRole->id_dapur !== $dapur->id_dapur) {
@@ -298,7 +327,7 @@ class StockItemController extends Controller
         $filename = 'stock_' . $dapur->nama_dapur . '_' . now()->format('Y-m-d') . '.csv';
 
         $headers = [
-            'Content-Type' => 'text/csv',
+            'Content-Type'        => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
@@ -313,7 +342,7 @@ class StockItemController extends Controller
                     $item->templateItem->satuan,
                     $item->getStockStatus(),
                     $item->tanggal_restok ? $item->tanggal_restok->format('d/m/Y') : '-',
-                    $item->keterangan ?: '-'
+                    $item->keterangan ?: '-',
                 ]);
             }
             fclose($file);
@@ -322,86 +351,21 @@ class StockItemController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    /**
-     * Process and store image, convert to WebP format
-     */
     private function processAndStoreImage($file, $dapurId, $stockItemId)
     {
         try {
-            // Create directory path
             $directory = "stock_items/{$dapurId}/{$stockItemId}";
-            $filename = time() . '_' . uniqid() . '.webp';
+            $filename  = time() . '_' . uniqid() . '.webp';
 
-            // Get image resource based on mime type
-            $mimeType = $file->getMimeType();
-            $image = null;
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $image   = $manager->read($file->getRealPath());
 
-            switch ($mimeType) {
-                case 'image/jpeg':
-                case 'image/jpg':
-                    $image = imagecreatefromjpeg($file->getRealPath());
-                    break;
-                case 'image/png':
-                    $image = imagecreatefrompng($file->getRealPath());
-                    break;
-                default:
-                    throw new \Exception('Format gambar tidak didukung');
+            if ($image->width() > 1920) {
+                $image->scaleDown(width: 1920);
             }
 
-            if (!$image) {
-                throw new \Exception('Gagal memproses gambar');
-            }
+            Storage::put('public/' . $directory . '/' . $filename, (string) $image->toWebp(85));
 
-            // Get original dimensions
-            $width = imagesx($image);
-            $height = imagesy($image);
-
-            // Calculate new dimensions (max 1920px width, maintain aspect ratio)
-            $maxWidth = 1920;
-            $newWidth = $width;
-            $newHeight = $height;
-
-            if ($width > $maxWidth) {
-                $newWidth = $maxWidth;
-                $newHeight = (int) ($height * ($maxWidth / $width));
-            }
-
-            // Create resized image
-            $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
-
-            // Preserve transparency for PNG
-            if ($mimeType === 'image/png') {
-                imagealphablending($resizedImage, false);
-                imagesavealpha($resizedImage, true);
-                $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
-                imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
-            }
-
-            // Resize image
-            imagecopyresampled(
-                $resizedImage,
-                $image,
-                0, 0, 0, 0,
-                $newWidth,
-                $newHeight,
-                $width,
-                $height
-            );
-
-            // Save as WebP (quality 85 for good balance)
-            $fullPath = storage_path('app/public/' . $directory);
-            if (!file_exists($fullPath)) {
-                mkdir($fullPath, 0755, true);
-            }
-
-            $webpPath = $fullPath . '/' . $filename;
-            imagewebp($resizedImage, $webpPath, 85);
-
-            // Clean up
-            imagedestroy($image);
-            imagedestroy($resizedImage);
-
-            // Return relative path for database storage
             return $directory . '/' . $filename;
         } catch (\Exception $e) {
             throw new \Exception('Gagal memproses gambar: ' . $e->getMessage());

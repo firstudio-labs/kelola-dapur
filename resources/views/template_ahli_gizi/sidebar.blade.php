@@ -27,8 +27,8 @@
                     onmouseover="this.style.background='rgba(255,255,255,0.25)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.15)'">
                     <div class="avatar avatar-online me-3">
-                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
-                            class="w-px-40 h-auto rounded-circle" />
+                        <img src="{{ isset($ahliGizi) && $ahliGizi->foto_diri ? Storage::url($ahliGizi->foto_diri) : (auth()->user()->foto_diri ? Storage::url(auth()->user()->foto_diri) : asset('admin/assets/img/avatars/1.png')) }}" alt="Foto"
+                            class="w-px-40 h-auto rounded-circle" style="object-fit: cover; aspect-ratio: 1/1;" />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
@@ -56,12 +56,12 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ route('ahli-gizi.profile.edit', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
-                                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
-                                            class="w-px-40 h-auto rounded-circle" />
+                                        <img src="{{ isset($ahliGizi) && $ahliGizi->foto_diri ? Storage::url($ahliGizi->foto_diri) : (auth()->user()->foto_diri ? Storage::url(auth()->user()->foto_diri) : asset('admin/assets/img/avatars/1.png')) }}" alt="Foto"
+                                            class="w-px-40 h-auto rounded-circle" style="object-fit: cover; aspect-ratio: 1/1;" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
@@ -247,7 +247,7 @@
             
             // Menu Akun (selalu ada)
             $akunSubmenu = [
-                ['type' => 'link', 'label' => 'Edit', 'url' => '#'],
+                ['type' => 'link', 'label' => 'Edit Profil', 'url' => route('ahli-gizi.profile.edit', $idDapur)],
                 ['type' => 'logout', 'label' => 'Logout', 'url' => route('logout'), 'method' => 'POST'],
             ];
             
@@ -607,7 +607,7 @@
         }
 
         /* Safe area untuk iPhone dengan notch */
-        @supports (padding: max(0px)) {
+        @@supports (padding: max(0px)) {
             .mobile-bottom-nav {
                 padding-bottom: max(8px, env(safe-area-inset-bottom));
             }

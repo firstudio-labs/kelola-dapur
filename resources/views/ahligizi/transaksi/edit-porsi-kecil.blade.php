@@ -2,7 +2,6 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -27,7 +26,6 @@
                                     </p>
                                 </div>
                             </div>
-                            <!-- Progress Steps -->
                             <div class="d-flex align-items-center">
                                 <div class="step-indicator">
                                     <span class="badge bg-success me-2">1</span>
@@ -43,8 +41,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Info Porsi Besar -->
         <div class="row mb-3">
             <div class="col-12">
                 <div class="alert alert-info">
@@ -74,8 +70,21 @@
                 </div>
             </div>
         </div>
-
-        <!-- Form Input Porsi Kecil -->
+        @if($totalPorsiPenerima > 0)
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="bx bx-group me-2 fs-5"></i>
+                    <div>
+                        <strong>Total Porsi Penerima MBG:</strong>
+                        <span class="badge bg-warning text-dark ms-2">{{ $totalPorsiPenerima }} Porsi</span>
+                        <small class="text-muted ms-2">(dari penerima MBG yang sudah disetujui di dapur ini)</small>
+                        &mdash; Jumlah porsi menu baru akan otomatis diisi dengan nilai ini.
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -167,7 +176,6 @@
                                                     </button>
                                                 </div>
                                             </div>
-                                            <!-- Menu Details -->
                                             <div class="mt-3 menu-details">
                                                 @if ($detail->menuMakanan->gambar_url)
                                                     <div
@@ -317,8 +325,6 @@
                                     </div>
                                 @endif
                             </div>
-
-                            <!-- Modal for Menu Selection -->
                             <div
                                 class="modal fade"
                                 id="menuModal"
@@ -408,8 +414,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- Modal Alert --}}
         <div
             class="modal fade"
             id="duplicateModal"
@@ -454,6 +458,7 @@
 @push("scripts")
     <script>
         let currentMenuIndex = {{ $porsiKecil->count() }};
+        const totalPorsiPenerima = {{ $totalPorsiPenerima ?? 1 }};
         let selectedMenus = [
             @foreach ($porsiKecil as $detail)
                 {{ $detail->id_menu }},
@@ -632,9 +637,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">Jumlah Porsi</label>
-                                    <input type="number" name="menus[${index}][jumlah_porsi]" class="form-control porsi-input" min="1" max="1000000" value="1" required />
-                                </div>
+                                     <label class="form-label">Jumlah Porsi</label>
+                                     <input type="number" name="menus[${index}][jumlah_porsi]" class="form-control porsi-input" min="1" max="1000000" value="${totalPorsiPenerima > 0 ? totalPorsiPenerima : 1}" required />
+                                 </div>
                                 <div class="col-md-1">
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeMenuRow(this)">
                                         <i class="bx bx-trash"></i>

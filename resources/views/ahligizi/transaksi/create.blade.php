@@ -2,7 +2,6 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -27,8 +26,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Form Buat Paket -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -56,8 +53,7 @@
                                         class="form-control @error("tanggal_transaksi") is-invalid @enderror"
                                         id="tanggal_transaksi"
                                         name="tanggal_transaksi"
-                                        value="{{ date("Y-m-d") }}"
-                                        readonly
+                                        value="{{ old('tanggal_transaksi', date('Y-m-d')) }}"
                                         required
                                     />
                                     @error("tanggal_transaksi")
@@ -88,8 +84,6 @@
                                     </div>
                                 @enderror
                             </div>
-
-                            <!-- Info Steps -->
                             <div class="alert alert-info">
                                 <h6 class="alert-heading mb-2">
                                     Langkah Selanjutnya:
@@ -126,8 +120,7 @@
 @push("scripts")
     <script>
         $(document).ready(function () {
-            // Set input to readonly to prevent user changes
-            $('#tanggal_transaksi').prop('readonly', true);
+            // Tanggal transaksi: user can edit, default is today
         });
     </script>
 @endpush

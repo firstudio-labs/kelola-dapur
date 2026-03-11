@@ -483,7 +483,7 @@
         }
 
         /* Safe area untuk iPhone dengan notch */
-        @supports (padding: max(0px)) {
+        @@supports (padding: max(0px)) {
             .mobile-bottom-nav {
                 padding-bottom: max(8px, env(safe-area-inset-bottom));
             }

@@ -15,21 +15,17 @@ class CheckRole
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu');
         }
 
-        /** @var User $user */
         $user = auth()->user();
 
-        // Validasi role
-        $validRoles = ['super_admin', 'kepala_dapur', 'admin_gudang', 'ahli_gizi'];
+        $validRoles = ['super_admin', 'kepala_dapur', 'admin_gudang', 'ahli_gizi', 'penerima_mbg', 'produksi', 'distributor'];
         if (!in_array($role, $validRoles)) {
             throw new \InvalidArgumentException("Invalid role: {$role}");
         }
 
-        // Super admin selalu diizinkan
         if ($user->isSuperAdmin()) {
             return $next($request);
         }
 
-        // Cek role dengan lebih efisien
         if (!$this->hasRole($user, $role)) {
             abort(403, 'Anda tidak memiliki akses untuk halaman ini');
         }
@@ -44,6 +40,9 @@ class CheckRole
             'kepala_dapur' => $user->isKepalaDapur(),
             'admin_gudang' => $user->isAdminGudang(),
             'ahli_gizi' => $user->isAhliGizi(),
+            'penerima_mbg' => $user->isPenerimaMbg(),
+            'produksi' => $user->isProduksi(),
+            'distributor' => $user->isDistributor(),
             default => false
         };
     }

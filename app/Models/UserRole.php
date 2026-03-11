@@ -43,4 +43,19 @@ class UserRole extends Model
     {
         return $this->hasOne(AdminGudang::class, 'id_user_role');
     }
+
+    public function penerimaMbg()
+    {
+        return $this->hasOne(PenerimaMbg::class, 'id_user_role');
+    }
+
+    public function produksi()
+    {
+        return $this->hasOne(Produksi::class, 'id_user_role');
+    }
+
+    public function distributor()
+    {
+        return $this->hasOne(Distributor::class, 'id_user_role');
+    }
 }

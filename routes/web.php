@@ -18,6 +18,19 @@ use App\Http\Controllers\KepalaDapur\ApprovalStockItemController as KepalaDapurA
 use App\Http\Controllers\KepalaDapur\ApprovalTransaksiController as KepalaDapurApprovalTransaksiController;
 use App\Http\Controllers\KepalaDapur\StockItemController;
 use App\Http\Controllers\KepalaDapur\SubscriptionController;
+use App\Http\Controllers\KepalaDapur\PrasaranaController;
+use App\Http\Controllers\KepalaDapur\PengaturanDapurController;
+use App\Http\Controllers\KepalaDapur\DapurController as KepalaDapurDapurController;
+use App\Http\Controllers\KepalaDapur\PenerimaMbgController as KepalaDapurPenerimaMbgController;
+use App\Http\Controllers\PenerimaMbg\DashboardController as PenerimaMbgDashboardController;
+use App\Http\Controllers\PenerimaMbg\ProfileController as PenerimaMbgProfileController;
+use App\Http\Controllers\PenerimaMbg\PorsiController as PenerimaMbgPorsiController;
+use App\Http\Controllers\Produksi\DashboardController as ProduksiDashboardController;
+use App\Http\Controllers\Produksi\ProfileController as ProduksiProfileController;
+use App\Http\Controllers\Produksi\OrderProduksiController;
+use App\Http\Controllers\Distributor\DashboardController as DistributorDashboardController;
+use App\Http\Controllers\Distributor\ProfileController as DistributorProfileController;
+use App\Http\Controllers\Distributor\OrderController as DistributorOrderController;
 // use App\Http\Controllers\SuperAdmin\ApprovalStockItemController;
 use App\Http\Controllers\SuperAdmin\BahanMenuController;
 use App\Http\Controllers\SuperAdmin\DapurController;
@@ -77,8 +90,13 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 
     // Register
+    // Register Kepala Dapur
     Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Register Penerima MBG
+    Route::get('/daftar-mbg', [AuthController::class, 'showRegistrationFormPenerima'])->name('daftar-mbg');
+    Route::post('/daftar-mbg', [AuthController::class, 'registerPenerima'])->name('daftar-mbg.post');
 });
 
 // API
@@ -380,6 +398,30 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur', 'check.subscription'])
             Route::get('/{subscriptionRequest}', [SubscriptionController::class, 'show'])->name('show');
             Route::delete('/{subscriptionRequest}', [SubscriptionController::class, 'cancel'])->name('cancel');
         });
+
+        // Profile Update
+        Route::get('/profile', [\App\Http\Controllers\KepalaDapur\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [\App\Http\Controllers\KepalaDapur\ProfileController::class, 'update'])->name('profile.update');
+
+        // Pengaturan Dapur
+        Route::get('/pengaturan-dapur', [PengaturanDapurController::class, 'edit'])->name('pengaturan-dapur.edit');
+        Route::put('/pengaturan-dapur', [PengaturanDapurController::class, 'update'])->name('pengaturan-dapur.update');
+
+        // Prasarana Management
+        Route::get('/prasarana', [PrasaranaController::class, 'index'])->name('prasarana.index');
+        Route::put('/prasarana', [PrasaranaController::class, 'update'])->name('prasarana.update');
+        Route::post('/prasarana/kategori', [PrasaranaController::class, 'storeKategori'])->name('prasarana.kategori.store');
+        Route::post('/prasarana/item', [PrasaranaController::class, 'storeItem'])->name('prasarana.item.store');
+        Route::delete('/prasarana/kategori/{id_kategori}', [PrasaranaController::class, 'destroyKategori'])->name('prasarana.kategori.destroy');
+        Route::delete('/prasarana/item/{id_item}', [PrasaranaController::class, 'destroyItem'])->name('prasarana.item.destroy');
+
+        // Penerima MBG Approval
+        Route::prefix('penerima-mbg')->name('penerima-mbg.')->group(function () {
+            Route::get('/', [KepalaDapurPenerimaMbgController::class, 'index'])->name('index');
+            Route::get('/{penerima_mbg}', [KepalaDapurPenerimaMbgController::class, 'show'])->name('show');
+            Route::put('/{penerima_mbg}/approve', [KepalaDapurPenerimaMbgController::class, 'approve'])->name('approve');
+            Route::put('/{penerima_mbg}/reject', [KepalaDapurPenerimaMbgController::class, 'reject'])->name('reject');
+        });
     });
 
 
@@ -451,15 +493,15 @@ Route::middleware(['auth', 'role:kepala_dapur', 'check.subscription'])->prefix('
 
 
 
-    // Profile routes - Always accessible
-    Route::get('/edit-profil', [KepalaDapurUserController::class, 'editKepalaDapur'])->name('edit-profil');
-    Route::put('/edit-profil', [KepalaDapurUserController::class, 'updateKepalaDapur'])->name('update-profil');
+
 
     // Route::get('/shortage-reports', [KepalaDapurApprovalTransaksiController::class, 'shortageReports'])->name('shortage-reports');
     // Route::post('/shortage-reports/{report}/resolve', [KepalaDapurApprovalTransaksiController::class, 'resolveShortage'])->name('resolve-shortage');
 });
 
 //========== General Role Check Routes ==========
+use App\Http\Controllers\AhliGizi\ProfileController as AhliGiziProfileController;
+
 Route::middleware(['auth', 'role:admin_gudang'])->group(function () {
     // Route::get('/admin-gudang/dashboard', [AdminGudangController::class, 'dashboard']);
 });
@@ -470,6 +512,10 @@ Route::middleware(['auth', 'role:ahli_gizi', 'check.subscription'])->prefix('ahl
 
     // Dashboard - Always accessible
     Route::get('/dashboard', [AhliGiziController::class, 'dashboard'])->name('dashboard');
+
+    // Profil Saya
+    Route::get('/dapur/{dapur}/profile/edit', [AhliGiziProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/dapur/{dapur}/profile', [AhliGiziProfileController::class, 'update'])->name('profile.update');
 
     // Menu Makanan - Requires active subscription
     Route::prefix('menu-makanan')->name('menu-makanan.')->group(function () {
@@ -506,6 +552,7 @@ Route::middleware(['auth', 'role:ahli_gizi', 'check.subscription'])->prefix('ahl
         Route::post('/{transaksi}/ajukan-persetujuan', [AhliGiziTransaksiDapurController::class, 'submitApproval'])->name('submit-approval');
         Route::post('/{transaksi}/laporkan-kekurangan', [AhliGiziTransaksiDapurController::class, 'createShortageReport'])->name('create-shortage-report');
         Route::post('/{transaksi}/buat-transaksi-sekarang', [AhliGiziTransaksiDapurController::class, 'createTransactionNow'])->name('create-transaction-now');
+        Route::post('/{transaksi}/buat-transaksi-selanjutnya', [AhliGiziTransaksiDapurController::class, 'createNext'])->name('create-next');
 
         Route::get('/{transaksi}/detail', [AhliGiziTransaksiDapurController::class, 'show'])->name('show');
         Route::delete('/{transaksi}/hapus', [AhliGiziTransaksiDapurController::class, 'destroy'])->name('destroy');
@@ -532,3 +579,79 @@ Route::middleware(['auth', 'role:ahli_gizi', 'check.subscription'])->prefix('ahl
 
 
 Route::middleware(['auth', 'role:kepala_dapur,admin_gudang,ahli_gizi'])->group(function () {});
+
+// ============================
+// Penerima MBG Area
+// ============================
+Route::middleware(['auth', 'role:penerima_mbg'])
+    ->prefix('penerima-mbg')
+    ->name('penerima-mbg.')
+    ->group(function () {
+        Route::get('/dashboard', [PenerimaMbgDashboardController::class, 'index'])->name('dashboard');
+
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/edit', [PenerimaMbgProfileController::class, 'edit'])->name('edit');
+            Route::put('/', [PenerimaMbgProfileController::class, 'update'])->name('update');
+        });
+
+        Route::prefix('porsi')->name('porsi.')->group(function () {
+            Route::get('/edit', [PenerimaMbgPorsiController::class, 'edit'])->name('edit');
+            Route::put('/', [PenerimaMbgPorsiController::class, 'update'])->name('update');
+        });
+    });
+
+// ============================
+// Produksi Area
+// ============================
+Route::middleware(['auth', 'role:produksi', 'check.subscription'])
+    ->prefix('produksi')
+    ->name('produksi.')
+    ->group(function () {
+        Route::get('/dashboard', [ProduksiDashboardController::class, 'index'])->name('dashboard');
+
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/edit', [ProduksiProfileController::class, 'edit'])->name('edit');
+            Route::put('/', [ProduksiProfileController::class, 'update'])->name('update');
+        });
+
+        Route::prefix("order-produksi")
+            ->name("order.")
+            ->group(function () {
+                Route::get("/", [OrderProduksiController::class, "index"])->name(
+                    "index"
+                );
+                Route::get("/{order}", [
+                    OrderProduksiController::class,
+                    "show",
+                ])->name("show");
+                Route::patch("/{order}/update-status", [
+                    OrderProduksiController::class,
+                    "updateStatus",
+                ])->name("update-status");
+            });
+    });
+
+
+
+// ============================
+// Distributor Area
+// ============================
+Route::middleware(['auth', 'role:distributor', 'check.subscription'])
+    ->prefix('distributor')
+    ->name('distributor.')
+    ->group(function () {
+        Route::get('/dashboard', [DistributorDashboardController::class, 'index'])->name('dashboard');
+
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/edit', [DistributorProfileController::class, 'edit'])->name('edit');
+            Route::put('/', [DistributorProfileController::class, 'update'])->name('update');
+        });
+
+        Route::prefix('order-distribusi')
+            ->name('order.')
+            ->group(function () {
+                Route::get('/', [DistributorOrderController::class, 'index'])->name('index');
+                Route::get('/{order}', [DistributorOrderController::class, 'show'])->name('show');
+                Route::patch('/{order}/update-status', [DistributorOrderController::class, 'updateStatus'])->name('update-status');
+            });
+    });

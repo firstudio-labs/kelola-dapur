@@ -76,8 +76,60 @@
                             @enderror
                         </div>
 
+                        <!-- Klasifikasi Kandungan Gizi -->
+                        <div class="col-md-12 mt-4 pt-3 border-top">
+                            <h6 class="fw-semibold">Kandungan Gizi</h6>
+                            <p class="text-muted small">Pilih kandungan gizi dominan pada bahan ini (bisa lebih dari satu).</p>
+                            <div class="row g-3">
+                                @php
+                                    $savedGizi = old('kandungan_gizi', is_array($templateItem->kandungan_gizi) ? $templateItem->kandungan_gizi : []);
+                                @endphp
+                                @foreach($kandunganGiziEnum as $gizi)
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="form-check custom-option custom-option-basic">
+                                        <label class="form-check-label custom-option-content" for="gizi_{{ Str::slug($gizi) }}">
+                                            <input name="kandungan_gizi[]" class="form-check-input" type="checkbox" value="{{ $gizi }}" id="gizi_{{ Str::slug($gizi) }}" {{ in_array($gizi, $savedGizi) ? 'checked' : '' }} />
+                                            <span class="custom-option-header">
+                                                <span class="h6 mb-0">{{ $gizi }}</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            @error('kandungan_gizi')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Klasifikasi Jenis Bahan -->
+                        <div class="col-md-12 mt-4 pt-3 border-top">
+                            <h6 class="fw-semibold">Jenis Bahan Makanan</h6>
+                            <p class="text-muted small">Pilih klasifikasi jenis bahan makanan ini (bisa lebih dari satu).</p>
+                            <div class="row g-3">
+                                @php
+                                    $savedJenis = old('jenis_bahan', is_array($templateItem->jenis_bahan) ? $templateItem->jenis_bahan : []);
+                                @endphp
+                                @foreach($jenisBahanEnum as $jenis)
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="form-check custom-option custom-option-basic">
+                                        <label class="form-check-label custom-option-content" for="jenis_{{ Str::slug($jenis) }}">
+                                            <input name="jenis_bahan[]" class="form-check-input" type="checkbox" value="{{ $jenis }}" id="jenis_{{ Str::slug($jenis) }}" {{ in_array($jenis, $savedJenis) ? 'checked' : '' }} />
+                                            <span class="custom-option-header">
+                                                <span class="h6 mb-0">{{ $jenis }}</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            @error('jenis_bahan')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <!-- Keterangan -->
-                        <div class="col-12">
+                        <div class="col-12 mt-4 pt-3 border-top">
                             <label for="keterangan" class="form-label">Keterangan</label>
                             <textarea name="keterangan" 
                                       id="keterangan" 

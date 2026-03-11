@@ -13,7 +13,20 @@ class KepalaDapur extends Model
     protected $table = 'kepala_dapur';
     protected $primaryKey = 'id_kepala_dapur';
 
-    protected $fillable = ['id_user_role', 'id_dapur'];
+    protected $fillable = [
+        'id_user_role', 
+        'id_dapur',
+        'nik_kepala_sppg',
+        'alamat_detail',
+        'kode_provinsi',
+        'kode_kabupaten',
+        'kode_kecamatan',
+        'kode_desa',
+        'kontak_wa',
+        'pendidikan_terakhir',
+        'jenis_kelamin',
+        'foto_diri',
+    ];
 
     public function userRole()
     {
@@ -25,10 +38,10 @@ class KepalaDapur extends Model
         return $this->hasOneThrough(
             User::class,
             UserRole::class,
-            'id_user_role', // Foreign key on kepala_dapur table
-            'id_user', // Foreign key on user_roles table
-            'id_user_role', // Local key on kepala_dapur table
-            'id_user' // Local key on user_roles table
+            'id_user_role', 
+            'id_user', 
+            'id_user_role', 
+            'id_user' 
         );
     }
 

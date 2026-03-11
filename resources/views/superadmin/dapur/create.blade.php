@@ -49,7 +49,7 @@
         <div class="col-12">
             <div class="card mb-4">
                 <div class="card-body">
-                    <form action="{{ route('superadmin.dapur.store') }}" method="POST" class="row g-3">
+                    <form action="{{ route('superadmin.dapur.store') }}" method="POST" class="row g-3" enctype="multipart/form-data">
                         @csrf
 
                         <!-- Nama Dapur -->
@@ -134,6 +134,70 @@
                             <small class="text-muted">Nomor telepon dapur (opsional)</small>
                         </div>
 
+                        <!-- No Registrasi SPPG -->
+                        <div class="col-md-6">
+                            <label for="no_registrasi_sppg" class="form-label">
+                                No Registrasi SPPG
+                            </label>
+                            <input type="text" 
+                                   name="no_registrasi_sppg" 
+                                   id="no_registrasi_sppg"
+                                   class="form-control @error('no_registrasi_sppg') is-invalid @enderror"
+                                   placeholder="Contoh: SPPG-12345"
+                                   value="{{ old('no_registrasi_sppg') }}">
+                            @error('no_registrasi_sppg')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- NIK Pemilik -->
+                        <div class="col-md-6">
+                            <label for="nik_pemilik" class="form-label">
+                                NIK Pemilik
+                            </label>
+                            <input type="text" 
+                                   name="nik_pemilik" 
+                                   id="nik_pemilik"
+                                   class="form-control @error('nik_pemilik') is-invalid @enderror"
+                                   placeholder="Contoh: 3171234567890001"
+                                   value="{{ old('nik_pemilik') }}">
+                            @error('nik_pemilik')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Foto Bangunan -->
+                        <div class="col-md-6">
+                            <label for="foto_bangunan" class="form-label">
+                                Foto Bangunan
+                            </label>
+                            <input type="file" 
+                                   name="foto_bangunan" 
+                                   id="foto_bangunan"
+                                   accept="image/*"
+                                   class="form-control @error('foto_bangunan') is-invalid @enderror">
+                            @error('foto_bangunan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Format: JPG, PNG. Maksimal 2MB</small>
+                        </div>
+
+                        <!-- Tag Lokasi Gmaps -->
+                        <div class="col-md-12">
+                            <label for="tag_lokasi" class="form-label">
+                                Link Google Maps (Tag Lokasi)
+                            </label>
+                            <input type="text" 
+                                   name="tag_lokasi" 
+                                   id="tag_lokasi"
+                                   class="form-control @error('tag_lokasi') is-invalid @enderror"
+                                   placeholder="Contoh: https://maps.app.goo.gl/..."
+                                   value="{{ old('tag_lokasi') }}">
+                            @error('tag_lokasi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <!-- Status -->
                         <div class="col-md-6">
                             <label for="status" class="form-label">
@@ -151,6 +215,36 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <small class="text-muted">Status dapur dalam sistem</small>
+                        </div>
+
+                        <!-- Checklist Prasarana -->
+                        <div class="col-12 mt-4">
+                            <h5 class="mb-3 border-bottom pb-2">Kelengkapan Prasarana</h5>
+                            <div class="row">
+                                @foreach($kategoriPrasarana as $kategori)
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card h-100 shadow-none border">
+                                            <div class="card-header bg-lighter py-2">
+                                                <h6 class="mb-0">{{ $kategori->nama_kategori }}</h6>
+                                            </div>
+                                            <div class="card-body p-3">
+                                                @foreach($kategori->items as $item)
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                            name="prasarana[]" 
+                                                            value="{{ $item->id_item }}" 
+                                                            id="item_{{ $item->id_item }}"
+                                                            {{ in_array($item->id_item, old('prasarana', [])) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="item_{{ $item->id_item }}">
+                                                            {{ $item->nama_item }}
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
 
                         <!-- Preview Card -->
