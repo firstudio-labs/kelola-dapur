@@ -245,10 +245,9 @@
                                     <th>Tanggal Transaksi</th>
                                     <th>Total Porsi</th>
                                     <th>Status Transaksi</th>
+                                    <th>Status Stock</th>
                                     <th>Status Produksi</th>
                                     <th>Status Distribusi</th>
-                                    <th>Kekurangan Stock</th>
-                                    <th>Dibuat</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -306,6 +305,28 @@
                                             </span>
                                         </td>
                                         <td>
+                                            @if ($hasPendingShortage)
+                                                <span
+                                                    class="badge bg-label-danger"
+                                                >
+                                                    <i
+                                                        class="bx bx-error me-1"
+                                                    ></i>
+                                                    {{ $pendingShortages->count() }}
+                                                    Item
+                                                </span>
+                                            @elseif ($hasResolvedShortage)
+                                                <span class="badge bg-label-success">
+                                                    <i class="bx bx-check me-1"></i>
+                                                    Diselesaikan
+                                                </span>
+                                            @else
+                                                <span class="text-muted">
+                                                    -
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td>
                                             @if ($item->orderProduksi)
                                                 @php
                                                     $mapStatusProduksi = [
@@ -340,33 +361,6 @@
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
-                                        </td>
-                                        <td>
-                                            @if ($hasPendingShortage)
-                                                <span
-                                                    class="badge bg-label-danger"
-                                                >
-                                                    <i
-                                                        class="bx bx-error me-1"
-                                                    ></i>
-                                                    {{ $pendingShortages->count() }}
-                                                    Item
-                                                </span>
-                                            @elseif ($hasResolvedShortage)
-                                                <span class="badge bg-label-success">
-                                                    <i class="bx bx-check me-1"></i>
-                                                    Diselesaikan
-                                                </span>
-                                            @else
-                                                <span class="text-muted">
-                                                    -
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">
-                                                {{ $item->created_at->format("d M Y") }}
-                                            </small>
                                         </td>
                                         <td>
                                             <div class="d-flex gap-1">

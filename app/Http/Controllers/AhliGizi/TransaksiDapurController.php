@@ -67,7 +67,17 @@ class TransaksiDapurController extends Controller
                 ->with('info', 'Anda memiliki draft Input Paket Menu yang belum selesai. Silakan lanjutkan atau hapus terlebih dahulu.');
         }
 
-        return view('ahligizi.transaksi.create', compact('ahliGizi'));
+        // Cari transaksi terakhir untuk mengambil tanggalnya
+        $latestTransaksi = TransaksiDapur::where('id_dapur', $ahliGizi->id_dapur)
+            ->where('created_by', $user->id_user)
+            ->orderBy('tanggal_transaksi', 'desc')
+            ->first();
+
+        $defaultDate = $latestTransaksi 
+            ? $latestTransaksi->tanggal_transaksi->addDay()->format('Y-m-d') 
+            : date('Y-m-d');
+
+        return view('ahligizi.transaksi.create', compact('ahliGizi', 'defaultDate'));
     }
 
     public function store(Request $request)
@@ -342,7 +352,7 @@ class TransaksiDapurController extends Controller
 
         $stockCheck = $transaksi->checkAllStockAvailability();
 
-        $bahanKebutuhan = $this->calculateIngredientNeeds($transaksi);
+        $bahanKebutuhan = $transaksi->calculateIngredientNeeds();
 
         return view('ahligizi.transaksi.preview', compact('transaksi', 'stockCheck', 'bahanKebutuhan', 'ahliGizi'));
     }
@@ -644,7 +654,7 @@ class TransaksiDapurController extends Controller
         try {
             $newTransaksi = TransaksiDapur::create([
                 'id_dapur'           => $ahliGizi->id_dapur,
-                'tanggal_transaksi'  => now(),
+                'tanggal_transaksi'  => $transaksi->tanggal_transaksi->addDay(),
                 'keterangan'         => null,
                 'status'             => 'draft',
                 'total_porsi'        => 0,

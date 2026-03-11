@@ -132,25 +132,31 @@
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Tanggal Transaksi</th>
-                                <th>Ahli Gizi</th>
-                                <th>Total Porsi</th>
-                                <th>Status Transaksi</th>
-                                <th>Status Produksi</th>
-                                <th>Status Distribusi</th>
-                                <th>Aksi</th>
-                            </tr>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal Transaksi</th>
+                                    <th>Ahli Gizi</th>
+                                    <th>Total Porsi</th>
+                                    <th>Status Transaksi</th>
+                                    <th>Status Stock</th>
+                                    <th>Status Produksi</th>
+                                    <th>Status Distribusi</th>
+                                    <th>Aksi</th>
+                                </tr>
                         </thead>
                         <tbody id="transaksi-table-body">
                             @foreach($orders as $order)
                                 @php
                                     $transaksi  = $order->transaksiDapur;
-                                    $totalPorsi = $transaksi->detailTransaksiDapur->sum('jumlah_porsi');
-                                    $menuList   = $transaksi->detailTransaksiDapur->map(fn($d) => $d->menuMakanan->nama_menu ?? '-')->unique()->implode(', ');
-                                    $isStokKurang = $order->status === 'stok_kurang';
+                                    $totalPorsi     = $transaksi->detailTransaksiDapur->sum('jumlah_porsi');
+                                    $menuList       = $transaksi->detailTransaksiDapur->map(fn($d) => $d->menuMakanan->nama_menu ?? '-')->unique()->implode(', ');
+                                    $isStokKurang   = $order->status === 'stok_kurang';
                                     
+                                    // Status Stock logic
+                                    $pendingShortages = $transaksi->laporanKekuranganStock->where('status', 'pending');
+                                    $hasPendingShortage = $pendingShortages->isNotEmpty();
+                                    $hasResolvedShortage = $transaksi->laporanKekuranganStock->where('status', 'resolved')->isNotEmpty() && !$hasPendingShortage;
+
                                     // Status Transaksi
                                     $statusClasses = [
                                         "draft" => "bg-label-warning",
@@ -163,7 +169,7 @@
                                 <tr class="{{ $isStokKurang ? 'table-danger' : '' }}" 
                                     data-search="{{ strtolower($transaksi->nama_paket ?? '') }}" 
                                     data-status="{{ $order->status }}">
-                                    <td>{{ $order->id_order }}</td>
+                                    <td>{{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}</td>
                                     <td>
                                         <small class="text-muted">
                                             {{ $transaksi->tanggal_transaksi->format("d M Y") }}<br>
@@ -186,6 +192,21 @@
                                         <span class="badge {{ $statusClasses[$transaksi->status] ?? "bg-label-secondary" }}">
                                             {{ ucfirst(str_replace("_", " ", $transaksi->status)) }}
                                         </span>
+                                    </td>
+                                    <td>
+                                        @if ($hasPendingShortage)
+                                            <span class="badge bg-label-danger">
+                                                <i class="bx bx-error me-1"></i>
+                                                {{ $pendingShortages->count() }} Item
+                                            </span>
+                                        @elseif ($hasResolvedShortage)
+                                            <span class="badge bg-label-success">
+                                                <i class="bx bx-check me-1"></i>
+                                                Diselesaikan
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
                                     </td>
                                     <td>
                                         @php

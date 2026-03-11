@@ -53,7 +53,7 @@
                                         class="form-control @error("tanggal_transaksi") is-invalid @enderror"
                                         id="tanggal_transaksi"
                                         name="tanggal_transaksi"
-                                        value="{{ old('tanggal_transaksi', date('Y-m-d')) }}"
+                                        value="{{ old('tanggal_transaksi', $defaultDate ?? date('Y-m-d')) }}"
                                         required
                                     />
                                     @error("tanggal_transaksi")
