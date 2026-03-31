@@ -10,9 +10,13 @@ return new class extends Migration
     
     public function up(): void
     {
+        if (Schema::hasColumn('order_distribusi_details', 'id_detail_distribusi')) {
+            DB::statement('ALTER TABLE `order_distribusi_details` CHANGE `id_detail_distribusi` `id_detail` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT');
+        }
         
-        DB::statement('ALTER TABLE `order_distribusi_details` CHANGE `id_detail_distribusi` `id_detail` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT');
-        DB::statement('ALTER TABLE `order_distribusi_details` CHANGE `jumlah_porsi_dikirim` `jumlah_diterima` INT NOT NULL DEFAULT 0');
+        if (Schema::hasColumn('order_distribusi_details', 'jumlah_porsi_dikirim')) {
+            DB::statement('ALTER TABLE `order_distribusi_details` CHANGE `jumlah_porsi_dikirim` `jumlah_diterima` INT NOT NULL DEFAULT 0');
+        }
 
         Schema::table('order_distribusi_details', function (Blueprint $table) {
             $toDrop = [];
@@ -30,8 +34,13 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE `order_distribusi_details` CHANGE `id_detail` `id_detail_distribusi` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT');
-        DB::statement('ALTER TABLE `order_distribusi_details` CHANGE `jumlah_diterima` `jumlah_porsi_dikirim` INT NOT NULL DEFAULT 0');
+        if (Schema::hasColumn('order_distribusi_details', 'id_detail')) {
+            DB::statement('ALTER TABLE `order_distribusi_details` CHANGE `id_detail` `id_detail_distribusi` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT');
+        }
+
+        if (Schema::hasColumn('order_distribusi_details', 'jumlah_diterima')) {
+            DB::statement('ALTER TABLE `order_distribusi_details` CHANGE `jumlah_diterima` `jumlah_porsi_dikirim` INT NOT NULL DEFAULT 0');
+        }
 
         Schema::table('order_distribusi_details', function (Blueprint $table) {
             $table->string('path_foto')->nullable();
