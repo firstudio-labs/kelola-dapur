@@ -547,16 +547,20 @@
 
                             <dt class="col-sm-4">Akhir Berlangganan</dt>
                             <dd class="col-sm-8">
-                                {{ $dapur->subscription_end->format('d M Y') }}
-                                @if ($dapur->subscription_end->isBefore(now()->subDays(1)))
-                                    <span class="badge bg-label-danger ms-2"
-                                        href="{{ route('kepala-dapur.subscription.choose-package', ['dapur' => $dapur->id_dapur]) }}">
-                                        Langganan Berakhir
-                                    </span>
-                                @elseif ($dapur->subscription_end->isBefore(now()->addDays(7)))
-                                    <span class="badge bg-label-warning ms-2">
-                                        Segera Berakhir
-                                    </span>
+                                @if ($dapur->subscription_end)
+                                    {{ $dapur->subscription_end->format('d M Y') }}
+                                    @if ($dapur->subscription_end->isBefore(now()->subDays(1)))
+                                        <span class="badge bg-label-danger ms-2"
+                                            href="{{ route('kepala-dapur.subscription.choose-package', ['dapur' => $dapur->id_dapur]) }}">
+                                            Langganan Berakhir
+                                        </span>
+                                    @elseif ($dapur->subscription_end->isBefore(now()->addDays(7)))
+                                        <span class="badge bg-label-warning ms-2">
+                                            Segera Berakhir
+                                        </span>
+                                    @endif
+                                @else
+                                    <span class="text-muted">Belum Berlangganan</span>
                                 @endif
                             </dd>
                         </dl>

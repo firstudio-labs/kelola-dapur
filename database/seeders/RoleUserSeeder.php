@@ -25,11 +25,12 @@ class RoleUserSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
-            $dapur = Dapur::firstOrCreate(
+            $dapur = Dapur::updateOrCreate(
                 ['nama_dapur' => 'Dapur Anom'],
                 [
                     'alamat' => 'Jl. Anom No. 1, Kota Anom',
                     'status' => 'active',
+                    'subscription_end' => now()->addYear(),
                 ]
             );
 
