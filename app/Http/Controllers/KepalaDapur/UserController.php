@@ -81,6 +81,7 @@ class UserController extends Controller
                 'password' => 'required|string|min:8|confirmed',
                 'role_type' => ['required', Rule::in(['admin_gudang', 'ahli_gizi', 'produksi', 'distributor'])],
                 'nik_produksi' => 'nullable|string|max:16',
+                'nik_ahli_gizi' => 'nullable|string|max:16',
                 'nama_lengkap' => 'nullable|string|max:255',
                 'kontak_wa' => 'nullable|string|max:20',
                 'jabatan' => 'nullable|in:Penanggung jawab,Anggota',

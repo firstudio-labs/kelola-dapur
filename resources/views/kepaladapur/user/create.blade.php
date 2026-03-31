@@ -175,8 +175,38 @@
                             <input type="text" name="nik_ahli_gizi" id="nik_ahli_gizi" class="form-control" placeholder="NIK" value="{{ old('nik_ahli_gizi') }}">
                         </div>
                         <div class="col-md-6">
-                            <label for="pendidikan_terakhir" class="form-label">Pendidikan Terakhir</label>
-                            <input type="text" name="pendidikan_terakhir" id="pendidikan_terakhir" class="form-control" value="{{ old('pendidikan_terakhir') }}">
+                            <label for="jabatan_ag" class="form-label">Jabatan</label>
+                            <select name="jabatan" id="jabatan_ag" class="form-select">
+                                <option value="Penanggung jawab" {{ old('jabatan') == 'Penanggung jawab' ? 'selected' : '' }}>Penanggung jawab</option>
+                                <option value="Anggota" {{ old('jabatan') == 'Anggota' ? 'selected' : '' }}>Anggota</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="kontak_wa_ag" class="form-label">Kontak/WA</label>
+                            <input type="text" name="kontak_wa" id="kontak_wa_ag" class="form-control" value="{{ old('kontak_wa') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jenis_kelamin_ag" class="form-label">Jenis Kelamin</label>
+                            <select name="jenis_kelamin" id="jenis_kelamin_ag" class="form-select">
+                                <option value="Pria" {{ old('jenis_kelamin') == 'Pria' ? 'selected' : '' }}>Pria</option>
+                                <option value="Wanita" {{ old('jenis_kelamin') == 'Wanita' ? 'selected' : '' }}>Wanita</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="pendidikan_ag" class="form-label">Pendidikan Terakhir</label>
+                            <select name="pendidikan_terakhir" id="pendidikan_ag" class="form-select">
+                                <option value="SD" {{ old('pendidikan_terakhir') == 'SD' ? 'selected' : '' }}>SD</option>
+                                <option value="SMP" {{ old('pendidikan_terakhir') == 'SMP' ? 'selected' : '' }}>SMP</option>
+                                <option value="SMA" {{ old('pendidikan_terakhir') == 'SMA' ? 'selected' : '' }}>SMA</option>
+                                <option value="D1" {{ old('pendidikan_terakhir') == 'D1' ? 'selected' : '' }}>D1</option>
+                                <option value="D2" {{ old('pendidikan_terakhir') == 'D2' ? 'selected' : '' }}>D2</option>
+                                <option value="D3" {{ old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3</option>
+                                <option value="Sarjana" {{ old('pendidikan_terakhir') == 'Sarjana' ? 'selected' : '' }}>Sarjana</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="foto_diri_ag" class="form-label">Foto Diri</label>
+                            <input type="file" name="foto_diri" id="foto_diri_ag" class="form-control @error('foto_diri') is-invalid @enderror">
                         </div>
                     </div>
                 </div>
@@ -222,6 +252,10 @@
                                 <option value="Pria" {{ old('jenis_kelamin') == 'Pria' ? 'selected' : '' }}>Pria</option>
                                 <option value="Wanita" {{ old('jenis_kelamin') == 'Wanita' ? 'selected' : '' }}>Wanita</option>
                             </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="foto_diri_prod" class="form-label">Foto Diri</label>
+                            <input type="file" name="foto_diri" id="foto_diri_prod" class="form-control @error('foto_diri') is-invalid @enderror">
                         </div>
                     </div>
                 </div>
