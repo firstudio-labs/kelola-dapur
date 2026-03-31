@@ -16,7 +16,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            // Performance Indexes
             $table->index(['nama_menu'], 'idx_menu_makanan_nama');
             $table->index(['is_active'], 'idx_menu_makanan_active');
             $table->index(['is_active', 'nama_menu'], 'idx_menu_makanan_active_nama');

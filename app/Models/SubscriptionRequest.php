@@ -36,7 +36,6 @@ class SubscriptionRequest extends Model
         'tanggal_approval' => 'datetime'
     ];
 
-    // Relationships
     public function dapur(): BelongsTo
     {
         return $this->belongsTo(Dapur::class, 'id_dapur');
@@ -52,7 +51,6 @@ class SubscriptionRequest extends Model
         return $this->belongsTo(PromoCode::class, 'id_promo');
     }
 
-    // Helper methods
     public function getFormattedHargaAsliAttribute(): string
     {
         return 'Rp ' . number_format($this->harga_asli, 0, ',', '.');
@@ -108,7 +106,6 @@ class SubscriptionRequest extends Model
             'tanggal_approval' => now()
         ]);
 
-        // Update subscription_end di dapur
         $newEndDate = $this->dapur->subscription_end && $this->dapur->subscription_end > now()
             ? Carbon::parse($this->dapur->subscription_end)->addDays($this->package->durasi_hari)
             : Carbon::now()->addDays($this->package->durasi_hari);
@@ -155,7 +152,6 @@ class SubscriptionRequest extends Model
         ];
     }
 
-    // Scope methods
     public function scopePending($query)
     {
         return $query->where('status', 'pending');

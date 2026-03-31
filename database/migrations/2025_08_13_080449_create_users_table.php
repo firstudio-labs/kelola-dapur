@@ -17,25 +17,21 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            // Performance Indexes
             $table->index(['is_active'], 'idx_users_active');
             $table->index(['nama'], 'idx_users_nama');
             $table->index(['is_active', 'created_at'], 'idx_users_active_created');
         });
 
-        // Tabel User Roles
         Schema::create('user_roles', function (Blueprint $table) {
             $table->id('id_user_role');
-            $table->unsignedBigInteger('id_user')->unique(); // Unik untuk memastikan satu role per user
+            $table->unsignedBigInteger('id_user')->unique(); 
             $table->enum('role_type', ['kepala_dapur', 'ahli_gizi', 'admin_gudang', 'super_admin']);
-            $table->unsignedBigInteger('id_dapur')->nullable(); // Nullable untuk super_admin
+            $table->unsignedBigInteger('id_dapur')->nullable(); 
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
             $table->foreign('id_dapur')->references('id_dapur')->on('dapur')->onDelete('cascade');
 
-            // Performance Indexes
             $table->index(['role_type'], 'idx_user_roles_type');
             $table->index(['id_dapur'], 'idx_user_roles_dapur');
         });

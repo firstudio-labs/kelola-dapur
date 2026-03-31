@@ -88,7 +88,17 @@ class UserController extends Controller
                 'jenis_kelamin' => 'nullable|in:Pria,Wanita',
                 'foto_diri' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
                 'nik_distribusi' => 'nullable|string|max:16',
+                'nik_admin_gudang' => 'nullable|string|max:16',
                 'pendidikan_terakhir' => 'nullable|string',
+                'alamat_detail' => 'nullable|string',
+                'province_code' => 'nullable|string',
+                'province_name' => 'nullable|string',
+                'regency_code' => 'nullable|string',
+                'regency_name' => 'nullable|string',
+                'district_code' => 'nullable|string',
+                'district_name' => 'nullable|string',
+                'village_code' => 'nullable|string',
+                'village_name' => 'nullable|string',
             ]);
 
             $user = User::create([
@@ -106,10 +116,37 @@ class UserController extends Controller
             ]);
 
             if ($validated['role_type'] === 'admin_gudang') {
-                AdminGudang::create([
+                $adminGudangData = [
                     'id_user_role' => $userRole->id_user_role,
                     'id_dapur' => $dapur->id_dapur,
-                ]);
+                    'nik_admin_gudang' => $validated['nik_admin_gudang'] ?? null,
+                    'nama_lengkap' => $validated['nama_lengkap'] ?? null,
+                    'kontak_wa' => $validated['kontak_wa'] ?? null,
+                    'jabatan' => $validated['jabatan'] ?? 'Anggota',
+                    'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
+                    'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
+                    'alamat_detail' => $validated['alamat_detail'] ?? null,
+                    'province_code' => $validated['province_code'] ?? null,
+                    'province_name' => $validated['province_name'] ?? null,
+                    'regency_code' => $validated['regency_code'] ?? null,
+                    'regency_name' => $validated['regency_name'] ?? null,
+                    'district_code' => $validated['district_code'] ?? null,
+                    'district_name' => $validated['district_name'] ?? null,
+                    'village_code' => $validated['village_code'] ?? null,
+                    'village_name' => $validated['village_name'] ?? null,
+                ];
+
+                if ($request->hasFile('foto_diri')) {
+                    $image = $request->file('foto_diri');
+                    $filename = time() . '_' . uniqid() . '.webp';
+                    $path = 'dokumen_admin_gudang/foto_diri/' . $filename;
+                    $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                    $img = $manager->read($image->getRealPath());
+                    if ($img->width() > 1200) $img->scale(width: 1200);
+                    Storage::disk('public')->put($path, (string) $img->toWebp(80));
+                    $adminGudangData['foto_diri'] = $path;
+                }
+                AdminGudang::create($adminGudangData);
             } elseif ($validated['role_type'] === 'ahli_gizi') {
                 $ahliGiziData = [
                     'id_user_role' => $userRole->id_user_role,
@@ -245,10 +282,13 @@ class UserController extends Controller
                 return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, atau distributor.");
             }
 
+            $adminGudang = null;
             $ahliGizi = null;
             $produksi = null;
             $distributor = null;
-            if ($user->userRole->role_type === 'ahli_gizi') {
+            if ($user->userRole->role_type === 'admin_gudang') {
+                $adminGudang = AdminGudang::where('id_user_role', $user->userRole->id_user_role)->first();
+            } elseif ($user->userRole->role_type === 'ahli_gizi') {
                 $ahliGizi = AhliGizi::where('id_user_role', $user->userRole->id_user_role)->first();
             } elseif ($user->userRole->role_type === 'produksi') {
                 $produksi = Produksi::where('id_user_role', $user->userRole->id_user_role)->first();
@@ -263,7 +303,7 @@ class UserController extends Controller
                 'dapur_id' => $dapur->id_dapur
             ]);
 
-            return view('kepaladapur.user.show', compact('user', 'dapur', 'ahliGizi', 'produksi', 'distributor'));
+            return view('kepaladapur.user.show', compact('user', 'dapur', 'adminGudang', 'ahliGizi', 'produksi', 'distributor'));
         } catch (Exception $e) {
             Log::error('Failed to show user', [
                 'error' => $e->getMessage(),
@@ -318,10 +358,13 @@ class UserController extends Controller
                 'produksi' => 'Produksi', 'distributor' => 'Distributor'
             ];
 
+            $adminGudang = null;
             $ahliGizi = null;
             $produksi = null;
             $distributor = null;
-            if ($user->userRole->role_type === 'ahli_gizi') {
+            if ($user->userRole->role_type === 'admin_gudang') {
+                $adminGudang = AdminGudang::where('id_user_role', $user->userRole->id_user_role)->first();
+            } elseif ($user->userRole->role_type === 'ahli_gizi') {
                 $ahliGizi = AhliGizi::where('id_user_role', $user->userRole->id_user_role)->first();
             } elseif ($user->userRole->role_type === 'produksi') {
                 $produksi = Produksi::where('id_user_role', $user->userRole->id_user_role)->first();
@@ -336,7 +379,7 @@ class UserController extends Controller
                 'dapur_id' => $dapur->id_dapur
             ]);
 
-            return view('kepaladapur.user.edit', compact('user', 'dapur', 'roles', 'current_user', 'ahliGizi', 'produksi', 'distributor'));
+            return view('kepaladapur.user.edit', compact('user', 'dapur', 'roles', 'current_user', 'adminGudang', 'ahliGizi', 'produksi', 'distributor'));
         } catch (Exception $e) {
             Log::error('Failed to edit user', [
                 'error' => $e->getMessage(),
@@ -391,6 +434,7 @@ class UserController extends Controller
                 'nama_lengkap' => 'nullable|string|max:255',
                 'pendidikan' => 'nullable|in:SD,SMP,SMA,D1,D2,D3,Sarjana',
                 'nik_distribusi' => 'nullable|string|max:16',
+                'nik_admin_gudang' => 'nullable|string|max:16',
             ]);
 
             $user->update([
@@ -439,7 +483,49 @@ class UserController extends Controller
                 }
             }
 
-            if ($userRole->role_type === 'ahli_gizi') {
+            if ($userRole->role_type === 'admin_gudang') {
+                $adminGudang = AdminGudang::where('id_user_role', $userRole->id_user_role)->first();
+                if ($adminGudang) {
+                    $adminGudangProfileData = [
+                        'nik_admin_gudang' => $validated['nik_admin_gudang'] ?? null,
+                        'nama_lengkap' => $validated['nama_lengkap'] ?? null,
+                        'jabatan' => $validated['jabatan'] ?? null,
+                        'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
+                        'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
+                        'kontak_wa' => $validated['kontak_wa'] ?? null,
+                        'alamat_detail' => $validated['alamat_detail'] ?? null,
+                        'province_code' => $validated['province_code'] ?? null,
+                        'province_name' => $validated['province_name'] ?? null,
+                        'regency_code' => $validated['regency_code'] ?? null,
+                        'regency_name' => $validated['regency_name'] ?? null,
+                        'district_code' => $validated['district_code'] ?? null,
+                        'district_name' => $validated['district_name'] ?? null,
+                        'village_code' => $validated['village_code'] ?? null,
+                        'village_name' => $validated['village_name'] ?? null,
+                    ];
+
+                    if ($request->hasFile('foto_diri')) {
+                        if ($adminGudang->foto_diri && Storage::disk('public')->exists($adminGudang->foto_diri)) {
+                            Storage::disk('public')->delete($adminGudang->foto_diri);
+                        }
+
+                        $image = $request->file('foto_diri');
+                        $filename = time() . '_' . uniqid() . '.webp';
+                        $path = 'dokumen_admin_gudang/foto_diri/' . $filename;
+                        
+                        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                        $img = $manager->read($image->getRealPath());
+                        if ($img->width() > 1200) {
+                            $img->scale(width: 1200);
+                        }
+                        
+                        Storage::disk('public')->put($path, (string) $img->toWebp(80));
+                        $adminGudangProfileData['foto_diri'] = $path;
+                    }
+
+                    $adminGudang->update($adminGudangProfileData);
+                }
+            } elseif ($userRole->role_type === 'ahli_gizi') {
                 $ahliGizi = AhliGizi::where('id_user_role', $userRole->id_user_role)->first();
                 if ($ahliGizi) {
                     $ahliGiziProfileData = [

@@ -18,7 +18,6 @@ return new class extends Migration
         });
     }
 
-    
     public function down(): void
     {
         Schema::table('kategori_prasarana', function (Blueprint $table) {

@@ -23,7 +23,6 @@ class StockSnapshot extends Model
         'available' => 'decimal:2',
     ];
 
-    // Relationships
     public function approvalTransaksi()
     {
         return $this->belongsTo(ApprovalTransaksi::class, 'id_approval_transaksi');

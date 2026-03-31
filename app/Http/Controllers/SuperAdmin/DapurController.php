@@ -225,7 +225,6 @@ class DapurController extends Controller
                 $fotoBangunanPath = 'dapur/' . $filename;
             }
 
-            
             $dapur->update([
                 'nama_dapur' => trim($request->nama_dapur),
                 'province_code' => $wilayahData['province_code'],
@@ -245,7 +244,6 @@ class DapurController extends Controller
                 'tag_lokasi' => $request->tag_lokasi,
             ]);
 
-            
             $dapur->prasarana()->delete();
             if ($request->has('prasarana') && is_array($request->prasarana)) {
                 foreach ($request->prasarana as $itemId) {

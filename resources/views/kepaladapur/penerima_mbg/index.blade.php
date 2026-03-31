@@ -1,10 +1,22 @@
 @extends('template_kepala_dapur.layout')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">Daftar Penerima MBG</h4>
-            <p class="text-muted mb-0">Kelola pengajuan penerima MBG untuk dapur {{ $dapur->nama_dapur }}</p>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav class="d-flex align-items-center mb-2">
+                        <a href="{{ route('dashboard') }}" class="text-muted me-2">
+                            <i class="bx bx-home-alt me-1"></i>
+                            Dashboard
+                        </a>
+                        <i class="bx bx-chevron-right me-2"></i>
+                        <span class="text-dark">Penerima MBG</span>
+                    </nav>
+                    <h4 class="mb-1">Daftar Penerima MBG</h4>
+                    <p class="mb-0 text-muted">Kelola pengajuan penerima MBG untuk dapur {{ $dapur->nama_dapur }}</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -47,65 +59,70 @@
     </div>
 
     <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nama</th>
-                        <th>Identitas</th>
-                        <th>Alamat</th>
-                        <th>Porsi</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($penerima as $p)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            <div class="fw-semibold">{{ $p->userRole?->user?->nama }}</div>
-                            <small class="text-muted">{{ $p->penanggung_jawab }}</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-label-secondary">{{ strtoupper($p->id_type) }}</span><br>
-                            <small>{{ $p->id_number }}</small>
-                        </td>
-                        <td>
-                            <small>{{ $p->village_name ? $p->village_name.', ' : '' }}{{ $p->district_name }}</small>
-                        </td>
-                        <td><span class="badge bg-label-primary">{{ $p->jumlah_porsi }} Porsi</span></td>
-                        <td>
-                            @php  $col = match($p->status_approval) { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' }; @endphp
-                            <span class="badge bg-label-{{ $col }}">{{ ucfirst($p->status_approval) }}</span>
-                        </td>
-                        <td>
-                            <a href="{{ route('kepala-dapur.penerima-mbg.show', ['dapur' => $dapur, 'penerima_mbg' => $p->id_penerima]) }}" class="btn btn-sm btn-icon btn-outline-info">
-                                <i class="bx bx-show"></i>
-                            </a>
-                            @if($p->status_approval === 'pending')
-                                <form action="{{ route('kepala-dapur.penerima-mbg.approve', ['dapur' => $dapur, 'penerima_mbg' => $p->id_penerima]) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('PUT')
-                                    <button type="submit" class="btn btn-sm btn-icon btn-outline-success" title="Setujui">
-                                        <i class="bx bx-check"></i>
-                                    </button>
-                                </form>
-                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger" title="Tolak"
-                                    onclick="showRejectModal({{ $p->id_penerima }})">
-                                    <i class="bx bx-x"></i>
-                                </button>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-4">Belum ada data penerima MBG dengan status ini.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">No</th>
+                            <th width="25%">Nama</th>
+                            <th width="20%">Identitas</th>
+                            <th width="15%">Alamat</th>
+                            <th width="10%">Porsi</th>
+                            <th width="15%">Status</th>
+                            <th width="10%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($penerima as $p)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>
+                                <div class="fw-semibold">{{ $p->userRole?->user?->nama }}</div>
+                                <small class="text-muted">{{ $p->penanggung_jawab }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-label-secondary">{{ strtoupper($p->id_type) }}</span><br>
+                                <small class="text-muted">{{ $p->id_number }}</small>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ $p->village_name ? $p->village_name.', ' : '' }}{{ $p->district_name }}</small>
+                            </td>
+                            <td><span class="badge bg-label-primary">{{ $p->jumlah_porsi }} Porsi</span></td>
+                            <td>
+                                @php  $col = match($p->status_approval) { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' }; @endphp
+                                <span class="badge bg-label-{{ $col }}">{{ ucfirst($p->status_approval) }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="{{ route('kepala-dapur.penerima-mbg.show', ['dapur' => $dapur, 'penerima_mbg' => $p->id_penerima]) }}" 
+                                       class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Lihat Detail">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+                                    @if($p->status_approval === 'pending')
+                                        <form action="{{ route('kepala-dapur.penerima-mbg.approve', ['dapur' => $dapur, 'penerima_mbg' => $p->id_penerima]) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Setujui">
+                                                <i class="bx bx-check"></i>
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Tolak"
+                                            onclick="showRejectModal({{ $p->id_penerima }})">
+                                            <i class="bx bx-x"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Belum ada data penerima MBG dengan status ini.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="card-footer">
             {{ $penerima->links() }}

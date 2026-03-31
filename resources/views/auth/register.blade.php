@@ -56,19 +56,16 @@
         <script src="{{ asset("admin") }}/assets/vendor/js/helpers.js"></script>
         <script src="{{ asset("admin") }}/assets/js/config.js"></script>
 
-        <!-- hCaptcha -->
         <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     </head>
 
     <body style="background-color: #3758F9">
         <div class="container-xxl">
-            <div
-                class="authentication-wrapper authentication-basic container-p-y"
-            >
-                <div class="authentication-inner">
+            <div class="authentication-wrapper authentication-basic container-p-y">
+                <div class="authentication-inner py-4" style="max-width: 800px;">
                     <div class="card">
                         <div class="card-body">
-                            <!-- Logo -->
+                            
                             <div class="app-brand justify-content-center">
                                 <a href="/welcome" class="app-brand-link gap-2">
                                     <span class="app-brand-logo demo">
@@ -78,14 +75,10 @@
                                             style="height: 60px"
                                         />
                                     </span>
-                                    {{-- <span class="demo text-body fw-bolder fs-2">
-                                        Kelola Dapur
-                                    </span> --}}
+                                    
                                 </a>
                             </div>
-                            <!-- /Logo -->
-
-                            <!-- Alert Section -->
+                            
                             @if (session("success"))
                                 <div
                                     class="alert alert-success alert-dismissible fade show"
@@ -140,12 +133,17 @@
                             </p>
 
                             <div class="row g-2 mb-4">
-                                <div class="col-6">
+                                <div class="col-4">
                                     <a href="{{ route('register') }}" class="btn btn-primary w-100 py-2">
                                         <i class="bx bx-store me-1"></i> <small>Kepala Dapur</small>
                                     </a>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-4">
+                                    <a href="{{ route('daftar-mitra') }}" class="btn btn-outline-primary w-100 py-2">
+                                        <i class="bx bx-buildings me-1"></i> <small>Mitra</small>
+                                    </a>
+                                </div>
+                                <div class="col-4">
                                     <a href="{{ route('daftar-mbg') }}" class="btn btn-outline-primary w-100 py-2">
                                         <i class="bx bx-user me-1"></i> <small>Penerima MBG</small>
                                     </a>
@@ -164,7 +162,6 @@
                             >
                                 @csrf
 
-                                <!-- Hidden codes -->
                                 <input
                                     type="hidden"
                                     name="province_code"
@@ -186,7 +183,6 @@
                                     id="village_code"
                                 />
 
-                                <!-- Nama Lengkap -->
                                 <div class="mb-3">
                                     <label for="nama" class="form-label">
                                         Nama Lengkap
@@ -208,7 +204,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Username -->
                                 <div class="mb-3">
                                     <label for="username" class="form-label">
                                         Username
@@ -229,7 +224,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Email -->
                                 <div class="mb-3">
                                     <label for="email" class="form-label">
                                         Email
@@ -250,7 +244,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Nama Dapur -->
                                 <div class="mb-3">
                                     <label for="nama_dapur" class="form-label">
                                         Nama Dapur
@@ -271,7 +264,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Provinsi -->
                                 <div class="mb-3">
                                     <label for="provinsi" class="form-label">
                                         Provinsi
@@ -291,7 +283,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Kabupaten/Kota -->
                                 <div class="mb-3">
                                     <label
                                         for="kabupaten_kota"
@@ -316,7 +307,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Kecamatan -->
                                 <div class="mb-3">
                                     <label for="kecamatan" class="form-label">
                                         Kecamatan
@@ -337,7 +327,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Kelurahan/Desa -->
                                 <div class="mb-3">
                                     <label for="kelurahan" class="form-label">
                                         Kelurahan/Desa
@@ -358,7 +347,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Alamat -->
                                 <div class="mb-3">
                                     <label for="alamat" class="form-label">
                                         Alamat
@@ -377,7 +365,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Telepon -->
                                 <div class="mb-3">
                                     <label for="telepon" class="form-label">
                                         Telepon
@@ -398,7 +385,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Password -->
                                 <div class="mb-3 form-password-toggle">
                                     <label class="form-label" for="password">
                                         Password
@@ -425,7 +411,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Konfirmasi Password -->
                                 <div class="mb-3 form-password-toggle">
                                     <label
                                         class="form-label"
@@ -450,7 +435,6 @@
                                     </div>
                                 </div>
 
-                                <!-- hCaptcha -->
                                 <div class="mb-3">
                                     <div class="h-captcha" 
                                          data-sitekey="{{ config('services.hcaptcha.site_key', env('HCAPTCHA_SITE_KEY')) }}"
@@ -464,27 +448,17 @@
                                     @enderror
                                 </div>
 
-                                <!-- Terms Agreement -->
-                                {{-- <div class="mb-3">
+                                <div class="mb-3">
                                     <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            id="terms"
-                                            name="terms"
-                                            required
-                                            {{ old('terms') ? 'checked' : '' }}
-                                        />
+                                        <input class="form-check-input @error('terms') is-invalid @enderror" type="checkbox" name="terms" id="terms" required>
                                         <label class="form-check-label" for="terms">
-                                            <small>
-                                                Saya setuju dengan 
-                                                <a href="#" target="_blank" class="text-primary">Syarat dan Ketentuan</a> 
-                                                serta 
-                                                <a href="#" target="_blank" class="text-primary">Kebijakan Privasi</a>
-                                            </small>
+                                            Saya menyetujui <a href="javascript:void(0);">Aturan & Ketentuan Layanan</a> yang berlaku.
                                         </label>
+                                        @error('terms')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
-                                </div> --}}
+                                </div>
 
                                 <button
                                     id="registerBtn"

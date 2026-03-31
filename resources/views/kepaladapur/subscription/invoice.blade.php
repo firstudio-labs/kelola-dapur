@@ -344,7 +344,7 @@
     </head>
     <body>
         <div class="invoice-container">
-            <!-- Header -->
+            
             <div class="invoice-header">
                 <div class="logo">
                     <span class="app-brand-logo demo">
@@ -363,9 +363,8 @@
                 </div>
             </div>
 
-            <!-- Body -->
             <div class="invoice-body">
-                <!-- Parties Section -->
+                
                 <div class="parties-section">
                     <div class="party">
                         <div class="party-label">FROM:</div>
@@ -398,7 +397,6 @@
                     </div>
                 </div>
 
-                <!-- Invoice Meta -->
                 <div class="invoice-meta">
                     <div class="meta-label">INVOICE DATE:</div>
                     <div class="meta-value">
@@ -406,7 +404,6 @@
                     </div>
                 </div>
 
-                <!-- Items Table -->
                 <table class="items-table">
                     <thead>
                         <tr>
@@ -481,7 +478,6 @@
                     </tbody>
                 </table>
 
-                <!-- Summary -->
                 <div class="summary-section">
                     <div class="summary-row subtotal">
                         <span>SUBTOTAL</span>
@@ -517,7 +513,6 @@
                     </div>
                 </div>
 
-                <!-- Payment Info -->
                 <div class="payment-section">
                     <div class="payment-title">SEND PAYMENT TO:</div>
                     <div class="payment-details">
@@ -536,7 +531,6 @@
                 </div>
             </div>
 
-            <!-- Footer -->
             <div class="invoice-footer">Created by Kelola Dapur</div>
         </div>
 

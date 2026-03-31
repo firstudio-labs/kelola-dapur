@@ -19,7 +19,7 @@ class AhliGiziController extends Controller
 
     public function dashboard(Request $request)
     {
-        /** @var User $user */
+        
         $user = Auth::user();
 
         $userRole = $user->userRole()->where('role_type', 'ahli_gizi')->first();

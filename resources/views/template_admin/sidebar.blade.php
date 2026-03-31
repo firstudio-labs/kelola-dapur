@@ -1,7 +1,7 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-    <!-- Brand + Toggle -->
+    
     <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
-        <!-- Logo -->
+        
         <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
             <span class="app-brand-logo demo">
                 <img src="{{ asset('logo_kelola_dapur_black.png') }}" alt="Logo" style="height: 45px; width: auto" />
@@ -9,9 +9,8 @@
         </a>
     </div>
 
-    <!-- Menu Container with flex layout -->
     <div class="menu-container d-flex flex-column h-100">
-        <!-- User Profile Section - Moved to Top of Menu -->
+        
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
@@ -74,9 +73,8 @@
             </div>
         </div>
 
-        <!-- Menu Utama -->
         <ul class="menu-inner py-1 flex-grow-1">
-            <!-- Dashboard -->
+            
             <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <a href="{{ route('dashboard') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -84,12 +82,10 @@
                 </a>
             </li>
 
-            <!-- Admin Header -->
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Admin</span>
             </li>
 
-            <!-- Dapur -->
             <li class="menu-item {{ request()->routeIs('superadmin.dapur.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-buildings"></i>
@@ -104,7 +100,6 @@
                 </ul>
             </li>
 
-            <!-- Menu Makanan -->
             <li class="menu-item {{ request()->routeIs('superadmin.menu-makanan.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-food-menu"></i>
@@ -124,7 +119,6 @@
                 </ul>
             </li>
 
-            <!-- Template Bahan -->
             <li class="menu-item {{ request()->routeIs('superadmin.template-items.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-package"></i>
@@ -144,7 +138,6 @@
                 </ul>
             </li>
 
-            <!-- Subscription Packages -->
             <li class="menu-item {{ request()->routeIs('superadmin.subscription-packages.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-credit-card"></i>
@@ -166,7 +159,6 @@
                 </ul>
             </li>
 
-            <!-- Promo Codes -->
             <li class="menu-item {{ request()->routeIs('superadmin.promo-codes.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-purchase-tag"></i>
@@ -186,7 +178,6 @@
                 </ul>
             </li>
 
-            <!-- Subscription Requests -->
             <li class="menu-item {{ request()->routeIs('superadmin.subscription-requests.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-receipt"></i>
@@ -205,7 +196,6 @@
     </div>
 </aside>
 
-<!-- Mobile Menu Toggle Button (tampil hanya di mobile) -->
 <button class="btn btn-primary position-fixed d-lg-none" id="mobileMenuToggle"
     style="
         top: 10px;
@@ -222,7 +212,6 @@
     <i class="bx bx-chevron-right bx-sm align-middle"></i>
 </button>
 
-<!-- Overlay untuk mobile -->
 <div class="layout-overlay d-lg-none" id="layoutOverlay" style="display: none"></div>
 
 <style>

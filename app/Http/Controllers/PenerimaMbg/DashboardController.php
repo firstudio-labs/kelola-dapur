@@ -16,6 +16,19 @@ class DashboardController extends Controller
             ->with('dapur')
             ->first();
 
-        return view('penerima_mbg.dashboard', compact('user', 'penerima'));
+        $today = now()->toDateString();
+        $todayDeliveries = [];
+
+        if ($penerima) {
+            $todayDeliveries = \App\Models\OrderDistribusiDetail::where('id_penerima', $penerima->id_penerima)
+                ->where('status', \App\Models\OrderDistribusiDetail::STATUS_SUDAH_DIKIRIM)
+                ->whereHas('orderDistribusi.orderProduksi.transaksiDapur', function ($query) use ($today) {
+                    $query->whereDate('tanggal_transaksi', $today);
+                })
+                ->with(['orderDistribusi.orderProduksi.transaksiDapur.detailTransaksiDapur.menuMakanan'])
+                ->get();
+        }
+
+        return view('penerima_mbg.dashboard', compact('user', 'penerima', 'todayDeliveries'));
     }
 }

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    
     <div class="card mb-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
@@ -22,7 +22,6 @@
         </div>
     </div>
 
-    <!-- Success/Error Messages -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible mb-4" role="alert">
             <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
@@ -36,7 +35,6 @@
         </div>
     @endif
 
-    <!-- Filter Section -->
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('produksi.order.index') }}" class="row g-3">
@@ -50,7 +48,7 @@
                         <option value="selesai" {{ $statusFilter === 'selesai' ? 'selected' : '' }}>Selesai</option>
                     </select>
                 </div>
-                <!-- Menambahkan filter tanggal untuk menyamai UI Ahli Gizi meskipun belum ada logic di controller produksi (bisa ditambahkan nanti atau visual saja) -->
+                
                 <div class="col-md-3">
                     <label for="date-from" class="form-label">Dari Tanggal</label>
                     <input type="date" name="date_from" id="date-from" value="{{ request('date_from') }}" class="form-control" />
@@ -59,8 +57,15 @@
                     <label for="date-to" class="form-label">Sampai Tanggal</label>
                     <input type="date" name="date_to" id="date-to" value="{{ request('date_to') }}" class="form-control" />
                 </div>
+                <div class="col-md-3">
+                    <label for="search-input" class="form-label">Pencarian Cepat</label>
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" id="search-input" class="form-control" placeholder="Cari nama, menu..." />
+                    </div>
+                </div>
                 <div class="col-12 d-flex justify-content-end gap-2 mt-3">
-                    @if (request()->hasAny(['search', 'status', 'date_from', 'date_to']) && request('status') !== 'all')
+                    @if (request()->hasAny(['search', 'status', 'date_from', 'date_to']) && (request('status') !== 'all' || request('date_from')))
                         <a href="{{ route('produksi.order.index') }}" class="btn btn-outline-secondary">
                             Reset Filter
                         </a>
@@ -71,7 +76,6 @@
         </div>
     </div>
 
-    <!-- Statistics Section -->
     @if($orders->total() > 0)
         <div class="card mb-4">
             <div class="card-body py-2 px-4">
@@ -125,11 +129,10 @@
         </div>
     @endif
 
-    <!-- Transaksi List -->
     <div class="card">
         <div class="card-body">
             @if($orders->count() > 0)
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                     <table class="table table-hover">
                         <thead>
                                 <tr>
@@ -164,10 +167,18 @@
                                         "completed" => "bg-label-success",
                                         "rejected" => "bg-label-danger",
                                     ];
+
+                                    $mapStatusProduksi = [
+                                        'stok_kurang' => ['badge' => 'bg-danger', 'text' => 'Stok Kurang'],
+                                        'belum_dibuat' => ['badge' => 'bg-secondary', 'text' => 'Belum Dibuat'],
+                                        'sedang_dibuat' => ['badge' => 'bg-warning', 'text' => 'Sedang Dibuat'],
+                                        'selesai' => ['badge' => 'bg-success', 'text' => 'Selesai']
+                                    ];
+                                    $prodData = $mapStatusProduksi[$order->status] ?? ['badge' => 'bg-label-secondary', 'text' => 'Unknown'];
                                 @endphp
 
                                 <tr class="{{ $isStokKurang ? 'table-danger' : '' }}" 
-                                    data-search="{{ strtolower($transaksi->nama_paket ?? '') }}" 
+                                    data-search="{{ strtolower($transaksi->nama_paket ?? '') }} {{ strtolower($transaksi->createdBy->nama ?? '') }} {{ strtolower($menuList) }}" 
                                     data-status="{{ $order->status }}">
                                     <td>{{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}</td>
                                     <td>
@@ -209,16 +220,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @php
-                                            $mapStatusProduksi = [
-                                                'stok_kurang' => ['badge' => 'bg-label-danger', 'text' => 'Stok Kurang'],
-                                                'belum_dibuat' => ['badge' => 'bg-label-secondary', 'text' => 'Belum Dibuat'],
-                                                'sedang_dibuat' => ['badge' => 'bg-label-warning', 'text' => 'Sedang Dibuat'],
-                                                'selesai' => ['badge' => 'bg-label-success', 'text' => 'Selesai']
-                                            ];
-                                            $prodData = $mapStatusProduksi[$order->status] ?? ['badge' => 'bg-label-secondary', 'text' => 'Unknown'];
-                                        @endphp
-                                        <span class="badge {{ $prodData['badge'] }}">
+                                        <span class="badge {{ $prodData['badge'] }} text-white shadow-sm">
                                             {{ $prodData['text'] }}
                                         </span>
                                         @if($isStokKurang)
@@ -234,13 +236,13 @@
                                             @php
                                                 $orderDistribusi = $order->distribusiOrder;
                                                 $mapStatusDistribusi = [
-                                                    'belum_dikirim' => ['badge' => 'bg-label-secondary', 'text' => 'Belum Dikirim'],
-                                                    'sedang_dikirim' => ['badge' => 'bg-label-warning', 'text' => 'Sedang Dikirim'],
-                                                    'sudah_dikirim' => ['badge' => 'bg-label-success', 'text' => 'Sudah Dikirim']
+                                                    'belum_dikirim' => ['badge' => 'bg-secondary', 'text' => 'Belum Dikirim'],
+                                                    'sedang_dikirim' => ['badge' => 'bg-warning', 'text' => 'Sedang Dikirim'],
+                                                    'sudah_dikirim' => ['badge' => 'bg-success', 'text' => 'Sudah Dikirim']
                                                 ];
                                                 $distData = $mapStatusDistribusi[$orderDistribusi->status] ?? ['badge' => 'bg-label-secondary', 'text' => 'Unknown'];
                                             @endphp
-                                            <span class="badge {{ $distData['badge'] }}">
+                                            <span class="badge {{ $distData['badge'] }} text-white shadow-sm">
                                                 {{ $distData['text'] }}
                                             </span>
                                         @else
@@ -251,7 +253,7 @@
                                         <div class="d-flex gap-1">
                                             <a href="{{ route('produksi.order.show', $order->id_order) }}" 
                                                class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="tooltip" title="Lihat Detail">
-                                                <i class="bx bx-show"></i>
+                                                <i class="bx bx-show px-1"></i> Detail
                                             </a>
                                             @if(!$isStokKurang && $order->status !== 'selesai')
                                                 <button type="button" 
@@ -262,7 +264,7 @@
                                                         data-status="{{ $order->status }}"
                                                         data-catatan="{{ $order->catatan }}"
                                                         title="Update Status">
-                                                    <i class="bx bx-edit"></i>
+                                                    <i class="bx bx-edit px-1"></i>
                                                 </button>
                                             @endif
                                         </div>
@@ -272,14 +274,103 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination -->
+
+                <div class="d-block d-md-none mt-3" id="mobile-cards-container">
+                    @foreach ($orders as $order)
+                        @php
+                            $transaksi = $order->transaksiDapur;
+                            $totalPorsi = $transaksi->detailTransaksiDapur->sum('jumlah_porsi');
+                            $menuList = $transaksi->detailTransaksiDapur->map(fn($d) => $d->menuMakanan->nama_menu ?? '-')->unique()->implode(', ');
+                            $isStokKurang = $order->status === 'stok_kurang';
+                            
+                            $mapStatusProduksi = [
+                                'stok_kurang' => ['badge' => 'bg-danger', 'text' => 'Stok Kurang'],
+                                'belum_dibuat' => ['badge' => 'bg-secondary', 'text' => 'Belum Dibuat'],
+                                'sedang_dibuat' => ['badge' => 'bg-warning', 'text' => 'Sedang Dibuat'],
+                                'selesai' => ['badge' => 'bg-success', 'text' => 'Selesai']
+                            ];
+                            $prodData = $mapStatusProduksi[$order->status] ?? ['badge' => 'bg-label-secondary', 'text' => 'Unknown'];
+                            
+                            $distData = ['badge' => 'bg-secondary', 'text' => '-'];
+                            if ($order->distribusiOrder) {
+                                $mapStatusDistribusi = [
+                                    'belum_dikirim' => ['badge' => 'bg-secondary', 'text' => 'Belum'],
+                                    'sedang_dikirim' => ['badge' => 'bg-warning', 'text' => 'Proses'],
+                                    'sudah_dikirim' => ['badge' => 'bg-success', 'text' => 'Selesai']
+                                ];
+                                $distData = $mapStatusDistribusi[$order->distribusiOrder->status] ?? $distData;
+                            }
+                        @endphp
+                        
+                        <div class="card mb-3 border shadow-none mobile-card-item {{ $isStokKurang ? 'border-danger' : '' }}" 
+                             data-search="{{ strtolower($transaksi->nama_paket ?? '') }} {{ strtolower($transaksi->createdBy->nama ?? '') }} {{ strtolower($menuList) }}">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="fw-semibold text-primary mb-1">Order #{{ $order->id_order }}</div>
+                                        <small class="text-muted"><i class="bx bx-calendar me-1"></i>{{ $transaksi->tanggal_transaksi->format("d M Y") }}</small>
+                                    </div>
+                                    <span class="badge {{ $prodData['badge'] }} text-white shadow-sm">{{ $prodData['text'] }}</span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-sm me-2">
+                                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-bowl-hot"></i></span>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">Porsi</small>
+                                            <span class="fw-semibold">{{ $totalPorsi }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted d-block mb-1">Distribusi</small>
+                                        <span class="badge {{ $distData['badge'] }}" style="font-size: 0.7rem;">{{ $distData['text'] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Menu:</small>
+                                    <div class="text-dark small text-truncate" title="{{ $menuList }}">
+                                        {{ $menuList }}
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('produksi.order.show', $order->id_order) }}" class="btn btn-sm btn-outline-primary">
+                                            Detail
+                                        </a>
+                                        @if(!$isStokKurang && $order->status !== 'selesai')
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-info"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#updateStatusModal"
+                                                    data-id="{{ $order->id_order }}"
+                                                    data-status="{{ $order->status }}"
+                                                    data-catatan="{{ $order->catatan }}">
+                                                Update
+                                            </button>
+                                        @endif
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Dibuat Oleh:</small>
+                                        <span class="fw-semibold small">{{ $transaksi->createdBy->nama ?? 'N/A' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                
                 @if ($orders->hasPages())
                     <div class="mt-4 d-flex justify-content-center">
                         {{ $orders->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                     </div>
                 @endif
             @else
-                <!-- Empty State -->
+                
                 <div class="text-center py-6">
                     @if (request()->hasAny(['search', 'status', 'date_from', 'date_to']))
                         <i class="bx bx-search bx-lg text-muted mb-3"></i>
@@ -299,7 +390,6 @@
     </div>
 </div>
 
-<!-- Modal Update Status Produksi -->
 <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -319,7 +409,7 @@
                             <option value="selesai">Selesai</option>
                         </select>
                     </div>
-                    <!-- Foto Dokumentasi - Muncul hanya jika Selesai -->
+                    
                     <div class="mb-3 d-none" id="dokumentasiWrapper">
                         <label class="form-label">Foto Dokumentasi (Wajib untuk Selesai, Minimal 1)</label>
                         <input type="file" name="dokumentasi[]" class="form-control" multiple accept="image/*" id="inputDokumentasi">
@@ -339,10 +429,8 @@
     </div>
 </div>
 
-<!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" />
 
-<!-- Custom Styling for Action Buttons and Choices.js -->
 <style>
     .choices__inner {
         background-color: #fff;
@@ -391,13 +479,16 @@
     }
 </style>
 
-<!-- Choices.js JS -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-<!-- JavaScript for Filters and Tooltips -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const statusFilter = document.getElementById('status-filter');
+        const searchInput = document.getElementById('search-input');
+        const tableBody = document.getElementById('transaksi-table-body');
+        const rows = tableBody ? tableBody.getElementsByTagName('tr') : [];
+        const mobileCardsContainer = document.getElementById('mobile-cards-container');
+        const mobileCards = mobileCardsContainer ? mobileCardsContainer.getElementsByClassName('mobile-card-item') : [];
         
         // Initialize Choices.js
         if(statusFilter) {
@@ -406,6 +497,25 @@
                 itemSelectText: '',
                 placeholder: true,
                 placeholderValue: 'Semua Status',
+            });
+        }
+
+        // Fast Searching Logic (Client-side)
+        if(searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                
+                // Filter Table Rows
+                Array.from(rows).forEach(row => {
+                    const text = row.getAttribute('data-search').toLowerCase();
+                    row.style.display = text.includes(query) ? '' : 'none';
+                });
+
+                // Filter Mobile Cards
+                Array.from(mobileCards).forEach(card => {
+                    const text = card.getAttribute('data-search').toLowerCase();
+                    card.style.display = text.includes(query) ? '' : 'none';
+                });
             });
         }
 

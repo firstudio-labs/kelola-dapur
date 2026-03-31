@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Breadcrumb -->
+    
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -12,7 +12,6 @@
         </ol>
     </nav>
 
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="mb-1">Template Bahan</h4>
@@ -23,7 +22,6 @@
         </a>
     </div>
 
-    <!-- Flash Messages -->
     @if (session('success'))
         <div class="alert alert-success alert-dismissible" role="alert">
             {{ session('success') }}
@@ -37,7 +35,6 @@
         </div>
     @endif
 
-    <!-- Search -->
     <div class="card mb-4">
         <div class="card-body py-3">
             <form action="{{ route('kepala-dapur.template-items.index') }}" method="GET" class="row align-items-center">
@@ -53,7 +50,6 @@
         </div>
     </div>
 
-    <!-- Table -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0">Daftar Template Bahan</h6>
@@ -112,16 +108,7 @@
                                        class="btn btn-sm btn-outline-warning">
                                         <i class="bx bx-edit"></i>
                                     </a>
-                                    {{-- <form action="{{ route('kepala-dapur.template-items.destroy', $item) }}" 
-                                          method="POST" 
-                                          class="d-inline"
-                                          onsubmit="return confirm('Yakin ingin menghapus {{ $item->nama_bahan }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
-                                    </form> --}}
+                                    
                                 </div>
                             </td>
                         </tr>
@@ -148,7 +135,6 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
             @if($templateItems->hasPages())
             <div class="mt-3">
                 {{ $templateItems->appends(['search' => request('search')])->links('vendor.pagination.sneat') }}
@@ -156,7 +142,6 @@
             @endif
         </div>
         
-        <!-- Table Info Footer -->
         @if($templateItems->count() > 0)
         <div class="card-footer">
             <small class="text-muted">

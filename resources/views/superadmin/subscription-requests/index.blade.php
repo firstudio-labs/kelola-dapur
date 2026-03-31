@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -27,7 +27,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -55,7 +54,6 @@
             </div>
         @endif
 
-        <!-- Filter Tabs -->
         <div class="card mb-4">
             <div class="card-body">
                 <ul class="nav nav-pills nav-fill">
@@ -111,7 +109,6 @@
             </div>
         </div>
 
-        <!-- Bulk Action for Pending -->
         @if (request()->routeIs("superadmin.subscription-requests.pending") && $subscriptionRequests->count() > 0)
             <div class="card mb-4">
                 <div class="card-body">
@@ -172,7 +169,6 @@
             </div>
         @endif
 
-        <!-- Subscription Requests List -->
         <div class="card mb-4">
             <div class="card-body">
                 @if ($subscriptionRequests->count() > 0)
@@ -335,7 +331,6 @@
                                         </td>
                                     </tr>
 
-                                    <!-- Approve Modal -->
                                     @if ($request->status === "pending")
                                         <div
                                             class="modal fade"
@@ -409,7 +404,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Reject Modal -->
                                         <div
                                             class="modal fade"
                                             id="rejectModal{{ $request->id_subscription_request }}"
@@ -492,14 +486,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($subscriptionRequests->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $subscriptionRequests->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         <i class="bx bx-receipt bx-lg text-muted mb-3"></i>
                         <h5 class="mb-1">Tidak ada request subscription</h5>

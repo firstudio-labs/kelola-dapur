@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -31,7 +31,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -59,7 +58,6 @@
             </div>
         @endif
 
-        <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
                 <div class="card">
@@ -170,7 +168,6 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -302,7 +299,6 @@
             </div>
         </div>
 
-        <!-- Approvals Table -->
         <div class="card">
             <div class="card-body">
                 @if ($approvals->isNotEmpty())
@@ -316,6 +312,7 @@
                                     <th>Jumlah Diminta</th>
                                     <th>Admin Gudang</th>
                                     <th>Status</th>
+                                    <th>Dokumentasi</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -364,27 +361,22 @@
                                             </small>
                                         </td>
                                         <td>
-                                            <div
-                                                class="d-flex align-items-center"
-                                            >
-                                                {{--
-                                                    <div
-                                                    class="avatar avatar-sm me-2"
-                                                    >
-                                                    <span
-                                                    class="avatar-initial rounded-circle bg-label-info"
-                                                    >
-                                                    {{ strtoupper(substr($approval->adminGudang->user->nama ?? "AG", 0, 2)) }}
-                                                    </span>
-                                                    </div>
-                                                --}}
+                                            <div class="d-flex align-items-center">
                                                 <div>
-                                                    <span class="fw-medium">
-                                                        {{ $approval->adminGudang->user->nama ?? "Admin Gudang" }}
-                                                    </span>
+                                                    @if($approval->suppliers->count() > 1)
+                                                        <span class="badge bg-label-info">
+                                                            <i class="bx bx-store me-1"></i> {{ $approval->suppliers->count() }} Supplier
+                                                        </span>
+                                                    @elseif($approval->suppliers->count() === 1)
+                                                        <span class="fw-medium text-dark">
+                                                            {{ $approval->suppliers->first()->supplier->nama_supplier }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted small italic">Tanpa Supplier</span>
+                                                    @endif
                                                     <br />
                                                     <small class="text-muted">
-                                                        Admin Gudang
+                                                        Oleh: {{ $approval->adminGudang->user->nama ?? "Admin Gudang" }}
                                                     </small>
                                                 </div>
                                             </div>
@@ -419,6 +411,22 @@
                                             @endif
                                         </td>
                                         <td>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @if($approval->foto_bahan)
+                                                    <img src="{{ asset('storage/' . $approval->foto_bahan) }}" 
+                                                         class="img-thumbnail" style="width: 40px; height: 40px; object-fit: cover;" 
+                                                         title="Foto Bahan"
+                                                         onclick="window.open(this.src, '_blank')">
+                                                @endif
+                                                @foreach($approval->dokumentasi as $doc)
+                                                    <img src="{{ asset('storage/' . $doc->foto_path) }}" 
+                                                         class="img-thumbnail" style="width: 40px; height: 40px; object-fit: cover;" 
+                                                         title="Foto Supplier"
+                                                         onclick="window.open(this.src, '_blank')">
+                                                @endforeach
+                                            </div>
+                                        </td>
+                                        <td>
                                             <div class="d-flex gap-1">
                                                     <button
                                                         type="button"
@@ -427,7 +435,7 @@
                                                     data-bs-target="#approvalStockDetailModal"
                                                     data-approval-data="{{ json_encode([
                                                         'tanggal_permintaan' => $approval->created_at->format('d M Y H:i'),
-                                                        'jumlah_diminta' => rtrim(rtrim(number_format($approval->jumlah, 3), '0'), '.') . ' ' . $approval->satuan,
+                                                        'jumlah_diminta' => rtrim(rtrim(number_format($approval->jumlah, 3), '0'), '.') . ' ' . ($approval->satuan ?? ($approval->stockItem->templateItem->satuan ?? '')),
                                                         'status' => $approval->status,
                                                         'tanggal_diproses' => $approval->approved_at ? $approval->approved_at->format('d M Y H:i') : '-',
                                                         'nama_pemohon' => $approval->adminGudang->user->nama ?? 'Admin Gudang',
@@ -438,7 +446,12 @@
                                                         'suhu' => $approval->suhu_bahan_makanan,
                                                         'warna' => $approval->warna_bahan_makanan,
                                                         'foto_bahan' => $approval->foto_bahan ? asset('storage/' . $approval->foto_bahan) : null,
-                                                        'keterangan' => $approval->keterangan
+                                                        'keterangan' => $approval->keterangan,
+                                                        'suppliers' => $approval->suppliers->map(fn($s) => [
+                                                            'nama_supplier' => $s->supplier->nama_supplier ?? 'Unknown',
+                                                            'jumlah' => rtrim(rtrim(number_format($s->jumlah, 3), '0'), '.') . ' ' . ($approval->satuan ?? ($approval->stockItem->templateItem->satuan ?? '')),
+                                                            'fotos' => $s->dokumentasi->map(fn($d) => asset('storage/' . $d->foto_path))->values()->toArray()
+                                                        ])->values()->toArray()
                                                     ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                     onclick="showApprovalStockDetailModal(JSON.parse(this.getAttribute('data-approval-data')))"
                                                     title="Lihat Detail"
@@ -453,14 +466,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($approvals->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $approvals->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         <i class="bx bx-receipt bx-lg text-muted mb-3"></i>
                         <h5 class="mb-1">Tidak ada permintaan stok</h5>
@@ -482,16 +494,13 @@
         </div>
     </div>
 
-    <!-- Approval Stock Detail Modal -->
     @include('partials.approval-stock-detail-modal')
 
-    <!-- Choices.js CSS -->
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
     />
 
-    <!-- Custom Styling -->
     <style>
         .choices__inner {
             background-color: #fff;
@@ -573,10 +582,8 @@
         }
     </style>
 
-    <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize Choices.js

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('id_promo')->nullable()->constrained('promo_codes', 'id_promo')->onDelete('set null');
             $table->decimal('harga_asli', 10, 0);
             $table->decimal('diskon', 10, 0)->default(0);
-            $table->decimal('harga_final', 10, 0); // harga dengan id_dapur ditambahkan
+            $table->decimal('harga_final', 10, 0); 
             $table->string('bukti_transfer')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('catatan')->nullable();

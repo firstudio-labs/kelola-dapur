@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Dapur;
 use App\Models\KepalaDapur;
+use App\Models\Mitra;
+use App\Models\MitraDapur;
 use App\Models\PenerimaMbg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +52,132 @@ class AuthController extends Controller
         return view('auth.register_penerima', compact('dapurList'));
     }
 
+    public function showRegistrationFormMitra()
+    {
+        if (Auth::check()) {
+            return $this->redirectBasedOnRole();
+        }
+
+        return view('auth.register_mitra');
+    }
+
+    public function registerMitra(Request $request)
+    {
+        $key = 'register_mitra.' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return redirect()->back()
+                ->with('error', "Terlalu banyak percobaan. Coba lagi dalam {$seconds} detik.")
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
+
+        $validator = Validator::make($request->all(), [
+            'nama'                  => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'username'              => 'required|string|max:255|unique:users,username|regex:/^[a-zA-Z0-9_]+$/',
+            'email'                 => 'required|email|max:255|unique:users,email',
+            'password'              => [
+                'required', 'string', 'min:8', 'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+            ],
+            'nik_pemilik'           => 'required|string|max:20|regex:/^[0-9]+$/',
+            'nama_pemilik'          => 'required|string|max:255',
+            'province_code'         => 'required|string',
+            'province_name'         => 'required|string|max:100',
+            'regency_code'          => 'required|string',
+            'regency_name'          => 'required|string|max:100',
+            'district_code'         => 'nullable|string',
+            'district_name'         => 'nullable|string|max:100',
+            'village_code'          => 'nullable|string',
+            'village_name'          => 'nullable|string|max:100',
+            'alamat_detail'         => 'required|string|max:500',
+            'h-captcha-response'    => 'required',
+            'terms'                 => 'required|accepted',
+        ], [
+            'nama.required'             => 'Nama lengkap harus diisi',
+            'nama.regex'                => 'Nama hanya boleh mengandung huruf dan spasi',
+            'username.required'         => 'Username harus diisi',
+            'username.unique'           => 'Username sudah digunakan',
+            'email.required'            => 'Email harus diisi',
+            'email.unique'              => 'Email sudah terdaftar',
+            'password.required'         => 'Password harus diisi',
+            'password.min'              => 'Password minimal 8 karakter',
+            'password.regex'            => 'Password harus mengandung minimal 1 huruf kecil, 1 huruf besar, dan 1 angka',
+            'password.confirmed'        => 'Konfirmasi password tidak cocok',
+            'nik_pemilik.required'      => 'NIK pemilik harus diisi',
+            'nik_pemilik.regex'         => 'NIK hanya boleh mengandung angka',
+            'nama_pemilik.required'     => 'Nama pemilik harus diisi',
+            'province_name.required'    => 'Provinsi harus dipilih',
+            'regency_name.required'     => 'Kabupaten/Kota harus dipilih',
+            'alamat_detail.required'    => 'Detail alamat harus diisi',
+            'h-captcha-response.required' => 'Silakan verifikasi captcha terlebih dahulu',
+            'terms.required'            => 'Anda harus menyetujui syarat dan ketentuan',
+            'terms.accepted'            => 'Anda harus menyetujui syarat dan ketentuan',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
+
+        if (!$this->verifyCaptcha($request->input('h-captcha-response'))) {
+            return redirect()->back()
+                ->withErrors(['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
+
+        RateLimiter::hit($key, 3600);
+        DB::beginTransaction();
+
+        try {
+            $user = User::create([
+                'nama'      => trim($request->nama),
+                'username'  => strtolower(trim($request->username)),
+                'email'     => strtolower(trim($request->email)),
+                'password'  => Hash::make($request->password),
+                'is_active' => true,
+            ]);
+
+            // Mitra tidak terikat ke satu dapur di user_roles; id_dapur null
+            $userRole = UserRole::create([
+                'id_user'   => $user->id_user,
+                'role_type' => 'mitra',
+                'id_dapur'  => null,
+            ]);
+
+            $mitra = Mitra::create([
+                'id_user_role'  => $userRole->id_user_role,
+                'nik_pemilik'   => $request->nik_pemilik,
+                'nama_pemilik'  => trim($request->nama_pemilik),
+                'province_code' => $request->province_code,
+                'province_name' => $request->province_name,
+                'regency_code'  => $request->regency_code,
+                'regency_name'  => $request->regency_name,
+                'district_code' => $request->district_code,
+                'district_name' => $request->district_name,
+                'village_code'  => $request->village_code,
+                'village_name'  => $request->village_name,
+                'alamat_detail' => trim($request->alamat_detail),
+            ]);
+
+            DB::commit();
+            RateLimiter::clear($key);
+
+            Log::info('Mitra registered', ['user_id' => $user->id_user]);
+
+            Auth::login($user);
+            $user->load(['userRole']);
+
+            return redirect()->route('mitra.dashboard')
+                ->with('success', 'Registrasi berhasil! Selamat datang di Kelola Dapur sebagai Mitra.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Mitra registration failed', ['error' => $e->getMessage()]);
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.')
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
+    }
+
     public function registerPenerima(Request $request)
     {
         $key = 'register_penerima.' . $request->ip();
@@ -61,10 +189,16 @@ class AuthController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'nama'                 => 'required|string|max:255',
+            'nama'                 => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'username'             => 'required|string|max:255|unique:users,username|regex:/^[a-zA-Z0-9_]+$/',
             'email'                => 'required|email|max:255|unique:users,email',
-            'password'             => 'required|string|min:8|confirmed',
+            'password'             => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'
+            ],
             'id_dapur'             => 'required|exists:dapur,id_dapur',
             'id_type'              => 'required|in:nik,nisn,no_registrasi',
             'id_number'            => 'required|string|max:50',
@@ -82,12 +216,19 @@ class AuthController extends Controller
             'longitude'            => 'nullable|numeric|between:-180,180',
             'link_gmaps'           => 'nullable|url|max:500',
             'foto_lokasi'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
+            'h-captcha-response'   => 'required',
+            'terms'                => 'required|accepted',
         ], [
             'nama.required'             => 'Nama lengkap harus diisi',
+            'nama.regex'                => 'Nama hanya boleh mengandung huruf dan spasi',
             'username.required'         => 'Username harus diisi',
             'username.unique'           => 'Username sudah digunakan',
             'email.required'            => 'Email harus diisi',
             'email.unique'              => 'Email sudah terdaftar',
+            'password.required'         => 'Password harus diisi',
+            'password.min'              => 'Password minimal 8 karakter',
+            'password.regex'            => 'Password harus mengandung minimal 1 huruf kecil, 1 huruf besar, dan 1 angka',
+            'password.confirmed'        => 'Konfirmasi password tidak cocok',
             'id_dapur.required'         => 'Silakan pilih Dapur SPPG tujuan',
             'id_dapur.exists'           => 'Dapur SPPG tidak ditemukan',
             'id_number.required'        => 'Nomor identitas harus diisi',
@@ -95,10 +236,19 @@ class AuthController extends Controller
             'province_name.required'    => 'Provinsi harus dipilih',
             'regency_name.required'     => 'Kabupaten/Kota harus dipilih',
             'alamat_detail.required'    => 'Detail alamat harus diisi',
+            'h-captcha-response.required' => 'Silakan verifikasi captcha terlebih dahulu',
+            'terms.required'            => 'Anda harus menyetujui syarat dan ketentuan',
+            'terms.accepted'            => 'Anda harus menyetujui syarat dan ketentuan',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput($request->except('password', 'password_confirmation'));
+        }
+
+        if (!$this->verifyCaptcha($request->input('h-captcha-response'))) {
+            return redirect()->back()
+                ->withErrors(['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
+                ->withInput($request->except('password', 'password_confirmation'));
         }
 
         RateLimiter::hit($key, 3600);
@@ -205,7 +355,7 @@ class AuthController extends Controller
 
         if (!$this->verifyCaptcha($request->input('h-captcha-response'))) {
             return redirect()->back()
-                ->with('errors', ['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
+                ->withErrors(['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
                 ->withInput($request->except('password'));
         }
 
@@ -376,7 +526,6 @@ class AuthController extends Controller
                 ->withInput($request->except('password', 'password_confirmation'));
         }
 
-        
         if (!$this->verifyCaptcha($request->input('h-captcha-response'))) {
             return redirect()->back()
                 ->withErrors(['h-captcha-response' => 'Verifikasi captcha gagal. Silakan coba lagi.'])
@@ -492,7 +641,7 @@ class AuthController extends Controller
             'id_dapur' => $user->userRole->id_dapur,
         ];
 
-        if ($user->userRole->role_type !== 'super_admin' && $user->userRole->dapur) {
+        if ($user->userRole->role_type !== 'super_admin' && $user->userRole->id_dapur && $user->userRole->dapur) {
             $dapur = $user->userRole->dapur;
 
             $sessionData['dapur_name'] = $dapur->nama_dapur;
@@ -519,7 +668,6 @@ class AuthController extends Controller
             return;
         }
 
-        
         $targetDapurId = $dapurId ?: session('id_dapur');
 
         if (!$targetDapurId) {
@@ -549,7 +697,6 @@ class AuthController extends Controller
             return redirect()->route('superadmin.dashboard');
         }
 
-        
         $user = Auth::user();
 
         if (!$user->userRole) {
@@ -600,6 +747,8 @@ class AuthController extends Controller
                 return redirect()->route('distributor.dashboard');
             case 'penerima_mbg':
                 return redirect()->route('penerima-mbg.dashboard');
+            case 'mitra':
+                return redirect()->route('mitra.dashboard');
             default:
                 Auth::logout();
                 return redirect()->route('login')

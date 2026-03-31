@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -34,7 +34,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -62,7 +61,6 @@
             </div>
         @endif
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -128,7 +126,6 @@
             </div>
         </div>
 
-        <!-- Statistics Section -->
         @if ($promoCodes->total() > 0)
             <div class="card mb-4">
                 <div class="card-body py-2 px-4">
@@ -206,7 +203,6 @@
             </div>
         @endif
 
-        <!-- Promo Codes List -->
         <div class="card mb-4">
             <div class="card-body">
                 @if ($promoCodes->count() > 0)
@@ -349,14 +345,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($promoCodes->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $promoCodes->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         @if (request()->hasAny(["search", "status"]))
                             <i class="bx bx-search bx-lg text-muted mb-3"></i>

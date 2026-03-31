@@ -1,9 +1,9 @@
-{{-- resources/views/superadmin/promo-codes/edit.blade.php --}}
+
 @extends("template_admin.layout")
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <nav class="d-flex align-items-center mb-2">
@@ -29,7 +29,6 @@
             </div>
         </div>
 
-        <!-- Form -->
         <div class="row">
             <div class="col-lg-8">
                 <div class="card">
@@ -44,7 +43,6 @@
                             @csrf
                             @method("PUT")
 
-                            <!-- Kode Promo -->
                             <div class="mb-3">
                                 <label for="kode_promo" class="form-label">
                                     Kode Promo
@@ -66,7 +64,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Persentase Diskon -->
                             <div class="mb-3">
                                 <label
                                     for="persentase_diskon"
@@ -96,7 +93,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Tanggal Mulai -->
                             <div class="mb-3">
                                 <label for="tanggal_mulai" class="form-label">
                                     Tanggal Mulai
@@ -117,7 +113,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Tanggal Berakhir -->
                             <div class="mb-3">
                                 <label
                                     for="tanggal_berakhir"
@@ -141,7 +136,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Status -->
                             <div class="mb-4">
                                 <div class="form-check form-switch">
                                     <input
@@ -164,7 +158,6 @@
                                 </small>
                             </div>
 
-                            <!-- Submit Buttons -->
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bx bx-save me-1"></i>
@@ -183,7 +176,6 @@
                 </div>
             </div>
 
-            <!-- Preview Card -->
             <div class="col-lg-4">
                 <div class="card">
                     <div class="card-header">
@@ -236,7 +228,6 @@
                     </div>
                 </div>
 
-                <!-- Help Card -->
                 <div class="card mt-3">
                     <div class="card-body">
                         <h6 class="card-title">

@@ -1,20 +1,17 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-    <!-- Brand + Toggle -->
+    
     <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
-        <!-- Logo -->
+        
         <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
             <span class="app-brand-logo demo">
                 <img src="{{ asset('logo_kelola_dapur_black.png') }}" alt="Logo" style="height: 45px; width: auto" />
             </span>
-            {{-- <span class="app-brand-text demo fw-bolder ms-4 fs-3">
-                Ahli Gizi
-            </span> --}}
+            
         </a>
     </div>
 
-    <!-- Menu Container with flex layout -->
     <div class="menu-container d-flex flex-column h-100">
-        <!-- User Profile Section - Moved to Top of Menu -->
+        
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
@@ -107,7 +104,6 @@
             $idDapur = session('id_dapur');
         @endphp
 
-        <!-- Subscription Status Alert -->
         @if (!$isSubscriptionActive && $subscriptionStatus)
             <div class="px-3 mb-3">
                 <div class="alert alert-warning alert-dismissible fade show py-2 px-3" role="alert"
@@ -137,9 +133,8 @@
             </div>
         @endif
 
-        <!-- Menu Utama -->
         <ul class="menu-inner py-1 flex-grow-1">
-            <!-- Dashboard - Always accessible -->
+            
             <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <a href="{{ route('dashboard', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
                     class="menu-link">
@@ -149,12 +144,11 @@
             </li>
 
             @if ($isSubscriptionActive)
-                <!-- Ahli Gizi Header - Only show when subscription active -->
+                
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text">Ahli Gizi</span>
                 </li>
 
-                <!-- Menu Makanan -->
                 <li class="menu-item {{ request()->routeIs('ahli-gizi.menu-makanan.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-food-menu"></i>
@@ -181,7 +175,6 @@
                     </ul>
                 </li>
 
-                <!-- Transaksi Dapur -->
                 <li class="menu-item {{ request()->routeIs('ahli-gizi.transaksi.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-cart"></i>
@@ -207,14 +200,13 @@
                     </ul>
                 </li>
             @else
-                <!-- Limited Access Message -->
+                
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text text-warning">
                         Limited Access
                     </span>
                 </li>
 
-                <!-- Disabled menu items with tooltips -->
                 @php
                     $disabledMenus = [
                         'Menu Makanan' => 'bx-food-menu',
@@ -238,7 +230,6 @@
     </div>
 </aside>
 
-<!-- Bottom Navigation untuk Mobile/Tablet -->
 <nav class="mobile-bottom-nav d-lg-none" id="mobileBottomNav">
     <div class="bottom-nav-container">
         @php
@@ -306,7 +297,6 @@
     </div>
 </nav>
 
-<!-- Subscription Expired Modal -->
 <div class="modal fade" id="subscriptionExpiredModal" tabindex="-1" aria-labelledby="subscriptionExpiredModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

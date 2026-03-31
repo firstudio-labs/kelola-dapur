@@ -38,7 +38,7 @@ class PorsiController extends Controller
 
         $penerima->update(['jumlah_porsi' => $validated['jumlah_porsi']]);
 
-        return redirect()->route('penerima-mbg.porsi.edit')
+        return redirect()->route('penerima-mbg.dashboard')
             ->with('success', 'Jumlah porsi MBG berhasil diperbarui menjadi ' . $validated['jumlah_porsi'] . ' porsi.');
     }
 }

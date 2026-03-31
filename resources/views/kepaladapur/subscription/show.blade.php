@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <nav class="d-flex align-items-center mb-2">
@@ -30,7 +30,6 @@
             </div>
         </div>
 
-        <!-- Request Details -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -110,7 +109,6 @@
                             </div>
                         </div>
 
-                        <!-- Pricing Breakdown -->
                         <div class="row mt-4">
                             <div class="col-12">
                                 <h6 class="mb-2">Rincian Harga</h6>
@@ -173,7 +171,6 @@
                             </div>
                         </div>
 
-                        <!-- Bukti Transfer -->
                         @if ($subscriptionRequest->bukti_transfer)
                             <div class="row mt-4">
                                 <div class="col-12">
@@ -193,7 +190,6 @@
                             </div>
                         @endif
 
-                        <!-- Catatan dari Admin -->
                         @if ($subscriptionRequest->catatan)
                             <div class="row mt-4">
                                 <div class="col-12">
@@ -205,7 +201,6 @@
                             </div>
                         @endif
 
-                        <!-- Cancel Button (if pending) -->
                         @if ($subscriptionRequest->status === "pending")
                             <div class="row mt-4">
                                 <div class="col-12">
@@ -231,7 +226,6 @@
                     </div>
                 </div>
 
-                <!-- Next Steps -->
                 <div class="card mt-4">
                     <div class="card-body">
                         <h6 class="card-title mb-3">

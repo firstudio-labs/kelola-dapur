@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -36,7 +36,6 @@
             </div>
         </div>
 
-        <!-- Template Item Details -->
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title mb-3">Informasi Template Bahan</h5>
@@ -93,7 +92,6 @@
                     </div>
                 </div>
 
-                <!-- JSON Checklists Badges Start -->
                 <div class="row g-3 mt-2 pt-3 border-top">
                     <div class="col-md-6">
                         <p class="mb-1"><strong>Kandungan Gizi:</strong></p>
@@ -120,8 +118,7 @@
                         @endif
                     </div>
                 </div>
-                <!-- JSON Checklists Badges End -->
-
+                
                 <div class="mt-4">
                     <a
                         href="{{ route("kepala-dapur.template-items.edit", $templateItem) }}"
@@ -134,7 +131,6 @@
             </div>
         </div>
 
-        <!-- Related Menu Items -->
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title mb-3">Menu yang Menggunakan Bahan Ini</h5>
@@ -191,7 +187,6 @@
             </div>
         </div>
 
-        <!-- Related Stock Items -->
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title mb-3">Stock Bahan di Dapur</h5>
@@ -203,7 +198,7 @@
                                 <th>Nama Dapur</th>
                                 <th>Jumlah Stock</th>
                                 <th>Tanggal Update</th>
-                                {{-- <th>Aksi</th> --}}
+                                
                             </tr>
                         </thead>
                         <tbody>
@@ -218,13 +213,7 @@
                                     <td>
                                         {{ $stock->updated_at->format("d M Y H:i") }}
                                     </td>
-                                    {{--
-                                        <td>
-                                        <a href="{{ route('kepala-dapur.dapur.show', $stock->dapur) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bx bx-show"></i> Lihat Dapur
-                                        </a>
-                                        </td>
-                                    --}}
+                                    
                                 </tr>
                             @empty
                                 <tr>
@@ -239,7 +228,6 @@
             </div>
         </div>
 
-        <!-- Instructions Alert -->
         <div class="alert alert-info alert-dismissible" role="alert">
             <h6 class="alert-heading mb-2">Informasi Detail Template Bahan</h6>
             <ul class="mb-0">
@@ -265,7 +253,6 @@
             ></button>
         </div>
 
-        <!-- Back Button -->
         <div class="mt-4">
             <a
                 href="{{ route("kepala-dapur.template-items.index") }}"

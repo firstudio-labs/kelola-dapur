@@ -1,9 +1,8 @@
 @extends("template_kepala_dapur.layout")
-{{-- Asumsi ada layout untuk kepala dapur, sesuaikan jika berbeda --}}
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -11,7 +10,6 @@
                         <nav class="d-flex align-items-center mb-2">
                             <a
                                 href="{{ route("kepala-dapur.dashboard", $dapur) }}"
-                                {{-- Sesuaikan route dashboard kepala dapur --}}
                                 class="text-muted me-2"
                             >
                                 <i class="bx bx-home-alt me-1"></i>
@@ -43,7 +41,6 @@
             </div>
         </div>
 
-        <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
                 <div class="card">
@@ -145,13 +142,11 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
                     method="GET"
                     action="{{ route("kepala-dapur.stock.index", $dapur) }}"
-                    {{-- Sesuaikan route --}}
                     class="row g-3"
                 >
                     <div class="col-md-3">
@@ -269,7 +264,6 @@
                         @if (request()->hasAny(["search", "status", "satuan", "sort"]))
                             <a
                                 href="{{ route("kepala-dapur.stock.index", $dapur) }}"
-                                {{-- Sesuaikan route --}}
                                 class="btn btn-outline-secondary"
                             >
                                 Reset Filter
@@ -284,7 +278,6 @@
             </div>
         </div>
 
-        <!-- Stock Items Table -->
         <div class="card">
             <div class="card-body">
                 @if ($stockItems->isNotEmpty())
@@ -295,6 +288,7 @@
                                     <th>No</th>
                                     <th>Nama Bahan</th>
                                     <th>Jumlah Stok</th>
+                                    <th>Konversi Stok</th>
                                     <th>Satuan</th>
                                     <th>Status</th>
                                     <th>Tanggal Restok Terakhir</th>
@@ -331,6 +325,19 @@
                                             </span>
                                         </td>
                                         <td>
+                                            @if ($stockItem->getConvertedStock())
+                                                <span class="fw-medium text-primary">
+                                                    {{ $stockItem->getConvertedStock() }}
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ rtrim(rtrim(number_format((float)$stockItem->konversi_nilai, 3), '0'), '.') }} {{ $stockItem->satuan }} = 1 {{ $stockItem->konversi_satuan }}
+                                                </small>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
                                             <span class="badge bg-label-info">
                                                 {{ $stockItem->satuan }}
                                             </span>
@@ -360,16 +367,14 @@
                                             {{ $latestRestockDate ? $latestRestockDate->format("d M Y") : "-" }}
                                         </td>
                                         <td>
-                                            <div class="d-flex gap-1">
-                                                <a
-                                                    href="{{ route("kepala-dapur.stock.show", [$dapur, $stockItem]) }}"
-                                                    class="btn btn-sm btn-outline-primary action-btn"
-                                                    data-bs-toggle="tooltip"
-                                                    title="Lihat Detail & Riwayat"
-                                                >
-                                                    <i class="bx bx-show"></i>
-                                                </a>
-                                            </div>
+                                            <a
+                                                href="{{ route("kepala-dapur.stock.show", [$dapur, $stockItem]) }}"
+                                                class="btn btn-sm btn-outline-primary action-btn"
+                                                data-bs-toggle="tooltip"
+                                                title="Lihat Detail & Riwayat"
+                                            >
+                                                <i class="bx bx-show"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -377,14 +382,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($stockItems->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $stockItems->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         <i class="bx bx-package bx-lg text-muted mb-3"></i>
                         <h5 class="mb-1">Tidak ada data stok</h5>
@@ -394,7 +398,6 @@
                         @if (request()->hasAny(["search", "status", "satuan"]))
                             <a
                                 href="{{ route("kepala-dapur.stock.index", $dapur) }}"
-                                {{-- Sesuaikan route --}}
                                 class="btn btn-outline-primary"
                             >
                                 Reset Filter
@@ -406,13 +409,11 @@
         </div>
     </div>
 
-    <!-- Choices.js CSS -->
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
     />
 
-    <!-- Custom Styling -->
     <style>
         .choices__inner {
             background-color: #fff;
@@ -492,7 +493,6 @@
         }
     </style>
 
-    <!-- Export Stock Modal -->
     <div class="modal fade" id="exportStockModal" tabindex="-1" aria-labelledby="exportStockModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -628,10 +628,8 @@
         </div>
     </div>
 
-    <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize Choices.js

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -23,18 +23,16 @@
         </div>
     </div>
 
-    <!-- Form -->
     <div class="card mb-4">
         <div class="card-body">
             <form action="{{ route('superadmin.users.update', $user) }}" method="POST" class="row g-4">
                 @csrf
                 @method('PUT')
 
-                <!-- Personal Information -->
                 <div class="col-12">
                     <h5 class="card-title mb-0">Informasi Personal</h5>
                     <div class="row g-4 mt-2">
-                        <!-- Nama -->
+                        
                         <div class="col-md-6">
                             <label for="nama" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                             <input type="text" 
@@ -49,7 +47,6 @@
                             @enderror
                         </div>
 
-                        <!-- Username -->
                         <div class="col-md-6">
                             <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                             <input type="text" 
@@ -65,7 +62,6 @@
                             <small class="text-muted">Username unik untuk login</small>
                         </div>
 
-                        <!-- Email -->
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" 
@@ -80,7 +76,6 @@
                             @enderror
                         </div>
 
-                        <!-- Password -->
                         <div class="col-md-6">
                             <label for="password" class="form-label">Password Baru</label>
                             <input type="password" 
@@ -94,7 +89,6 @@
                             <small class="text-muted">Minimal 8 karakter. Kosongkan jika tidak ingin mengubah.</small>
                         </div>
 
-                        <!-- Status -->
                         <div class="col-md-6">
                             <label for="is_active" class="form-label">Status <span class="text-danger">*</span></label>
                             <select name="is_active" 
@@ -112,7 +106,6 @@
                     </div>
                 </div>
 
-                <!-- Current Roles -->
                 <div class="col-12 mt-4">
                     <h5 class="card-title mb-0">Current Roles</h5>
                     <div class="mt-3">
@@ -154,7 +147,6 @@
                     </div>
                 </div>
 
-                <!-- Preview Card -->
                 <div class="col-12">
                     <div class="card bg-light">
                         <div class="card-body">
@@ -180,7 +172,6 @@
                     </div>
                 </div>
 
-                <!-- Account Information -->
                 <div class="col-12">
                     <div class="alert alert-info alert-dismissible" role="alert">
                         <div class="d-flex">
@@ -200,7 +191,6 @@
                     </div>
                 </div>
 
-                <!-- Form Actions -->
                 <div class="col-12 d-flex justify-content-end gap-2">
                     <a href="{{ route('superadmin.users.show', $user) }}" class="btn btn-outline-secondary">Batal</a>
                     <a href="{{ route('superadmin.users.show', $user) }}" class="btn btn-outline-primary">Lihat Detail</a>
@@ -210,7 +200,6 @@
         </div>
     </div>
 
-    <!-- Role Management Note -->
     <div class="alert alert-info alert-dismissible" role="alert">
         <div class="d-flex">
             <div class="flex-shrink-0">
@@ -228,10 +217,8 @@
     </div>
 </div>
 
-<!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css">
 
-<!-- Custom Choices.js Styling -->
 <style>
 .choices__inner {
     background-color: #fff;
@@ -256,10 +243,8 @@
 }
 </style>
 
-<!-- Choices.js JS -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-<!-- JavaScript for Live Preview -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Choices.js for status select

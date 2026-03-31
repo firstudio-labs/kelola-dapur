@@ -19,7 +19,6 @@ class ProfileController extends Controller
         
         $user = Auth::user();
 
-        
         if (!$user->isAhliGizi($dapur->id_dapur)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini untuk dapur ini');
         }
@@ -34,14 +33,12 @@ class ProfileController extends Controller
         
         $user = Auth::user();
 
-        
         if (!$user->isAhliGizi($dapur->id_dapur)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini untuk dapur ini');
         }
 
         $ahliGizi = $user->ahliGizi()->where('ahli_gizi.id_dapur', $dapur->id_dapur)->first();
 
-        
         $request->validate([
             'nama' => 'required|string|max:255',
             'nik_ahli_gizi' => 'nullable|string|max:16',
@@ -64,18 +61,15 @@ class ProfileController extends Controller
             'jabatan.in' => 'Pilihan jabatan tidak valid',
         ]);
 
-        
         $user->update([
             'nama' => $request->nama
         ]);
 
-        
         $province_code = $request->filled('province_code') ? $request->province_code : $ahliGizi->province_code;
         $regency_code = $request->filled('regency_code') ? $request->regency_code : $ahliGizi->regency_code;
         $district_code = $request->filled('district_code') ? $request->district_code : $ahliGizi->district_code;
         $village_code = $request->filled('village_code') ? $request->village_code : $ahliGizi->village_code;
 
-        
         $fotoDiriPath = $ahliGizi->foto_diri;
         if ($request->hasFile('foto_diri')) {
             
@@ -97,7 +91,6 @@ class ProfileController extends Controller
             $fotoDiriPath = 'profiles/' . $filename;
         }
 
-        
         $ahliGizi->update([
             'nik_ahli_gizi' => $request->nik_ahli_gizi,
             'jabatan' => $request->jabatan,

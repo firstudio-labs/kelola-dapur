@@ -15,7 +15,6 @@
         />
         <title>Login - Kelola Dapur</title>
 
-        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -23,13 +22,11 @@
             rel="stylesheet"
         />
 
-        <!-- Icons -->
         <link
             rel="stylesheet"
             href="{{ asset("admin") }}/assets/vendor/fonts/boxicons.css"
         />
 
-        <!-- Core CSS -->
         <link
             rel="stylesheet"
             href="{{ asset("admin") }}/assets/vendor/css/core.css"
@@ -43,23 +40,19 @@
             href="{{ asset("admin") }}/assets/css/demo.css"
         />
 
-        <!-- Vendors CSS -->
         <link
             rel="stylesheet"
             href="{{ asset("admin") }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css"
         />
 
-        <!-- Page CSS -->
         <link
             rel="stylesheet"
             href="{{ asset("admin") }}/assets/vendor/css/pages/page-auth.css"
         />
 
-        <!-- Helpers -->
         <script src="{{ asset("admin") }}/assets/vendor/js/helpers.js"></script>
         <script src="{{ asset("admin") }}/assets/js/config.js"></script>
 
-        <!-- hCaptcha -->
         <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     </head>
     <body style="background-color: #3758F9">
@@ -68,10 +61,10 @@
                 class="authentication-wrapper authentication-basic container-p-y"
             >
                 <div class="authentication-inner">
-                    <!-- Card -->
+                    
                     <div class="card">
                         <div class="card-body">
-                            <!-- Logo -->
+                            
                             <div class="app-brand justify-content-center mb-4">
                                 <a href="/welcome" class="app-brand-link gap-2">
                                     <span class="app-brand-logo demo">
@@ -81,13 +74,10 @@
                                             style="height: 60px"
                                         />
                                     </span>
-                                    {{-- <span class="demo fw-bolder fs-2">
-                                        Kelola Dapur
-                                    </span> --}}
+                                    
                                 </a>
                             </div>
 
-                            <!-- Alert Section -->
                             @if (session("success"))
                                 <div
                                     class="alert alert-success alert-dismissible fade show"
@@ -146,7 +136,7 @@
                                 method="POST"
                             >
                                 @csrf
-                                <!-- Username/Email -->
+                                
                                 <div class="mb-3">
                                     <label for="login" class="form-label">
                                         Username atau Email
@@ -167,7 +157,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Password -->
                                 <div class="mb-3 form-password-toggle">
                                     <label class="form-label" for="password">
                                         Password
@@ -194,7 +183,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- hCaptcha -->
                                 <div class="mb-3">
                                     <div class="h-captcha" data-sitekey="{{ config('services.hcaptcha.site_key', env('HCAPTCHA_SITE_KEY')) }}"></div>
                                     @error('h-captcha-response')
@@ -204,23 +192,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Remember Me -->
-                                {{-- <div class="mb-3">
-                                    <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            id="remember"
-                                            name="remember"
-                                            {{ old('remember') ? 'checked' : '' }}
-                                        />
-                                        <label class="form-check-label" for="remember">
-                                            Ingat saya
-                                        </label>
-                                    </div>
-                                </div> --}}
-
-                                <!-- Submit -->
                                 <div class="mb-3">
                                     <button
                                         class="btn btn-primary d-grid w-100"
@@ -241,12 +212,11 @@
                             </p>
                         </div>
                     </div>
-                    <!-- /Card -->
+                    
                 </div>
             </div>
         </div>
 
-        <!-- Core JS -->
         <script src="{{ asset("admin") }}/assets/vendor/libs/jquery/jquery.js"></script>
         <script src="{{ asset("admin") }}/assets/vendor/libs/popper/popper.js"></script>
         <script src="{{ asset("admin") }}/assets/vendor/js/bootstrap.js"></script>

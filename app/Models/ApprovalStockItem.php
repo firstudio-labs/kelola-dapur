@@ -16,6 +16,7 @@ class ApprovalStockItem extends Model
         'id_admin_gudang',
         'id_kepala_dapur',
         'id_stock_item',
+        'id_supplier',
         'jumlah',
         'satuan',
         'status',
@@ -37,7 +38,6 @@ class ApprovalStockItem extends Model
         'suhu_bahan_makanan' => 'decimal:2',
     ];
 
-    // Relationships
     public function adminGudang()
     {
         return $this->belongsTo(AdminGudang::class, 'id_admin_gudang');
@@ -48,9 +48,24 @@ class ApprovalStockItem extends Model
         return $this->belongsTo(KepalaDapur::class, 'id_kepala_dapur');
     }
 
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'id_supplier');
+    }
+
     public function stockItem()
     {
         return $this->belongsTo(StockItem::class, 'id_stock_item');
+    }
+
+    public function dokumentasi()
+    {
+        return $this->hasMany(ApprovalStockItemDokumentasi::class, 'id_approval_stock_item', 'id_approval_stock_item');
+    }
+
+    public function suppliers()
+    {
+        return $this->hasMany(ApprovalStockItemSupplier::class, 'id_approval_stock_item', 'id_approval_stock_item');
     }
 
     public function approve(): bool
@@ -59,7 +74,7 @@ class ApprovalStockItem extends Model
         $this->approved_at = now();
 
         if ($this->save()) {
-            // Update stock dengan tanggal_restok secara eksplisit
+            
             $stockItem = $this->stockItem;
             $currentStock = (float) $stockItem->jumlah;
             return StockItem::where('id_stock_item', $stockItem->id_stock_item)

@@ -1,7 +1,7 @@
 @extends("template_admin_gudang.layout")
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -31,9 +31,8 @@
             </div>
         </div>
 
-        <!-- Informasi Detail Akun dan Dapur -->
         <div class="row mb-4">
-            <!-- Informasi Akun -->
+            
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
@@ -68,7 +67,6 @@
                 </div>
             </div>
 
-            <!-- Informasi Dapur -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
@@ -147,7 +145,52 @@
             </div>
         </div>
 
-        <!-- Statistik Utama -->
+        @if(isset($adminGudang))
+        
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Profil Spesifik Admin Gudang</h5>
+                <a href="{{ route('admin-gudang.profile.edit', $dapur) }}" class="btn btn-sm btn-primary">
+                    <i class="bx bx-edit-alt me-1"></i> Edit Profil
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3 text-center mb-3 mb-md-0">
+                        <img src="{{ $adminGudang->foto_diri ? Storage::url($adminGudang->foto_diri) : asset('assets/img/avatars/1.png') }}" 
+                             alt="Foto Admin Gudang" 
+                             class="img-fluid rounded border" 
+                             style="max-height: 200px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-9">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <p class="mb-1"><strong>NIK:</strong> {{ $adminGudang->nik_admin_gudang ?: '-' }}</p>
+                                <p class="mb-1"><strong>Nama Lengkap:</strong> {{ $adminGudang->nama_lengkap ?: '-' }}</p>
+                                <p class="mb-1"><strong>Jabatan:</strong> {{ $adminGudang->jabatan ?: '-' }}</p>
+                                <p class="mb-1"><strong>Pendidikan:</strong> {{ $adminGudang->pendidikan_terakhir ?: '-' }}</p>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <p class="mb-1"><strong>Kontak WA:</strong> {{ $adminGudang->kontak_wa ?: '-' }}</p>
+                                <p class="mb-1"><strong>Jenis Kelamin:</strong> {{ $adminGudang->jenis_kelamin ?: '-' }}</p>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <p class="mb-1"><strong>Alamat Lengkap:</strong></p>
+                                <p class="text-muted mb-0">
+                                    {{ $adminGudang->alamat_detail ?: '-' }}<br>
+                                    @if($adminGudang->village_name || $adminGudang->district_name)
+                                        Kel. {{ $adminGudang->village_name ?: '-' }}, Kec. {{ $adminGudang->district_name ?: '-' }}<br>
+                                        {{ $adminGudang->regency_name ?: '-' }}, Prov. {{ $adminGudang->province_name ?: '-' }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <div class="row">
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
@@ -246,7 +289,6 @@
             </div>
         </div>
 
-        <!-- Daftar Menu Terbaru -->
         @if (isset($recentMenus) && $recentMenus->isNotEmpty())
             <div class="row">
                 <div class="col-12 mb-4">
@@ -352,7 +394,7 @@
                 </div>
             </div>
         @else
-            <!-- Empty State -->
+            
             <div class="row">
                 <div class="col-12 mb-4">
                     <div class="card">

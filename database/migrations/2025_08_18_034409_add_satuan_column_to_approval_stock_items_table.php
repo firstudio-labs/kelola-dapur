@@ -19,7 +19,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('approval_stock_items', function (Blueprint $table) {
-            //
+            
         });
     }
 };

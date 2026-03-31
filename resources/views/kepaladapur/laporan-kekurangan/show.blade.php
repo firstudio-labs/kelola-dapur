@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -38,7 +38,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -101,7 +100,6 @@
             </div>
         </div>
 
-        <!-- Transaction Details -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">Informasi Transaksi</h5>
@@ -113,12 +111,7 @@
                             <strong>ID Transaksi:</strong>
                             {{ $transaksi->id_transaksi }}
                         </p>
-                        {{--
-                            <p>
-                            <strong>Nama Paket:</strong>
-                            {{ $transaksi->nama_paket }}
-                            </p>
-                        --}}
+                        
                         <p>
                             <strong>Tanggal Transaksi:</strong>
                             {{ $transaksi->tanggal_transaksi->format("d M Y") }}
@@ -150,7 +143,6 @@
             </div>
         </div>
 
-        <!-- Shortage Details -->
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">Detail Kekurangan Stok</h5>
@@ -212,7 +204,6 @@
             </div>
         </div>
 
-        <!-- Resolve Modal -->
         <div
             class="modal fade"
             id="resolveModal"
@@ -241,21 +232,7 @@
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                {{--
-                                    <label
-                                    for="resolveNamaPaket"
-                                    class="form-label"
-                                    >
-                                    Nama Paket
-                                    </label>
-                                    <input
-                                    type="text"
-                                    id="resolveNamaPaket"
-                                    class="form-control"
-                                    value="{{ $transaksi->nama_paket }}"
-                                    readonly
-                                    />
-                                --}}
+                                
                             </div>
                             <div class="mb-3">
                                 <label
@@ -316,13 +293,11 @@
         </div>
     </div>
 
-    <!-- Choices.js CSS -->
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
     />
 
-    <!-- Custom Styling -->
     <style>
         .choices__inner {
             background-color: #fff;
@@ -381,10 +356,8 @@
         }
     </style>
 
-    <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize Choices.js

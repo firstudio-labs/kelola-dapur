@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -36,7 +36,6 @@
             </div>
         </div>
 
-        <!-- Form -->
         <div class="card mb-4">
             <div class="card-body">
                 @if (session("error"))
@@ -62,13 +61,12 @@
                     @csrf
                     @method("PUT")
 
-                    <!-- Template Item Information -->
                     <div class="col-12">
                         <h5 class="card-title mb-0">
                             Informasi Template Bahan
                         </h5>
                         <div class="row g-4 mt-2">
-                            <!-- Nama Bahan -->
+                            
                             <div class="col-md-6">
                                 <label for="nama_bahan" class="form-label">
                                     Nama Bahan
@@ -90,7 +88,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Satuan -->
                             <div class="col-md-6">
                                 <label for="satuan" class="form-label">
                                     Satuan
@@ -119,7 +116,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Klasifikasi Kandungan Gizi -->
                             <div class="col-md-12 mt-4 pt-3 border-top">
                                 <h6 class="fw-semibold">Kandungan Gizi</h6>
                                 <p class="text-muted small">Pilih kandungan gizi dominan pada bahan ini (bisa lebih dari satu).</p>
@@ -146,7 +142,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Klasifikasi Jenis Bahan -->
                             <div class="col-md-12 mt-4 pt-3 border-top">
                                 <h6 class="fw-semibold">Jenis Bahan Makanan</h6>
                                 <p class="text-muted small">Pilih klasifikasi jenis bahan makanan ini (bisa lebih dari satu).</p>
@@ -177,7 +172,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Keterangan -->
                             <div class="col-12 mt-4 pt-3 border-top">
                                 <label for="keterangan" class="form-label">
                                     Keterangan
@@ -200,7 +194,6 @@
                         </div>
                     </div>
 
-                    <!-- Submit Buttons -->
                     <div class="col-12 mt-4">
                         <div class="d-flex justify-content-between">
                             <a
@@ -218,7 +211,6 @@
             </div>
         </div>
 
-        <!-- Preview Card -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="card-title mb-0">Preview Template Bahan</h5>
@@ -232,7 +224,6 @@
             </div>
         </div>
 
-        <!-- Instructions Alert -->
         <div class="alert alert-info alert-dismissible" role="alert">
             <h6 class="alert-heading mb-2">Instruksi Edit Template Bahan</h6>
             <ul class="mb-0">

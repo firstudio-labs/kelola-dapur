@@ -37,7 +37,6 @@ class MenuMakanan extends Model
         'Tambahan' => 'Tambahan'
     ];
 
-    // Relationships
     public function createdByDapur()
     {
         return $this->belongsTo(Dapur::class, 'created_by_dapur_id', 'id_dapur');
@@ -71,7 +70,6 @@ class MenuMakanan extends Model
 
         return asset('images/menu/default-menu.jpg');
     }
-
 
     public function getGambarFullPathAttribute(): ?string
     {

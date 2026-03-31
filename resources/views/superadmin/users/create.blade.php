@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -23,17 +23,15 @@
         </div>
     </div>
 
-    <!-- Form -->
     <div class="card mb-4">
         <div class="card-body">
             <form action="{{ route('superadmin.users.store') }}" method="POST" class="row g-4">
                 @csrf
 
-                <!-- Personal Information -->
                 <div class="col-12">
                     <h5 class="card-title mb-0">Informasi Personal</h5>
                     <div class="row g-4 mt-2">
-                        <!-- Nama -->
+                        
                         <div class="col-md-6">
                             <label for="nama" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                             <input type="text" 
@@ -48,7 +46,6 @@
                             @enderror
                         </div>
 
-                        <!-- Username -->
                         <div class="col-md-6">
                             <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                             <input type="text" 
@@ -64,7 +61,6 @@
                             <small class="text-muted">Username unik untuk login</small>
                         </div>
 
-                        <!-- Email -->
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" 
@@ -79,7 +75,6 @@
                             @enderror
                         </div>
 
-                        <!-- Password -->
                         <div class="col-md-6">
                             <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                             <input type="password" 
@@ -93,7 +88,6 @@
                             @enderror
                         </div>
 
-                        <!-- Status -->
                         <div class="col-md-6">
                             <label for="is_active" class="form-label">Status <span class="text-danger">*</span></label>
                             <select name="is_active" 
@@ -111,11 +105,10 @@
                     </div>
                 </div>
 
-                <!-- Role Assignment -->
                 <div class="col-12 mt-4">
                     <h5 class="card-title mb-0">Role Assignment</h5>
                     <div class="row g-4 mt-2">
-                        <!-- Role -->
+                        
                         <div class="col-md-6">
                             <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
                             <select name="role" 
@@ -133,7 +126,6 @@
                             @enderror
                         </div>
 
-                        <!-- Dapur -->
                         <div class="col-md-6" id="dapur-section" style="{{ old('role') === 'super_admin' ? 'display: none;' : '' }}">
                             <label for="id_dapur" class="form-label">Dapur <span class="text-danger" id="dapur-required">*</span></label>
                             <select name="id_dapur" 
@@ -153,7 +145,6 @@
                         </div>
                     </div>
 
-                    <!-- Role Descriptions -->
                     <div class="mt-4 p-3 bg-light rounded">
                         <h6 class="mb-2">Deskripsi Role:</h6>
                         <div class="text-muted small" id="role-description">
@@ -174,7 +165,6 @@
                     </div>
                 </div>
 
-                <!-- Preview Card -->
                 <div class="col-12">
                     <div class="card bg-light">
                         <div class="card-body">
@@ -201,7 +191,6 @@
                     </div>
                 </div>
 
-                <!-- Form Actions -->
                 <div class="col-12 d-flex justify-content-end gap-2">
                     <a href="{{ route('superadmin.users.index') }}" class="btn btn-outline-secondary">
                         Batal
@@ -214,7 +203,6 @@
         </div>
     </div>
 
-    <!-- Help Section -->
     <div class="alert alert-info alert-dismissible" role="alert">
         <div class="d-flex">
             <div class="flex-shrink-0">
@@ -235,10 +223,8 @@
     </div>
 </div>
 
-<!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css">
 
-<!-- Custom Choices.js Styling -->
 <style>
 .choices__inner {
     background-color: #fff;
@@ -263,10 +249,8 @@
 }
 </style>
 
-<!-- Choices.js JS -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-<!-- JavaScript for Dynamic Form -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Choices.js

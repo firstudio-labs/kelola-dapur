@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -38,6 +38,7 @@
                                 </p>
                             </div>
                             <div>
+                             @if ($menuMakanan->created_by_dapur_id == auth()->user()->userRole->id_dapur)
                                 <a
                                     href="{{ route("ahli-gizi.menu-makanan.edit", $menuMakanan->id_menu) }}"
                                     class="btn btn-primary me-2"
@@ -45,6 +46,7 @@
                                     <i class="bx bx-edit"></i>
                                     Edit Menu
                                 </a>
+                            @endif
                                 <a
                                     href="{{ route("ahli-gizi.menu-makanan.index") }}"
                                     class="btn btn-label-secondary"
@@ -59,9 +61,8 @@
             </div>
         </div>
 
-        <!-- Menu Detail -->
         <div class="row">
-            <!-- Menu Information -->
+            
             <div class="col-md-8">
                 <div class="card mb-4">
                     <div
@@ -162,7 +163,6 @@
                     </div>
                 </div>
 
-                <!-- Bahan Menu -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Bahan-bahan Menu</h5>
@@ -231,42 +231,49 @@
                 </div>
             </div>
 
-            <!-- Action Panel -->
             <div class="col-md-4">
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Aksi</h5>
                     </div>
                     <div class="card-body">
-                        <a
-                            href="{{ route("ahli-gizi.menu-makanan.edit", $menuMakanan->id_menu) }}"
-                            class="btn btn-primary w-100 mb-2"
-                        >
-                            <i class="bx bx-edit me-2"></i>
-                            Edit Menu
-                        </a>
-                        <form
-                            action="{{ route("ahli-gizi.menu-makanan.toggle-status", $menuMakanan->id_menu) }}"
-                            method="POST"
-                            class="d-inline"
-                        >
-                            @csrf
-                            @method("PATCH")
-                            <button
-                                type="submit"
-                                class="btn {{ $menuMakanan->is_active ? "btn-warning" : "btn-success" }} w-100 mb-2"
+                         @if ($menuMakanan->created_by_dapur_id == auth()->user()->userRole->id_dapur)
+                            <a
+                                href="{{ route("ahli-gizi.menu-makanan.edit", $menuMakanan->id_menu) }}"
+                                class="btn btn-primary w-100 mb-2"
                             >
-                                <i
-                                    class="bx {{ $menuMakanan->is_active ? "bx-lock" : "bx-lock-open" }} me-2"
-                                ></i>
-                                {{ $menuMakanan->is_active ? "Nonaktifkan" : "Aktifkan" }}
-                                Menu
-                            </button>
-                        </form>
+                                <i class="bx bx-edit me-2"></i>
+                                Edit Menu
+                            </a>
+                            <form
+                                action="{{ route("ahli-gizi.menu-makanan.toggle-status", $menuMakanan->id_menu) }}"
+                                method="POST"
+                                class="d-inline"
+                            >
+                                @csrf
+                                @method("PATCH")
+                                <button
+                                    type="submit"
+                                    class="btn {{ $menuMakanan->is_active ? "btn-warning" : "btn-success" }} w-100 mb-2"
+                                >
+                                    <i
+                                        class="bx {{ $menuMakanan->is_active ? "bx-lock" : "bx-lock-open" }} me-2"
+                                    ></i>
+                                    {{ $menuMakanan->is_active ? "Nonaktifkan" : "Aktifkan" }}
+                                    Menu
+                                </button>
+                            </form>
+                        @else
+                            <div class="alert alert-info py-2 px-3 mb-0">
+                                <small>
+                                    <i class="bx bx-info-circle me-1"></i>
+                                    Menu ini dibuat oleh dapur lain dan tidak dapat diubah oleh Anda.
+                                </small>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
-                <!-- Statistics -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Statistik Menu</h5>
@@ -317,7 +324,6 @@
             </div>
         </div>
 
-        <!-- Recent Transactions -->
         @if ($menuMakanan->detailTransaksiDapur && $menuMakanan->detailTransaksiDapur->count() > 0)
             <div class="card mt-4">
                 <div class="card-header">

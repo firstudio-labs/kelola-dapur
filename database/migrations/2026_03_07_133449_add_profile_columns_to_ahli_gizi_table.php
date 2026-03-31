@@ -28,7 +28,6 @@ return new class extends Migration
         });
     }
 
-    
     public function down(): void
     {
         Schema::table('ahli_gizi', function (Blueprint $table) {

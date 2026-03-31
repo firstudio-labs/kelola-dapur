@@ -51,4 +51,25 @@ class OrderDistribusi extends Model
     {
         return $this->hasMany(OrderDistribusiDokumentasi::class, 'id_distribusi', 'id_distribusi');
     }
+
+    public function details()
+    {
+        return $this->hasMany(OrderDistribusiDetail::class, 'id_distribusi', 'id_distribusi');
+    }
+
+    public function recalculateStatus(): void
+    {
+        $details = $this->details()->get();
+
+        if ($details->isEmpty()) {
+            return;
+        }
+
+        $allDone    = $details->every(fn($d) => $d->status === self::STATUS_SUDAH_DIKIRIM);
+        $anyStarted = $details->contains(fn($d) => in_array($d->status, [self::STATUS_SEDANG_DIKIRIM, self::STATUS_SUDAH_DIKIRIM]));
+
+        $this->status = $allDone ? self::STATUS_SUDAH_DIKIRIM
+            : ($anyStarted ? self::STATUS_SEDANG_DIKIRIM : self::STATUS_BELUM_DIKIRIM);
+        $this->save();
+    }
 }

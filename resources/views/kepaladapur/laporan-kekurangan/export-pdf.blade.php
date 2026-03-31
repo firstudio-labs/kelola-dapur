@@ -41,8 +41,20 @@
             .text-center {
                 text-align: center;
             }
+            .text-right {
+                text-align: right;
+            }
+            .text-left {
+                text-align: left;
+            }
             .text-muted {
                 color: #6c757d;
+            }
+            th.text-center, td.text-center {
+                text-align: center;
+            }
+            th.text-right, td.text-right {
+                text-align: right;
             }
         </style>
     </head>
@@ -75,29 +87,43 @@
         <table>
             <thead>
                 <tr>
-                    <th>Nama Bahan</th>
-                    <th>Jumlah Dibutuhkan</th>
-                    <th>Jumlah Tersedia</th>
-                    <th>Jumlah Kurang</th>
-                    <th>Satuan</th>
-                    <th>Status</th>
-                    <th>Keterangan</th>
+                    <th class="text-left">Nama Bahan</th>
+                    <th class="text-right">Dibutuhkan</th>
+                    <th class="text-right">Tersedia</th>
+                    <th class="text-right">Kekurangan (Nominal)</th>
+                    <th class="text-center">Satuan</th>
+                    <th class="text-right">Kekurangan (Konversi)</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-left">Keterangan</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($laporan as $item)
+                    @php
+                        $stockItem = \App\Models\StockItem::where('id_dapur', $transaksi->id_dapur)->where('id_template_item', $item->id_template_item)->first();
+                        $formatNumber = function($val) {
+                            return rtrim(rtrim(number_format((float) $val, 3, ',', '.'), '0'), ',');
+                        };
+                    @endphp
                     <tr>
-                        <td>{{ $item->templateItem->nama_bahan }}</td>
-                        <td>{{ $item->jumlah_dibutuhkan }}</td>
-                        <td>{{ $item->jumlah_tersedia }}</td>
-                        <td>{{ $item->jumlah_kurang }}</td>
-                        <td>{{ $item->satuan }}</td>
-                        <td>{{ ucfirst($item->status) }}</td>
-                        <td>{{ $item->keterangan_resolve ?? "-" }}</td>
+                        <td class="text-left">{{ $item->templateItem->nama_bahan }}</td>
+                        <td class="text-right">{{ $formatNumber($item->jumlah_dibutuhkan) }}</td>
+                        <td class="text-right">{{ $formatNumber($item->jumlah_tersedia) }}</td>
+                        <td class="text-right">{{ $formatNumber($item->jumlah_kurang) }}</td>
+                        <td class="text-center">{{ $item->satuan }}</td>
+                        <td class="text-right">
+                            @if($stockItem && $stockItem->konversi_nilai > 0)
+                                {{ $formatNumber($item->jumlah_kurang / $stockItem->konversi_nilai) }} {{ $stockItem->konversi_satuan }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td class="text-center">{{ ucfirst($item->status) }}</td>
+                        <td class="text-left">{{ $item->keterangan_resolve ?? "-" }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center">
+                        <td colspan="8" class="text-center">
                             Tidak ada data kekurangan stok ditemukan
                         </td>
                     </tr>

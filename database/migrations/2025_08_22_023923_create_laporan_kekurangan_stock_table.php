@@ -19,11 +19,9 @@ return new class extends Migration
             $table->enum('status', ['pending', 'resolved'])->default('pending');
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_transaksi')->references('id_transaksi')->on('transaksi_dapur')->onDelete('cascade');
             $table->foreign('id_template_item')->references('id_template_item')->on('template_items')->onDelete('cascade');
 
-            // Indexes
             $table->index(['id_transaksi'], 'idx_laporan_transaksi');
             $table->index(['status'], 'idx_laporan_status');
             $table->index(['id_template_item'], 'idx_laporan_template');

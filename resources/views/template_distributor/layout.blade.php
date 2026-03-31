@@ -16,6 +16,49 @@
     <link rel="stylesheet" href="{{ asset("admin") }}/assets/css/custom-badge.css" />
     <link rel="stylesheet" href="{{ asset("admin") }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Mobile Bottom Navbar */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            background-color: #fff;
+            border-top: 1px solid #eaeaec;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            padding-bottom: env(safe-area-inset-bottom); /* For iPhone notch */
+        }
+        .mobile-bottom-nav .nav-item {
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #697a8d;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .mobile-bottom-nav .nav-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .mobile-bottom-nav .nav-item.active {
+            color: #696cff; /* Primary color */
+            font-weight: 500;
+        }
+        
+        /* Padding bottom for main content to avoid overlap with bottom nav */
+        @media (max-width: 767.98px) {
+            .content-wrapper {
+                padding-bottom: 100px !important;
+            }
+        }
+    </style>
     <script src="{{ asset("admin") }}/assets/vendor/js/helpers.js"></script>
     <script src="{{ asset("admin") }}/assets/js/config.js"></script>
 </head>
@@ -33,6 +76,22 @@
         </div>
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
+
+    <div class="mobile-bottom-nav d-md-none">
+        <a href="{{ route('distributor.dashboard') }}" class="nav-item {{ Request::is('distributor/dashboard*') ? 'active' : '' }}">
+            <i class="bx bx-home-circle"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ route('distributor.order.index') }}" class="nav-item {{ Request::is('distributor/order-distribusi*') ? 'active' : '' }}">
+            <i class="bx bx-package"></i>
+            <span>Pengiriman</span>
+        </a>
+        <a href="{{ route('distributor.profile.edit') }}" class="nav-item {{ Request::is('distributor/profile*') ? 'active' : '' }}">
+            <i class="bx bx-user"></i>
+            <span>Profil</span>
+        </a>
+    </div>
+
     <script src="{{ asset("admin") }}/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="{{ asset("admin") }}/assets/vendor/libs/popper/popper.js"></script>
     <script src="{{ asset("admin") }}/assets/vendor/js/bootstrap.js"></script>

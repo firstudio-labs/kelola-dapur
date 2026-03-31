@@ -27,7 +27,6 @@ class ApprovalTransaksi extends Model
         'approved_at' => 'datetime',
     ];
 
-    // Relationships
     public function transaksiDapur()
     {
         return $this->belongsTo(TransaksiDapur::class, 'id_transaksi');
@@ -48,7 +47,6 @@ class ApprovalTransaksi extends Model
         return $this->hasMany(StockSnapshot::class, 'id_approval_transaksi');
     }
 
-    // Helper methods
     public function approve(string $catatan = null): bool
     {
         $this->status = 'approved';
@@ -56,7 +54,7 @@ class ApprovalTransaksi extends Model
         $this->approved_at = now();
 
         if ($this->save()) {
-            // Process transaksi setelah approve
+            
             $result = $this->transaksiDapur->processTransaction();
             return $result['success'];
         }

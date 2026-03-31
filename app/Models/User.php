@@ -33,7 +33,6 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-
     public function userRole()
     {
         return $this->hasOne(UserRole::class, 'id_user');
@@ -63,10 +62,46 @@ class User extends Authenticatable
         );
     }
 
+    public function adminGudang()
+    {
+        return $this->hasOneThrough(
+            AdminGudang::class,
+            UserRole::class,
+            'id_user',
+            'id_user_role',
+            'id_user',
+            'id_user_role'
+        );
+    }
+
+    public function ahliGizi()
+    {
+        return $this->hasOneThrough(
+            AhliGizi::class,
+            UserRole::class,
+            'id_user',
+            'id_user_role',
+            'id_user',
+            'id_user_role'
+        );
+    }
+
     public function distributor()
     {
         return $this->hasOneThrough(
             Distributor::class,
+            UserRole::class,
+            'id_user',
+            'id_user_role',
+            'id_user',
+            'id_user_role'
+        );
+    }
+
+    public function mitra()
+    {
+        return $this->hasOneThrough(
+            Mitra::class,
             UserRole::class,
             'id_user',
             'id_user_role',
@@ -86,7 +121,6 @@ class User extends Authenticatable
             'id_dapur'
         )->whereNotNull('user_roles.id_dapur');
     }
-
 
     public function isSuperAdmin(): bool
     {
@@ -175,6 +209,23 @@ class User extends Authenticatable
         }
         
         return $this->distributor && $this->distributor->jabatan === 'Penanggung jawab';
+    }
+
+    public function isMitra(): bool
+    {
+        return $this->userRole && $this->userRole->role_type === 'mitra';
+    }
+
+    public function isMitraInDapur(int $dapurId): bool
+    {
+        if (!$this->isMitra()) {
+            return false;
+        }
+
+        return $this->mitra && $this->mitra->mitraDapur()
+            ->where('id_dapur', $dapurId)
+            ->where('status', 'approved')
+            ->exists();
     }
 
     public function getUserRole(?int $dapurId = null): string

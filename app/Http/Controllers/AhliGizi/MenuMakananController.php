@@ -165,6 +165,11 @@ class MenuMakananController extends Controller
 
     public function edit(MenuMakanan $menuMakanan)
     {
+        if ($menuMakanan->created_by_dapur_id !== auth()->user()->userRole->id_dapur) {
+            return redirect()->route('ahli-gizi.menu-makanan.index')
+                ->with('error', 'Anda tidak memiliki hak akses untuk mengubah menu ini.');
+        }
+
         $menuMakanan->load(['bahanMenu.templateItem']);
         $templateItems = TemplateItem::orderBy('nama_bahan', 'asc')->get();
         $currentDapur = Auth::user()->userRole->dapur ?? null;
@@ -174,6 +179,10 @@ class MenuMakananController extends Controller
 
     public function update(Request $request, MenuMakanan $menuMakanan)
     {
+        if ($menuMakanan->created_by_dapur_id !== auth()->user()->userRole->id_dapur) {
+            return redirect()->route('ahli-gizi.menu-makanan.index')
+                ->with('error', 'Anda tidak memiliki hak akses untuk memperbarui menu ini.');
+        }
         $validator = Validator::make($request->all(), [
             'nama_menu' => 'required|string|max:100|unique:menu_makanan,nama_menu,' . $menuMakanan->id_menu . ',id_menu',
             'deskripsi' => 'nullable|string|max:1000',
@@ -256,6 +265,10 @@ class MenuMakananController extends Controller
 
     public function destroy(MenuMakanan $menuMakanan)
     {
+        if ($menuMakanan->created_by_dapur_id !== auth()->user()->userRole->id_dapur) {
+            return redirect()->route('ahli-gizi.menu-makanan.index')
+                ->with('error', 'Anda tidak memiliki hak akses untuk menghapus menu ini.');
+        }
         if ($menuMakanan->detailTransaksiDapur()->exists()) {
             return redirect()->back()
                 ->with('error', 'Menu tidak dapat dihapus karena sudah digunakan dalam transaksi');
@@ -273,6 +286,10 @@ class MenuMakananController extends Controller
 
     public function toggleStatus(MenuMakanan $menuMakanan)
     {
+        if ($menuMakanan->created_by_dapur_id !== auth()->user()->userRole->id_dapur) {
+            return redirect()->route('ahli-gizi.menu-makanan.index')
+                ->with('error', 'Anda tidak memiliki hak akses untuk mengubah status menu ini.');
+        }
         $menuMakanan->update([
             'is_active' => !$menuMakanan->is_active
         ]);

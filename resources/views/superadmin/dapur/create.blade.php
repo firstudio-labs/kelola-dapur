@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -29,7 +29,6 @@
         </div>
     </div>
 
-    <!-- Success/Error Messages -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible mb-4" role="alert">
             {{ session('success') }}
@@ -44,7 +43,6 @@
         </div>
     @endif
 
-    <!-- Form -->
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -52,7 +50,6 @@
                     <form action="{{ route('superadmin.dapur.store') }}" method="POST" class="row g-3" enctype="multipart/form-data">
                         @csrf
 
-                        <!-- Nama Dapur -->
                         <div class="col-12">
                             <label for="nama_dapur" class="form-label">
                                 Nama Dapur <span class="text-danger">*</span>
@@ -69,7 +66,6 @@
                             @enderror
                         </div>
 
-                        <!-- Wilayah -->
                         <div class="col-md-6">
                             <label for="provinsi" class="form-label">
                                 Provinsi <span class="text-danger">*</span>
@@ -101,7 +97,6 @@
                             @enderror
                         </div>
 
-                        <!-- Alamat -->
                         <div class="col-12">
                             <label for="alamat" class="form-label">
                                 Alamat Lengkap <span class="text-danger">*</span>
@@ -117,7 +112,6 @@
                             @enderror
                         </div>
 
-                        <!-- Telepon -->
                         <div class="col-md-6">
                             <label for="telepon" class="form-label">
                                 Telepon
@@ -134,7 +128,6 @@
                             <small class="text-muted">Nomor telepon dapur (opsional)</small>
                         </div>
 
-                        <!-- No Registrasi SPPG -->
                         <div class="col-md-6">
                             <label for="no_registrasi_sppg" class="form-label">
                                 No Registrasi SPPG
@@ -150,7 +143,6 @@
                             @enderror
                         </div>
 
-                        <!-- NIK Pemilik -->
                         <div class="col-md-6">
                             <label for="nik_pemilik" class="form-label">
                                 NIK Pemilik
@@ -166,7 +158,6 @@
                             @enderror
                         </div>
 
-                        <!-- Foto Bangunan -->
                         <div class="col-md-6">
                             <label for="foto_bangunan" class="form-label">
                                 Foto Bangunan
@@ -182,7 +173,6 @@
                             <small class="text-muted">Format: JPG, PNG. Maksimal 2MB</small>
                         </div>
 
-                        <!-- Tag Lokasi Gmaps -->
                         <div class="col-md-12">
                             <label for="tag_lokasi" class="form-label">
                                 Link Google Maps (Tag Lokasi)
@@ -198,7 +188,6 @@
                             @enderror
                         </div>
 
-                        <!-- Status -->
                         <div class="col-md-6">
                             <label for="status" class="form-label">
                                 Status <span class="text-danger">*</span>
@@ -217,7 +206,6 @@
                             <small class="text-muted">Status dapur dalam sistem</small>
                         </div>
 
-                        <!-- Checklist Prasarana -->
                         <div class="col-12 mt-4">
                             <h5 class="mb-3 border-bottom pb-2">Kelengkapan Prasarana</h5>
                             <div class="row">
@@ -247,7 +235,6 @@
                             </div>
                         </div>
 
-                        <!-- Preview Card -->
                         <div class="col-12">
                             <div class="card bg-light mb-3">
                                 <div class="card-body">
@@ -283,7 +270,6 @@
                             </div>
                         </div>
 
-                        <!-- Form Actions -->
                         <div class="col-12 d-flex justify-content-end gap-2">
                             <a href="{{ route('superadmin.dapur.index') }}" 
                                class="btn btn-outline-secondary">
@@ -300,7 +286,6 @@
         </div>
     </div>
 
-    <!-- Help Section -->
     <div class="row">
         <div class="col-12">
             <div class="alert alert-info alert-dismissible" role="alert">
@@ -322,11 +307,9 @@
     </div>
 </div>
 
-<!-- Choices.js CSS and JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css">
 <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-<!-- Custom CSS for Choices.js with Sneat -->
 <style>
 .choices__inner {
     min-height: 38px;
@@ -352,7 +335,6 @@
 }
 </style>
 
-<!-- JavaScript for Wilayah API and Live Preview -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const namaDapurInput = document.getElementById('nama_dapur');

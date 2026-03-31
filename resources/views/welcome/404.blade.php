@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="assets/css/animate.css" />
     <link rel="stylesheet" href="./src/css/tailwind.css" />
 
-    <!-- ==== WOW JS ==== -->
     <script src="assets/js/wow.min.js"></script>
     <script>
       new WOW().init();
@@ -21,7 +20,7 @@
   </head>
 
   <body>
-    <!-- ====== Navbar Section Start -->
+    
     <div
       class="absolute top-0 left-0 z-40 flex items-center w-full bg-transparent ud-header"
     >
@@ -278,9 +277,7 @@
         </div>
       </div>
     </div>
-    <!-- ====== Navbar Section End -->
-
-    <!-- ====== Banner Section Start -->
+    
     <div
       class="relative z-10 overflow-hidden pb-[60px] pt-[120px] dark:bg-dark md:pt-[130px] lg:pt-[160px]"
     >
@@ -324,9 +321,7 @@
         </div>
       </div>
     </div>
-    <!-- ====== Banner Section End -->
-
-    <!-- ====== 404 Section Start -->
+    
     <section class="bg-white py-20 dark:bg-dark-2 lg:py-[110px]">
       <div class="container mx-auto px-4">
         <div class="flex flex-wrap items-center -mx-4">
@@ -392,9 +387,7 @@
         </div>
       </div>
     </section>
-    <!-- ====== 404 Section End -->
-
-    <!-- ====== Footer Section Start -->
+    
     <footer
       class="wow fadeInUp relative z-10 bg-[#090E34] pt-20 lg:pt-[100px]"
       data-wow-delay=".15s"
@@ -972,9 +965,7 @@
         </span>
       </div>
     </footer>
-    <!-- ====== Footer Section End -->
-
-    <!-- ====== Back To Top Start -->
+    
     <a
       href="javascript:void(0)"
       class="fixed left-auto items-center justify-center hidden w-10 h-10 text-white transition duration-300 ease-in-out rounded-md shadow-md back-to-top bottom-8 right-8 z-999 bg-primary hover:bg-dark"
@@ -983,9 +974,7 @@
         class="mt-[6px] h-3 w-3 rotate-45 border-l border-t border-white"
       ></span>
     </a>
-    <!-- ====== Back To Top End -->
-
-    <!-- ====== Made With Button Start -->
+    
     <a
       target="_blank"
       rel="nofollow noopener"
@@ -1009,9 +998,7 @@
         />
       </span>
     </a>
-    <!-- ====== Made With Button End -->
-
-    <!-- ====== All Scripts -->
+    
     <script src="assets/js/main.js"></script>
   </body>
 </html>

@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -30,7 +30,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session('success'))
             <div class="alert alert-success alert-dismissible mb-4" role="alert">
                 {{ session('success') }}
@@ -45,14 +44,12 @@
             </div>
         @endif
 
-        <!-- Form -->
         <div class="card mb-4">
             <div class="card-body">
                 <form action="{{ route('superadmin.dapur.update', $dapur) }}" method="POST" class="row g-3" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
-                    <!-- Hidden fields for wilayah codes -->
                     <input type="hidden" name="province_code" id="province_code"
                         value="{{ old('province_code', $dapur->province_code) }}" />
                     <input type="hidden" name="regency_code" id="regency_code"
@@ -62,7 +59,6 @@
                     <input type="hidden" name="village_code" id="village_code"
                         value="{{ old('village_code', $dapur->village_code) }}" />
 
-                    <!-- Nama Dapur -->
                     <div class="col-12">
                         <label for="nama_dapur" class="form-label">
                             Nama Dapur
@@ -79,7 +75,6 @@
                         @enderror
                     </div>
 
-                    <!-- Wilayah -->
                     <div class="col-md-6">
                         <label for="provinsi" class="form-label">
                             Provinsi
@@ -144,7 +139,6 @@
                         @enderror
                     </div>
 
-                    <!-- Alamat -->
                     <div class="col-12">
                         <label for="alamat" class="form-label">
                             Alamat Lengkap
@@ -161,7 +155,6 @@
                         @enderror
                     </div>
 
-                    <!-- Telepon -->
                     <div class="col-md-6">
                         <label for="telepon" class="form-label">
                             Telepon
@@ -180,7 +173,6 @@
                         </small>
                     </div>
 
-                    <!-- No Registrasi SPPG -->
                     <div class="col-md-6">
                         <label for="no_registrasi_sppg" class="form-label">
                             No Registrasi SPPG
@@ -196,7 +188,6 @@
                         @enderror
                     </div>
 
-                    <!-- NIK Pemilik -->
                     <div class="col-md-6">
                         <label for="nik_pemilik" class="form-label">
                             NIK Pemilik
@@ -212,7 +203,6 @@
                         @enderror
                     </div>
 
-                    <!-- Foto Bangunan -->
                     <div class="col-md-6">
                         <label for="foto_bangunan" class="form-label">
                             Foto Bangunan
@@ -235,7 +225,6 @@
                         @endif
                     </div>
 
-                    <!-- Tag Lokasi Gmaps -->
                     <div class="col-md-12">
                         <label for="tag_lokasi" class="form-label">
                             Link Google Maps (Tag Lokasi)
@@ -251,7 +240,6 @@
                         @enderror
                     </div>
 
-                    <!-- Status -->
                     <div class="col-md-6">
                         <label for="status" class="form-label">
                             Status
@@ -278,7 +266,6 @@
                         </small>
                     </div>
 
-                    <!-- Checklist Prasarana -->
                     <div class="col-12 mt-4">
                         @php
                             $checkedPrasarana = old('prasarana', $dapur->prasarana->pluck('id_item')->toArray());
@@ -311,7 +298,6 @@
                         </div>
                     </div>
 
-                    <!-- Preview Card -->
                     <div class="col-12">
                         <div class="card bg-light mb-3">
                             <div class="card-body">
@@ -364,7 +350,6 @@
                         </div>
                     </div>
 
-                    <!-- Form Actions -->
                     <div class="col-12 d-flex justify-content-end gap-2">
                         <a href="{{ route('superadmin.dapur.index') }}" class="btn btn-outline-secondary">
                             Batal
@@ -377,7 +362,6 @@
             </div>
         </div>
 
-        <!-- Help Section -->
         <div class="alert alert-info alert-dismissible" role="alert">
             <div class="alert-heading d-flex align-items-center">
                 <i class="bx bx-info-circle me-2"></i>

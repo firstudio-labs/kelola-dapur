@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -37,7 +37,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -66,9 +65,9 @@
         @endif
 
         <div class="row">
-            <!-- Left Column - Transaction Details -->
+            
             <div class="col-lg-8">
-                <!-- Basic Information -->
+                
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
@@ -166,7 +165,6 @@
                     </div>
                 </div>
 
-                <!-- Menu Details -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
@@ -186,68 +184,45 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($approval->transaksiDapur->detailTransaksiDapur as $detail)
+                                    @foreach ($menuDetails as $menuDetail)
                                         @php
-                                            $requiredIngredients = $detail->menuMakanan->calculateRequiredIngredients($detail->jumlah_porsi);
+                                            $detail = $menuDetail['detail'];
+                                            $menu = $menuDetail['menu'];
+                                            $requiredIngredients = $menuDetail['ingredients'];
                                         @endphp
 
                                         <tr>
                                             <td>
-                                                <div
-                                                    class="d-flex align-items-center"
-                                                >
+                                                <div class="d-flex align-items-center">
                                                     <img
-                                                        src="{{ $detail->menuMakanan->gambar_url ?? asset("images/menu/default-menu.jpg") }}"
-                                                        alt="{{ $detail->menuMakanan->nama_menu ?? "Menu" }}"
+                                                        src="{{ $menu->gambar_url ?? asset('images/menu/default-menu.jpg') }}"
+                                                        alt="{{ $menu->nama_menu ?? 'Menu' }}"
                                                         class="rounded me-2"
-                                                        style="
-                                                            width: 100px;
-                                                            height: 100px;
-                                                            object-fit: cover;
-                                                        "
-                                                        onerror="this.src='{{ asset("images/menu/default-menu.jpg") }}'"
+                                                        style="width: 100px; height: 100px; object-fit: cover;"
+                                                        onerror="this.src='{{ asset('images/menu/default-menu.jpg') }}'"
                                                     />
                                                     <div>
-                                                        <h6 class="mb-0">
-                                                            {{ $detail->menuMakanan->nama_menu ?? "Menu Tidak Ditemukan" }}
-                                                        </h6>
-                                                        <small
-                                                            class="text-muted"
-                                                        >
-                                                            {{ $detail->menuMakanan->jenis_menu ?? "" }}
-                                                        </small>
+                                                        <h6 class="mb-0">{{ $menu->nama_menu ?? 'Menu Tidak Ditemukan' }}</h6>
+                                                        <small class="text-muted">{{ $menu->jenis_menu ?? '' }}</small>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <span
-                                                    class="badge {{ $detail->getTipePorsiBadgeClass() }}"
-                                                >
+                                                <span class="badge {{ $detail->getTipePorsiBadgeClass() }}">
                                                     {{ $detail->getTipePorsiText() }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="fw-medium">
-                                                    {{ $detail->jumlah_porsi }}
-                                                </span>
+                                                <span class="fw-medium">{{ $detail->jumlah_porsi }}</span>
                                             </td>
                                             <td>
                                                 <div class="table-responsive">
-                                                    <table
-                                                        class="table table-sm mb-0"
-                                                    >
+                                                    <table class="table table-sm mb-0">
                                                         <thead>
                                                             <tr>
-                                                                <th>
-                                                                    Nama Bahan
-                                                                </th>
-                                                                <th>
-                                                                    Per Porsi
-                                                                </th>
-                                                                <th>
-                                                                    Total
-                                                                    Diperlukan
-                                                                </th>
+                                                                <th>Nama Bahan</th>
+                                                                <th>Per Porsi</th>
+                                                                <th>Total Diperlukan</th>
                                                                 <th>Satuan</th>
                                                             </tr>
                                                         </thead>
@@ -302,7 +277,6 @@
                     </div>
                 </div>
 
-                <!-- Stock Availability -->
                 <div class="card">
                     <div
                         class="card-header d-flex justify-content-between align-items-center"
@@ -366,12 +340,6 @@
                                             $neededAmount = $ingredient["needed"];
                                             $isSufficient = $ingredient["sufficient"];
                                             $isBahanBasah = isset($ingredient["is_bahan_basah"]) ? $ingredient["is_bahan_basah"] : false;
-                                            // Logging untuk debugging
-                                            Log::debug("Stock summary in view", [
-                                                "nama_bahan" => $ingredient["nama_bahan"],
-                                                "is_bahan_basah" => $isBahanBasah,
-                                                "needed" => $neededAmount,
-                                            ]);
                                         @endphp
 
                                         <tr
@@ -395,15 +363,7 @@
                                             </td>
                                             <td>
                                                 {{ number_format($ingredient["available"], 3) }}
-                                                {{--
-                                                    @if ($stockCheck["has_snapshots"])
-                                                    <small
-                                                    class="text-info d-block"
-                                                    >
-                                                    (Snapshot)
-                                                    </small>
-                                                    @endif
-                                                --}}
+                                                
                                             </td>
                                             @if ($stockCheck["has_snapshots"] && isset($ingredient["current_available"]))
                                                 <td>
@@ -436,9 +396,8 @@
                 </div>
             </div>
 
-            <!-- Right Column - Summary & Actions -->
             <div class="col-lg-4">
-                <!-- Summary Card -->
+                
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
@@ -518,7 +477,6 @@
                     </div>
                 </div>
 
-                <!-- Timeline Card -->
                 @if ($approval->approved_at || $approval->created_at)
                     <div class="card mb-4">
                         <div class="card-header">
@@ -573,22 +531,135 @@
                                                 class="bx {{ $approval->isApproved() ? "bx-check" : "bx-x" }}"
                                             ></i>
                                         </span>
-                                        <div class="timeline-content">
+                                        <div class="timeline-content border-bottom pb-3 mb-3">
                                             <div class="fw-medium">
                                                 {{ $approval->isApproved() ? "Disetujui" : "Ditolak" }}
                                             </div>
                                             <small class="text-muted">
                                                 {{ $approval->approved_at->format("d M Y, H:i") }}
                                             </small>
+                                            @if($approval->catatan_approval)
+                                                <small class="text-muted d-block mt-1"><i class="bx bx-note me-1"></i>{{ $approval->catatan_approval }}</small>
+                                            @endif
                                         </div>
                                     </div>
+
+                                    @if ($approval->isApproved())
+                                        @php
+                                            $orderProd = $approval->transaksiDapur->orderProduksi;
+                                            $orderDist = $orderProd ? $orderProd->distribusiOrder : null;
+                                        @endphp
+                                        
+                                        @if($orderProd)
+                                            @php
+                                                $mapStatusProd = [
+                                                    'stok_kurang'  => ['badge' => 'bg-danger',   'icon' => 'bx-error-circle', 'text' => 'Stok Kurang'],
+                                                    'belum_dibuat' => ['badge' => 'bg-secondary','icon' => 'bx-time',         'text' => 'Belum Dibuat'],
+                                                    'sedang_dibuat'=> ['badge' => 'bg-warning',  'icon' => 'bx-loader-circle','text' => 'Sedang Dibuat'],
+                                                    'selesai'      => ['badge' => 'bg-success',  'icon' => 'bx-check-circle', 'text' => 'Selesai'],
+                                                ];
+                                                $prodData = $mapStatusProd[$orderProd->status] ?? $mapStatusProd['belum_dibuat'];
+                                            @endphp
+                                            <div class="timeline-item">
+                                                <span class="timeline-indicator {{ str_replace('bg-', 'timeline-indicator-', $prodData['badge']) }}">
+                                                    <i class="bx {{ $prodData['icon'] }}"></i>
+                                                </span>
+                                                <div class="timeline-content {{ $orderProd->status === 'selesai' ? 'border-bottom pb-3 mb-3' : '' }}">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <div class="fw-medium">Status Produksi</div>
+                                                        <span class="badge {{ $prodData['badge'] }}">{{ $prodData['text'] }}</span>
+                                                    </div>
+                                                    <small class="text-muted d-block mb-2">Update: {{ $orderProd->updated_at->format('d M Y, H:i') }}</small>
+                                                    <div class="mt-2 text-start">
+                                                        <button type="button" class="btn btn-xs btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalDetailProduksi">
+                                                            <i class="bx bx-info-circle me-1"></i>Lihat Detail
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if($orderDist)
+                                            @php
+                                                $mapStatusDist = [
+                                                    'belum_dikirim'  => ['badge' => 'bg-secondary', 'icon' => 'bx-time',         'text' => 'Belum Dikirim'],
+                                                    'sedang_dikirim' => ['badge' => 'bg-warning',   'icon' => 'bx-car',          'text' => 'Sedang Dikirim'],
+                                                    'sudah_dikirim'  => ['badge' => 'bg-success',   'icon' => 'bx-check-double', 'text' => 'Sudah Dikirim'],
+                                                ];
+                                                $distData = $mapStatusDist[$orderDist->status] ?? $mapStatusDist['belum_dikirim'];
+                                            @endphp
+                                            <div class="timeline-item">
+                                                <span class="timeline-indicator {{ str_replace('bg-', 'timeline-indicator-', $distData['badge']) }}">
+                                                    <i class="bx {{ $distData['icon'] }}"></i>
+                                                </span>
+                                                <div class="timeline-content border-bottom pb-3 mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="fw-medium">Status Distribusi</div>
+                                                        <span class="badge {{ $distData['badge'] }}">{{ $distData['text'] }}</span>
+                                                    </div>
+                                                    <small class="text-muted">Update: {{ $orderDist->updated_at->format('d M Y, H:i') }}</small>
+                                                </div>
+                                            </div>
+
+                                            @php
+                                                $jumlahPenerima  = $orderDist->details->count();
+                                                $penerimaSelesai = $orderDist->details->where('status','sudah_dikirim')->count();
+                                                $penerimaDiterima = $orderDist->details->where('status_penerimaan', 'diterima')->count();
+                                                
+                                                $pctDelivered    = $jumlahPenerima > 0 ? round(($penerimaSelesai / $jumlahPenerima) * 100) : 0;
+                                                $pctAccepted     = $jumlahPenerima > 0 ? round(($penerimaDiterima / $jumlahPenerima) * 100) : 0;
+                                            @endphp
+                                            <div class="timeline-item">
+                                                <span class="timeline-indicator {{ $pctDelivered == 100 ? 'timeline-indicator-success' : 'timeline-indicator-warning' }}">
+                                                    <i class="bx bx-package"></i>
+                                                </span>
+                                                <div class="timeline-content border-bottom pb-3 mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <div class="fw-medium">Progres Pengiriman (Distribusi)</div>
+                                                        <span class="text-warning fw-semibold">{{ $penerimaSelesai }}/{{ $jumlahPenerima }} Terkirim</span>
+                                                    </div>
+                                                    <div class="progress mb-1" style="height:6px">
+                                                        <div class="progress-bar {{ $pctDelivered == 100 ? 'bg-success' : 'bg-warning' }}"
+                                                             style="width:{{ $pctDelivered }}%" role="progressbar"></div>
+                                                    </div>
+                                                    <small class="text-muted d-block mb-2">{{ $pctDelivered }}% Pengiriman selesai</small>
+                                                    <div class="mt-2 text-start">
+                                                        <button type="button" class="btn btn-xs btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalDetailDistribusi">
+                                                            <i class="bx bx-info-circle me-1"></i>Lihat Detail
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="timeline-item">
+                                                <span class="timeline-indicator {{ $pctAccepted == 100 ? 'timeline-indicator-success' : 'timeline-indicator-primary' }}">
+                                                    <i class="bx bx-check-shield"></i>
+                                                </span>
+                                                <div class="timeline-content">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <div class="fw-medium">Konfirmasi Penerima MBG</div>
+                                                        <span class="text-primary fw-semibold">{{ $penerimaDiterima }}/{{ $jumlahPenerima }} Dikonfirmasi</span>
+                                                    </div>
+                                                    <div class="progress mb-1" style="height:6px">
+                                                        <div class="progress-bar {{ $pctAccepted == 100 ? 'bg-success' : 'bg-primary' }}"
+                                                             style="width:{{ $pctAccepted }}%" role="progressbar"></div>
+                                                    </div>
+                                                    <small class="text-muted d-block mb-2">{{ $pctAccepted }}% Dikonfirmasi Makanan Diterima</small>
+                                                    <div class="mt-2 text-start">
+                                                        <button type="button" class="btn btn-xs btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalDetailPenerimaan">
+                                                            <i class="bx bx-list-ul me-1"></i>Lihat Detail
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endif
                                 @endif
                             </div>
                         </div>
                     </div>
                 @endif
 
-                <!-- Status Actions -->
                 @if ($approval->isPending())
                     <div class="card">
                         <div class="card-header">
@@ -635,7 +706,6 @@
             </div>
         </div>
 
-        <!-- Approve Modal -->
         <div
             class="modal fade"
             id="approveModal"
@@ -726,7 +796,6 @@
             </div>
         </div>
 
-        <!-- Reject Modal -->
         <div
             class="modal fade"
             id="rejectModal"
@@ -798,7 +867,370 @@
             </div>
         </div>
 
-        <!-- Custom Styling -->
+        <!-- Modal Detail Penerimaan -->
+        <div class="modal fade" id="modalDetailPenerimaan" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-success text-success"><i class="bx bx-check-double"></i></span>
+                            </div>
+                            <h5 class="modal-title fw-bold mb-0">Detail Konfirmasi Penerima MBG</h5>
+                        </div>
+                    </div>
+                    <div class="modal-body p-4">
+                        @if (isset($orderDist) && $orderDist)
+                            <div class="table-responsive border rounded">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="py-2 px-3">Penerima</th>
+                                            <th class="py-2 text-center">Status</th>
+                                            <th class="py-2 text-center">Dikirim (B/K)</th>
+                                            <th class="py-2 text-center">Diterima (B/K)</th>
+                                            <th class="py-2 px-3">Catatan / Ulasan</th>
+                                            <th class="py-2 text-center">Waktu Konfirmasi</th>
+                                            <th class="py-2 text-center">Foto Bukti</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($orderDist->details as $pDetail)
+                                            <tr>
+                                                <td class="py-3 px-3">
+                                                    <div class="fw-medium text-dark">{{ $pDetail->penerimaMbg->userRole->user->nama ?? 'Unknown' }}</div>
+                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">PJ: {{ $pDetail->penerimaMbg->penanggung_jawab ?? '-' }}</small>
+                                                </td>
+                                                <td class="py-3 text-center">
+                                                    @if ($pDetail->status_penerimaan === 'diterima')
+                                                        <span class="badge bg-label-success small px-2">Diterima</span>
+                                                    @elseif ($pDetail->status_penerimaan === 'ditolak')
+                                                        <span class="badge bg-label-danger small px-2">Ditolak</span>
+                                                    @else
+                                                        <span class="badge bg-label-secondary small px-2">Menunggu</span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-3 text-center">
+                                                    <span class="fw-bold text-dark">{{ $pDetail->porsi_besar + $pDetail->porsi_kecil }}</span>
+                                                    <div class="text-muted small" style="font-size: 0.7rem;">{{ $pDetail->porsi_besar }}B / {{ $pDetail->porsi_kecil }}K</div>
+                                                </td>
+                                                <td class="py-3 text-center">
+                                                    @if ($pDetail->status_penerimaan !== 'menunggu')
+                                                        <span class="fw-bold text-primary">{{ ($pDetail->porsi_besar_diterima ?? 0) + ($pDetail->porsi_kecil_diterima ?? 0) }}</span>
+                                                        <div class="text-primary small" style="font-size: 0.7rem;">{{ $pDetail->porsi_besar_diterima ?? 0 }}B / {{ $pDetail->porsi_kecil_diterima ?? 0 }}K</div>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-3 px-3">
+                                                    <small class="text-muted fst-italic">{{ $pDetail->ulasan ?: '-' }}</small>
+                                                </td>
+                                                <td class="py-3 text-center">
+                                                    @if ($pDetail->status_penerimaan !== 'menunggu')
+                                                        <small class="text-dark d-block mb-1">{{ $pDetail->updated_at->format('d M Y') }}</small>
+                                                        <small class="text-muted">{{ $pDetail->updated_at->format('H:i') }}</small>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-3 text-center">
+                                                    @if ($pDetail->penerimaanFoto && $pDetail->penerimaanFoto->count() > 0)
+                                                        <div class="d-flex align-items-center justify-content-center gap-1 flex-wrap">
+                                                            @foreach ($pDetail->penerimaanFoto as $foto)
+                                                                <a href="{{ Storage::url($foto->path_foto) }}" target="_blank"
+                                                                   class="d-inline-flex border rounded p-1 bg-white shadow-sm">
+                                                                    <img src="{{ Storage::url($foto->path_foto) }}" 
+                                                                         alt="Foto" 
+                                                                         class="rounded" 
+                                                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                                                </a>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <span class="text-muted small">-</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="bx bx-error display-1 text-warning mb-2"></i>
+                                <h5 class="fw-bold">Data Konfirmasi Tidak Ditemukan</h5>
+                                <p class="text-muted mb-0">Oops! Terjadi kesalahan saat memuat rincian konfirmasi.</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top py-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup Detail</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Detail Distribusi -->
+        <div class="modal fade" id="modalDetailDistribusi" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-warning text-warning"><i class="bx bx-car"></i></span>
+                            </div>
+                            <h5 class="modal-title fw-bold mb-0">Detail Proses Distribusi</h5>
+                        </div>
+                    </div>
+                    <div class="modal-body p-4">
+                        @if (isset($orderDist) && $orderDist)
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <div>
+                                    <small class="text-uppercase text-muted fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Status Distribusi Keseluruhan</small>
+                                    @php
+                                        $mapStatusDistModal = [
+                                            'belum_dikirim'  => ['badge' => 'bg-label-secondary', 'icon' => 'bx-time',         'text' => 'Belum Dikirim'],
+                                            'sedang_dikirim' => ['badge' => 'bg-label-warning',   'icon' => 'bx-loader-circle', 'text' => 'Sedang Dikirim'],
+                                            'sudah_dikirim'  => ['badge' => 'bg-label-success',   'icon' => 'bx-check-double', 'text' => 'Sudah Dikirim'],
+                                        ];
+                                        $dD = $mapStatusDistModal[$orderDist->status] ?? $mapStatusDistModal['belum_dikirim'];
+                                    @endphp
+                                    <span class="badge {{ $dD['badge'] }} px-3 py-2 fs-6">
+                                        <i class="bx {{ $dD['icon'] }} me-1"></i> {{ $dD['text'] }}
+                                    </span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-uppercase text-muted fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Update Terakhir</small>
+                                    <span class="fw-semibold text-dark"><i class="bx bx-calendar-check me-1"></i>{{ $orderDist->updated_at->format('d M Y, H:i') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-0">
+                                <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                    <i class="bx bx-map-pin me-2 text-warning"></i>Rincian Pengiriman per Penerima
+                                </h6>
+                                <div class="table-responsive border rounded">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="py-2 px-3">Penerima</th>
+                                                <th class="py-2 text-center">Status Driver</th>
+                                                <th class="py-2 text-center">Porsi (B/K)</th>
+                                                <th class="py-2 px-3">Catatan Driver</th>
+                                                <th class="py-2 text-center">Bukti</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if ($orderDist->details && $orderDist->details->count() > 0)
+                                                @foreach ($orderDist->details as $dDetail)
+                                                    <tr>
+                                                        <td class="py-3 px-3">
+                                                            <div class="fw-medium text-dark">{{ $dDetail->penerimaMbg->userRole->user->nama ?? 'Unknown' }}</div>
+                                                            <small class="text-muted d-block" style="font-size: 0.75rem;">PJ: {{ $dDetail->penerimaMbg->penanggung_jawab ?? '-' }}</small>
+                                                        </td>
+                                                        <td class="py-3 text-center">
+                                                            @php
+                                                                $sD = $mapStatusDistModal[$dDetail->status] ?? $mapStatusDistModal['belum_dikirim'];
+                                                            @endphp
+                                                            <span class="badge {{ $sD['badge'] }} small">{{ $sD['text'] }}</span>
+                                                        </td>
+                                                        <td class="py-3 text-center">
+                                                            <span class="fw-bold text-dark">{{ ($dDetail->porsi_besar ?? 0) + ($dDetail->porsi_kecil ?? 0) }}</span>
+                                                            <div class="text-muted small" style="font-size: 0.7rem;">{{ $dDetail->porsi_besar ?? 0 }}B / {{ $dDetail->porsi_kecil ?? 0 }}K</div>
+                                                        </td>
+                                                        <td class="py-3 px-3">
+                                                            <small class="text-muted fst-italic">{{ $dDetail->catatan ?: '-' }}</small>
+                                                        </td>
+                                                        <td class="py-3 text-center">
+                                                             @if ($dDetail->dokumentasi && $dDetail->dokumentasi->count() > 0)
+                                                                 <a href="{{ $dDetail->dokumentasi->first()->url }}" target="_blank"
+                                                                    class="d-inline-flex border rounded p-1 bg-white shadow-sm">
+                                                                     <img src="{{ $dDetail->dokumentasi->first()->url }}" 
+                                                                          class="rounded" 
+                                                                          style="width: 45px; height: 45px; object-fit: cover;" 
+                                                                          alt="Bukti">
+                                                                 </a>
+                                                             @else
+                                                                 <span class="text-muted small">-</span>
+                                                             @endif
+                                                         </td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-4 text-muted border-0">
+                                                        <i class="bx bx-info-circle fs-4 d-block mb-2"></i>
+                                                        Belum ada data rincian pengiriman
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="bx bx-error display-1 text-warning mb-3"></i>
+                                <h5 class="fw-bold">Data Distribusi Tidak Ditemukan</h5>
+                                <p class="text-muted">Oops! Terjadi kesalahan saat memuat detail distribusi. Silakan hubungi admin.</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top py-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup Detail</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Detail Produksi -->
+        <div class="modal fade" id="modalDetailProduksi" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-primary text-primary"><i class="bx bx-cog"></i></span>
+                            </div>
+                            <h5 class="modal-title fw-bold mb-0">Detail Proses Produksi</h5>
+                        </div>
+                    </div>
+                    <div class="modal-body p-4">
+                        @if (isset($orderProd) && $orderProd)
+                            <div class="row g-4">
+                                <div class="col-md-7 border-end">
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <div>
+                                            <small class="text-uppercase text-muted fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Status Produksi</small>
+                                            @php
+                                                $mapStatusProdModal = [
+                                                    'stok_kurang'  => ['badge' => 'bg-label-danger',  'icon' => 'bx-error-circle', 'text' => 'Stok Kurang'],
+                                                    'belum_dibuat' => ['badge' => 'bg-label-secondary','icon' => 'bx-time',         'text' => 'Belum Dibuat'],
+                                                    'sedang_dibuat'=> ['badge' => 'bg-label-warning',  'icon' => 'bx-loader-circle','text' => 'Sedang Dibuat'],
+                                                    'selesai'      => ['badge' => 'bg-label-success',  'icon' => 'bx-check-circle', 'text' => 'Selesai'],
+                                                ];
+                                                $pD = $mapStatusProdModal[$orderProd->status] ?? $mapStatusProdModal['belum_dibuat'];
+                                            @endphp
+                                            <span class="badge {{ $pD['badge'] }} px-3 py-2 fs-6">
+                                                <i class="bx {{ $pD['icon'] }} me-1"></i> {{ $pD['text'] }}
+                                            </span>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-uppercase text-muted fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Update Terakhir</small>
+                                            <span class="fw-semibold text-dark"><i class="bx bx-calendar-check me-1"></i>{{ $orderProd->updated_at->format('d M Y, H:i') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                            <i class="bx bx-restaurant me-2 text-primary"></i>Daftar Menu Diproduksi
+                                        </h6>
+                                        <div class="table-responsive border rounded">
+                                            <table class="table table-sm table-hover mb-0">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th class="py-2">Menu</th>
+                                                        <th class="py-2 text-center">Tipe Porsi</th>
+                                                        <th class="py-2 text-end">Jumlah</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (isset($approval->transaksiDapur) && $approval->transaksiDapur->detailTransaksiDapur->count() > 0)
+                                                        @foreach($approval->transaksiDapur->detailTransaksiDapur as $det)
+                                                            <tr>
+                                                                <td class="py-2 fw-medium">{{ $det->menuMakanan->nama_menu }}</td>
+                                                                <td class="py-2 text-center small">
+                                                                    <span class="badge {{ $det->tipe_porsi === 'besar' ? 'bg-label-primary' : 'bg-label-warning' }}">
+                                                                        {{ ucfirst($det->tipe_porsi) }}
+                                                                    </span>
+                                                                </td>
+                                                                <td class="py-2 text-end fw-semibold text-primary">
+                                                                    {{ $det->jumlah_porsi }} Porsi
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @else
+                                                        <tr>
+                                                            <td colspan="3" class="text-center py-3 text-muted">Data menu tidak tersedia</td>
+                                                        </tr>
+                                                    @endif
+                                                </tbody>
+                                                @if(isset($approval->transaksiDapur))
+                                                <tfoot class="bg-lighter">
+                                                    <tr>
+                                                        <td colspan="2" class="fw-bold text-end">Total Porsi:</td>
+                                                        <td class="text-end fw-bold text-primary">{{ $approval->transaksiDapur->detailTransaksiDapur->sum('jumlah_porsi') }}</td>
+                                                    </tr>
+                                                </tfoot>
+                                                @endif
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-0">
+                                        <h6 class="fw-bold mb-2 d-flex align-items-center">
+                                            <i class="bx bx-note me-2 text-primary"></i>Catatan Produksi
+                                        </h6>
+                                        <div class="p-3 bg-lighter rounded border" style="min-height: 80px;">
+                                            <p class="mb-0 text-dark small fst-italic">
+                                                {{ $orderProd->catatan ?: 'Tidak ada catatan dari staf produksi.' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                        <i class="bx bx-image-alt me-2 text-primary"></i>Dokumentasi Produksi
+                                    </h6>
+                                    <div class="row g-2">
+                                        @forelse($orderProd->dokumentasi as $dok)
+                                            <div class="col-6">
+                                                <a href="{{ $dok->url }}" target="_blank" class="d-block card-hover">
+                                                    <div class="position-relative">
+                                                        <img src="{{ $dok->url }}" 
+                                                             class="img-fluid rounded border shadow-sm" 
+                                                             style="width: 100%; height: 140px; object-fit: cover;"
+                                                             alt="Dokumentasi">
+                                                        <div class="position-absolute top-0 end-0 p-1">
+                                                            <span class="badge bg-dark bg-opacity-50"><i class="bx bx-zoom-in"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        @empty
+                                            <div class="col-12">
+                                                <div class="text-center py-5 border rounded bg-lighter">
+                                                    <i class="bx bx-no-entry display-4 text-muted mb-2"></i>
+                                                    <p class="text-muted mb-0 small">Belum ada foto dokumentasi</p>
+                                                </div>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                    @if($orderProd->dokumentasi && $orderProd->dokumentasi->count() > 0)
+                                        <div class="mt-3">
+                                            <p class="text-muted small">
+                                                <i class="bx bx-info-circle me-1"></i>Klik gambar untuk melihat dalam ukuran penuh.
+                                            </p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="bx bx-error display-1 text-warning mb-3"></i>
+                                <h5 class="fw-bold">Data Produksi Tidak Ditemukan</h5>
+                                <p class="text-muted">Oops! Terjadi kesalahan saat memuat detail produksi. Silakan hubungi admin.</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top py-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup Detail</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <style>
             .avatar-initial {
                 width: 40px;
@@ -862,7 +1294,6 @@
             }
         </style>
 
-        <!-- JavaScript -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const alerts = document.querySelectorAll('.alert-dismissible');

@@ -189,7 +189,7 @@ class LaporanKekuranganStockController extends Controller
         }
 
         return redirect()->back()
-            // ->with('success', "{$successCount} bahan stok berhasil diselesaikan.");
+            
             ->with('success', "Laporan berhasil diselesaikan.");
     }
 
@@ -266,30 +266,46 @@ class LaporanKekuranganStockController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ];
 
-        $callback = function () use ($reports) {
+        $callback = function () use ($reports, $kepalaDapur) {
             $file = fopen('php://output', 'w');
 
             fputcsv($file, [
                 'Tanggal',
                 'ID Transaksi',
                 'Nama Bahan',
-                'Jumlah Dibutuhkan',
-                'Jumlah Tersedia',
-                'Jumlah Kurang',
+                'Dibutuhkan',
+                'Tersedia',
+                'Kekurangan (Nominal)',
                 'Satuan',
+                'Kekurangan (Konversi)',
                 'Status',
                 'Dibuat Oleh'
             ]);
 
+            $formatNumber = function($val) {
+                return rtrim(rtrim(number_format((float) $val, 3, ',', '.'), '0'), ',');
+            };
+
             foreach ($reports as $report) {
+                $stockItem = \App\Models\StockItem::where('id_dapur', $kepalaDapur->id_dapur)
+                    ->where('id_template_item', $report->id_template_item)
+                    ->first();
+                
+                $konversiLabel = '-';
+                if ($stockItem && $stockItem->konversi_nilai > 0) {
+                    $konversiVal = (float) ($report->jumlah_kurang / $stockItem->konversi_nilai);
+                    $konversiLabel = $formatNumber($konversiVal) . ' ' . $stockItem->konversi_satuan;
+                }
+
                 fputcsv($file, [
                     $report->created_at->format('Y-m-d H:i:s'),
                     $report->id_transaksi,
                     $report->templateItem->nama_bahan,
-                    $report->jumlah_dibutuhkan,
-                    $report->jumlah_tersedia,
-                    $report->jumlah_kurang,
+                    $formatNumber($report->jumlah_dibutuhkan),
+                    $formatNumber($report->jumlah_tersedia),
+                    $formatNumber($report->jumlah_kurang),
                     $report->satuan,
+                    $konversiLabel,
                     $report->status,
                     $report->transaksiDapur->createdBy->nama
                 ]);
@@ -313,8 +329,9 @@ class LaporanKekuranganStockController extends Controller
         }
 
         $laporan = $transaksi->laporanKekuranganStock->load('templateItem');
+        $dapur = $transaksi->dapur;
 
-        $pdf = Pdf::loadView('kepaladapur.laporan-kekurangan.export-pdf', compact('transaksi', 'laporan'));
+        $pdf = Pdf::loadView('kepaladapur.laporan-kekurangan.export-pdf', compact('transaksi', 'laporan', 'dapur'));
         return $pdf->download('laporan-kekurangan-' . $transaksi->id_transaksi . '.pdf');
     }
 
@@ -342,25 +359,41 @@ class LaporanKekuranganStockController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ];
 
-        $callback = function () use ($laporan) {
+        $callback = function () use ($laporan, $kepalaDapur) {
             $file = fopen('php://output', 'w');
 
             fputcsv($file, [
                 'Nama Bahan',
-                'Jumlah Dibutuhkan',
-                'Jumlah Tersedia',
-                'Jumlah Kurang',
+                'Dibutuhkan',
+                'Tersedia',
+                'Kekurangan (Nominal)',
                 'Satuan',
+                'Kekurangan (Konversi)',
                 'Status'
             ]);
 
+            $formatNumber = function($val) {
+                return rtrim(rtrim(number_format((float) $val, 3, ',', '.'), '0'), ',');
+            };
+
             foreach ($laporan as $item) {
+                $stockItem = \App\Models\StockItem::where('id_dapur', $kepalaDapur->id_dapur)
+                    ->where('id_template_item', $item->id_template_item)
+                    ->first();
+                
+                $konversiLabel = '-';
+                if ($stockItem && $stockItem->konversi_nilai > 0) {
+                    $konversiVal = (float) ($item->jumlah_kurang / $stockItem->konversi_nilai);
+                    $konversiLabel = $formatNumber($konversiVal) . ' ' . $stockItem->konversi_satuan;
+                }
+
                 fputcsv($file, [
                     $item->templateItem->nama_bahan,
-                    $item->jumlah_dibutuhkan,
-                    $item->jumlah_tersedia,
-                    $item->jumlah_kurang,
+                    $formatNumber($item->jumlah_dibutuhkan),
+                    $formatNumber($item->jumlah_tersedia),
+                    $formatNumber($item->jumlah_kurang),
                     $item->satuan,
+                    $konversiLabel,
                     $item->status
                 ]);
             }

@@ -18,6 +18,8 @@ class StockItem extends Model
         'id_dapur',
         'id_template_item',
         'jumlah',
+        'konversi_nilai',
+        'konversi_satuan',
         'satuan',
         'tanggal_restok',
         'keterangan'
@@ -25,10 +27,10 @@ class StockItem extends Model
 
     protected $casts = [
         'jumlah' => 'decimal:3',
+        'konversi_nilai' => 'decimal:3',
         'tanggal_restok' => 'date',
     ];
 
-    // Relationships
     public function dapur()
     {
         return $this->belongsTo(Dapur::class, 'id_dapur');
@@ -68,7 +70,6 @@ class StockItem extends Model
         return $value;
     }
 
-    // Helper methods
     public function isLowStock(int $threshold = 10): bool
     {
         return (float) $this->jumlah <= $threshold;
@@ -99,9 +100,6 @@ class StockItem extends Model
         return 'normal';
     }
 
-    /**
-     * Get stock status badge class for display
-     */
     public function getStockStatusBadgeClass(): string
     {
         return match ($this->getStockStatus()) {
@@ -112,34 +110,31 @@ class StockItem extends Model
         };
     }
 
-    /**
-     * Get formatted stock amount with unit from TemplateItem
-     */
     public function getFormattedStock(): string
     {
         return number_format($this->jumlah, 3) . ' ' . $this->satuan;
     }
 
-    /**
-     * Check if stock is sufficient for given amount
-     */
     public function isSufficient(float $requiredAmount): bool
     {
         return (float) $this->jumlah >= $requiredAmount;
     }
 
-    /**
-     * Get shortage amount if stock is insufficient
-     */
     public function getShortageAmount(float $requiredAmount): float
     {
         $available = (float) $this->jumlah;
         return $requiredAmount > $available ? $requiredAmount - $available : 0;
     }
 
-    /**
-     * Create stock snapshot for approval
-     */
+    public function getConvertedStock(): ?string
+    {
+        if ($this->konversi_nilai && $this->konversi_nilai > 0 && $this->konversi_satuan) {
+            $convertedValue = (float)($this->jumlah / $this->konversi_nilai);
+            return rtrim(rtrim(number_format($convertedValue, 3), '0'), '.') . ' ' . $this->konversi_satuan;
+        }
+        return null;
+    }
+
     public function createSnapshot(int $approvalId): ?StockSnapshot
     {
         return StockSnapshot::create([
@@ -163,10 +158,6 @@ class StockItem extends Model
         return $latestApproval ? $latestApproval->approved_at : $this->tanggal_restok;
     }
 
-
-    /**
-     * Boot method to sync satuan with TemplateItem when saving
-     */
     protected static function boot()
     {
         parent::boot();

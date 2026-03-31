@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -44,7 +44,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -72,7 +71,6 @@
             </div>
         @endif
 
-        <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
                 <div class="card">
@@ -183,7 +181,6 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -319,11 +316,10 @@
             </div>
         </div>
 
-        <!-- Approvals Table -->
         <div class="card">
             <div class="card-body">
                 @if ($approvals->isNotEmpty())
-                    <!-- Bulk Action Checkboxes -->
+                    
                     @if ($approvals->where("status", "pending")->count() > 0)
                         <div class="mb-3 d-flex align-items-center">
                             <input
@@ -421,17 +417,7 @@
                                             <div
                                                 class="d-flex align-items-center"
                                             >
-                                                {{--
-                                                    <div
-                                                    class="avatar avatar-sm me-2"
-                                                    >
-                                                    <span
-                                                    class="avatar-initial rounded-circle bg-label-info"
-                                                    >
-                                                    {{ strtoupper(substr($approval->transaksiDapur->createdBy->nama ?? "NA", 0, 2)) }}
-                                                    </span>
-                                                    </div>
-                                                --}}
+                                                
                                                 <div>
                                                     <span class="fw-medium">
                                                         {{ $approval->transaksiDapur->createdBy->nama ?? "Unknown" }}
@@ -503,14 +489,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($approvals->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $approvals->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         <i class="bx bx-receipt bx-lg text-muted mb-3"></i>
                         <h5 class="mb-1">
@@ -533,7 +518,6 @@
             </div>
         </div>
 
-        <!-- Approve Modal -->
         <div
             class="modal fade"
             id="approveModal"
@@ -629,7 +613,6 @@
             </div>
         </div>
 
-        <!-- Reject Modal -->
         <div
             class="modal fade"
             id="rejectModal"
@@ -723,7 +706,6 @@
             </div>
         </div>
 
-        <!-- Bulk Action Modal -->
         <div
             class="modal fade"
             id="bulkActionModal"
@@ -823,13 +805,11 @@
             </div>
         </div>
 
-        <!-- Choices.js CSS -->
         <link
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
         />
 
-        <!-- Custom Styling -->
         <style>
             .choices__inner {
                 background-color: #fff;
@@ -900,10 +880,8 @@
             }
         </style>
 
-        <!-- Choices.js JS -->
         <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-        <!-- JavaScript -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const selects = document.querySelectorAll('.choices-select');

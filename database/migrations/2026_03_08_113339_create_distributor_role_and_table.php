@@ -13,7 +13,6 @@ return new class extends Migration
         
         DB::statement("ALTER TABLE user_roles MODIFY COLUMN role_type ENUM('kepala_dapur','ahli_gizi','admin_gudang','super_admin','penerima_mbg','produksi','distributor') NOT NULL");
 
-        
         Schema::create('distributor', function (Blueprint $table) {
             $table->id('id_distributor');
             $table->unsignedBigInteger('id_user_role');
@@ -44,11 +43,9 @@ return new class extends Migration
         });
     }
 
-    
     public function down(): void
     {
         Schema::dropIfExists('distributor');
-        
         
         DB::statement("ALTER TABLE user_roles MODIFY COLUMN role_type ENUM('kepala_dapur','ahli_gizi','admin_gudang','super_admin','penerima_mbg','produksi') NOT NULL");
     }

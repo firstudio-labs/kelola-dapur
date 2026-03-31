@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <nav class="d-flex align-items-center mb-2">
@@ -31,7 +31,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("error"))
             <div class="alert alert-danger alert-dismissible mb-4" role="alert">
                 {{ session("error") }}
@@ -44,7 +43,6 @@
             </div>
         @endif
 
-        <!-- Available Packages -->
         @if ($packages->count() > 0)
             <div class="row">
                 @foreach ($packages as $package)
@@ -120,7 +118,7 @@
                 @endforeach
             </div>
         @else
-            <!-- Empty State -->
+            
             <div class="card">
                 <div class="card-body">
                     <div class="text-center py-6">
@@ -142,7 +140,6 @@
         @endif
     </div>
 
-    <!-- Payment Modal -->
     <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -168,7 +165,7 @@
                     />
 
                     <div class="modal-body">
-                        <!-- Package Summary -->
+                        
                         <div class="card bg-light mb-4">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -198,7 +195,6 @@
                             </div>
                         </div>
 
-                        <!-- Promo Code -->
                         <div class="mb-4">
                             <label for="kode_promo" class="form-label">
                                 Kode Promo (opsional)
@@ -223,7 +219,6 @@
                             <div id="promo-message" class="mt-2"></div>
                         </div>
 
-                        <!-- Price Calculation -->
                         <div class="card border mb-4">
                             <div class="card-body">
                                 <div
@@ -269,7 +264,6 @@
                             </div>
                         </div>
 
-                        <!-- Payment Instructions -->
                         <div class="alert alert-info" role="alert">
                             <h6 class="alert-heading mb-2">
                                 <i class="bx bx-info-circle me-1"></i>
@@ -279,16 +273,7 @@
                                 Silakan transfer ke rekening berikut:
                             </p>
                             <ul class="mb-2">
-                                {{--
-                                    <li>
-                                    <strong>Bank BCA:</strong>
-                                    1234567890 a.n. PT Dapur Sistem
-                                    </li>
-                                    <li>
-                                    <strong>Bank Mandiri:</strong>
-                                    9876543210 a.n. PT Dapur Sistem
-                                    </li>
-                                --}}
+                                
                                 <li>
                                     <strong>Bank BRI:</strong>
                                     067801021372500 a.n. Mihammad Khoirul Anam
@@ -302,7 +287,6 @@
                             </p>
                         </div>
 
-                        <!-- Upload Bukti Transfer -->
                         <div class="mb-3">
                             <label for="bukti_transfer" class="form-label">
                                 Upload Bukti Transfer (opsional)
@@ -324,7 +308,6 @@
                             @enderror
                         </div>
 
-                        <!-- Preview Upload -->
                         <div id="image-preview" style="display: none">
                             <label class="form-label">
                                 Preview Bukti Transfer:

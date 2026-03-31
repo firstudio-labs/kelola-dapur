@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -71,7 +71,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -99,7 +98,6 @@
             </div>
         @endif
 
-        <!-- Statistics Section -->
         @if ($stats["total_staff"] > 0)
             <div class="card mb-4">
                 <div class="card-body py-2 px-4">
@@ -175,9 +173,8 @@
             </div>
         @endif
 
-        <!-- Dapur Information and Quick Actions -->
         <div class="row g-4 mb-4">
-            <!-- Dapur Information -->
+            
             <div class="col-lg-8">
                 <div class="card h-100">
                     <div class="card-header">
@@ -349,7 +346,6 @@
             </div>
         </div>
 
-        <!-- Staff List -->
         <div class="card mt-4">
             <div
                 class="card-header d-flex justify-content-between align-items-center"
@@ -360,17 +356,7 @@
                         Staff yang bertugas di dapur ini
                     </small>
                 </div>
-                {{--
-                    <a
-                    href="{{ route("superadmin.users.create") }}?dapur={{ $dapur->id_dapur }}"
-                    class="btn btn-sm btn-outline-primary btn-icon action-btn"
-                    title="Tambah Staff"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    >
-                    <i class="bx bx-plus"></i>
-                    </a>
-                --}}
+                
             </div>
             <div class="card-body">
                 @if ($stats["total_staff"] > 0)
@@ -490,7 +476,6 @@
         </div>
     </div>
 
-    <!-- Custom Styling for Action Buttons -->
     <style>
         .action-btn {
             min-width: 40px;
@@ -517,7 +502,6 @@
         }
     </style>
 
-    <!-- JavaScript for Tooltips -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const tooltipTriggerList = document.querySelectorAll(

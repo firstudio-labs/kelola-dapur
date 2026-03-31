@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -23,17 +23,15 @@
         </div>
     </div>
 
-    <!-- Form -->
     <div class="card mb-4">
         <div class="card-body">
             <form action="{{ route('kepala-dapur.users.store', ['dapur' => $dapur]) }}" method="POST" class="row g-4" enctype="multipart/form-data">
                 @csrf
 
-                <!-- User Information -->
                 <div class="col-12">
                     <h5 class="card-title mb-0">Informasi User</h5>
                     <div class="row g-4 mt-2">
-                        <!-- Nama -->
+                        
                         <div class="col-md-6">
                             <label for="nama" class="form-label">Nama <span class="text-danger">*</span></label>
                             <input type="text" 
@@ -48,7 +46,6 @@
                             @enderror
                         </div>
 
-                        <!-- Username -->
                         <div class="col-md-6">
                             <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                             <input type="text" 
@@ -63,7 +60,6 @@
                             @enderror
                         </div>
 
-                        <!-- Email -->
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" 
@@ -78,7 +74,6 @@
                             @enderror
                         </div>
 
-                        <!-- Role -->
                         <div class="col-md-6">
                             <label for="role_type" class="form-label">Role <span class="text-danger">*</span></label>
                             <select name="role_type" 
@@ -95,7 +90,6 @@
                             @enderror
                         </div>
 
-                        <!-- Password -->
                         <div class="col-md-6">
                             <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                             <input type="password" 
@@ -109,7 +103,6 @@
                             @enderror
                         </div>
 
-                        <!-- Password Confirmation -->
                         <div class="col-md-6">
                             <label for="password_confirmation" class="form-label">Konfirmasi Password <span class="text-danger">*</span></label>
                             <input type="password" 
@@ -124,8 +117,55 @@
                         </div>
                 </div>
 
-                <!-- Role Specific Sections -->
-                <!-- Ahli Gizi Section -->
+                <div class="col-12" id="admin_gudang_section" style="display: {{ old('role_type') === 'admin_gudang' ? 'block' : 'none' }};">
+                    <hr class="my-3">
+                    <h5 class="card-title mb-3">Informasi Spesifik Admin Gudang</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="nik_admin_gudang" class="form-label">NIK Logistik</label>
+                            <input type="text" name="nik_admin_gudang" id="nik_admin_gudang" class="form-control" placeholder="NIK" value="{{ old('nik_admin_gudang') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="nama_lengkap_admin" class="form-label">Nama Lengkap Logistik</label>
+                            <input type="text" name="nama_lengkap" id="nama_lengkap_admin" class="form-control" value="{{ old('nama_lengkap') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="kontak_wa_admin" class="form-label">Kontak/WA</label>
+                            <input type="text" name="kontak_wa" id="kontak_wa_admin" class="form-control" value="{{ old('kontak_wa') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jabatan_admin" class="form-label">Jabatan</label>
+                            <select name="jabatan" id="jabatan_admin" class="form-select">
+                                <option value="Penanggung jawab" {{ old('jabatan') == 'Penanggung jawab' ? 'selected' : '' }}>Penanggung jawab</option>
+                                <option value="Anggota" {{ old('jabatan') == 'Anggota' ? 'selected' : '' }}>Anggota</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="pendidikan_admin" class="form-label">Pendidikan</label>
+                            <select name="pendidikan_terakhir" id="pendidikan_admin" class="form-select">
+                                <option value="SD" {{ old('pendidikan_terakhir') == 'SD' ? 'selected' : '' }}>SD</option>
+                                <option value="SMP" {{ old('pendidikan_terakhir') == 'SMP' ? 'selected' : '' }}>SMP</option>
+                                <option value="SMA" {{ old('pendidikan_terakhir') == 'SMA' ? 'selected' : '' }}>SMA</option>
+                                <option value="D1" {{ old('pendidikan_terakhir') == 'D1' ? 'selected' : '' }}>D1</option>
+                                <option value="D2" {{ old('pendidikan_terakhir') == 'D2' ? 'selected' : '' }}>D2</option>
+                                <option value="D3" {{ old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3</option>
+                                <option value="Sarjana" {{ old('pendidikan_terakhir') == 'Sarjana' ? 'selected' : '' }}>Sarjana</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jenis_kelamin_admin" class="form-label">Jenis Kelamin</label>
+                            <select name="jenis_kelamin" id="jenis_kelamin_admin" class="form-select">
+                                <option value="Pria" {{ old('jenis_kelamin') == 'Pria' ? 'selected' : '' }}>Pria</option>
+                                <option value="Wanita" {{ old('jenis_kelamin') == 'Wanita' ? 'selected' : '' }}>Wanita</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="foto_diri_admin" class="form-label">Foto Diri</label>
+                            <input type="file" name="foto_diri" id="foto_diri_admin" class="form-control @error('foto_diri') is-invalid @enderror">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-12" id="ahli_gizi_section" style="display: {{ old('role_type') === 'ahli_gizi' ? 'block' : 'none' }};">
                     <hr class="my-3">
                     <h5 class="card-title mb-3">Informasi Spesifik Ahli Gizi</h5>
@@ -141,7 +181,6 @@
                     </div>
                 </div>
 
-                <!-- Produksi Section -->
                 <div class="col-12" id="produksi_section" style="display: {{ old('role_type') === 'produksi' ? 'block' : 'none' }};">
                     <hr class="my-3">
                     <h5 class="card-title mb-3">Informasi Spesifik Produksi</h5>
@@ -187,7 +226,6 @@
                     </div>
                 </div>
 
-                <!-- Distributor Section -->
                 <div class="col-12" id="distributor_section" style="display: {{ old('role_type') === 'distributor' ? 'block' : 'none' }};">
                     <hr class="my-3">
                     <h5 class="card-title mb-3">Informasi Spesifik Distributor</h5>
@@ -237,8 +275,7 @@
                     </div>
                 </div>
 
-                <!-- Shared Address Section -->
-                <div class="col-12" id="address_section" style="display: {{ in_array(old('role_type'), ['ahli_gizi', 'produksi', 'distributor']) ? 'block' : 'none' }};">
+                <div class="col-12" id="address_section" style="display: {{ in_array(old('role_type'), ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor']) ? 'block' : 'none' }};">
                     <hr class="my-3">
                     <h5 class="card-title mb-3">Informasi Alamat</h5>
                     <div class="row g-4">
@@ -296,7 +333,6 @@
                     </div>
                 </div>
 
-                <!-- Submit Buttons -->
                 <div class="col-12 mt-4">
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('kepala-dapur.users.index', ['dapur' => $dapur]) }}" class="btn btn-label-secondary">Batal</a>
@@ -307,7 +343,6 @@
         </div>
     </div>
 
-    <!-- Instructions Alert -->
     <div class="alert alert-info alert-dismissible" role="alert">
         <h6 class="alert-heading mb-2">Instruksi Tambah User</h6>
         <ul class="mb-0">
@@ -340,7 +375,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const roleSelect = document.getElementById('role_type');
+    const adminGudangSection = document.getElementById('admin_gudang_section');
     const ahliGiziSection = document.getElementById('ahli_gizi_section');
+    const produksiSection = document.getElementById('produksi_section');
     const distributorSection = document.getElementById('distributor_section');
     const addressSection = document.getElementById('address_section');
 
@@ -348,18 +385,25 @@ document.addEventListener('DOMContentLoaded', function () {
         const role = roleSelect.value;
         
         // Hide all first
+        adminGudangSection.style.display = 'none';
         ahliGiziSection.style.display = 'none';
         produksiSection.style.display = 'none';
         distributorSection.style.display = 'none';
         addressSection.style.display = 'none';
         
         // Disable all inputs in sections to avoid submitting unused fields
+        adminGudangSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
         ahliGiziSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
         produksiSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
         distributorSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
         addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
 
-        if (role === 'ahli_gizi') {
+        if (role === 'admin_gudang') {
+            adminGudangSection.style.display = 'block';
+            adminGudangSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+            addressSection.style.display = 'block';
+            addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+        } else if (role === 'ahli_gizi') {
             ahliGiziSection.style.display = 'block';
             ahliGiziSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
             addressSection.style.display = 'block';

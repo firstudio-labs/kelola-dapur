@@ -11,25 +11,41 @@
     <link rel="stylesheet" href="{{ asset('admin') }}/assets/css/demo.css">
     <script src="{{ asset('admin') }}/assets/vendor/js/helpers.js"></script>
     <script src="{{ asset('admin') }}/assets/js/config.js"></script>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 </head>
-<body>
-<div class="container-xxl">
-    <div class="authentication-wrapper authentication-basic container-p-y">
-        <div class="authentication-inner py-4" style="max-width: 700px; margin: auto;">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="app-brand justify-content-center mb-2">
-                        <span class="app-brand-text fw-bolder fs-4">Daftar <span class="text-primary">Kelola Dapur</span></span>
-                    </div>
-                    <p class="mb-3 text-center text-muted small">Pilih peran Anda untuk memulai pendaftaran</p>
+<body style="background-color: #3758F9">
+        <div class="container-xxl">
+            <div class="authentication-wrapper authentication-basic container-p-y">
+                <div class="authentication-inner py-4" style="max-width: 800px; margin: auto;">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            
+                            <div class="app-brand justify-content-center mb-4">
+                                <a href="/welcome" class="app-brand-link gap-2">
+                                    <span class="app-brand-logo demo">
+                                        <img
+                                            src="{{ asset('logo_kelola_dapur_black.png') }}"
+                                            alt="Logo"
+                                            style="height: 60px"
+                                        />
+                                    </span>
+                                </a>
+                            </div>
+
+                            <p class="mb-3 text-center text-muted small">Pilih peran Anda untuk memulai pendaftaran</p>
 
                     <div class="row g-2 mb-4">
-                        <div class="col-6">
+                        <div class="col-4">
                             <a href="{{ route('register') }}" class="btn btn-outline-primary w-100 py-2">
                                 <i class="bx bx-store me-1"></i> <small>Kepala Dapur</small>
                             </a>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
+                            <a href="{{ route('daftar-mitra') }}" class="btn btn-outline-primary w-100 py-2">
+                                <i class="bx bx-buildings me-1"></i> <small>Mitra</small>
+                            </a>
+                        </div>
+                        <div class="col-4">
                             <a href="{{ route('daftar-mbg') }}" class="btn btn-primary w-100 py-2">
                                 <i class="bx bx-user me-1"></i> <small>Penerima MBG</small>
                             </a>
@@ -164,8 +180,34 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bx bx-send me-1"></i> Kirim Pendaftaran
+                        <div class="mb-3">
+                            <div class="h-captcha" 
+                                 data-sitekey="{{ config('services.hcaptcha.site_key', env('HCAPTCHA_SITE_KEY')) }}"
+                                 data-theme="light"
+                                 data-size="normal">
+                            </div>
+                            @error('h-captcha-response')
+                                <div class="text-danger mt-2">
+                                    <small>{{ $message }}</small>
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input @error('terms') is-invalid @enderror" type="checkbox" name="terms" id="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    Saya menyetujui <a href="javascript:void(0);">Aturan & Ketentuan Layanan</a> yang berlaku.
+                                </label>
+                                @error('terms')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100" id="registerBtn">
+                            <i class="bx bx-send me-1"></i> <span class="btn-text">Kirim Pendaftaran</span>
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                         </button>
                         <p class="text-center mt-3 text-muted">
                             Sudah punya akun? <a href="{{ route('login') }}">Login di sini</a>
@@ -208,6 +250,17 @@ document.getElementById('sel_kec').addEventListener('change', function() {
 });
 document.getElementById('sel_desa').addEventListener('change', function() {
     document.getElementById('desa_code').value=this.value; document.getElementById('desa_name').value=this.value?this.options[this.selectedIndex]?.text:'';
+});
+
+// Handle form submission loading state
+document.getElementById('formPenerima').addEventListener('submit', function() {
+    const btn = document.getElementById('registerBtn');
+    const btnText = btn.querySelector('.btn-text');
+    const spinner = btn.querySelector('.spinner-border');
+    
+    btn.disabled = true;
+    btnText.textContent = 'Mendaftar...';
+    spinner.classList.remove('d-none');
 });
 </script>
 </body>

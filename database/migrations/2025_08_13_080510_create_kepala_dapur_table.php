@@ -14,11 +14,9 @@ return new class extends Migration
             $table->unsignedBigInteger('id_dapur');
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_user_role')->references('id_user_role')->on('user_roles')->onDelete('cascade')->where('role_type', 'kepala_dapur');
             $table->foreign('id_dapur')->references('id_dapur')->on('dapur')->onDelete('cascade');
 
-            // Performance Indexes
             $table->index(['id_dapur'], 'idx_kepala_dapur_dapur');
         });
     }

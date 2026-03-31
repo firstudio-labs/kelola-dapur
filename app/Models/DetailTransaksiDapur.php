@@ -23,7 +23,6 @@ class DetailTransaksiDapur extends Model
         'jumlah_porsi' => 'integer',
     ];
 
-    // Relationships
     public function transaksiDapur()
     {
         return $this->belongsTo(TransaksiDapur::class, 'id_transaksi');
@@ -34,7 +33,6 @@ class DetailTransaksiDapur extends Model
         return $this->belongsTo(MenuMakanan::class, 'id_menu');
     }
 
-    // Helper methods
     public function reduceStockFromProduction(): bool
     {
         $requiredIngredients = $this->menuMakanan->calculateRequiredIngredients($this->jumlah_porsi);
@@ -76,7 +74,6 @@ class DetailTransaksiDapur extends Model
         return $this->menuMakanan->calculateRequiredIngredients($this->jumlah_porsi);
     }
 
-    // Helper methods 
     public function isPorsiBesar(): bool
     {
         return $this->tipe_porsi === 'besar';

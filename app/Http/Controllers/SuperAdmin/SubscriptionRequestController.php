@@ -96,7 +96,6 @@ class SubscriptionRequestController extends Controller
             ->with('success', "{$processed} request subscription berhasil {$action}");
     }
 
-    // Filter methods
     public function pending()
     {
         $subscriptionRequests = SubscriptionRequest::with(['dapur', 'package', 'promoCode'])

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -23,7 +23,6 @@
         </div>
     </div>
 
-    <!-- Form -->
     <div class="card mb-4">
         <div class="card-body">
             @if (session('error'))
@@ -37,11 +36,10 @@
                 @csrf
                 @method('PUT')
 
-                <!-- User Information -->
                 <div class="col-12">
                     <h5 class="card-title mb-0">Informasi User</h5>
                     <div class="row g-4 mt-2">
-                        <!-- Nama -->
+                        
                         <div class="col-md-6">
                             <label for="nama" class="form-label">Nama <span class="text-danger">*</span></label>
                             <input type="text" 
@@ -56,7 +54,6 @@
                             @enderror
                         </div>
 
-                        <!-- Username -->
                         <div class="col-md-6">
                             <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                             <input type="text" 
@@ -71,7 +68,6 @@
                             @enderror
                         </div>
 
-                        <!-- Email -->
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" 
@@ -86,7 +82,6 @@
                             @enderror
                         </div>
 
-                        <!-- Role -->
                         <div class="col-md-6">
                             <label for="role_type" class="form-label">Role <span class="text-danger">*</span></label>
                             <select name="role_type" 
@@ -103,7 +98,6 @@
                             @enderror
                         </div>
 
-                        <!-- Status -->
                         <div class="col-md-6">
                             <label for="is_active" class="form-label">Status</label>
                             <div class="form-check form-switch">
@@ -112,7 +106,6 @@
                             </div>
                         </div>
 
-                        <!-- Password -->
                         <div class="col-md-6">
                             <label for="password" class="form-label">Password Baru (Opsional)</label>
                             <input type="password" 
@@ -125,7 +118,6 @@
                             @enderror
                         </div>
 
-                        <!-- Password Confirmation -->
                         <div class="col-md-6">
                             <label for="password_confirmation" class="form-label">Konfirmasi Password Baru</label>
                             <input type="password" 
@@ -137,6 +129,113 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                    </div>
+                </div>
+
+                <div class="col-12" id="admin_gudang_section" style="display: {{ old('role_type', $user->userRole->role_type) === 'admin_gudang' ? 'block' : 'none' }};">
+                    <hr class="my-3">
+                    <h5 class="card-title mb-3">Informasi Spesifik Admin Gudang</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="nik_admin_gudang" class="form-label">NIK Logistik</label>
+                            <input type="text" 
+                                   name="nik_admin_gudang" 
+                                   id="nik_admin_gudang"
+                                   class="form-control @error('nik_admin_gudang') is-invalid @enderror"
+                                   placeholder="Contoh: 3171234567890001"
+                                   value="{{ old('nik_admin_gudang', $adminGudang->nik_admin_gudang ?? '') }}">
+                            @error('nik_admin_gudang')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="nama_lengkap_admin" class="form-label">Nama Lengkap Logistik</label>
+                            <input type="text" 
+                                   name="nama_lengkap" 
+                                   id="nama_lengkap_admin"
+                                   class="form-control @error('nama_lengkap') is-invalid @enderror"
+                                   placeholder="Nama lengkap sesuai KTP"
+                                   value="{{ old('nama_lengkap', $adminGudang->nama_lengkap ?? '') }}">
+                            @error('nama_lengkap')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="jabatan_admin" class="form-label">Jabatan</label>
+                            <select name="jabatan" id="jabatan_admin" class="form-select @error('jabatan') is-invalid @enderror">
+                                <option value="">Pilih Jabatan</option>
+                                <option value="Penanggung jawab" {{ old('jabatan', $adminGudang->jabatan ?? '') === 'Penanggung jawab' ? 'selected' : '' }}>Penanggung jawab</option>
+                                <option value="Anggota" {{ old('jabatan', $adminGudang->jabatan ?? '') === 'Anggota' ? 'selected' : '' }}>Anggota</option>
+                            </select>
+                            @error('jabatan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="kontak_wa_admin" class="form-label">Nomor WhatsApp / Telepon</label>
+                            <input type="text" 
+                                   name="kontak_wa" 
+                                   id="kontak_wa_admin"
+                                   class="form-control @error('kontak_wa') is-invalid @enderror"
+                                   placeholder="Contoh: 08123456789"
+                                   value="{{ old('kontak_wa', $adminGudang->kontak_wa ?? '') }}">
+                            @error('kontak_wa')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="jenis_kelamin_admin" class="form-label">Jenis Kelamin</label>
+                            <select name="jenis_kelamin" id="jenis_kelamin_admin" class="form-select @error('jenis_kelamin') is-invalid @enderror">
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="Pria" {{ old('jenis_kelamin', $adminGudang->jenis_kelamin ?? '') === 'Pria' ? 'selected' : '' }}>Pria</option>
+                                <option value="Wanita" {{ old('jenis_kelamin', $adminGudang->jenis_kelamin ?? '') === 'Wanita' ? 'selected' : '' }}>Wanita</option>
+                            </select>
+                            @error('jenis_kelamin')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="pendidikan_admin" class="form-label">Pendidikan Terakhir</label>
+                            <select name="pendidikan_terakhir" id="pendidikan_admin" class="form-select @error('pendidikan_terakhir') is-invalid @enderror">
+                                <option value="">Pilih Pendidikan</option>
+                                <option value="SD" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir ?? '') === 'SD' ? 'selected' : '' }}>SD</option>
+                                <option value="SMP" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir ?? '') === 'SMP' ? 'selected' : '' }}>SMP</option>
+                                <option value="SMA" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir ?? '') === 'SMA' ? 'selected' : '' }}>SMA</option>
+                                <option value="D1" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir ?? '') === 'D1' ? 'selected' : '' }}>D1</option>
+                                <option value="D2" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir ?? '') === 'D2' ? 'selected' : '' }}>D2</option>
+                                <option value="D3" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir ?? '') === 'D3' ? 'selected' : '' }}>D3</option>
+                                <option value="Sarjana" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir ?? '') === 'Sarjana' ? 'selected' : '' }}>Sarjana (S1/S2/S3)</option>
+                            </select>
+                            @error('pendidikan_terakhir')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="foto_diri_admin" class="form-label">Foto Diri</label>
+                            <input type="file" 
+                                   name="foto_diri" 
+                                   id="foto_diri_admin"
+                                   accept="image/*"
+                                   class="form-control @error('foto_diri') is-invalid @enderror">
+                            @error('foto_diri')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            
+                            <div class="mt-3">
+                                <img id="image_preview_admin" 
+                                     src="{{ ($adminGudang ?? false) && $adminGudang->foto_diri ? Storage::url($adminGudang->foto_diri) : '#' }}" 
+                                     alt="Preview Foto Diri" 
+                                     class="img-fluid rounded border" 
+                                     style="max-height: 200px; object-fit: cover; {{ ($adminGudang ?? false) && $adminGudang->foto_diri ? 'display: block;' : 'display: none;' }}">
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -232,24 +331,22 @@
                             </div>
                         </div>
 
-
                     </div>
                 </div>
 
-                <!-- Shared Address Section -->
-                <div class="col-12" id="address_section" style="display: {{ in_array(old('role_type', $user->userRole->role_type), ['ahli_gizi', 'produksi', 'distributor']) ? 'block' : 'none' }};">
+                <div class="col-12" id="address_section" style="display: {{ in_array(old('role_type', $user->userRole->role_type), ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor']) ? 'block' : 'none' }};">
                     <hr class="my-3">
                     <h5 class="card-title mb-3">Informasi Alamat</h5>
                     <div class="row g-4">
-                        <input type="hidden" name="province_code" id="province_code" value="{{ old('province_code', $ahliGizi->province_code ?? ($produksi->province_code ?? ($distributor->province_code ?? ''))) }}">
-                        <input type="hidden" name="regency_code" id="regency_code" value="{{ old('regency_code', $ahliGizi->regency_code ?? ($produksi->regency_code ?? ($distributor->regency_code ?? ''))) }}">
-                        <input type="hidden" name="district_code" id="district_code" value="{{ old('district_code', $ahliGizi->district_code ?? ($produksi->district_code ?? ($distributor->district_code ?? ''))) }}">
-                        <input type="hidden" name="village_code" id="village_code" value="{{ old('village_code', $ahliGizi->village_code ?? ($produksi->village_code ?? ($distributor->village_code ?? ''))) }}">
+                        <input type="hidden" name="province_code" id="province_code" value="{{ old('province_code', $adminGudang->province_code ?? ($ahliGizi->province_code ?? ($produksi->province_code ?? ($distributor->province_code ?? '')))) }}">
+                        <input type="hidden" name="regency_code" id="regency_code" value="{{ old('regency_code', $adminGudang->regency_code ?? ($ahliGizi->regency_code ?? ($produksi->regency_code ?? ($distributor->regency_code ?? '')))) }}">
+                        <input type="hidden" name="district_code" id="district_code" value="{{ old('district_code', $adminGudang->district_code ?? ($ahliGizi->district_code ?? ($produksi->district_code ?? ($distributor->district_code ?? '')))) }}">
+                        <input type="hidden" name="village_code" id="village_code" value="{{ old('village_code', $adminGudang->village_code ?? ($ahliGizi->village_code ?? ($produksi->village_code ?? ($distributor->village_code ?? '')))) }}">
 
-                        <input type="hidden" name="province_name" id="provinsi_name" value="{{ old('province_name', $ahliGizi->province_name ?? ($produksi->province_name ?? ($distributor->province_name ?? ''))) }}">
-                        <input type="hidden" name="regency_name" id="kabupaten_name" value="{{ old('regency_name', $ahliGizi->regency_name ?? ($produksi->regency_name ?? ($distributor->regency_name ?? ''))) }}">
-                        <input type="hidden" name="district_name" id="kecamatan_name" value="{{ old('district_name', $ahliGizi->district_name ?? ($produksi->district_name ?? ($distributor->district_name ?? ''))) }}">
-                        <input type="hidden" name="village_name" id="kelurahan_name" value="{{ old('village_name', $ahliGizi->village_name ?? ($produksi->village_name ?? ($distributor->village_name ?? ''))) }}">
+                        <input type="hidden" name="province_name" id="provinsi_name" value="{{ old('province_name', $adminGudang->province_name ?? ($ahliGizi->province_name ?? ($produksi->province_name ?? ($distributor->province_name ?? '')))) }}">
+                        <input type="hidden" name="regency_name" id="kabupaten_name" value="{{ old('regency_name', $adminGudang->regency_name ?? ($ahliGizi->regency_name ?? ($produksi->regency_name ?? ($distributor->regency_name ?? '')))) }}">
+                        <input type="hidden" name="district_name" id="kecamatan_name" value="{{ old('district_name', $adminGudang->district_name ?? ($ahliGizi->district_name ?? ($produksi->district_name ?? ($distributor->district_name ?? '')))) }}">
+                        <input type="hidden" name="village_name" id="kelurahan_name" value="{{ old('village_name', $adminGudang->village_name ?? ($ahliGizi->village_name ?? ($produksi->village_name ?? ($distributor->village_name ?? '')))) }}">
 
                         <div class="col-md-6 border-end pe-3">
                             <div class="mb-3">
@@ -287,7 +384,7 @@
                                       id="alamat_detail" 
                                       class="form-control @error('alamat_detail') is-invalid @enderror" 
                                       rows="6" 
-                                      placeholder="Nama jalan, gedung, no rumah, RT/RW, patokan">{{ old('alamat_detail', $ahliGizi->alamat_detail ?? ($produksi->alamat_detail ?? ($distributor->alamat_detail ?? ''))) }}</textarea>
+                                      placeholder="Nama jalan, gedung, no rumah, RT/RW, patokan">{{ old('alamat_detail', $adminGudang->alamat_detail ?? ($ahliGizi->alamat_detail ?? ($produksi->alamat_detail ?? ($distributor->alamat_detail ?? '')))) }}</textarea>
                             @error('alamat_detail')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -295,7 +392,6 @@
                     </div>
                 </div>
 
-                <!-- Section Produksi -->
                 <div class="col-12" id="produksi_section" style="display: {{ old('role_type', $user->userRole->role_type) === 'produksi' ? 'block' : 'none' }};">
 
                     <hr class="my-3">
@@ -402,10 +498,9 @@
                             </div>
                         </div>
 
-
                     </div>
                 </div>
-                <!-- Distributor Section -->
+                
                 <div class="col-12" id="distributor_section" style="display: {{ old('role_type', $user->userRole->role_type) === 'distributor' ? 'block' : 'none' }};">
                     <hr class="my-3">
                     <h5 class="card-title mb-3">Informasi Spesifik Distributor</h5>
@@ -557,6 +652,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Role Switch Logic
     const roleSelect = document.getElementById('role_type');
+    const adminGudangSection = document.getElementById('admin_gudang_section');
     const ahliGiziSection = document.getElementById('ahli_gizi_section');
     const produksiSection = document.getElementById('produksi_section');
     const distributorSection = document.getElementById('distributor_section');
@@ -566,18 +662,25 @@ document.addEventListener('DOMContentLoaded', function () {
         const role = roleSelect.value;
         
         // Hide all first
+        adminGudangSection.style.display = 'none';
         ahliGiziSection.style.display = 'none';
         produksiSection.style.display = 'none';
         distributorSection.style.display = 'none';
         addressSection.style.display = 'none';
         
         // Disable all inputs in sections to avoid submitting unused fields with duplicate names
+        adminGudangSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
         ahliGiziSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
         produksiSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
         distributorSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
         addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
 
-        if (role === 'ahli_gizi') {
+        if (role === 'admin_gudang') {
+            adminGudangSection.style.display = 'block';
+            adminGudangSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+            addressSection.style.display = 'block';
+            addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+        } else if (role === 'ahli_gizi') {
             ahliGiziSection.style.display = 'block';
             ahliGiziSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
             addressSection.style.display = 'block';
@@ -596,8 +699,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     roleSelect.addEventListener('change', toggleSections);
+    toggleSections(); // Call on load
 
     // Foto Preview Logic
+    const fotoInputAdmin = document.getElementById('foto_diri_admin');
+    const imagePreviewAdmin = document.getElementById('image_preview_admin');
+
     const fotoInput = document.getElementById('foto_diri');
     const imagePreview = document.getElementById('image_preview');
 
@@ -630,6 +737,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    handleImagePreview(fotoInputAdmin, imagePreviewAdmin, "{{ ($adminGudang ?? false) && $adminGudang->foto_diri ? Storage::url($adminGudang->foto_diri) : '#' }}");
     handleImagePreview(fotoInput, imagePreview, "{{ ($ahliGizi ?? false) && $ahliGizi->foto_diri ? Storage::url($ahliGizi->foto_diri) : '#' }}");
     handleImagePreview(fotoInputProd, imagePreviewProd, "{{ ($produksi ?? false) && $produksi->foto_diri ? Storage::url($produksi->foto_diri) : '#' }}");
     handleImagePreview(fotoInputDist, imagePreviewDist, "{{ ($distributor ?? false) && $distributor->foto_diri ? Storage::url($distributor->foto_diri) : '#' }}");

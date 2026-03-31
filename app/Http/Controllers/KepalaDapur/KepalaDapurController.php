@@ -13,6 +13,9 @@ use App\Models\MenuMakanan;
 use App\Models\TemplateItem;
 use App\Models\LaporanKekuranganStock;
 use App\Models\SubscriptionRequest;
+use App\Models\OrderProduksi;
+use App\Models\OrderDistribusi;
+use App\Models\OrderDistribusiDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,63 +25,48 @@ class KepalaDapurController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware(['auth', 'role:kepala_dapur']);
+        
     }
 
     public function dashboard(Request $request, Dapur $dapur)
     {
-        /** @var User $user */
+        
         $user = Auth::user();
         if (!$user->isKepalaDapur($dapur->id_dapur)) {
             abort(403, 'Anda tidak memiliki akses ke dashboard ini untuk dapur ini');
         }
 
-        // Get comprehensive dashboard data
         $dashboardData = [
             'user' => $user,
             'dapur' => $dapur,
             'role' => 'kepala_dapur',
 
-            // Enhanced Core Statistics
             'statistics' => $this->getCoreStatistics($dapur),
 
-            // Approval Statistics
             'approvalStats' => $this->getApprovalStatistics($dapur),
 
-            // Stock Health Overview
             'stockHealth' => $this->getStockHealthOverview($dapur),
 
-            // Transaction Performance
             'transactionPerformance' => $this->getTransactionPerformance($dapur),
 
-            // Team Management Overview
             'teamOverview' => $this->getTeamOverview($dapur),
 
-            // Recent Activities Timeline
             'recentActivities' => $this->getRecentActivitiesTimeline($dapur),
 
-            // System Health & Alerts
             'systemAlerts' => $this->getSystemAlerts($dapur),
 
-            // Performance Metrics
             'performanceMetrics' => $this->getPerformanceMetrics($dapur),
 
-            // Quick Actions
             'quickActions' => $this->getEnhancedQuickActions($dapur),
 
-            // Charts Data
             'chartsData' => $this->getChartsData($dapur),
 
-            // Subscription Status
             'subscriptionStatus' => $this->getSubscriptionStatus($dapur),
         ];
 
         return view('kepaladapur.dashboard.index', $dashboardData);
     }
 
-    /**
-     * Get core statistics for dashboard cards
-     */
     private function getCoreStatistics(Dapur $dapur): array
     {
         return [
@@ -95,9 +83,6 @@ class KepalaDapurController extends Controller
         ];
     }
 
-    /**
-     * Get approval statistics with breakdown
-     */
     private function getApprovalStatistics(Dapur $dapur): array
     {
         $stockApprovals = ApprovalStockItem::whereHas('stockItem', function ($query) use ($dapur) {
@@ -127,31 +112,20 @@ class KepalaDapurController extends Controller
         ];
     }
 
-    /**
-     * Get detailed stock health overview
-     */
-    /**
-     * Get detailed stock health overview
-     */
     private function getStockHealthOverview(Dapur $dapur): array
     {
         $stockItemsQuery = StockItem::where('id_dapur', $dapur->id_dapur)->with('templateItem');
 
         $totalItems = $stockItemsQuery->count();
 
-        // Stok normal (tersedia sepenuhnya)
         $availableItems = $stockItemsQuery->clone()->where('jumlah', '>', 10)->count();
 
-        // Habis
         $outOfStock = $stockItemsQuery->clone()->where('jumlah', '<=', 0)->count();
 
-        // Rendah (6-10)
         $lowStock = $stockItemsQuery->clone()->where('jumlah', '>', 5)->where('jumlah', '<=', 10)->count();
 
-        // Kritis (1-5)
         $criticalStock = $stockItemsQuery->clone()->where('jumlah', '>', 0)->where('jumlah', '<=', 5)->count();
 
-        // Ambil semua item rendah, kritis, dan habis (<=10, termasuk <=0)
         $lowStockItems = $stockItemsQuery->clone()->where('jumlah', '<=', 10)
             ->orderBy('jumlah', 'asc')
             ->get()
@@ -181,9 +155,6 @@ class KepalaDapurController extends Controller
         ];
     }
 
-    /**
-     * Get transaction performance data
-     */
     private function getTransactionPerformance(Dapur $dapur): array
     {
         $transactions = TransaksiDapur::where('id_dapur', $dapur->id_dapur);
@@ -213,9 +184,6 @@ class KepalaDapurController extends Controller
         ];
     }
 
-    /**
-     * Get comprehensive team overview
-     */
     private function getTeamOverview(Dapur $dapur): array
     {
         $kepalaDapur = $dapur->kepalaDapur()->with('user')->get();
@@ -239,125 +207,140 @@ class KepalaDapurController extends Controller
         ];
     }
 
-    /**
-     * Get enhanced recent activities timeline
-     */
-    private function getRecentActivitiesTimeline(Dapur $dapur, int $limit = 15): array
+    private function getRecentActivitiesTimeline(Dapur $dapur, int $limit = 20): array
     {
         $activities = collect();
+        $since = now()->subHours(24);
 
-        // Stock approvals activities
         $stockApprovals = ApprovalStockItem::whereHas('stockItem', function ($query) use ($dapur) {
             $query->where('id_dapur', $dapur->id_dapur);
         })
+            ->where('updated_at', '>=', $since)
             ->with(['stockItem.templateItem', 'adminGudang.user'])
-            ->orderBy('created_at', 'desc')
-            ->take($limit)
+            ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($approval) use ($dapur) {
                 return [
                     'type' => 'stock_approval',
-                    'title' => 'Permintaan Stock ' . ucfirst($approval->status),
+                    'title' => 'Stock ' . ucfirst($approval->status),
                     'description' => ($approval->adminGudang->user->nama ?? 'Admin') . ' mengajukan ' .
                         number_format($approval->jumlah) . ' ' . $approval->satuan . ' ' .
                         ($approval->stockItem->templateItem->nama_bahan ?? 'item'),
                     'user' => $approval->adminGudang->user->nama ?? 'Admin',
                     'status' => $approval->status,
-                    'created_at' => $approval->created_at,
+                    'created_at' => $approval->updated_at,
                     'icon' => $this->getActivityIcon('stock_approval', $approval->status),
                     'color' => $this->getActivityColor($approval->status),
-                    'url' => '#', // Modal detail, tidak perlu route
+                    'url' => route('kepala-dapur.approvals.index', $dapur),
                 ];
             });
 
-        // Transaction approvals activities
         $transactionApprovals = ApprovalTransaksi::whereHas('transaksiDapur', function ($query) use ($dapur) {
             $query->where('id_dapur', $dapur->id_dapur);
         })
+            ->where('updated_at', '>=', $since)
             ->with(['transaksiDapur', 'ahliGizi.user'])
-            ->orderBy('created_at', 'desc')
-            ->take($limit)
+            ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($approval) use ($dapur) {
                 return [
                     'type' => 'transaction_approval',
                     'title' => 'Approval Transaksi ' . ucfirst($approval->status),
-                    'description' => ($approval->ahliGizi->user->nama ?? 'Ahli Gizi') . ' mengajukan paket menu ' .
-                        number_format($approval->transaksiDapur->total_porsi ?? 0),
+                    'description' => ($approval->ahliGizi->user->nama ?? 'Ahli Gizi') . ' memproses menu ' .
+                        number_format($approval->transaksiDapur->total_porsi ?? 0) . ' porsi',
                     'user' => $approval->ahliGizi->user->nama ?? 'Ahli Gizi',
                     'status' => $approval->status,
-                    'created_at' => $approval->created_at,
+                    'created_at' => $approval->updated_at,
                     'icon' => $this->getActivityIcon('transaction_approval', $approval->status),
                     'color' => $this->getActivityColor($approval->status),
                     'url' => route('kepala-dapur.approval-transaksi.show', [$dapur, $approval]),
                 ];
             });
 
-        // Recent transactions
-        $transactions = TransaksiDapur::where('id_dapur', $dapur->id_dapur)
-            ->where('status', ['processing', 'completed', 'cancelled'])
-            ->with(['createdBy'])
-            ->orderBy('created_at', 'desc')
-            ->take($limit)
+        $orderProduksi = OrderProduksi::where('id_dapur', $dapur->id_dapur)
+            ->where('updated_at', '>=', $since)
+            ->with(['transaksiDapur.approvalTransaksi'])
+            ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(function ($transaction) {
+            ->map(function ($order) use ($dapur) {
                 return [
-                    'type' => 'transaction',
-                    'title' => 'Transaksi ' . ucfirst($transaction->status),
-                    'description' => 'Paket menu ' . number_format($transaction->total_porsi) . ' porsi ' .
-                        'oleh ' . ($transaction->createdBy->nama ?? 'System'),
-                    'user' => $transaction->createdBy->nama ?? 'System',
-                    'status' => $transaction->status,
-                    'created_at' => $transaction->created_at,
-                    'icon' => $this->getActivityIcon('transaction', $transaction->status),
-                    'color' => $this->getActivityColor($transaction->status),
-                    'url' => route('ahli-gizi.transaksi.show', $transaction),
+                    'type' => 'production',
+                    'title' => 'Produksi: ' . $order->status_label,
+                    'description' => 'Pesanan ' . number_format($order->transaksiDapur->total_porsi ?? 0) . ' porsi ' .
+                        ($order->status === 'selesai' ? 'telah selesai dimasak' : 'sedang dalam proses'),
+                    'user' => 'Tim Produksi',
+                    'status' => $order->status,
+                    'created_at' => $order->updated_at,
+                    'icon' => $this->getActivityIcon('production', $order->status),
+                    'color' => $this->getActivityColor($order->status),
+                    'url' => $order->transaksiDapur->approvalTransaksi
+                        ? route('kepala-dapur.approval-transaksi.show', [$dapur, $order->transaksiDapur->approvalTransaksi->id_approval_transaksi])
+                        : route('kepala-dapur.order-produksi.show', $order->id_order),
                 ];
             });
 
-        // Shortage reports
-        $shortageReports = LaporanKekuranganStock::whereHas('transaksiDapur', function ($query) use ($dapur) {
+        $orderDistribusi = OrderDistribusi::where('id_dapur', $dapur->id_dapur)
+            ->where('updated_at', '>=', $since)
+            ->with(['orderProduksi.transaksiDapur.approvalTransaksi'])
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->map(function ($dist) use ($dapur) {
+                return [
+                    'type' => 'distribution',
+                    'title' => 'Distribusi: ' . $dist->status_label,
+                    'description' => 'Pengiriman untuk ' . number_format($dist->orderProduksi->transaksiDapur->total_porsi ?? 0) . ' porsi ' .
+                        ($dist->status === 'sudah_dikirim' ? 'telah sampai tujuan' : 'sedang dalam perjalanan'),
+                    'user' => 'Kurir/Driver',
+                    'status' => $dist->status,
+                    'created_at' => $dist->updated_at,
+                    'icon' => $this->getActivityIcon('distribution', $dist->status),
+                    'color' => $this->getActivityColor($dist->status),
+                    'url' => $dist->orderProduksi->transaksiDapur->approvalTransaksi
+                        ? route('kepala-dapur.approval-transaksi.show', [$dapur, $dist->orderProduksi->transaksiDapur->approvalTransaksi->id_approval_transaksi])
+                        : route('kepala-dapur.order-distribusi.show', $dist->id_distribusi),
+                ];
+            });
+
+        $orderConfirmations = OrderDistribusiDetail::whereHas('orderDistribusi', function ($query) use ($dapur) {
             $query->where('id_dapur', $dapur->id_dapur);
         })
-            ->with(['transaksiDapur', 'templateItem'])
-            ->orderBy('created_at', 'desc')
-            ->take($limit)
+            ->where('updated_at', '>=', $since)
+            ->whereIn('status_penerimaan', ['diterima', 'ditolak'])
+            ->with(['penerimaMbg.userRole.user', 'orderDistribusi.orderProduksi.transaksiDapur.approvalTransaksi'])
+            ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(function ($report) use ($dapur) {
+            ->map(function ($detail) use ($dapur) {
                 return [
-                    'type' => 'shortage_report',
-                    'title' => 'Laporan Kekurangan Stock',
-                    'description' => 'Kekurangan ' . ($report->templateItem->nama_bahan ?? 'item') . ': ' .
-                        number_format($report->jumlah_kurang, 2) . ' ' . $report->satuan,
-                    'user' => 'System',
-                    'status' => $report->status,
-                    'created_at' => $report->created_at,
-                    'icon' => $this->getActivityIcon('shortage', $report->status),
-                    'color' => $this->getActivityColor($report->status),
-                    'url' => route('kepala-dapur.laporan-kekurangan.show', [$dapur, $report->transaksi]),
+                    'type' => 'confirmation',
+                    'title' => 'Konfirmasi: ' . ($detail->penerimaMbg->userRole->user->nama ?? 'Sekolah'),
+                    'description' => 'Penerima menyatakan pesanan ' . $detail->status_penerimaan_label,
+                    'user' => $detail->penerimaMbg->userRole->user->nama ?? 'Sekolah',
+                    'status' => $detail->status_penerimaan,
+                    'created_at' => $detail->updated_at,
+                    'icon' => $this->getActivityIcon('confirmation', $detail->status_penerimaan),
+                    'color' => $this->getActivityColor($detail->status_penerimaan),
+                    'url' => $detail->orderDistribusi->orderProduksi->transaksiDapur->approvalTransaksi
+                        ? route('kepala-dapur.approval-transaksi.show', [$dapur, $detail->orderDistribusi->orderProduksi->transaksiDapur->approvalTransaksi->id_approval_transaksi])
+                        : route('kepala-dapur.order-distribusi.show', $detail->id_distribusi),
                 ];
             });
 
-        // Merge and sort all activities
         return $activities
             ->merge($stockApprovals)
             ->merge($transactionApprovals)
-            ->merge($transactions)
-            ->merge($shortageReports)
+            ->merge($orderProduksi)
+            ->merge($orderDistribusi)
+            ->merge($orderConfirmations)
             ->sortByDesc('created_at')
             ->take($limit)
             ->values()
             ->toArray();
     }
 
-    /**
-     * Get system alerts and notifications
-     */
     private function getSystemAlerts(Dapur $dapur): array
     {
         $alerts = [];
 
-        // Critical stock alerts
         $criticalStock = $this->getCriticalStockItemsForDapur($dapur);
         if ($criticalStock > 0) {
             $alerts[] = [
@@ -365,13 +348,12 @@ class KepalaDapurController extends Controller
                 'category' => 'stock',
                 'title' => 'Stock Kritis',
                 'message' => "{$criticalStock} item stock dalam kondisi kritis (≤5 unit)",
-                // 'action_text' => 'Lihat Detail',
+                
                 'action_url' => route('admin-gudang.stock.index', $dapur) . '?filter=critical',
                 'icon' => 'bx-error-circle',
             ];
         }
 
-        // Subscription alerts
         $subscriptionStatus = $this->getSubscriptionStatus($dapur);
         if ($subscriptionStatus['is_expired'] || $subscriptionStatus['is_expiring_soon']) {
             $alerts[] = [
@@ -387,7 +369,6 @@ class KepalaDapurController extends Controller
             ];
         }
 
-        // High pending approvals
         $pendingApprovals = $this->getPendingApprovalsCount($dapur) + $this->getPendingTransactionApprovalsCount($dapur);
         if ($pendingApprovals >= 5) {
             $alerts[] = [
@@ -404,9 +385,6 @@ class KepalaDapurController extends Controller
         return $alerts;
     }
 
-    /**
-     * Get performance metrics
-     */
     private function getPerformanceMetrics(Dapur $dapur): array
     {
         return [
@@ -417,20 +395,15 @@ class KepalaDapurController extends Controller
         ];
     }
 
-    /**
-     * Get enhanced quick actions
-     */
     private function getEnhancedQuickActions(Dapur $dapur): array
     {
         $actions = [];
 
-        // Priority actions based on current status
         $pendingStockApprovals = $this->getPendingApprovalsCount($dapur);
         $pendingTransactionApprovals = $this->getPendingTransactionApprovalsCount($dapur);
         $lowStockCount = $this->getLowStockAlertsCount($dapur);
         $subscriptionStatus = $this->getSubscriptionStatus($dapur);
 
-        // Critical actions first
         if ($subscriptionStatus['is_expired']) {
             $actions[] = [
                 'id' => 'renew_subscription',
@@ -483,7 +456,6 @@ class KepalaDapurController extends Controller
             ];
         }
 
-        // Standard management actions
         $actions = array_merge($actions, [
             [
                 'id' => 'manage_users',
@@ -527,7 +499,6 @@ class KepalaDapurController extends Controller
             ],
         ]);
 
-        // Sort by priority
         usort($actions, function ($a, $b) {
             return $a['priority'] <=> $b['priority'];
         });
@@ -535,9 +506,6 @@ class KepalaDapurController extends Controller
         return $actions;
     }
 
-    /**
-     * Get charts data for dashboard
-     */
     private function getChartsData(Dapur $dapur): array
     {
         return [
@@ -547,8 +515,6 @@ class KepalaDapurController extends Controller
             'team_workload' => $this->getTeamWorkloadData($dapur),
         ];
     }
-
-    // Helper methods for various metrics...
 
     private function getPendingApprovalsCount(Dapur $dapur): int
     {
@@ -659,6 +625,9 @@ class KepalaDapurController extends Controller
             'stock_approval' => ['pending' => 'bx-time', 'approved' => 'bx-check-circle', 'rejected' => 'bx-x-circle'],
             'transaction_approval' => ['pending' => 'bx-receipt', 'approved' => 'bx-check', 'rejected' => 'bx-x'],
             'shortage' => ['pending' => 'bx-error', 'resolved' => 'bx-check'],
+            'production' => ['belum_dibuat' => 'bx-dish', 'sedang_dibuat' => 'bx-loader-circle', 'selesai' => 'bx-badge-check'],
+            'distribution' => ['belum_dikirim' => 'bx-package', 'sedang_dikirim' => 'bx-car', 'sudah_dikirim' => 'bx-map-pin'],
+            'confirmation' => ['menunggu' => 'bx-time-five', 'diterima' => 'bx-smile', 'ditolak' => 'bx-sad'],
         ];
 
         return $icons[$type][$status] ?? 'bx-circle';
@@ -674,12 +643,19 @@ class KepalaDapurController extends Controller
             'processing' => 'info',
             'cancelled' => 'danger',
             'resolved' => 'success',
+            'belum_dibuat' => 'secondary',
+            'sedang_dibuat' => 'info',
+            'selesai' => 'success',
+            'belum_dikirim' => 'secondary',
+            'sedang_dikirim' => 'info',
+            'sudah_dikirim' => 'success',
+            'menunggu' => 'warning',
+            'diterima' => 'success',
+            'ditolak' => 'danger',
         ];
 
         return $colors[$status] ?? 'secondary';
     }
-
-    // Additional helper methods implementation
 
     private function getApprovalPerformanceMetrics(Dapur $dapur): array
     {
@@ -760,7 +736,6 @@ class KepalaDapurController extends Controller
     {
         $recentMembers = collect();
 
-        // Recent Kepala Dapur
         $recentKD = $dapur->kepalaDapur()->with('user')
             ->where('created_at', '>=', now()->subDays(30))
             ->get()
@@ -772,7 +747,6 @@ class KepalaDapurController extends Controller
                 ];
             });
 
-        // Recent Admin Gudang
         $recentAG = $dapur->adminGudang()->with('user')
             ->where('created_at', '>=', now()->subDays(30))
             ->get()
@@ -784,7 +758,6 @@ class KepalaDapurController extends Controller
                 ];
             });
 
-        // Recent Ahli Gizi
         $recentAhliGizi = $dapur->ahliGizi()->with('user')
             ->where('created_at', '>=', now()->subDays(30))
             ->get()
@@ -807,7 +780,7 @@ class KepalaDapurController extends Controller
 
     private function getTeamPerformanceMetrics(Dapur $dapur): array
     {
-        // Admin Gudang Performance
+        
         $adminPerformance = $dapur->adminGudang()
             ->with(['approvalStockItems' => function ($query) {
                 $query->whereMonth('created_at', now()->month);
@@ -821,9 +794,8 @@ class KepalaDapurController extends Controller
                 ];
             })
             ->values()
-            ->toBase(); // paksa ke base collection agar tidak mencari getKey pada array
+            ->toBase(); 
 
-        // Ahli Gizi Performance
         $ahliGiziPerformance = $dapur->ahliGizi()
             ->with(['approvalTransaksi' => function ($query) {
                 $query->whereMonth('created_at', now()->month);
@@ -948,7 +920,6 @@ class KepalaDapurController extends Controller
     {
         $workloadData = [];
 
-        // Admin Gudang workload
         $adminWorkload = $dapur->adminGudang()->with('user')->get()->map(function ($admin) {
             $pendingRequests = $admin->approvalStockItems()->where('status', 'pending')->count();
             return [
@@ -958,7 +929,6 @@ class KepalaDapurController extends Controller
             ];
         })->values()->toBase();
 
-        // Ahli Gizi workload
         $ahliGiziWorkload = $dapur->ahliGizi()->with('user')->get()->map(function ($ahliGizi) use ($dapur) {
             $pendingTransactions = TransaksiDapur::where('id_dapur', $dapur->id_dapur)
                 ->where('created_by', $ahliGizi->user->id_user ?? 0)

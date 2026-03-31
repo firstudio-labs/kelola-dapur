@@ -17,7 +17,7 @@ class AdminGudangController extends Controller
 
     public function dashboard(Request $request, Dapur $dapur)
     {
-        /** @var User $user */
+        
         $user = Auth::user();
 
         if (!$user->isAdminGudang($dapur->id_dapur)) {
@@ -33,6 +33,7 @@ class AdminGudangController extends Controller
             'user' => $user,
             'dapur' => $dapur,
             'role' => 'admin_gudang',
+            'adminGudang' => $adminGudang,
             'myRequests' => $adminGudang
                 ? $adminGudang->approvalStockItems()->latest()->take(5)->get()
                 : collect(),

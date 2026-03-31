@@ -1,7 +1,7 @@
 @extends("template_kepala_dapur.layout")
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Breadcrumb -->
+        
         <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
@@ -11,7 +11,6 @@
             </ol>
         </nav>
 
-        <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h4 class="mb-1">Kelola User</h4>
@@ -38,7 +37,6 @@
             </a>
         </div>
 
-        <!-- Flash Messages -->
         @if (session("success"))
             <div class="alert alert-success alert-dismissible" role="alert">
                 {{ session("success") }}
@@ -61,7 +59,6 @@
             </div>
         @endif
 
-        <!-- Search -->
         <div class="card mb-4">
             <div class="card-body py-3">
                 <form
@@ -90,7 +87,6 @@
             </div>
         </div>
 
-        <!-- Table -->
         <div class="card">
             <div
                 class="card-header d-flex justify-content-between align-items-center"
@@ -214,7 +210,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 @if ($users->hasPages())
                     <div class="mt-3">
                         {{ $users->appends(["search" => request("search")])->links("vendor.pagination.sneat") }}
@@ -222,7 +217,6 @@
                 @endif
             </div>
 
-            <!-- Table Info Footer -->
             @if ($users->count() > 0)
                 <div class="card-footer">
                     <small class="text-muted">

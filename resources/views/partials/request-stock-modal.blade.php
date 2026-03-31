@@ -1,4 +1,4 @@
-<!-- Request Stock Modal -->
+
 <div
     class="modal fade"
     id="requestStockModal"
@@ -45,7 +45,7 @@
                                     type="text"
                                     id="modalCurrentStock"
                                     class="form-control"
-                                    value="{{ isset($stockItem) ? rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") : '' }}"
+                                    value="{{ isset($stockItem) ? (float) $stockItem->jumlah : '' }}"
                                     readonly
                                 />
                                 <span class="input-group-text" id="modalCurrentSatuan">
@@ -55,34 +55,82 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="jumlah" class="form-label">
-                            Jumlah Penambahan
-                            <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group">
-                            <input
-                                type="number"
-                                name="jumlah"
-                                id="jumlah"
-                                class="form-control @error("jumlah") is-invalid @enderror"
-                                step="0.001"
-                                min="0.1"
-                                max="2000000000"
-                                required
-                                placeholder="0.000"
-                                value="{{ old("jumlah") }}"
-                            />
-                            <span class="input-group-text" id="modalSatuan">
-                                {{ isset($stockItem) ? $stockItem->templateItem->satuan : '' }}
-                            </span>
-                        </div>
-                        @error("jumlah")
-                            <div class="invalid-feedback">
-                                {{ $message }}
+                        <div class="mb-3 d-none bg-light p-2 rounded" id="konversiToggleContainer">
+                            <label class="form-label d-block mb-1 fw-medium" style="font-size: 0.85rem;">Format Input Satuan:</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check form-check-inline mb-0">
+                                    <input class="form-check-input unit-toggle-radio" type="radio" name="input_mode" id="unit_asli" value="asli" checked>
+                                    <label class="form-check-label" for="unit_asli" id="label_unit_asli" style="font-size: 0.85rem;">Satuan Asli (-)</label>
+                                </div>
+                                <div class="form-check form-check-inline mb-0">
+                                    <input class="form-check-input unit-toggle-radio" type="radio" name="input_mode" id="unit_konversi" value="konversi">
+                                    <label class="form-check-label text-primary" for="unit_konversi" id="label_unit_konversi" style="font-size: 0.85rem;">Konversi (-)</label>
+                                </div>
                             </div>
-                        @enderror
-                    </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="jumlah" class="form-label">
+                                Total Penambahan Stok (Semua Supplier)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input
+                                    type="number"
+                                    name="jumlah"
+                                    id="jumlah"
+                                    class="form-control @error("jumlah") is-invalid @enderror"
+                                    step="0.001"
+                                    min="0.1"
+                                    max="2000000000"
+                                    required
+                                    placeholder="0"
+                                    value="{{ old("jumlah") }}"
+                                />
+                                <span class="input-group-text" id="modalSatuan">
+                                    {{ isset($stockItem) ? $stockItem->templateItem->satuan : '' }}
+                                </span>
+                            </div>
+                            @error("jumlah")
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-flex justify-content-between align-items-center">
+                                <span>Pilih Supplier (Opsional)</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="addSupplierRowBtn" onclick="window.createSupplierRow()">
+                                    <i class="bx bx-plus me-1"></i> Tambah Supplier
+                                </button>
+                            </label>
+                            <div class="table-responsive border rounded">
+                                <table class="table table-sm table-borderless mb-0" id="supplierTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th width="35%">Nama Supplier</th>
+                                            <th width="25%">Jumlah Disuplai</th>
+                                            <th width="30%">Foto (Opsional, Multi)</th>
+                                            <th width="10%" class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="supplierContainer">
+                                        
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-light border-top">
+                                            <td class="text-end fw-semibold">Total dari Supplier:</td>
+                                            <td colspan="2">
+                                                <span id="totalSupplierUi">0</span> <span id="modalSatuanBottom">{{ isset($stockItem) ? $stockItem->templateItem->satuan : '' }}</span>
+                                                <small class="text-danger d-block d-none" id="supplierErrorMsg">Total melebihi Total Penambahan Stok!</small>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <small class="form-text text-muted">Jika tidak ada rincian supplier, sistem akan mencatat stok ke asal Gudang Umum.</small>
+                        </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -230,7 +278,6 @@
                         <div class="form-text">Maksimal 500 karakter</div>
                     </div>
 
-                    <!-- Preview Section -->
                     <div class="bg-light rounded p-3">
                         <h6 class="mb-2">Preview Permintaan:</h6>
                         <div class="row">
@@ -239,7 +286,7 @@
                                     Stok Saat Ini:
                                 </small>
                                 <div class="fw-medium" id="previewCurrentStock">
-                                    {{ isset($stockItem) ? rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") . ' ' . $stockItem->templateItem->satuan : '-' }}
+                                    {{ isset($stockItem) ? ((float) $stockItem->jumlah) . ' ' . $stockItem->templateItem->satuan : '-' }}
                                 </div>
                             </div>
                             <div class="col-6">
@@ -290,28 +337,142 @@
         @if(isset($stockItem))
             let currentStock = {{ $stockItem->jumlah }};
             let satuan = '{{ $stockItem->templateItem->satuan }}';
+            
+            window.activeKonversiNilai = parseFloat({{ $stockItem->konversi_nilai ?? 0 }});
+            window.activeKonversiSatuan = '{{ $stockItem->konversi_satuan ?? "" }}';
+            
+            if (window.activeKonversiNilai > 0 && window.activeKonversiSatuan !== '') {
+                const konversiToggleContainer = document.getElementById('konversiToggleContainer');
+                const labelUnitAsli = document.getElementById('label_unit_asli');
+                const labelUnitKonversi = document.getElementById('label_unit_konversi');
+                
+                if (konversiToggleContainer) konversiToggleContainer.classList.remove('d-none');
+                if (labelUnitAsli) labelUnitAsli.textContent = `Satuan Asli (${satuan})`;
+                if (labelUnitKonversi) labelUnitKonversi.textContent = `Konversi (${window.activeKonversiSatuan})`;
+            }
         @else
             let currentStock = 0;
             let satuan = '';
+            window.activeKonversiNilai = 0;
+            window.activeKonversiSatuan = '';
         @endif
+        
+        window.currentInputMode = 'asli';
 
         // Update preview when amount changes
         if (jumlahInput && previewStock) {
-            function updatePreview() {
-                const additionalAmount = parseFloat(jumlahInput.value) || 0;
+            window.updatePreview = function() {
+                let additionalAmount = parseFloat(jumlahInput.value) || 0;
+                
+                // If input mode is konversi, we must convert it back to Original to add to currentStock!
+                if(window.currentInputMode === 'konversi' && window.activeKonversiNilai > 0) {
+                    additionalAmount = additionalAmount * window.activeKonversiNilai;
+                }
+                
                 const newStock = currentStock + additionalAmount;
-                let formattedNewStock = newStock.toFixed(3);
-                formattedNewStock = formattedNewStock.replace(/\.?0+$/, '');
-                previewStock.textContent = formattedNewStock + ' ' + satuan;
-            }
+                const formattedNewStock = parseFloat(newStock.toFixed(3)).toString();
+                previewStock.textContent = formattedNewStock + ' ' + (satuan || '');
+                
+                // Recalculate supplier totals
+                if(typeof window.calculateSupplierTotals === 'function') {
+                    window.calculateSupplierTotals();
+                }
+            };
 
-            jumlahInput.addEventListener('input', updatePreview);
+            jumlahInput.addEventListener('input', window.updatePreview);
 
             // Initialize preview if stockItem is available
             @if(isset($stockItem))
                 updatePreview();
             @endif
         }
+
+        window.calculateSupplierTotals = function() {
+            let total = 0;
+            const supplierInputs = document.querySelectorAll('.supplier-jumlah-input');
+            supplierInputs.forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+
+            if (totalSupplierUi) totalSupplierUi.textContent = parseFloat(total.toFixed(3)).toString();
+
+            const maxAllowed = parseFloat(jumlahInput ? jumlahInput.value : 0) || 0;
+            if (total > maxAllowed && total > 0) {
+                if(totalSupplierUi) {
+                    totalSupplierUi.classList.add('text-danger');
+                    totalSupplierUi.classList.remove('text-success');
+                }
+                if(supplierErrorMsg) supplierErrorMsg.classList.remove('d-none');
+            } else {
+                if(totalSupplierUi) {
+                    totalSupplierUi.classList.remove('text-danger');
+                    totalSupplierUi.classList.add('text-success');
+                }
+                if(supplierErrorMsg) supplierErrorMsg.classList.add('d-none');
+            }
+        };
+
+        let supplierOptionsHtml = '<option value="">Pilih Supplier...</option>';
+        @isset($suppliers)
+        @foreach($suppliers as $supplier)
+            supplierOptionsHtml += '<option value="{{ $supplier->id_supplier }}">' + {!! json_encode(htmlspecialchars($supplier->nama_supplier)) !!} + '</option>';
+        @endforeach
+        @endisset
+
+        window.supplierCounter = 0;
+
+        window.createSupplierRow = function() {
+            const supplierContainer = document.getElementById('supplierContainer');
+            if(!supplierContainer) return;
+            
+            const currentIndex = window.supplierCounter++;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <select name="suppliers[${currentIndex}][id_supplier]" class="form-select form-select-sm" required>
+                        ${supplierOptionsHtml}
+                    </select>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="number" name="suppliers[${currentIndex}][jumlah]" class="form-control supplier-jumlah-input" step="0.001" min="0.1" required>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <label class="btn btn-sm btn-outline-secondary w-100 mb-1" style="font-size:0.75rem;">
+                            <i class="bx bx-image-add me-1"></i> Pilih Foto
+                            <input type="file" name="suppliers[${currentIndex}][fotos][]" class="d-none supplier-foto-input" accept="image/jpeg,image/jpg,image/png" multiple>
+                        </label>
+                        <div class="supplier-foto-preview" style="font-size:0.7rem;color:#555;"></div>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-supplier-btn"><i class="bx bx-trash"></i></button>
+                </td>
+            `;
+
+            supplierContainer.appendChild(tr);
+
+            // Photo preview names
+            const fotoInput = tr.querySelector('.supplier-foto-input');
+            const fotoPreviews = tr.querySelector('.supplier-foto-preview');
+            fotoInput.addEventListener('change', function() {
+                const files = Array.from(this.files);
+                fotoPreviews.textContent = files.length > 0
+                    ? files.map(f => f.name).join(', ')
+                    : '';
+            });
+
+            // Attach listeners
+            tr.querySelector('.remove-supplier-btn').addEventListener('click', function() {
+                tr.remove();
+                window.calculateSupplierTotals();
+            });
+
+            tr.querySelector('.supplier-jumlah-input').addEventListener('input', window.calculateSupplierTotals);
+        };
 
         // Preview image before upload
         const fotoInput = document.getElementById('foto_bahan');
@@ -353,19 +514,16 @@
         @endif
 
         // Function to update modal data dynamically (for index page)
-        window.updateRequestStockModal = function(stockId, bahanName, currentStockValue, satuanValue) {
+        window.updateRequestStockModal = function(stockId, bahanName, currentStockValue, satuanValue, defaultJumlah = '', konversiNilaiVal = 0, konversiSatuanVal = '') {
             if (modalBahanName) modalBahanName.value = bahanName;
             if (modalCurrentStock) {
-                let formattedStock = parseFloat(currentStockValue).toFixed(3);
-                formattedStock = formattedStock.replace(/\.?0+$/, '');
-                modalCurrentStock.value = formattedStock;
+                modalCurrentStock.value = parseFloat(currentStockValue).toString();
             }
             if (modalCurrentSatuan) modalCurrentSatuan.textContent = satuanValue;
             if (modalSatuan) modalSatuan.textContent = satuanValue;
+            if (modalSatuanBottom) modalSatuanBottom.textContent = satuanValue;
             if (previewCurrentStock) {
-                let formattedStock = parseFloat(currentStockValue).toFixed(3);
-                formattedStock = formattedStock.replace(/\.?0+$/, '');
-                previewCurrentStock.textContent = formattedStock + ' ' + satuanValue;
+                previewCurrentStock.textContent = parseFloat(currentStockValue).toString() + ' ' + satuanValue;
             }
             if (requestStockForm) {
                 const actionUrl = '{{ route("admin-gudang.stock.request", [$dapur, ":stockId"]) }}';
@@ -376,24 +534,51 @@
             currentStock = parseFloat(currentStockValue);
             satuan = satuanValue;
             
+            // Konversi Logic Injection
+            const konversiToggleContainer = document.getElementById('konversiToggleContainer');
+            const labelUnitAsli = document.getElementById('label_unit_asli');
+            const labelUnitKonversi = document.getElementById('label_unit_konversi');
+            const unitAsliRadio = document.getElementById('unit_asli');
+            
+            window.activeKonversiNilai = parseFloat(konversiNilaiVal) || 0;
+            window.activeKonversiSatuan = konversiSatuanVal || '';
+            
+            if (konversiToggleContainer) {
+                if (window.activeKonversiNilai > 0 && window.activeKonversiSatuan !== '') {
+                    konversiToggleContainer.classList.remove('d-none');
+                    if(labelUnitAsli) labelUnitAsli.textContent = `Satuan Asli (${satuanValue})`;
+                    if(labelUnitKonversi) labelUnitKonversi.textContent = `Konversi (${window.activeKonversiSatuan})`;
+                } else {
+                    konversiToggleContainer.classList.add('d-none');
+                }
+            }
+            
+            // Reset to default Asli mode strictly
+            if(unitAsliRadio) unitAsliRadio.checked = true;
+            window.currentInputMode = 'asli';
+            
             // Reset form
             if (requestStockForm) {
                 requestStockForm.reset();
                 // Restore non-input values
                 if (modalBahanName) modalBahanName.value = bahanName;
                 if (modalCurrentStock) {
-                    let formattedStock = parseFloat(currentStockValue).toFixed(3);
-                    formattedStock = formattedStock.replace(/\.?0+$/, '');
-                    modalCurrentStock.value = formattedStock;
+                    modalCurrentStock.value = parseFloat(currentStockValue).toString();
                 }
                 if (modalCurrentSatuan) modalCurrentSatuan.textContent = satuanValue;
                 if (modalSatuan) modalSatuan.textContent = satuanValue;
+                if (modalSatuanBottom) modalSatuanBottom.textContent = satuanValue;
                 if (previewCurrentStock) {
-                    let formattedStock = parseFloat(currentStockValue).toFixed(3);
-                    formattedStock = formattedStock.replace(/\.?0+$/, '');
-                    previewCurrentStock.textContent = formattedStock + ' ' + satuanValue;
+                    previewCurrentStock.textContent = parseFloat(currentStockValue).toString() + ' ' + satuanValue;
                 }
                 if (previewStock) previewStock.textContent = '-';
+                
+                // Clear suppliers
+                if (document.getElementById('supplierContainer')) {
+                    document.getElementById('supplierContainer').innerHTML = '';
+                    window.supplierCounter = 0;
+                    window.calculateSupplierTotals();
+                }
                 
                 // Reset preview image
                 const fotoPreview = document.getElementById('fotoPreview');
@@ -405,7 +590,69 @@
                 const tanggalExpired = document.getElementById('tanggal_expired');
                 if (tanggalExpired) tanggalExpired.min = '';
             }
+
+            // Optional Default Amount (Must be applied AFTER reset)
+            if (jumlahInput) {
+                if (defaultJumlah !== '') {
+                    // if default is provided (shortage amount) it's ALWAYS in master unit.
+                    let amountToFill = parseFloat(defaultJumlah);
+                    if(window.currentInputMode === 'konversi' && window.activeKonversiNilai > 0) {
+                        amountToFill = amountToFill / window.activeKonversiNilai;
+                    }
+                    jumlahInput.value = parseFloat(amountToFill.toFixed(3));
+                } else {
+                    jumlahInput.value = '';
+                }
+                if (typeof updatePreview === 'function') updatePreview();
+            }
         };
+
+        // Attach listeners to unit radio buttons
+        const unitRadios = document.querySelectorAll('.unit-toggle-radio');
+        unitRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const newMode = this.value;
+                if(newMode === window.currentInputMode) return;
+                
+                const oldMode = window.currentInputMode;
+                window.currentInputMode = newMode;
+                
+                let multiplier = 1;
+                // Asli -> Konversi
+                if (oldMode === 'asli' && newMode === 'konversi') {
+                    multiplier = 1 / window.activeKonversiNilai;
+                } 
+                // Konversi -> Asli
+                else if (oldMode === 'konversi' && newMode === 'asli') {
+                    multiplier = window.activeKonversiNilai;
+                }
+                
+                // Update specific Unit Labels globally
+                const targetedUnitLabel = newMode === 'asli' ? satuan : window.activeKonversiSatuan;
+                if(modalSatuan) modalSatuan.textContent = targetedUnitLabel;
+                if(modalSatuanBottom) modalSatuanBottom.textContent = targetedUnitLabel;
+                
+                // Scale existing values
+                if (jumlahInput && jumlahInput.value !== '') {
+                    let scaledVal = parseFloat(jumlahInput.value) * multiplier;
+                    jumlahInput.value = parseFloat(scaledVal.toFixed(3));
+                }
+                const supplierInputs = document.querySelectorAll('.supplier-jumlah-input');
+                supplierInputs.forEach(input => {
+                    if (input.value !== '') {
+                        let scaledVal = parseFloat(input.value) * multiplier;
+                        input.value = parseFloat(scaledVal.toFixed(3));
+                    }
+                });
+                
+                if (typeof window.calculateSupplierTotals === 'function') {
+                    window.calculateSupplierTotals();
+                }
+                if (typeof updatePreview === 'function') {
+                    // Wait! updatePreview must calculate in Master Unit!
+                    document.getElementById('jumlah').dispatchEvent(new Event('input'));
+                }
+            });
+        });
     });
 </script>
-

@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -30,7 +30,6 @@
             </div>
         </div>
 
-        <!-- Form -->
         <div class="card mb-4">
             <div class="card-body">
                 <form id="menu-form" action="{{ route('ahli-gizi.menu-makanan.update', $menuMakanan) }}" method="POST"
@@ -38,11 +37,10 @@
                     @csrf
                     @method('PUT')
 
-                    <!-- Menu Information -->
                     <div class="col-12">
                         <h5 class="card-title mb-0">Informasi Menu</h5>
                         <div class="row g-4 mt-2">
-                            <!-- Nama Menu -->
+                            
                             <div class="col-md-4">
                                 <label for="nama_menu" class="form-label">
                                     Nama Menu
@@ -59,7 +57,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Kategori -->
                             <div class="col-md-4">
                                 <label for="kategori" class="form-label">
                                     Kategori
@@ -82,7 +79,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Status -->
                             <div class="col-md-4">
                                 <label for="is_active" class="form-label">
                                     Status
@@ -107,7 +103,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Deskripsi -->
                             <div class="col-12">
                                 <label for="deskripsi" class="form-label">
                                     Deskripsi
@@ -122,7 +117,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Gambar Menu -->
                             <div class="col-md-6">
                                 <label for="gambar_menu" class="form-label">
                                     Gambar Menu
@@ -149,7 +143,6 @@
                         </div>
                     </div>
 
-                    <!-- Bahan Menu -->
                     <div class="col-12 mt-4">
                         <h5 class="card-title mb-0">
                             Bahan Menu
@@ -249,7 +242,6 @@
                         </button>
                     </div>
 
-                    <!-- Submit Button -->
                     <div class="col-12 d-flex justify-content-end mt-4">
                         <a href="{{ route('ahli-gizi.menu-makanan.index') }}" class="btn btn-outline-secondary me-2">
                             Batal
@@ -262,7 +254,6 @@
             </div>
         </div>
 
-        <!-- Preview Card -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="card-title mb-0">Preview Menu</h5>
@@ -310,7 +301,6 @@
             </div>
         </div>
 
-        <!-- Instructions Alert -->
         <div class="alert alert-info alert-dismissible" role="alert">
             <h6 class="alert-heading mb-2">Instruksi Edit Menu</h6>
             <ul class="mb-0">
@@ -340,10 +330,8 @@
         </div>
     </div>
 
-    <!-- Choices.js CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" />
 
-    <!-- Custom Choices.js Styling -->
     <style>
         .choices__inner {
             background-color: #fff;
@@ -388,10 +376,8 @@
         }
     </style>
 
-    <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-    <!-- JavaScript for Dynamic Form, Unit Conversion, and Preview -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let bahanIndex = {{ count($menuMakanan->bahanMenu) }};

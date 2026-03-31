@@ -219,7 +219,7 @@ class StockItemController extends Controller
                         default => ucfirst($approval->status)
                     };
                     $tanggal = $approval->created_at->format('d/m/Y H:i');
-                    $jumlah = rtrim(rtrim(number_format($approval->jumlah, 3), '0'), '.') . ' ' . $item->templateItem->satuan;
+                    $jumlah = rtrim(rtrim(number_format((float)$approval->jumlah, 3), '0'), '.') . ' ' . $item->templateItem->satuan;
                     $historyItems[] = "{$tanggal}: {$jumlah} ({$statusApproval})";
                 }
                 $historyPermintaan = implode(' | ', $historyItems);
@@ -370,5 +370,31 @@ class StockItemController extends Controller
 
             return response()->stream($callback, 200, $csvHeaders);
         }
+    }
+
+    public function updateKonversi(Request $request, Dapur $dapur, StockItem $stockItem)
+    {
+        $user = Auth::user();
+        $userRole = $user->userRole;
+
+        if (!$userRole || $userRole->role_type !== 'kepala_dapur' || $userRole->id_dapur !== $dapur->id_dapur) {
+            abort(403, 'Unauthorized access to this kitchen.');
+        }
+
+        if ($stockItem->id_dapur !== $dapur->id_dapur) {
+            abort(404, 'Stock item not found for this kitchen.');
+        }
+
+        $request->validate([
+            'konversi_nilai' => 'nullable|numeric|min:0.01',
+            'konversi_satuan' => 'nullable|string|max:50',
+        ]);
+
+        $stockItem->update([
+            'konversi_nilai' => $request->konversi_nilai,
+            'konversi_satuan' => $request->konversi_satuan,
+        ]);
+
+        return redirect()->back()->with('success', 'Konversi stok berhasil diperbarui.');
     }
 }

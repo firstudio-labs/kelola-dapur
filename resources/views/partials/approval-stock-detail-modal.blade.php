@@ -1,4 +1,4 @@
-<!-- Approval Stock Detail Modal -->
+
 <div
     class="modal fade"
     id="approvalStockDetailModal"
@@ -20,7 +20,7 @@
                 ></button>
             </div>
             <div class="modal-body">
-                <!-- Basic Information -->
+                
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tanggal Permintaan</label>
@@ -80,7 +80,6 @@
                     </div>
                 </div>
 
-                <!-- User Information -->
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Diminta Oleh</label>
@@ -113,7 +112,6 @@
                     </div>
                 </div>
 
-                <!-- Material Details -->
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Jam Kedatangan</label>
@@ -207,7 +205,6 @@
                     </div>
                 </div>
 
-                <!-- Keterangan -->
                 <div class="mb-3">
                     <label class="form-label">Keterangan</label>
                     <textarea
@@ -216,6 +213,25 @@
                         rows="3"
                         readonly
                     >-</textarea>
+                </div>
+
+                <div id="detailSuppliersContainer" style="display:none;">
+                    <hr>
+                    <label class="form-label fw-bold mb-2">
+                        <i class="bx bx-store me-1"></i> Rincian Supplier & Dokumentasi
+                    </label>
+                    <div class="table-responsive border rounded">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="30%">Supplier</th>
+                                    <th width="20%">Jumlah</th>
+                                    <th width="50%">Dokumentasi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailSuppliersList"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -250,6 +266,18 @@
         box-shadow: none !important;
         outline: none !important;
     }
+    
+    .supplier-thumb {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: transform 0.2s;
+    }
+    .supplier-thumb:hover {
+        transform: scale(1.05);
+    }
 </style>
 
 <script>
@@ -271,7 +299,9 @@
             warna: document.getElementById('detailWarna'),
             fotoContainer: document.getElementById('detailFotoContainer'),
             foto: document.getElementById('detailFoto'),
-            keterangan: document.getElementById('detailKeterangan')
+            keterangan: document.getElementById('detailKeterangan'),
+            suppliersContainer: document.getElementById('detailSuppliersContainer'),
+            suppliersList: document.getElementById('detailSuppliersList')
         };
 
         // Status mapping
@@ -306,7 +336,8 @@
                 suhu: data.suhu !== null && data.suhu !== undefined ? parseFloat(data.suhu) : null,
                 warna: data.warna ? escapeHtml(String(data.warna)) : null,
                 foto_bahan: data.foto_bahan ? String(data.foto_bahan) : null,
-                keterangan: data.keterangan ? escapeHtml(String(data.keterangan)) : null
+                keterangan: data.keterangan ? escapeHtml(String(data.keterangan)) : null,
+                suppliers: Array.isArray(data.suppliers) ? data.suppliers : []
             };
         }
 
@@ -412,6 +443,53 @@
 
             // Update keterangan
             updateField(elements.keterangan, safeData.keterangan || 'Tidak ada keterangan');
+
+            // Handle multiple suppliers and their photos
+            if (elements.suppliersContainer && elements.suppliersList) {
+                elements.suppliersList.innerHTML = '';
+                if (safeData.suppliers && safeData.suppliers.length > 0) {
+                    safeData.suppliers.forEach(function(sup) {
+                        const tr = document.createElement('tr');
+                        
+                        // Supplier Name
+                        const tdName = document.createElement('td');
+                        tdName.className = 'align-middle fw-medium';
+                        tdName.textContent = sup.nama_supplier;
+                        tr.appendChild(tdName);
+                        
+                        // Quantity
+                        const tdQty = document.createElement('td');
+                        tdQty.className = 'align-middle';
+                        tdQty.textContent = sup.jumlah;
+                        tr.appendChild(tdQty);
+                        
+                        // Photos
+                        const tdPhotos = document.createElement('td');
+                        const photoDiv = document.createElement('div');
+                        photoDiv.className = 'd-flex flex-wrap gap-1 py-1';
+                        
+                        if (Array.isArray(sup.fotos) && sup.fotos.length > 0) {
+                            sup.fotos.forEach(function(fUrl) {
+                                const img = document.createElement('img');
+                                img.src = fUrl;
+                                img.className = 'supplier-thumb border';
+                                img.onclick = function() { window.open(fUrl, '_blank'); };
+                                photoDiv.appendChild(img);
+                            });
+                        } else {
+                            photoDiv.innerHTML = '<span class="text-muted small italic">Tidak ada foto</span>';
+                        }
+                        
+                        tdPhotos.appendChild(photoDiv);
+                        tr.appendChild(tdPhotos);
+                        
+                        elements.suppliersList.appendChild(tr);
+                    });
+                    elements.suppliersContainer.style.display = 'block';
+                } else {
+                    elements.suppliersContainer.style.display = 'none';
+                }
+            }
 
             // Show modal
             const modalElement = document.getElementById('approvalStockDetailModal');

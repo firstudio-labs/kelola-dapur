@@ -15,11 +15,9 @@ return new class extends Migration
             $table->decimal('jumlah_per_porsi', 10, 4);
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_menu')->references('id_menu')->on('menu_makanan')->onDelete('cascade');
             $table->foreign('id_template_item')->references('id_template_item')->on('template_items')->onDelete('cascade');
 
-            // Performance Indexes & Constraints
             $table->unique(['id_menu', 'id_template_item'], 'uk_bahan_menu_menu_template');
             $table->index(['id_menu'], 'idx_bahan_menu_menu');
             $table->index(['id_template_item'], 'idx_bahan_menu_template');

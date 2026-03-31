@@ -79,7 +79,7 @@ class PromoCodeController extends Controller
 
     public function destroy(PromoCode $promoCode)
     {
-        // Cek apakah ada subscription request yang menggunakan promo ini
+        
         if ($promoCode->subscriptionRequests()->exists()) {
             return redirect()->back()
                 ->with('error', 'Tidak dapat menghapus kode promo yang sudah digunakan');
@@ -103,7 +103,6 @@ class PromoCodeController extends Controller
             ->with('success', "Kode promo berhasil {$status}");
     }
 
-    // API untuk validasi promo code
     public function validatePromo(Request $request)
     {
         $request->validate([

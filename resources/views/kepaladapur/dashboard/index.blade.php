@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header Section -->
+        
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -32,7 +32,7 @@
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <!-- Subscription Status Badge -->
+                                
                                 @if ($subscriptionStatus['is_expired'])
                                     <span class="badge bg-danger">
                                         <i class="bx bx-x-circle me-1"
@@ -52,7 +52,6 @@
                                     </span>
                                 @endif
 
-                                <!-- Quick Notification Bell -->
                                 <div class="dropdown">
                                     <button class="btn btn-icon btn-outline-secondary" type="button"
                                         data-bs-toggle="dropdown">
@@ -102,7 +101,6 @@
             </div>
         </div>
 
-        <!-- System Alerts -->
         @if (count($systemAlerts) > 0)
             <div class="row mb-4">
                 <div class="col-12">
@@ -119,12 +117,7 @@
                                         {{ $alert['message'] }}
                                     </div>
                                 </div>
-                                {{-- <a
-                                    href="{{ $alert["action_url"] }}"
-                                    class="btn btn-sm btn-{{ $alert["type"] === "critical" ? "danger" : ($alert["type"] === "warning" ? "warning" : "info") }} me-2"
-                                >
-                                    {{ $alert["action_text"] }}
-                                </a> --}}
+                                
                             </div>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
@@ -133,7 +126,6 @@
             </div>
         @endif
 
-        <!-- Quick Actions Section -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -185,9 +177,8 @@
             </div>
         </div>
 
-        <!-- Core Statistics Cards -->
         <div class="row mb-4">
-            <!-- Pending Approvals -->
+            
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
@@ -214,7 +205,6 @@
                 </div>
             </div>
 
-            <!-- Stock Overview -->
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
@@ -247,7 +237,6 @@
                 </div>
             </div>
 
-            <!-- Monthly Transactions -->
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
@@ -272,7 +261,6 @@
                 </div>
             </div>
 
-            <!-- Team Members -->
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
@@ -302,9 +290,8 @@
             </div>
         </div>
 
-        <!-- Main Content Row -->
         <div class="row">
-            <!-- Stock Health Overview -->
+            
             <div class="col-lg-8 mb-4">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -323,8 +310,8 @@
                             </a>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <!-- Stock Overview Stats -->
+                    <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                        
                         <div class="row mb-4">
                             <div class="col-3">
                                 <div class="d-flex flex-column align-items-center">
@@ -360,7 +347,6 @@
                             </div>
                         </div>
 
-                        <!-- Low Stock Items Table -->
                         @if (count($stockHealth['low_stock_items']) > 0)
                             <div>
                                 <h6 class="mb-3">Item Stock Rendah & Habis</h6>
@@ -375,8 +361,8 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach (array_slice($stockHealth['low_stock_items'], 0, 10) as $item)
-                                                <!-- Diperluas slice menjadi 10 untuk lebih banyak data -->
+                                            @foreach ($stockHealth['low_stock_items'] as $item)
+                                                
                                                 <tr>
                                                     <td>{{ $item['nama_bahan'] }}</td>
                                                     <td>
@@ -412,7 +398,6 @@
                 </div>
             </div>
 
-            <!-- Recent Activities -->
             <div class="col-lg-4 mb-4">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -422,9 +407,9 @@
                         </h5>
                         <small class="text-muted">24 jam terakhir</small>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="max-height: 500px; overflow-y: auto;">
                         <div class="timeline">
-                            @forelse (array_slice($recentActivities, 0, 5) as $activity)
+                            @forelse (array_slice($recentActivities, 0, 10) as $activity)
                                 <div class="timeline-item">
                                     <div class="timeline-icon">
                                         <span class="avatar avatar-sm">
@@ -471,9 +456,8 @@
             </div>
         </div>
 
-        <!-- Informasi Detail Akun dan Dapur -->
         <div class="row mb-4">
-            <!-- Informasi Akun -->
+            
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
@@ -506,18 +490,11 @@
                 </div>
             </div>
 
-            <!-- Informasi Dapur -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Informasi Dapur</h5>
-                        {{-- <a
-                                href="{{ route("superadmin.dapur.show", $dapur->id_dapur) }}"
-                                class="btn btn-sm btn-primary"
-                            >
-                                <i class="bx bx-detail me-1"></i>
-                                Lihat Detail
-                            </a> --}}
+                        
                     </div>
                     <div class="card-body">
                         <dl class="row">
@@ -590,7 +567,6 @@
     </div>
     </div>
 
-    <!-- Subscription Expired Modal -->
     <div class="modal fade" id="subscriptionExpiredModal" tabindex="-1" aria-labelledby="subscriptionExpiredModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -668,6 +644,19 @@
 
         .timeline-content {
             padding-left: 0.5rem;
+        }
+
+        .card-body::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .card-body::-webkit-scrollbar-thumb {
+            background-color: #e6e6e6;
+            border-radius: 10px;
+        }
+
+        .card-body:hover::-webkit-scrollbar-thumb {
+            background-color: #d1d1d1;
         }
     </style>
 @endsection

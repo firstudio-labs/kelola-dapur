@@ -1,6 +1,6 @@
 @if (session("success") || session("error") || session("warning") || session("info") || $errors->any())
     <div class="fixed top-4 right-4 z-50 space-y-3">
-        {{-- Success Alert --}}
+        
         @if (session("success"))
             <div
                 data-alert
@@ -49,7 +49,6 @@
             </div>
         @endif
 
-        {{-- Error Alert --}}
         @if (session("error"))
             <div
                 data-alert
@@ -98,7 +97,6 @@
             </div>
         @endif
 
-        {{-- Warning Alert --}}
         @if (session("warning"))
             <div
                 data-alert
@@ -147,7 +145,6 @@
             </div>
         @endif
 
-        {{-- Info Alert --}}
         @if (session("info"))
             <div
                 data-alert
@@ -196,7 +193,6 @@
             </div>
         @endif
 
-        {{-- Validation Errors --}}
         @if ($errors->any())
             <div
                 data-alert

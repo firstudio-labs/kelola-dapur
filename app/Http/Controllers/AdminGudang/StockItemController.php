@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\StockItem;
 use App\Models\TemplateItem;
 use App\Models\ApprovalStockItem;
+use App\Models\ApprovalStockItemDokumentasi;
 use App\Models\Dapur;
 use App\Models\TransaksiDapur;
 use Illuminate\Http\Request;
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class StockItemController extends Controller
 {
@@ -90,6 +94,8 @@ class StockItemController extends Controller
             ->filter()
             ->sort();
 
+        $suppliers = \App\Models\Supplier::where('id_dapur', $dapur->id_dapur)->orderBy('nama_supplier', 'asc')->get();
+
         return view('admingudang.stock.index', compact(
             'stockItems',
             'dapur',
@@ -97,7 +103,8 @@ class StockItemController extends Controller
             'habisStok',
             'rendahStok',
             'normalStok',
-            'availableSatuans'
+            'availableSatuans',
+            'suppliers'
         ));
     }
 
@@ -116,7 +123,7 @@ class StockItemController extends Controller
 
         $stockItem->load(['templateItem', 'dapur']);
 
-        $approvalHistory = ApprovalStockItem::with(['adminGudang.user', 'kepalaDapur.user'])
+        $approvalHistory = ApprovalStockItem::with(['adminGudang.user', 'kepalaDapur.user', 'suppliers.supplier', 'suppliers.dokumentasi', 'dokumentasi'])
             ->where('id_stock_item', $stockItem->id_stock_item)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -131,6 +138,8 @@ class StockItemController extends Controller
         $layoutTemplate   = 'template_admin_gudang.layout';
         $stockIndexLabel  = 'Kelola Stok';
 
+        $suppliers = \App\Models\Supplier::where('id_dapur', $dapur->id_dapur)->orderBy('nama_supplier', 'asc')->get();
+
         return view('admingudang.stock.show', compact(
             'stockItem',
             'dapur',
@@ -142,7 +151,8 @@ class StockItemController extends Controller
             'roleType',
             'routePrefix',
             'layoutTemplate',
-            'stockIndexLabel'
+            'stockIndexLabel',
+            'suppliers'
         ));
     }
 
@@ -160,7 +170,8 @@ class StockItemController extends Controller
         }
 
         $request->validate([
-            'jumlah'              => 'required|numeric|min:0.1|max:2000000000',
+            'jumlah'              => 'required|numeric|min:0.001|max:2000000000',
+            'input_mode'          => 'required|in:asli,konversi',
             'keterangan'          => 'nullable|string|max:500',
             'jam_kedatangan'      => 'nullable|date_format:H:i',
             'tanggal_produksi'    => 'nullable|date',
@@ -168,6 +179,11 @@ class StockItemController extends Controller
             'suhu_bahan_makanan'  => 'nullable|numeric|min:-50|max:100',
             'warna_bahan_makanan' => 'nullable|string|max:50',
             'foto_bahan'          => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
+            'suppliers'           => 'nullable|array',
+            'suppliers.*.id_supplier' => 'required_with:suppliers|exists:suppliers,id_supplier',
+            'suppliers.*.jumlah'  => 'required_with:suppliers|numeric|min:0.001',
+            'suppliers.*.fotos'   => 'nullable|array',
+            'suppliers.*.fotos.*' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
         ], [
             'jumlah.required'              => 'Jumlah harus diisi',
             'jumlah.numeric'               => 'Jumlah harus berupa angka',
@@ -207,11 +223,30 @@ class StockItemController extends Controller
                 $fotoPath = $this->processAndStoreImage($request->file('foto_bahan'), $dapur->id_dapur, $stockItem->id_stock_item);
             }
 
-            ApprovalStockItem::create([
+            $masterJumlah = (float) $request->jumlah;
+            $finalSuppliers = $request->suppliers ?? [];
+            
+            if ($request->input_mode === 'konversi' && $stockItem->konversi_nilai > 0) {
+                $masterJumlah = $masterJumlah * (float) $stockItem->konversi_nilai;
+                foreach ($finalSuppliers as $idx => $sup) {
+                    $finalSuppliers[$idx]['jumlah'] = ((float) $sup['jumlah']) * (float) $stockItem->konversi_nilai;
+                }
+            }
+
+            $totalSupplierJumlah = 0;
+            if (!empty($finalSuppliers)) {
+                foreach ($finalSuppliers as $sup) {
+                    $totalSupplierJumlah += (float) $sup['jumlah'];
+                }
+                if (round($totalSupplierJumlah, 3) > round($masterJumlah, 3)) {
+                    throw new \Exception('Total jumlah dari rincian supplier (' . round($totalSupplierJumlah, 3) . ') melebihi total keseluruhan penambahan (' . round($masterJumlah, 3) . ').');
+                }
+            }
+
+            $baseApprovalData = [
                 'id_admin_gudang'     => $adminGudang->id_admin_gudang,
                 'id_kepala_dapur'     => $kepalaDapur->id_kepala_dapur,
                 'id_stock_item'       => $stockItem->id_stock_item,
-                'jumlah'              => $request->jumlah,
                 'satuan'              => $stockItem->templateItem->satuan,
                 'status'              => 'approved',
                 'keterangan'          => $request->keterangan,
@@ -222,13 +257,54 @@ class StockItemController extends Controller
                 'warna_bahan_makanan' => $request->warna_bahan_makanan,
                 'foto_bahan'          => $fotoPath,
                 'approved_at'         => now(),
-            ]);
+            ];
+
+            // Create ONE Consolidated ApprovalStockItem
+            $createdApproval = ApprovalStockItem::create(array_merge($baseApprovalData, [
+                'jumlah' => $masterJumlah,
+                'id_supplier' => null // We now use the suppliers() relationship
+            ]));
+
+            if (!empty($finalSuppliers)) {
+                foreach ($finalSuppliers as $idx => $sup) {
+                    // Create Detail Record for each supplier
+                    $supplierItem = \App\Models\ApprovalStockItemSupplier::create([
+                        'id_approval_stock_item' => $createdApproval->id_approval_stock_item,
+                        'id_supplier' => $sup['id_supplier'],
+                        'jumlah' => $sup['jumlah'],
+                    ]);
+
+                    if (isset($request->file('suppliers')[$idx]['fotos'])) {
+                        $fotos = $request->file('suppliers')[$idx]['fotos'];
+                        if (is_array($fotos)) {
+                            $manager = new ImageManager(new Driver());
+                            foreach ($fotos as $foto) {
+                                if ($foto && $foto->isValid()) {
+                                    $filename = time() . '_' . Str::random(10) . '.webp';
+                                    $image = $manager->read($foto->getRealPath());
+                                    if ($image->width() > 1200) {
+                                        $image->scaleDown(width: 1200);
+                                    }
+                                    $path = 'dokumen_stock/' . $dapur->id_dapur . '/' . $stockItem->id_stock_item . '/supplier_fotos';
+                                    Storage::put('public/' . $path . '/' . $filename, (string) $image->toWebp(80));
+                                    
+                                    ApprovalStockItemDokumentasi::create([
+                                        'id_approval_stock_item' => $createdApproval->id_approval_stock_item,
+                                        'id_approval_stock_item_supplier' => $supplierItem->id, // Link to supplier detail
+                                        'foto_path' => $path . '/' . $filename,
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             $currentStock = (float) $stockItem->jumlah;
             StockItem::where('id_stock_item', $stockItem->id_stock_item)
                 ->where('id_dapur', $dapur->id_dapur)
                 ->update([
-                    'jumlah'          => $currentStock + $request->jumlah,
+                    'jumlah'          => $currentStock + $masterJumlah,
                     'tanggal_restok'  => now(),
                 ]);
 
@@ -236,10 +312,11 @@ class StockItemController extends Controller
 
             DB::commit();
 
+            $this->autoResolveKekuranganStock($dapur->id_dapur, $stockItem->id_template_item);
+
             $this->checkAndActivatePendingTransactions($dapur->id_dapur);
 
-            return redirect()->route('admin-gudang.stock.show', [$dapur, $stockItem])
-                ->with('success', 'Permintaan penambahan stok berhasil disetujui dan stok telah ditambahkan.');
+            return back()->with('success', 'Permintaan penambahan stok berhasil disetujui dan stok telah ditambahkan.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -308,6 +385,46 @@ class StockItemController extends Controller
         }
     }
 
+    protected function autoResolveKekuranganStock(int $idDapur, int $idTemplateItem): void
+    {
+        $stockItem = StockItem::where('id_dapur', $idDapur)->where('id_template_item', $idTemplateItem)->first();
+        if (!$stockItem) return;
+
+        $availableStock = (float) $stockItem->jumlah;
+
+        $reservedStockAmount = 0;
+        $allReserved = TransaksiDapur::calculateReservedStock($idDapur);
+        
+        if (isset($allReserved[$idTemplateItem])) {
+            $reservedStockAmount = (float) $allReserved[$idTemplateItem]['reserved'];
+        }
+
+        $usableStock = $availableStock - $reservedStockAmount;
+
+        if ($usableStock <= 0) return;
+
+        $pendingShortages = \App\Models\LaporanKekuranganStock::where('id_template_item', $idTemplateItem)
+            ->where('status', 'pending')
+            ->whereHas('transaksiDapur', function ($q) use ($idDapur) {
+                $q->where('id_dapur', $idDapur);
+            })
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        foreach ($pendingShortages as $shortage) {
+            $neededForTx = (float) $shortage->jumlah_dibutuhkan;
+
+            if ($usableStock >= $neededForTx) {
+                $shortage->update([
+                    'status' => 'resolved',
+                    'keterangan_resolve' => 'Otomatis diselesaikan oleh sistem karena penambahan stok fisik telah memenuhi kebutuhan laporan ini.'
+                ]);
+
+                $usableStock -= $neededForTx;
+            }
+        }
+    }
+
     public function export(Dapur $dapur)
     {
         $user     = Auth::user();
@@ -370,5 +487,31 @@ class StockItemController extends Controller
         } catch (\Exception $e) {
             throw new \Exception('Gagal memproses gambar: ' . $e->getMessage());
         }
+    }
+
+    public function updateKonversi(Request $request, Dapur $dapur, StockItem $stockItem)
+    {
+        $user     = Auth::user();
+        $userRole = $user->userRole;
+
+        if (!$userRole || $userRole->role_type !== 'admin_gudang' || $userRole->id_dapur !== $dapur->id_dapur) {
+            abort(403, 'Unauthorized access to this kitchen.');
+        }
+
+        if ($stockItem->id_dapur !== $dapur->id_dapur) {
+            abort(404, 'Stock item not found for this kitchen.');
+        }
+
+        $request->validate([
+            'konversi_nilai'  => 'nullable|numeric|min:0.01',
+            'konversi_satuan' => 'nullable|string|max:50',
+        ]);
+
+        $stockItem->update([
+            'konversi_nilai'  => $request->konversi_nilai,
+            'konversi_satuan' => $request->konversi_satuan,
+        ]);
+
+        return redirect()->back()->with('success', 'Konversi stok berhasil diperbarui.');
     }
 }

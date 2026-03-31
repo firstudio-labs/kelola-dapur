@@ -8,11 +8,7 @@ use App\Models\ItemPrasarana;
 
 class PrasaranaSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
+    
     public function run()
     {
         $data = [

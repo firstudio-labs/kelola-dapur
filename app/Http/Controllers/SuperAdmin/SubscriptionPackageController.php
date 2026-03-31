@@ -79,7 +79,7 @@ class SubscriptionPackageController extends Controller
 
     public function destroy(SubscriptionPackage $subscriptionPackage)
     {
-        // Cek apakah ada subscription request yang menggunakan package ini
+        
         if ($subscriptionPackage->subscriptionRequests()->exists()) {
             return redirect()->back()
                 ->with('error', 'Tidak dapat menghapus paket yang sudah digunakan');

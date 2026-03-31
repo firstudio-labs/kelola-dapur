@@ -18,17 +18,14 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_dapur')->references('id_dapur')->on('dapur')->onDelete('cascade');
             $table->foreign('created_by')->references('id_user')->on('users')->onDelete('set null');
 
-            // Performance Indexes
             $table->index(['id_dapur'], 'idx_transaksi_dapur');
             $table->index(['status'], 'idx_transaksi_status');
             $table->index(['tanggal_transaksi'], 'idx_transaksi_tanggal');
             $table->index(['created_by'], 'idx_transaksi_created_by');
 
-            // Composite indexes for common queries
             $table->index(['id_dapur', 'status'], 'idx_transaksi_dapur_status');
             $table->index(['id_dapur', 'tanggal_transaksi'], 'idx_transaksi_dapur_tanggal');
             $table->index(['status', 'tanggal_transaksi'], 'idx_transaksi_status_tanggal');

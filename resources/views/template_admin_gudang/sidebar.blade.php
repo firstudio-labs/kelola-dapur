@@ -1,7 +1,7 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-    <!-- Brand + Toggle -->
+    
     <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
-        <!-- Logo -->
+        
         <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
             <span class="app-brand-logo demo">
                 <img src="{{ asset('logo_kelola_dapur_black.png') }}" alt="Logo" style="height: 45px; width: auto" />
@@ -9,9 +9,8 @@
         </a>
     </div>
 
-    <!-- Menu Container with flex layout -->
     <div class="menu-container d-flex flex-column h-100">
-        <!-- User Profile Section -->
+        
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
@@ -101,7 +100,6 @@
             $idDapur = session('id_dapur', $dapur->id_dapur ?? null);
         @endphp
 
-        <!-- Subscription Status Alert -->
         @if (!$isSubscriptionActive && $subscriptionStatus)
             <div class="px-3 mb-3">
                 <div class="alert alert-warning alert-dismissible fade show py-2 px-3" role="alert"
@@ -130,9 +128,8 @@
             </div>
         @endif
 
-        <!-- Menu Utama -->
         <ul class="menu-inner py-1 flex-grow-1">
-            <!-- Dashboard - Always accessible -->
+            
             <li class="menu-item {{ request()->routeIs('admin-gudang.dashboard') ? 'active' : '' }}">
                 <a href="{{ route('admin-gudang.dashboard', ['dapur' => $idDapur]) }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -141,12 +138,11 @@
             </li>
 
             @if ($isSubscriptionActive)
-                <!-- Admin Gudang Header - Only show when subscription active -->
+                
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text">Admin Gudang</span>
                 </li>
 
-                <!-- Kelola Stok -->
                 <li class="menu-item {{ request()->routeIs('admin-gudang.stock.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-package"></i>
@@ -160,18 +156,27 @@
                         </li>
                     </ul>
                 </li>
+
+                <li class="menu-item {{ request()->routeIs('admin-gudang.laporan-kekurangan.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin-gudang.laporan-kekurangan.index', ['dapur' => $idDapur]) }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-error"></i>
+                        <div data-i18n="Laporan Kekurangan Stok">
+                            Laporan Kekurangan Stok
+                        </div>
+                    </a>
+                </li>
             @else
-                <!-- Limited Access Message -->
+                
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text text-warning">
                         Limited Access
                     </span>
                 </li>
 
-                <!-- Disabled menu items with tooltips -->
                 @php
                     $disabledMenus = [
                         'Kelola Stok' => 'bx-package',
+                        'Laporan Kekurangan' => 'bx-error',
                     ];
                 @endphp
 
@@ -191,7 +196,6 @@
     </div>
 </aside>
 
-<!-- Bottom Navigation untuk Mobile/Tablet -->
 <nav class="mobile-bottom-nav d-lg-none" id="mobileBottomNav">
     <div class="bottom-nav-container">
         @php
@@ -210,6 +214,7 @@
                     ['route' => 'admin-gudang.stock.index', 'icon' => 'bx-package', 'label' => 'Stok', 'param' => ['dapur' => $idDapur], 'hasSubmenu' => true, 'submenu' => [
                         ['type' => 'link', 'label' => 'Daftar Stok', 'url' => route('admin-gudang.stock.index', ['dapur' => $idDapur])],
                     ]],
+                    ['route' => 'admin-gudang.laporan-kekurangan.index', 'icon' => 'bx-error', 'label' => 'Laporan Kekurangan', 'param' => ['dapur' => $idDapur]],
                 ];
             } else {
                 $mainMenus = [
@@ -253,7 +258,6 @@
     </div>
 </nav>
 
-<!-- Subscription Expired Modal -->
 <div class="modal fade" id="subscriptionExpiredModal" tabindex="-1" aria-labelledby="subscriptionExpiredModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

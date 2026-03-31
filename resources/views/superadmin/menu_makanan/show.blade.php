@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -59,9 +59,8 @@
             </div>
         </div>
 
-        <!-- Menu Detail -->
         <div class="row">
-            <!-- Menu Information -->
+            
             <div class="col-md-8">
                 <div class="card mb-4">
                     <div
@@ -163,7 +162,6 @@
                     </div>
                 </div>
 
-                <!-- Ingredients List -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Daftar Bahan</h5>
@@ -229,7 +227,6 @@
                 </div>
             </div>
 
-            <!-- Action Panel -->
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
@@ -281,7 +278,6 @@
             </div>
         </div>
 
-        <!-- Recent Transactions -->
         @if ($menuMakanan->detailTransaksiDapur && $menuMakanan->detailTransaksiDapur->count() > 0)
             <div class="card mt-4">
                 <div class="card-header">

@@ -15,7 +15,6 @@ return new class extends Migration
             $table->text('keterangan')->nullable();
             $table->timestamps();
 
-            // Performance Indexes
             $table->index(['nama_bahan'], 'idx_template_items_nama');
             $table->index(['satuan'], 'idx_template_items_satuan');
         });

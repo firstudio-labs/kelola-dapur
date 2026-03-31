@@ -127,7 +127,6 @@ class CheckSubscription
             'logout',
         ];
 
-        
         if ($roleType === 'admin_gudang') {
             $allowedRoutes[] = 'admin-gudang.dashboard';
         } elseif ($roleType === 'ahli_gizi') {

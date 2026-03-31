@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -36,7 +36,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -79,7 +78,6 @@
             </div>
         @endif
 
-        <!-- Current Subscription Status -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">Status Subscription</h5>
@@ -154,7 +152,6 @@
             </div>
         </div>
 
-        <!-- Pending Request Alert -->
         @if ($pendingRequest)
             <div class="alert alert-warning" role="alert">
                 <div class="d-flex">
@@ -199,7 +196,6 @@
             </div>
         @endif
 
-        <!-- Subscription History -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">Riwayat Subscription</h5>
@@ -325,7 +321,6 @@
             </div>
         </div>
 
-        <!-- Subscription Info -->
         <div class="row">
             <div class="col-md-6">
                 <div class="card h-100">

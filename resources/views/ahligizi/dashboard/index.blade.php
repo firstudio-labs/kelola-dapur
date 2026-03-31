@@ -1,6 +1,6 @@
 @extends('template_ahli_gizi.layout') @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -30,9 +30,8 @@
         </div>
     </div>
 
-    <!-- Informasi Detail Akun dan Dapur -->
     <div class="row mb-4">
-        <!-- Informasi Akun -->
+        
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
@@ -61,7 +60,6 @@
             </div>
         </div>
 
-        <!-- Informasi Dapur -->
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
@@ -130,7 +128,6 @@
         </div>
     </div>
 
-    <!-- Statistik Utama -->
     <div class="row">
         <div class="col-lg-3 col-md-6 mb-4">
             <div class="card">
@@ -227,7 +224,6 @@
         </div>
     </div>
 
-    <!-- Daftar Menu Terbaru -->
     @if(isset($recentMenus) && $recentMenus->isNotEmpty())
     <div class="row">
         <div class="col-12 mb-4">
@@ -318,7 +314,7 @@
         </div>
     </div>
     @else
-    <!-- Empty State -->
+    
     <div class="row">
         <div class="col-12 mb-4">
             <div class="card">

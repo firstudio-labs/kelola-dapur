@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -37,7 +37,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -65,7 +64,6 @@
             </div>
         @endif
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -156,7 +154,6 @@
             </div>
         </div>
 
-        <!-- Statistics Section -->
         @if ($transaksi->total() > 0)
             <div class="card mb-4">
                 <div class="card-body py-2 px-4">
@@ -232,7 +229,6 @@
             </div>
         @endif
 
-        <!-- Transaksi List -->
         <div class="card">
             <div class="card-body">
                 @if ($transaksi->isNotEmpty())
@@ -241,7 +237,7 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    {{-- <th>Nama Paket</th> --}}
+                                    
                                     <th>Tanggal Transaksi</th>
                                     <th>Total Porsi</th>
                                     <th>Status Transaksi</th>
@@ -273,13 +269,7 @@
                                         <td>
                                             {{ $loop->iteration + ($transaksi->currentPage() - 1) * $transaksi->perPage() }}
                                         </td>
-                                        {{--
-                                            <td>
-                                            <div class="fw-semibold">
-                                            {{ $item->nama_paket }}
-                                            </div>
-                                            </td>
-                                        --}}
+                                        
                                         <td>
                                             <small class="text-muted">
                                                 {{ $item->tanggal_transaksi->format("d M Y") }}
@@ -410,14 +400,14 @@
                             </tbody>
                         </table>
                     </div>
-                    <!-- Pagination -->
+                    
                     @if ($transaksi->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $transaksi->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         @if (request()->hasAny(["search", "status", "date_from", "date_to"]))
                             <i class="bx bx-search bx-lg text-muted mb-3"></i>
@@ -451,13 +441,11 @@
         </div>
     </div>
 
-    <!-- Choices.js CSS -->
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
     />
 
-    <!-- Custom Styling for Action Buttons and Choices.js -->
     <style>
         .choices__inner {
             background-color: #fff;
@@ -508,10 +496,8 @@
         }
     </style>
 
-    <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-    <!-- JavaScript for Filters, Client-Side Search, and Tooltips -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const statusFilter = document.getElementById('status-filter');

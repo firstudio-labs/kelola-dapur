@@ -33,7 +33,6 @@ class PromoCode extends Model
         return $this->hasMany(SubscriptionRequest::class, 'id_promo');
     }
 
-    // Helper methods
     public function isValid(): bool
     {
         $now = Carbon::now()->format('Y-m-d');
@@ -81,7 +80,6 @@ class PromoCode extends Model
         }
     }
 
-    // Scope methods
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

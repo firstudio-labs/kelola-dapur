@@ -30,7 +30,7 @@ class ApprovalStockItemController extends Controller
             abort(403, 'Kepala dapur tidak ditemukan untuk user ini.');
         }
 
-        $query = ApprovalStockItem::with(['adminGudang.user', 'stockItem.templateItem', 'stockItem.dapur'])
+        $query = ApprovalStockItem::with(['adminGudang.user', 'stockItem.templateItem', 'stockItem.dapur', 'suppliers.supplier', 'suppliers.dokumentasi', 'dokumentasi'])
             ->where('id_kepala_dapur', $kepalaDapur->id_kepala_dapur)
             ->whereHas('stockItem', function ($q) use ($dapur) {
                 $q->where('id_dapur', $dapur->id_dapur);
@@ -139,7 +139,10 @@ class ApprovalStockItemController extends Controller
         $approval->load([
             'adminGudang.user',
             'stockItem.dapur',
-            'stockItem.templateItem'
+            'stockItem.templateItem',
+            'suppliers.supplier',
+            'suppliers.dokumentasi',
+            'dokumentasi'
         ]);
 
         return view('kepaladapur.approval_stock_item.show', compact('approval', 'dapur'));

@@ -16,7 +16,6 @@ class TemplateItemController extends Controller
         return view('superadmin.template_items.index', compact('templateItems'));
     }
 
-
     public function create()
     {
         return view('superadmin.template_items.create');

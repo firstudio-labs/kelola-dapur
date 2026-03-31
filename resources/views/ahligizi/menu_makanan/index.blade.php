@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -34,7 +34,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -62,7 +61,6 @@
             </div>
         @endif
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -206,7 +204,6 @@
             </div>
         </div>
 
-        <!-- Statistics Section -->
         @if ($menus->total() > 0)
             <div class="card mb-4">
                 <div class="card-body py-2 px-4">
@@ -317,7 +314,6 @@
             </div>
         @endif
 
-        <!-- Menu Cards -->
         <div class="card mb-4">
             <div class="card-body">
                 @if ($menus->count() > 0)
@@ -346,7 +342,7 @@
                                     <div
                                         class="card-body d-flex flex-column p-3"
                                     >
-                                        <!-- Status Badge -->
+                                        
                                         <div
                                             class="d-flex justify-content-end mb-2"
                                         >
@@ -357,14 +353,12 @@
                                             </span>
                                         </div>
 
-                                        <!-- Menu Name -->
                                         <h6
                                             class="card-title mb-2 text-truncate-2-lines"
                                         >
                                             {{ $menu->nama_menu }}
                                         </h6>
 
-                                        <!-- Kategori -->
                                         <div class="mb-2">
                                             <span
                                                 class="badge {{ $menu->getKategoriBadgeClass() }} me-1"
@@ -373,7 +367,6 @@
                                             </span>
                                         </div>
 
-                                        <!-- Bahan Count -->
                                         <div class="mb-2">
                                             <small class="text-muted">
                                                 <i
@@ -384,19 +377,22 @@
                                             </small>
                                         </div>
 
-                                        <!-- Created At -->
                                         @if ($menu->created_at)
-                                            <div class="mb-3">
+                                            <div class="mb-1">
                                                 <small class="text-muted">
-                                                    <i
-                                                        class="bx bx-calendar me-1"
-                                                    ></i>
+                                                    <i class="bx bx-calendar me-1"></i>
                                                     {{ $menu->created_at->format("d M Y") }}
                                                 </small>
                                             </div>
                                         @endif
 
-                                        <!-- Action Buttons -->
+                                        <div class="mb-3">
+                                            <small class="text-muted">
+                                                <i class="bx bx-home-alt me-1"></i>
+                                                Dapur: {{ $menu->createdByDapur->nama_dapur ?? 'Semua Dapur' }}
+                                            </small>
+                                        </div>
+
                                         <div class="mt-auto">
                                             <div class="d-flex flex-wrap gap-1">
                                                 <a
@@ -408,7 +404,7 @@
                                                     ></i>
                                                     Lihat Detail
                                                 </a>
-                                                @if ($menu->created_by_dapur_id === auth()->user()->userRole->id_dapur)
+                                                @if ($menu->created_by_dapur_id == auth()->user()->userRole->id_dapur)
                                                     <a
                                                         href="{{ route("ahli-gizi.menu-makanan.edit", $menu) }}"
                                                         class="btn btn-info btn-sm flex-grow-1"
@@ -444,14 +440,13 @@
                         @endforeach
                     </div>
 
-                    <!-- Pagination -->
                     @if ($menus->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $menus->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         @if (request()->hasAny(["search", "status", "dapur", "kategori"]))
                             <i class="bx bx-search bx-lg text-muted mb-3"></i>
@@ -487,13 +482,11 @@
         </div>
     </div>
 
-    <!-- Choices.js CSS -->
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
     />
 
-    <!-- Custom Styling -->
     <style>
         .choices__inner {
             background-color: #fff;
@@ -586,10 +579,8 @@
         }
     </style>
 
-    <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-    <!-- JavaScript for Filters and Client-Side Search -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const statusFilter = document.getElementById('status-filter');

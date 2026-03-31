@@ -10,7 +10,7 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
-        <!-- Dashboard -->
+        
         <li class="menu-item {{ Request::is('produksi/dashboard*') ? 'active' : '' }}">
             <a href="{{ route('produksi.dashboard') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -22,7 +22,6 @@
             <span class="menu-header-text">Menu Produksi</span>
         </li>
 
-        <!-- Order Produksi -->
         <li class="menu-item {{ Request::is('produksi/order-produksi*') ? 'active' : '' }}">
             <a href="{{ route('produksi.order.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-collection"></i>
@@ -34,7 +33,6 @@
             <span class="menu-header-text">Pengaturan</span>
         </li>
 
-        <!-- Profile -->
         <li class="menu-item {{ Request::is('produksi/profile*') ? 'active' : '' }}">
             <a href="{{ route('produksi.profile.edit') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user"></i>
@@ -42,7 +40,6 @@
             </a>
         </li>
 
-        <!-- Logout -->
         <li class="menu-item">
             <form action="{{ route('logout') }}" method="POST" id="logout-form">
                 @csrf

@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="{{ asset('play-tailwind-1.0.0/assets/css/animate.css') }}" />
     <link rel="stylesheet" href="{{ asset('play-tailwind-1.0.0/src/css/tailwind.css') }}" />
 
-    <!-- ==== WOW JS ==== -->
     <script src="{{ asset('play-tailwind-1.0.0/assets/js/wow.min.js') }}"></script>
     <script>
         new WOW().init();
@@ -22,7 +21,7 @@
 </head>
 
 <body>
-    <!-- ====== Navbar Section Start -->
+    
     <div class="absolute top-0 left-0 z-40 flex items-center w-full bg-transparent ud-header">
         <div class="container px-4 mx-auto">
             <div class="relative flex items-center justify-between -mx-4">
@@ -139,9 +138,7 @@
             </div>
         </div>
     </div>
-    <!-- ====== Navbar Section End -->
-
-    <!-- ====== Hero Section Start -->
+    
     <div id="home" class="relative overflow-hidden bg-primary pt-[120px] md:pt-[130px] lg:pt-[160px]">
         <div class="container px-4 mx-auto">
             <div class="flex flex-wrap items-center -mx-4">
@@ -508,9 +505,7 @@
             </div>
         </div>
     </div>
-    <!-- ====== Hero Section End -->
-
-    <!-- ====== Features Section Start -->
+    
     <section id="features" class="pb-8 pt-20 dark:bg-dark lg:pb-[70px] lg:pt-[120px]">
         <div class="container px-4 mx-auto">
             <div class="flex flex-wrap -mx-4">
@@ -530,14 +525,14 @@
                 </div>
             </div>
             <div class="flex flex-wrap -mx-4">
-                <!-- Transaksi Feature -->
+                
                 <div class="w-full px-4 md:w-1/2 lg:w-1/4">
                     <div class="mb-12 wow fadeInUp group" data-wow-delay=".1s">
                         <div
                             class="relative z-10 mb-10 flex h-[70px] w-[70px] items-center justify-center rounded-[14px] bg-primary">
                             <span
                                 class="absolute left-0 top-0 -z-1 mb-8 flex h-[70px] w-[70px] rotate-[25deg] items-center justify-center rounded-[14px] bg-primary/20 duration-300 group-hover:rotate-45"></span>
-                            <!-- Boxicons Dollar Circle -->
+                            
                             <i class="bx bxs-dollar-circle text-white text-4xl"></i>
                         </div>
                         <h4 class="mb-3 text-xl font-bold text-dark dark:text-white">
@@ -549,14 +544,13 @@
                     </div>
                 </div>
 
-                <!-- Kelola Menu Feature -->
                 <div class="w-full px-4 md:w-1/2 lg:w-1/4">
                     <div class="mb-12 wow fadeInUp group" data-wow-delay=".15s">
                         <div
                             class="relative z-10 mb-10 flex h-[70px] w-[70px] items-center justify-center rounded-[14px] bg-primary">
                             <span
                                 class="absolute left-0 top-0 -z-1 mb-8 flex h-[70px] w-[70px] rotate-[25deg] items-center justify-center rounded-[14px] bg-primary/20 duration-300 group-hover:rotate-45"></span>
-                            <!-- Boxicons Restaurant -->
+                            
                             <i class="bx bxs-bowl-hot text-white text-4xl"></i>
                         </div>
                         <h4 class="mb-3 text-xl font-bold text-dark dark:text-white">
@@ -568,14 +562,13 @@
                     </div>
                 </div>
 
-                <!-- Kelola Stok Feature -->
                 <div class="w-full px-4 md:w-1/2 lg:w-1/4">
                     <div class="mb-12 wow fadeInUp group" data-wow-delay=".2s">
                         <div
                             class="relative z-10 mb-10 flex h-[70px] w-[70px] items-center justify-center rounded-[14px] bg-primary">
                             <span
                                 class="absolute left-0 top-0 -z-1 mb-8 flex h-[70px] w-[70px] rotate-[25deg] items-center justify-center rounded-[14px] bg-primary/20 duration-300 group-hover:rotate-45"></span>
-                            <!-- Boxicons Box Package -->
+                            
                             <i class="bx bxs-package text-white text-4xl"></i>
                         </div>
                         <h4 class="mb-3 text-xl font-bold text-dark dark:text-white">
@@ -587,14 +580,13 @@
                     </div>
                 </div>
 
-                <!-- Pelaporan Feature -->
                 <div class="w-full px-4 md:w-1/2 lg:w-1/4">
                     <div class="mb-12 wow fadeInUp group" data-wow-delay=".25s">
                         <div
                             class="relative z-10 mb-10 flex h-[70px] w-[70px] items-center justify-center rounded-[14px] bg-primary">
                             <span
                                 class="absolute left-0 top-0 -z-1 mb-8 flex h-[70px] w-[70px] rotate-[25deg] items-center justify-center rounded-[14px] bg-primary/20 duration-300 group-hover:rotate-45"></span>
-                            <!-- Boxicons Report File -->
+                            
                             <i class="bx bxs-report text-white text-4xl"></i>
                         </div>
                         <h4 class="mb-3 text-xl font-bold text-dark dark:text-white">
@@ -608,9 +600,7 @@
             </div>
         </div>
     </section>
-    <!-- ====== Features Section End -->
-
-    <!-- ====== About Section Start -->
+    
     <section id="about" class="bg-gray-1 pb-8 pt-20 dark:bg-dark-2 lg:pb-[70px] lg:pt-[120px]">
         <div class="container px-4 mx-auto">
             <div class="wow fadeInUp" data-wow-delay=".2s">
@@ -724,9 +714,7 @@
             </div>
         </div>
     </section>
-    <!-- ====== About Section End -->
-
-    <!-- ====== CTA Section Start -->
+    
     <section class="relative z-10 overflow-hidden bg-primary py-20 lg:py-[115px]">
         <div class="container px-4 mx-auto">
             <div class="relative overflow-hidden">
@@ -776,9 +764,7 @@
             </span>
         </div>
     </section>
-    <!-- ====== CTA Section End -->
-
-    <!-- ====== Pricing Section Start -->
+    
     <section id="pricing"
         class="relative z-20 overflow-hidden bg-white pb-12 pt-20 dark:bg-dark lg:pb-[90px] lg:pt-[120px]">
         <div class="container px-4 mx-auto">
@@ -872,9 +858,7 @@
             </div>
         </div>
     </section>
-    <!-- ====== Pricing Section End -->
-
-    <!-- ====== FAQ Section Start -->
+    
     <section id="faq" class="relative z-20 overflow-hidden bg-gray-1 pb-8 pt-20 dark:bg-dark-2 md:py-[120px]">
         <div class="container px-4 mx-auto">
             <div class="flex flex-wrap -mx-4">
@@ -1165,16 +1149,14 @@
             </span>
         </div>
     </section>
-    <!-- ====== FAQ Section End -->
-
-    <!-- ====== Contact Start ====== -->
+    
     <section id="contact" class="relative py-20 md:py-[120px]">
-        <!-- Single color background using original colors -->
+        
         <div class="absolute top-0 left-0 w-full h-full -z-10 bg-[#E9F9FF] dark:bg-dark-700"></div>
 
         <div class="container px-4 mx-auto">
             <div class="flex flex-wrap items-start -mx-4">
-                <!-- Left side - Title -->
+                
                 <div class="w-full px-4 lg:w-7/12 xl:w-8/12">
                     <div class="ud-contact-content-wrapper">
                         <div class="ud-contact-title mb-12 lg:mb-[150px]">
@@ -1189,10 +1171,9 @@
                     </div>
                 </div>
 
-                <!-- Right side - Contact Info -->
                 <div class="w-full px-4 lg:w-5/12 xl:w-4/12">
                     <div class="space-y-12">
-                        <!-- Our Location -->
+                        
                         <div class="flex w-full max-w-full">
                             <div class="mr-6 text-[32px] text-primary dark:text-white transition-colors">
                                 <svg width="29" height="35" viewBox="0 0 29 35" class="fill-current">
@@ -1212,7 +1193,6 @@
                             </div>
                         </div>
 
-                        <!-- How Can We Help -->
                         <div class="flex w-full max-w-full">
                             <div class="mr-6 text-[32px] text-primary dark:text-white transition-colors">
                                 <svg width="34" height="25" viewBox="0 0 34 25" class="fill-current">
@@ -1224,16 +1204,13 @@
                                 <h5 class="mb-[18px] text-lg font-semibold text-dark dark:text-white">
                                     Email
                                 </h5>
-                                {{-- <p class="text-base text-body-color dark:text-dark-6">
-                                    support@keloladapur.com
-                                </p> --}}
+                                
                                 <p class="mt-1 mb-4 text-base text-body-color dark:text-dark-6">
                                     support@keloladapur.com
                                 </p>
                             </div>
                         </div>
 
-                        <!-- Connect With Us -->
                         <div class="flex w-full max-w-full">
                             <div class="mr-6 text-[32px] text-primary dark:text-white transition-colors">
                                 <svg width="32" height="32" viewBox="0 0 24 24" class="fill-current">
@@ -1245,7 +1222,7 @@
                                 <h5 class="mb-[18px] text-lg font-semibold text-dark dark:text-white">
                                     Sosial Media
                                 </h5>
-                                <!-- Instagram -->
+                                
                                 <div class="mb-1 flex items-center">
                                     <a href="#" class="text-primary dark:text-white transition-colors mr-3">
                                         <svg width="18" height="18" viewBox="0 0 24 24"
@@ -1257,7 +1234,6 @@
                                     <span class="text-base text-body-color dark:text-dark-6">Instagram</span>
                                 </div>
 
-                                <!-- WhatsApp -->
                                 <div class="mb-1 flex items-center">
                                     <a href="http://wa.me/+6285117494221"
                                         class="text-primary dark:text-white transition-colors mr-3">
@@ -1270,7 +1246,6 @@
                                     <span class="text-base text-body-color dark:text-dark-6">WhatsApp</span>
                                 </div>
 
-                                <!-- TikTok -->
                                 <div class="mb-1 flex items-center">
                                     <a href="#" class="text-primary dark:text-white transition-colors mr-3">
                                         <svg width="18" height="18" viewBox="0 0 24 24"
@@ -1288,81 +1263,7 @@
             </div>
         </div>
     </section>
-    <!-- ====== Contact End ====== -->
-    <!-- ====== Brands Section Start -->
-    {{--
-            <section class="pb-20 dark:bg-dark">
-            <div class="container px-4 mx-auto">
-            <div
-            class="flex flex-wrap items-center justify-center gap-8 -mx-4 xl:gap-11"
-            >
-            <a href="https://graygrids.com/">
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}graygrids.svg"
-            alt="graygrids"
-            class="dark:hidden"
-            />
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}graygrids-white.svg"
-            alt="graygrids"
-            class="hidden dark:block"
-            />
-            </a>
-            <a href="https://lineicons.com/">
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}lineicons.svg"
-            alt="lineicons"
-            class="dark:hidden"
-            />
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}lineicons-white.svg"
-            alt="graygrids"
-            class="hidden dark:block"
-            />
-            </a>
-            <a href="https://uideck.com/">
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}uideck.svg"
-            alt="uideck"
-            class="dark:hidden"
-            />
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}uideck-white.svg"
-            alt="graygrids"
-            class="hidden dark:block"
-            />
-            </a>
-            <a href="https://ayroui.com/">
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}ayroui.svg"
-            alt="ayroui"
-            class="dark:hidden"
-            />
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}ayroui-white.svg"
-            alt="graygrids"
-            class="hidden dark:block"
-            />
-            </a>
-            <a href="https://tailgrids.com/">
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}tailgrids.svg"
-            alt="tailgrids"
-            class="dark:hidden"
-            />
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}tailgrids-white.svg"
-            alt="graygrids"
-            class="hidden dark:block"
-            />
-            </a>
-            </div>
-            </div>
-            </section>
-        --}}
-    <!-- ====== Brands Section End -->
-
-    <!-- ====== Footer Section Start -->
+    
     <footer class="wow fadeInUp relative z-10 bg-[#090E34] pt-20 lg:pt-[100px]" data-wow-delay=".15s">
         <div class="container px-4 mx-auto">
             <div class="flex flex-wrap -mx-4">
@@ -1383,78 +1284,23 @@
                                     <path
                                         d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                                 </svg>
-                                {{-- <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 22 22"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="fill-current"
-                                    >
-                                        <path
-                                            d="M16.294 8.86875H14.369H13.6815V8.18125V6.05V5.3625H14.369H15.8128C16.1909 5.3625 16.5003 5.0875 16.5003 4.675V1.03125C16.5003 0.653125 16.2253 0.34375 15.8128 0.34375H13.3034C10.5878 0.34375 8.69714 2.26875 8.69714 5.12187V8.1125V8.8H8.00964H5.67214C5.19089 8.8 4.74402 9.17812 4.74402 9.72812V12.2031C4.74402 12.6844 5.12214 13.1313 5.67214 13.1313H7.94089H8.62839V13.8188V20.7281C8.62839 21.2094 9.00652 21.6562 9.55652 21.6562H12.7878C12.994 21.6562 13.1659 21.5531 13.3034 21.4156C13.4409 21.2781 13.544 21.0375 13.544 20.8312V13.8531V13.1656H14.2659H15.8128C16.2596 13.1656 16.6034 12.8906 16.6721 12.4781V12.4438V12.4094L17.1534 10.0375C17.1878 9.79688 17.1534 9.52187 16.9471 9.24687C16.8784 9.075 16.569 8.90312 16.294 8.86875Z"
-                                        />
-                                    </svg> --}}
+                                
                             </a>
                             <a href="javascript:void(0)" class="px-3 text-gray-7 hover:text-white">
                                 <svg width="18" height="18" viewBox="0 0 24 24" class="fill-current">
                                     <path
                                         d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
                                 </svg>
-                                {{-- <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 22 22"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="fill-current"
-                                    >
-                                        <path
-                                            d="M20.1236 5.91236C20.2461 5.76952 20.0863 5.58286 19.905 5.64972C19.5004 5.79896 19.1306 5.8974 18.5837 5.95817C19.2564 5.58362 19.5693 5.04828 19.8237 4.39259C19.885 4.23443 19.7 4.09092 19.5406 4.16647C18.8931 4.47345 18.1945 4.70121 17.4599 4.83578C16.7338 4.11617 15.6988 3.6665 14.5539 3.6665C12.3554 3.6665 10.5725 5.32454 10.5725 7.36908C10.5725 7.65933 10.6081 7.94206 10.6752 8.21276C7.51486 8.06551 4.6968 6.71359 2.73896 4.64056C2.60477 4.49848 2.36128 4.51734 2.27772 4.69063C2.05482 5.15296 1.93056 5.66584 1.93056 6.20582C1.93056 7.49014 2.6332 8.62331 3.70132 9.28732C3.22241 9.27293 2.76441 9.17961 2.34234 9.02125C2.13684 8.94416 1.90127 9.07964 1.92888 9.28686C2.14084 10.8781 3.42915 12.1909 5.09205 12.5011C4.75811 12.586 4.40639 12.6311 4.04253 12.6311C3.95431 12.6311 3.86685 12.6284 3.78019 12.6231C3.55967 12.6094 3.38044 12.8067 3.47499 12.9954C4.09879 14.2404 5.44575 15.1096 7.0132 15.1367C5.65077 16.13 3.93418 16.7218 2.06882 16.7218C1.83882 16.7218 1.74015 17.0175 1.9442 17.1178C3.52016 17.8924 5.31487 18.3332 7.22182 18.3332C14.545 18.3332 18.549 12.6914 18.549 7.79843C18.549 7.63827 18.545 7.47811 18.5377 7.31945C19.1321 6.92012 19.6664 6.44528 20.1236 5.91236Z"
-                                        />
-                                    </svg> --}}
+                                
                             </a>
                             <a href="http://wa.me/+6285117494221" class="px-3 text-gray-7 hover:text-white">
                                 <svg width="18" height="18" viewBox="0 0 24 24" class="fill-current">
                                     <path
                                         d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
                                 </svg>
-                                {{-- <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 22 22"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="fill-current"
-                                    >
-                                        <path
-                                            d="M11.0297 14.4305C12.9241 14.4305 14.4598 12.8948 14.4598 11.0004C14.4598 9.10602 12.9241 7.57031 11.0297 7.57031C9.13529 7.57031 7.59958 9.10602 7.59958 11.0004C7.59958 12.8948 9.13529 14.4305 11.0297 14.4305Z"
-                                        />
-                                        <path
-                                            d="M14.7554 1.8335H7.24463C4.25807 1.8335 1.83334 4.25823 1.83334 7.24479V14.6964C1.83334 17.7421 4.25807 20.1668 7.24463 20.1668H14.6962C17.7419 20.1668 20.1667 17.7421 20.1667 14.7555V7.24479C20.1667 4.25823 17.7419 1.8335 14.7554 1.8335ZM11.0296 15.4948C8.51614 15.4948 6.53496 13.4545 6.53496 11.0002C6.53496 8.54586 8.54571 6.50554 11.0296 6.50554C13.4839 6.50554 15.4946 8.54586 15.4946 11.0002C15.4946 13.4545 13.5134 15.4948 11.0296 15.4948ZM17.2393 6.91952C16.9436 7.24479 16.5 7.42221 15.9973 7.42221C15.5538 7.42221 15.1102 7.24479 14.7554 6.91952C14.4301 6.59425 14.2527 6.18027 14.2527 5.67758C14.2527 5.17489 14.4301 4.79049 14.7554 4.43565C15.0807 4.08081 15.4946 3.90339 15.9973 3.90339C16.4409 3.90339 16.914 4.08081 17.2393 4.40608C17.535 4.79049 17.7419 5.23403 17.7419 5.70715C17.7124 6.18027 17.535 6.59425 17.2393 6.91952Z"
-                                        />
-                                        <path
-                                            d="M16.0276 4.96777C15.6432 4.96777 15.318 5.29304 15.318 5.67745C15.318 6.06186 15.6432 6.38713 16.0276 6.38713C16.412 6.38713 16.7373 6.06186 16.7373 5.67745C16.7373 5.29304 16.4416 4.96777 16.0276 4.96777Z"
-                                        />
-                                    </svg> --}}
+                                
                             </a>
-                            {{-- <a
-                                    href="javascript:void(0)"
-                                    class="px-3 text-gray-7 hover:text-white"
-                                >
-                                    <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 22 22"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="fill-current"
-                                    >
-                                        <path
-                                            d="M18.8065 1.8335H3.16399C2.42474 1.8335 1.83334 2.42489 1.83334 3.16414V18.8362C1.83334 19.5459 2.42474 20.1668 3.16399 20.1668H18.7473C19.4866 20.1668 20.078 19.5754 20.078 18.8362V3.13457C20.1371 2.42489 19.5457 1.8335 18.8065 1.8335ZM7.24464 17.4168H4.55379V8.69371H7.24464V17.4168ZM5.88443 7.48135C4.99733 7.48135 4.31721 6.77167 4.31721 5.91414C4.31721 5.05661 5.0269 4.34694 5.88443 4.34694C6.74196 4.34694 7.45163 5.05661 7.45163 5.91414C7.45163 6.77167 6.8011 7.48135 5.88443 7.48135ZM17.4463 17.4168H14.7554V13.1883C14.7554 12.183 14.7258 10.8523 13.336 10.8523C11.9167 10.8523 11.7097 11.976 11.7097 13.0996V17.4168H9.01884V8.69371H11.6506V9.90608H11.6801C12.0645 9.1964 12.9221 8.48672 14.2527 8.48672C17.0027 8.48672 17.5054 10.2609 17.5054 12.6856V17.4168H17.4463Z"
-                                        />
-                                    </svg>
-                                </a> --}}
+                            
                         </div>
                     </div>
                 </div>
@@ -1543,28 +1389,7 @@
                     <div class="flex flex-wrap -mx-4">
                         <div class="w-full px-4 md:w-2/3 lg:w-1/2">
                             <div class="my-1">
-                                {{-- <div
-                                    class="flex items-center justify-center -mx-3 md:justify-start"
-                                >
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="px-3 text-base text-gray-7 hover:text-white hover:underline"
-                                    >
-                                        Privacy policy
-                                    </a>
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="px-3 text-base text-gray-7 hover:text-white hover:underline"
-                                    >
-                                        Legal notice
-                                    </a>
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="px-3 text-base text-gray-7 hover:text-white hover:underline"
-                                    >
-                                        Terms of service
-                                    </a>
-                                </div> --}}
+                                
                             </div>
                         </div>
                         <div class="w-full px-4 md:w-1/3 lg:w-1/2">
@@ -1575,15 +1400,7 @@
                                         class="text-gray-1 hover:underline">
                                         First Studio
                                     </a>
-                                    {{-- . Distributed by
-                                    <a
-                                        href="https://themewagon.com"
-                                        rel="nofollow noopner"
-                                        target="_blank"
-                                        class="text-gray-1 hover:underline"
-                                    >
-                                        ThemeWagon
-                                    </a> --}}
+                                    
                                 </p>
                             </div>
                         </div>
@@ -1754,45 +1571,12 @@
                 </span>
             </div>
     </footer>
-    <!-- ====== Footer Section End -->
-
-    <!-- ====== Back To Top Start -->
+    
     <a href="javascript:void(0)"
         class="fixed left-auto items-center justify-center hidden w-10 h-10 text-white transition duration-300 ease-in-out rounded-md shadow-md back-to-top bottom-8 right-8 z-999 bg-primary hover:bg-dark">
         <span class="mt-[6px] h-3 w-3 rotate-45 border-l border-t border-white"></span>
     </a>
-    <!-- ====== Back To Top End -->
-
-    <!-- ====== Made With Button Start -->
-    {{--
-            <a
-            target="_blank"
-            rel="nofollow noopener"
-            class="fixed bottom-8 left-4 z-999 inline-flex items-center gap-[10px] rounded-lg bg-white px-[14px] py-2 shadow-2 dark:bg-dark-2 sm:left-9"
-            href="https://tailgrids.com/"
-            >
-            <span class="text-base font-medium text-dark-3 dark:text-dark-6">
-            Made with
-            </span>
-            <span class="block w-px h-4 bg-stroke dark:bg-dark-3"></span>
-            <span class="block w-full max-w-[88px]">
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}tailgrids.svg"
-            alt="tailgrids"
-            class="dark:hidden"
-            />
-            <img
-            src="{{ asset('play-tailwind-1.0.0/assets/images/brands/') }}tailgrids-white.svg"
-            alt="tailgrids"
-            class="hidden dark:block"
-            />
-            </span>
-            </a>
-        --}}
-    <!-- ====== Made With Button End -->
-
-    <!-- ====== All Scripts -->
-
+    
     <script src="{{ asset('play-tailwind-1.0.0/assets/js/') }}swiper-bundle.min.js"></script>
     <script src="{{ asset('play-tailwind-1.0.0/assets/js/') }}main.js"></script>
     <script>

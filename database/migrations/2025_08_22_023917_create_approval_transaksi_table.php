@@ -19,12 +19,10 @@ return new class extends Migration
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_transaksi')->references('id_transaksi')->on('transaksi_dapur')->onDelete('cascade');
             $table->foreign('id_ahli_gizi')->references('id_ahli_gizi')->on('ahli_gizi')->onDelete('cascade');
             $table->foreign('id_kepala_dapur')->references('id_kepala_dapur')->on('kepala_dapur')->onDelete('cascade');
 
-            // Indexes
             $table->index(['status'], 'idx_approval_transaksi_status');
             $table->index(['id_transaksi'], 'idx_approval_transaksi_transaksi');
             $table->index(['id_kepala_dapur', 'status'], 'idx_approval_transaksi_kepala_status');

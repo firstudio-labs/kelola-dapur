@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
@@ -27,7 +27,6 @@
             </div>
         </div>
 
-        <!-- Form -->
         <div class="card mb-4">
             <div class="card-body">
                 @if (session("success"))
@@ -68,25 +67,20 @@
                     @csrf
                     @method("PUT")
 
-                    <!-- Profile Information -->
                     <div class="col-12">
                         <h5 class="card-title mb-0">
                             <i class="bx bx-user me-2 text-primary"></i>
                             Informasi Profil
                         </h5>
                         <div class="row g-4 mt-2">
-                            <!-- Nama -->
+                            
                             <div class="col-md-6">
                                 <label for="nama" class="form-label">
                                     Nama Lengkap
                                     <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
-                                    {{--
-                                        <span class="input-group-text">
-                                        <i class="bx bx-user"></i>
-                                        </span>
-                                    --}}
+                                    
                                     <input
                                         type="text"
                                         name="nama"
@@ -104,18 +98,13 @@
                                 @enderror
                             </div>
 
-                            <!-- Username -->
                             <div class="col-md-6">
                                 <label for="username" class="form-label">
                                     Username
                                     <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
-                                    {{--
-                                        <span class="input-group-text">
-                                        <i class="bx bx-at"></i>
-                                        </span>
-                                    --}}
+                                    
                                     <input
                                         type="text"
                                         name="username"
@@ -133,18 +122,13 @@
                                 @enderror
                             </div>
 
-                            <!-- Email -->
                             <div class="col-md-6">
                                 <label for="email" class="form-label">
                                     Email
                                     <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
-                                    {{--
-                                        <span class="input-group-text">
-                                        <i class="bx bx-envelope"></i>
-                                        </span>
-                                    --}}
+                                    
                                     <input
                                         type="email"
                                         name="email"
@@ -162,17 +146,12 @@
                                 @enderror
                             </div>
 
-                            <!-- Role (Read-only) -->
                             <div class="col-md-6">
                                 <label for="role_display" class="form-label">
                                     Role
                                 </label>
                                 <div class="input-group">
-                                    {{--
-                                        <span class="input-group-text">
-                                        <i class="bx bx-shield"></i>
-                                        </span>
-                                    --}}
+                                    
                                     <input
                                         type="text"
                                         id="role_display"
@@ -183,17 +162,12 @@
                                 </div>
                             </div>
 
-                            <!-- Dapur (Read-only) -->
                             <div class="col-md-6">
                                 <label for="dapur_display" class="form-label">
                                     Dapur
                                 </label>
                                 <div class="input-group">
-                                    {{--
-                                        <span class="input-group-text">
-                                        <i class="bx bx-store"></i>
-                                        </span>
-                                    --}}
+                                    
                                     <input
                                         type="text"
                                         id="dapur_display"
@@ -204,19 +178,12 @@
                                 </div>
                             </div>
 
-                            <!-- Status (Read-only) -->
                             <div class="col-md-6">
                                 <label for="status_display" class="form-label">
                                     Status
                                 </label>
                                 <div class="input-group">
-                                    {{--
-                                        <span class="input-group-text">
-                                        <i
-                                        class="bx bx-check-circle text-success"
-                                        ></i>
-                                        </span>
-                                    --}}
+                                    
                                     <input
                                         type="text"
                                         id="status_display"
@@ -231,7 +198,6 @@
 
                     <hr class="my-4" />
 
-                    <!-- Password Change Section -->
                     <div class="col-12">
                         <h5 class="card-title mb-0">
                             <i class="bx bx-lock me-2 text-warning"></i>
@@ -242,7 +208,7 @@
                         </p>
 
                         <div class="row g-4 mt-2">
-                            <!-- Password Baru -->
+                            
                             <div class="col-md-6">
                                 <label for="password" class="form-label">
                                     Password Baru
@@ -275,7 +241,6 @@
                                 <div class="form-text">Minimal 8 karakter</div>
                             </div>
 
-                            <!-- Konfirmasi Password -->
                             <div class="col-md-6">
                                 <label
                                     for="password_confirmation"
@@ -311,7 +276,6 @@
                         </div>
                     </div>
 
-                    <!-- Submit Buttons -->
                     <div class="col-12 mt-4">
                         <div
                             class="d-flex justify-content-between align-items-center"
@@ -333,7 +297,6 @@
             </div>
         </div>
 
-        <!-- Info Alert -->
         <div class="alert alert-info alert-dismissible" role="alert">
             <h6 class="alert-heading mb-2">
                 <i class="bx bx-info-circle me-2"></i>

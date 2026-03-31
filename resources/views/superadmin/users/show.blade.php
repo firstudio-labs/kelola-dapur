@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -30,7 +30,6 @@
         </div>
     </div>
 
-    <!-- User Information -->
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Informasi User</h5>
@@ -102,7 +101,6 @@
         </div>
     </div>
 
-    <!-- Role Assignments -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -184,7 +182,7 @@
                     @endforeach
                 </div>
             @else
-                <!-- Empty State -->
+                
                 <div class="text-center py-6">
                     <i class="bx bx-group bx-lg text-muted mb-3"></i>
                     <h5 class="mb-1">Belum ada role</h5>
@@ -197,7 +195,6 @@
         </div>
     </div>
 
-    <!-- Delete User Section -->
     @if($user->id_user !== auth()->id())
         <div class="alert alert-danger alert-dismissible" role="alert">
             <div class="d-flex">
@@ -221,7 +218,6 @@
     @endif
 </div>
 
-<!-- Assign Role Modal -->
 <div id="assignRoleModal" class="modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -262,10 +258,8 @@
     </div>
 </div>
 
-<!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css">
 
-<!-- Custom Choices.js Styling -->
 <style>
 .choices__inner {
     background-color: #fff;
@@ -290,10 +284,8 @@
 }
 </style>
 
-<!-- Choices.js JS -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-<!-- JavaScript for Modal and Role Management -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Choices.js for modal selects

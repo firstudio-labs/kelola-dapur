@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -42,7 +42,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session('success'))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -70,7 +69,6 @@
             </div>
         @endif
 
-        <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
                 <div class="card">
@@ -181,7 +179,6 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -310,11 +307,10 @@
             </div>
         </div>
 
-        <!-- Reports Table -->
         <div class="card">
             <div class="card-body">
                 @if ($transaksi->isNotEmpty())
-                    <!-- Bulk Action Checkboxes -->
+                    
                     @if ($transaksi->where('laporanKekuranganStock.status', 'pending')->count() > 0)
                         <div class="mb-3 d-flex align-items-center">
                             <input
@@ -404,13 +400,7 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                {{-- <div class="avatar avatar-sm me-2">
-                                                    <span
-                                                        class="avatar-initial rounded-circle bg-label-info"
-                                                    >
-                                                        {{ strtoupper(substr($transaksiItem->createdBy->nama ?? 'NA', 0, 2)) }}
-                                                    </span>
-                                                </div> --}}
+                                                
                                                 <div>
                                                     <span class="fw-medium">
                                                         {{ $transaksiItem->createdBy->nama ?? 'Unknown' }}
@@ -468,14 +458,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($transaksi->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $transaksi->appends(request()->query())->links('vendor.pagination.bootstrap-5') }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         <i class="bx bx-receipt bx-lg text-muted mb-3"></i>
                         <h5 class="mb-1">Tidak ada laporan kekurangan stok</h5>
@@ -495,7 +484,6 @@
             </div>
         </div>
 
-        <!-- Resolve Modal -->
         <div
             class="modal fade"
             id="resolveModal"
@@ -572,7 +560,6 @@
             </div>
         </div>
 
-        <!-- Bulk Action Modal -->
         <div
             class="modal fade"
             id="bulkActionModal"
@@ -644,13 +631,11 @@
             </div>
         </div>
 
-        <!-- Choices.js CSS -->
         <link
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
         />
 
-        <!-- Custom Styling -->
         <style>
             .choices__inner {
                 background-color: #fff;
@@ -721,10 +706,8 @@
             }
         </style>
 
-        <!-- Choices.js JS -->
         <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-        <!-- JavaScript -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 // Initialize Choices.js

@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -23,20 +23,11 @@
                             Kelola semua dapur dalam sistem
                         </p>
                     </div>
-                    {{--
-                        <a
-                        href="{{ route("superadmin.dapur.create") }}"
-                        class="btn btn-primary btn-sm"
-                        >
-                        <i class="bx bx-plus me-1"></i>
-                        Tambah Dapur
-                        </a>
-                    --}}
+                    
                 </div>
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -64,7 +55,6 @@
             </div>
         @endif
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -92,72 +82,11 @@
                             </button>
                         </div>
                     </div>
-                    {{--
-                        <div class="col-md-3">
-                        <label for="filter_provinsi" class="form-label">
-                        Provinsi
-                        </label>
-                        <select
-                        name="filter_provinsi"
-                        id="filter_provinsi"
-                        class="form-select"
-                        >
-                        <option value="">Semua Provinsi</option>
-                        </select>
-                        </div>
-                        <div class="col-md-3">
-                        <label for="filter_kabupaten" class="form-label">
-                        Kabupaten/Kota
-                        </label>
-                        <select
-                        name="filter_kabupaten"
-                        id="filter_kabupaten"
-                        disabled
-                        class="form-select"
-                        >
-                        <option value="">Semua Kabupaten/Kota</option>
-                        </select>
-                        </div>
-                        <div class="col-md-3">
-                        <label for="status" class="form-label">Status</label>
-                        <select name="status" id="status" class="form-select">
-                        <option value="">Semua Status</option>
-                        <option
-                        value="active"
-                        {{ request("status") === "active" ? "selected" : "" }}
-                        >
-                        Aktif
-                        </option>
-                        <option
-                        value="inactive"
-                        {{ request("status") === "inactive" ? "selected" : "" }}
-                        >
-                        Tidak Aktif
-                        </option>
-                        </select>
-                        </div>
-                    --}}
-                    {{--
-                        <div class="col-12 d-flex justify-content-end gap-2 mt-3">
-                        @if (request()->hasAny(["search", "filter_provinsi", "filter_kabupaten", "status"]))
-                        <a
-                        href="{{ route("superadmin.dapur.index") }}"
-                        class="btn btn-outline-secondary"
-                        >
-                        Reset Filter
-                        </a>
-                        @endif
-                        
-                        <button type="submit" class="btn btn-primary">
-                        Terapkan Filter
-                        </button>
-                        </div>
-                    --}}
+                    
                 </form>
             </div>
         </div>
 
-        <!-- Statistics Section -->
         @if ($dapurList->total() > 0)
             <div class="card mb-4">
                 <div class="card-body py-2 px-4">
@@ -235,7 +164,6 @@
             </div>
         @endif
 
-        <!-- Dapur List -->
         <div class="card mb-4">
             <div class="card-body">
                 @if ($dapurList->count() > 0)
@@ -377,14 +305,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($dapurList->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $dapurList->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-5">
                         @if (request()->hasAny(["search", "filter_provinsi", "filter_kabupaten", "status"]))
                             <i class="bx bx-search bx-lg text-muted mb-3"></i>
@@ -420,7 +347,6 @@
         </div>
     </div>
 
-    <!-- Custom Styling -->
     <style>
         .form-select:disabled {
             background-color: #f8f9fa;
@@ -453,7 +379,6 @@
         }
     </style>
 
-    <!-- JavaScript for Search and Filters -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Elements

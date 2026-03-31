@@ -58,4 +58,9 @@ class UserRole extends Model
     {
         return $this->hasOne(Distributor::class, 'id_user_role');
     }
+
+    public function mitra()
+    {
+        return $this->hasOne(Mitra::class, 'id_user_role');
+    }
 }

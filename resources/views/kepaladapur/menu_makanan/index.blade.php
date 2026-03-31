@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -27,7 +27,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -55,7 +54,6 @@
             </div>
         @endif
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -199,7 +197,6 @@
             </div>
         </div>
 
-        <!-- Statistics Section -->
         @if ($menus->total() > 0)
             <div class="card mb-4">
                 <div class="card-body py-2 px-4">
@@ -299,7 +296,6 @@
             </div>
         @endif
 
-        <!-- Menu Cards -->
         <div class="card">
             <div class="card-body">
                 @if ($menus->isNotEmpty())
@@ -315,7 +311,7 @@
                                 <div
                                     class="card menu-card h-100 position-relative"
                                 >
-                                    <!-- Status Badge -->
+                                    
                                     <div
                                         class="position-absolute top-0 end-0 m-2"
                                         style="z-index: 2"
@@ -327,7 +323,6 @@
                                         </span>
                                     </div>
 
-                                    <!-- Kategori Badge -->
                                     <div
                                         class="position-absolute top-0 start-0 m-2"
                                         style="z-index: 2"
@@ -339,7 +334,6 @@
                                         </span>
                                     </div>
 
-                                    <!-- Menu Image -->
                                     <div class="card-img-top-wrapper">
                                         <img
                                             src="{{ $menu->gambar_url }}"
@@ -349,7 +343,7 @@
                                     </div>
 
                                     <div class="card-body d-flex flex-column">
-                                        <!-- Menu Name -->
+                                        
                                         <h5
                                             class="card-title mb-2 text-truncate"
                                             title="{{ $menu->nama_menu }}"
@@ -357,14 +351,12 @@
                                             {{ $menu->nama_menu }}
                                         </h5>
 
-                                        <!-- Menu Description -->
                                         <p
                                             class="card-text text-muted small mb-2 flex-grow-1"
                                         >
                                             {{ Str::limit($menu->deskripsi, 80) }}
                                         </p>
 
-                                        <!-- Menu Info -->
                                         <div class="mb-3">
                                             <div
                                                 class="d-flex justify-content-between align-items-center mb-2"
@@ -401,7 +393,6 @@
                                             @endif
                                         </div>
 
-                                        <!-- Action Buttons -->
                                         <div class="mt-auto">
                                             <div class="d-grid">
                                                 <a
@@ -421,14 +412,13 @@
                         @endforeach
                     </div>
 
-                    <!-- Pagination -->
                     @if ($menus->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $menus->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         @if (request()->hasAny(["search", "status", "dapur", "kategori"]))
                             <i class="bx bx-search bx-lg text-muted mb-3"></i>
@@ -457,13 +447,11 @@
         </div>
     </div>
 
-    <!-- Choices.js CSS -->
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
     />
 
-    <!-- Custom Styling -->
     <style>
         .choices__inner {
             background-color: #fff;
@@ -556,10 +544,8 @@
         }
     </style>
 
-    <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-    <!-- JavaScript for Filters and Client-Side Search -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const statusFilter = document.getElementById('status-filter');

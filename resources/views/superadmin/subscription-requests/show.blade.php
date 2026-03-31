@@ -1,9 +1,9 @@
-{{-- resources/views/superadmin/subscription-requests/show.blade.php --}}
+
 @extends("template_admin.layout")
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <nav class="d-flex align-items-center mb-2">
@@ -32,7 +32,6 @@
             </div>
         </div>
 
-        <!-- Request Details -->
         <div class="row">
             <div class="col-lg-8">
                 <div class="card">
@@ -113,7 +112,6 @@
                             </div>
                         </div>
 
-                        <!-- Pricing Breakdown -->
                         <div class="row mt-4">
                             <div class="col-12">
                                 <h6 class="mb-2">Rincian Harga</h6>
@@ -176,7 +174,6 @@
                             </div>
                         </div>
 
-                        <!-- Bukti Transfer -->
                         @if ($subscriptionRequest->bukti_transfer)
                             <div class="row mt-4">
                                 <div class="col-12">
@@ -196,7 +193,6 @@
                             </div>
                         @endif
 
-                        <!-- Catatan Approval/Reject -->
                         @if ($subscriptionRequest->catatan)
                             <div class="row mt-4">
                                 <div class="col-12">
@@ -208,7 +204,6 @@
                             </div>
                         @endif
 
-                        <!-- Approval/Reject Form -->
                         @if ($subscriptionRequest->status === "pending")
                             <div class="row mt-4">
                                 <div class="col-12">
@@ -283,7 +278,7 @@
             </div>
 
             <div class="col-lg-4">
-                <!-- Quick Stats -->
+                
                 <div class="card">
                     <div class="card-header">
                         <h6 class="mb-0">Statistik Dapur</h6>
@@ -319,7 +314,6 @@
                     </div>
                 </div>
 
-                <!-- Help -->
                 <div class="card mt-3">
                     <div class="card-body">
                         <h6 class="card-title mb-3">

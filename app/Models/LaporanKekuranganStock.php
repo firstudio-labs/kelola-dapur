@@ -28,19 +28,16 @@ class LaporanKekuranganStock extends Model
         'jumlah_kurang' => 'decimal:3',
     ];
 
-    // Relationships
     public function transaksiDapur()
     {
         return $this->belongsTo(TransaksiDapur::class, 'id_transaksi');
     }
-
 
     public function templateItem()
     {
         return $this->belongsTo(TemplateItem::class, 'id_template_item');
     }
 
-    // Helper methods
     public static function createFromShortage(int $transaksiId, array $shortageData, string $status = 'pending'): self
     {
         return self::create([

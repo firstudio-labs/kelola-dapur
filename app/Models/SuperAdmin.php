@@ -24,10 +24,10 @@ class SuperAdmin extends Model
         return $this->hasOneThrough(
             User::class,
             UserRole::class,
-            'id_user_role', // Foreign key on super_admin table
-            'id_user', // Foreign key on user_roles table
-            'id_user_role', // Local key on super_admin table
-            'id_user' // Local key on user_roles table
+            'id_user_role', 
+            'id_user', 
+            'id_user_role', 
+            'id_user' 
         );
     }
 }

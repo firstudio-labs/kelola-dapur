@@ -17,11 +17,9 @@ return new class extends Migration
             $table->text('keterangan')->nullable();
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_dapur')->references('id_dapur')->on('dapur')->onDelete('cascade');
             $table->foreign('id_template_item')->references('id_template_item')->on('template_items')->onDelete('cascade');
 
-            // Performance Indexes & Constraints
             $table->unique(['id_dapur', 'id_template_item'], 'uk_stock_items_dapur_template');
             $table->index(['id_dapur'], 'idx_stock_items_dapur');
             $table->index(['id_template_item'], 'idx_stock_items_template');

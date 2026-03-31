@@ -15,17 +15,14 @@ return new class extends Migration
             $table->unsignedInteger('jumlah_porsi');
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_transaksi')->references('id_transaksi')->on('transaksi_dapur')->onDelete('cascade');
             $table->foreign('id_menu')->references('id_menu')->on('menu_makanan')->onDelete('cascade');
 
-            // Performance Indexes & Constraints
             $table->unique(['id_transaksi', 'id_menu'], 'uk_detail_transaksi_transaksi_menu');
             $table->index(['id_transaksi'], 'idx_detail_transaksi_transaksi');
             $table->index(['id_menu'], 'idx_detail_transaksi_menu');
             $table->index(['jumlah_porsi'], 'idx_detail_transaksi_jumlah');
 
-            // Composite index for reporting
             $table->index(['id_menu', 'jumlah_porsi'], 'idx_detail_transaksi_menu_jumlah');
         });
     }

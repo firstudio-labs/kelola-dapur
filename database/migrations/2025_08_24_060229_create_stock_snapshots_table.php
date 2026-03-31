@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
     public function up(): void
     {
         Schema::create('stock_snapshots', function (Blueprint $table) {
@@ -19,7 +17,6 @@ return new class extends Migration
             $table->string('satuan', 50);
             $table->timestamps();
 
-            // Foreign key constraints
             $table->foreign('id_approval_transaksi')
                 ->references('id_approval_transaksi')
                 ->on('approval_transaksi')
@@ -30,16 +27,12 @@ return new class extends Migration
                 ->on('template_items')
                 ->onDelete('cascade');
 
-            // Indexes 
             $table->index(['id_approval_transaksi', 'id_template_item']);
             $table->index('id_approval_transaksi');
             $table->index('id_template_item');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('stock_snapshots');

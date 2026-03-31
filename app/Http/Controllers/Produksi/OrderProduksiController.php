@@ -55,7 +55,6 @@ class OrderProduksiController extends Controller
             $q->where("id_user", $user->id_user);
         })->first();
 
-        
         if (!$produksi || $order->id_dapur !== $produksi->id_dapur) {
             abort(403, "Unauthorized");
         }
@@ -70,16 +69,13 @@ class OrderProduksiController extends Controller
 
         $order->load(['dokumentasi', 'distribusiOrder.dokumentasi']);
 
-        
         $bahanKebutuhan = $transaksi->calculateIngredientNeeds();
         $bahanBesar = $transaksi->calculateIngredientNeedsByType("besar");
         $bahanKecil = $transaksi->calculateIngredientNeedsByType("kecil");
 
-        
         $stockCheck = $transaksi->checkStockWithReservations();
         $shortages = $stockCheck["shortages"];
 
-        
         $stockData = [];
         foreach ($stockCheck["ingredients_summary"] as $item) {
             $stockData[$item["id_template_item"]] = [
@@ -173,8 +169,6 @@ class OrderProduksiController extends Controller
                     ]);
                 }
 
-                
-                
                 $orderDistribusi = \App\Models\OrderDistribusi::firstOrCreate(
                     ['id_order' => $order->id_order],
                     [
@@ -182,7 +176,30 @@ class OrderProduksiController extends Controller
                         'status'   => \App\Models\OrderDistribusi::STATUS_BELUM_DIKIRIM,
                     ]
                 );
-            }
+
+                if ($orderDistribusi->wasRecentlyCreated) {
+                    $penerimaMbgList = \App\Models\PenerimaMbg::where('id_dapur', $order->id_dapur)
+                        ->where('status_approval', 'approved')
+                        ->get();
+
+                    foreach ($penerimaMbgList as $penerima) {
+                        $pPorsi = $penerima->jumlah_porsi;
+
+                        \App\Models\OrderDistribusiDetail::firstOrCreate(
+                            [
+                                'id_distribusi' => $orderDistribusi->id_distribusi,
+                                'id_penerima'   => $penerima->id_penerima,
+                            ],
+                            [
+                                'porsi_besar'     => $pPorsi,
+                                'porsi_kecil'     => $pPorsi,
+                                'jumlah_diterima' => $pPorsi * 2,
+                                'status'          => \App\Models\OrderDistribusiDetail::STATUS_BELUM_DIKIRIM,
+                            ]
+                        );
+                    }
+                }
+            } 
 
             DB::commit();
 

@@ -45,7 +45,6 @@ class Dapur extends Model
         return 'id_dapur';
     }
 
-    
     public function kepalaDapur(): HasMany
     {
         return $this->hasMany(KepalaDapur::class, 'id_dapur');
@@ -66,6 +65,18 @@ class Dapur extends Model
         return $this->hasMany(Distributor::class, 'id_dapur');
     }
 
+    public function mitra(): BelongsToMany
+    {
+        return $this->belongsToMany(Mitra::class, 'mitra_dapur', 'id_dapur', 'id_mitra')
+            ->withPivot('id', 'status', 'catatan', 'approved_at')
+            ->withTimestamps();
+    }
+
+    public function mitraApproved(): BelongsToMany
+    {
+        return $this->mitra()->wherePivot('status', 'approved');
+    }
+
     public function stockItems(): HasMany
     {
         return $this->hasMany(StockItem::class, 'id_dapur');
@@ -75,7 +86,6 @@ class Dapur extends Model
     {
         return $this->hasMany(TransaksiDapur::class, 'id_dapur');
     }
-
 
     public function subscriptionRequests(): HasMany
     {
@@ -101,7 +111,6 @@ class Dapur extends Model
         return $this->hasMany(DapurPrasarana::class, 'id_dapur');
     }
 
-    
     public function isActive(): bool
     {
         return $this->status === 'active' &&
@@ -167,7 +176,6 @@ class Dapur extends Model
             ->where('users.is_active', true);
     }
 
-    
     public function getFullWilayahAttribute(): string
     {
         $parts = [
@@ -177,7 +185,6 @@ class Dapur extends Model
             $this->province_name
         ];
 
-        
         $filteredParts = array_filter($parts, fn($part) => !is_null($part) && $part !== '');
         return $filteredParts ? implode(', ', $filteredParts) : '';
     }
@@ -204,7 +211,6 @@ class Dapur extends Model
         ];
     }
 
-    
     public function scopeByProvince($query, $provinceCode)
     {
         return $query->where('province_code', $provinceCode);
@@ -225,7 +231,6 @@ class Dapur extends Model
         return $query->where('village_code', $villageCode);
     }
 
-    
     public function scopeSearchWilayah($query, $search)
     {
         return $query->where(function ($q) use ($search) {

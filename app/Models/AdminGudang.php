@@ -13,7 +13,26 @@ class AdminGudang extends Model
     protected $table = 'admin_gudang';
     protected $primaryKey = 'id_admin_gudang';
 
-    protected $fillable = ['id_user_role', 'id_dapur'];
+    protected $fillable = [
+        'id_user_role', 
+        'id_dapur',
+        'nik_admin_gudang',
+        'nama_lengkap',
+        'alamat_detail',
+        'province_code',
+        'province_name',
+        'regency_code',
+        'regency_name',
+        'district_code',
+        'district_name',
+        'village_code',
+        'village_name',
+        'kontak_wa',
+        'pendidikan_terakhir',
+        'jenis_kelamin',
+        'foto_diri',
+        'jabatan',
+    ];
 
     public function userRole()
     {
@@ -24,10 +43,10 @@ class AdminGudang extends Model
         return $this->hasOneThrough(
             User::class,
             UserRole::class,
-            'id_user_role', // Foreign key on admin_gudang table
-            'id_user', // Foreign key on user_roles table
-            'id_user_role', // Local key on admin_gudang table
-            'id_user' // Local key on user_roles table
+            'id_user_role', 
+            'id_user', 
+            'id_user_role', 
+            'id_user' 
         );
     }
 

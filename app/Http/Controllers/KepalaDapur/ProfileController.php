@@ -19,7 +19,6 @@ class ProfileController extends Controller
         
         $user = Auth::user();
 
-        
         if (!$user->isKepalaDapur($dapur->id_dapur)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini untuk dapur ini');
         }
@@ -34,7 +33,6 @@ class ProfileController extends Controller
         
         $user = Auth::user();
 
-        
         if (!$user->isKepalaDapur($dapur->id_dapur)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini untuk dapur ini');
         }
@@ -61,18 +59,15 @@ class ProfileController extends Controller
             'jenis_kelamin.in' => 'Pilihan jenis kelamin tidak valid',
         ]);
 
-        
         $user->update([
             'nama' => $request->nama
         ]);
 
-        
         $province_code = $request->filled('province_code') ? $request->province_code : $kepalaDapur->province_code;
         $regency_code = $request->filled('regency_code') ? $request->regency_code : $kepalaDapur->regency_code;
         $district_code = $request->filled('district_code') ? $request->district_code : $kepalaDapur->district_code;
         $village_code = $request->filled('village_code') ? $request->village_code : $kepalaDapur->village_code;
 
-        
         $fotoDiriPath = $kepalaDapur->foto_diri;
         if ($request->hasFile('foto_diri')) {
             
@@ -86,7 +81,6 @@ class ProfileController extends Controller
             $manager = new ImageManager(new Driver());
             $image = $manager->read($file->getRealPath());
             
-            
             if ($image->width() > 1200) {
                 $image->scaleDown(width: 1200);
             }
@@ -95,7 +89,6 @@ class ProfileController extends Controller
             $fotoDiriPath = 'profiles/' . $filename;
         }
 
-        
         $kepalaDapur->update([
             'nik_kepala_sppg' => $request->nik_kepala_sppg,
             'kontak_wa' => $request->kontak_wa,

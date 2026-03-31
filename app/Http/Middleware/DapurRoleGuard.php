@@ -37,37 +37,30 @@ class DapurRoleGuard
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu');
         }
 
-        
         $user = auth()->user();
 
-        
         if ($user->isSuperAdmin()) {
             return $next($request);
         }
 
-        
         if (!isset($this->permissions[$action])) {
             throw new \InvalidArgumentException("Invalid action: {$action}");
         }
 
-        
         $dapurId = $this->getDapurId($request);
         if (!$dapurId) {
             abort(400, 'ID Dapur tidak ditemukan');
         }
 
-        
         $dapur = $this->getCachedDapur($dapurId);
         if (!$dapur) {
             abort(404, 'Dapur tidak ditemukan atau tidak aktif');
         }
 
-        
         if (!$this->checkPermission($user, $dapurId, $action)) {
             abort(403, 'Anda tidak memiliki izin untuk melakukan aksi ini');
         }
 
-        
         $request->merge([
             'current_dapur' => $dapur,
             'user_role' => $user->getUserRole($dapurId),

@@ -18,6 +18,53 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset("admin") }}/assets/vendor/js/helpers.js"></script>
     <script src="{{ asset("admin") }}/assets/js/config.js"></script>
+    <style>
+        /* Mobile Bottom Navbar */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            background-color: #fff;
+            border-top: 1px solid #eaeaec;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            padding-bottom: env(safe-area-inset-bottom); /* For iPhone notch */
+        }
+        .mobile-bottom-nav .nav-item {
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #697a8d;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .mobile-bottom-nav .nav-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .mobile-bottom-nav .nav-item.active {
+            color: #696cff; /* Primary color */
+            background-color: rgba(105, 108, 255, 0.08);
+            font-weight: 700;
+        }
+        .mobile-bottom-nav .nav-item.active i {
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+        
+        @media (max-width: 767.98px) {
+            .content-wrapper {
+                padding-bottom: 80px !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="layout-wrapper layout-content-navbar">
@@ -32,6 +79,22 @@
             </div>
         </div>
         <div class="layout-overlay layout-menu-toggle"></div>
+    </div>
+
+    <!-- Mobile Bottom Navbar -->
+    <div class="mobile-bottom-nav d-md-none">
+        <a href="{{ route('produksi.dashboard') }}" class="nav-item {{ Request::is('produksi/dashboard*') ? 'active' : '' }}">
+            <i class="bx bx-home-circle"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ route('produksi.order.index') }}" class="nav-item {{ Request::is('produksi/order-produksi*') ? 'active' : '' }}">
+            <i class="bx bx-collection"></i>
+            <span>Order</span>
+        </a>
+        <a href="{{ route('produksi.profile.edit') }}" class="nav-item {{ Request::is('produksi/profile*') ? 'active' : '' }}">
+            <i class="bx bx-user"></i>
+            <span>Profil</span>
+        </a>
     </div>
     <script src="{{ asset("admin") }}/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="{{ asset("admin") }}/assets/vendor/libs/popper/popper.js"></script>

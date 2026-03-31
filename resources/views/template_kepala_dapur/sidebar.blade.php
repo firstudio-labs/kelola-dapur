@@ -1,17 +1,14 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-    <!-- Brand + Toggle -->
+    
     <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
-        <!-- Logo -->
+        
         <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
             <span class="app-brand-logo demo">
                 <img src="{{ asset('logo_kelola_dapur_black.png') }}" alt="Logo" style="height: 45px; width: auto" />
             </span>
-            {{-- <span class="app-brand-text demo fw-bolder ms-4 fs-3">
-                Kepala Dapur
-            </span> --}}
+            
         </a>
 
-        <!-- Desktop Toggle Button -->
         <button class="btn btn-outline-secondary d-none d-lg-inline-flex layout-menu-toggle" id="sidebarToggle"
             style="
                 border: none;
@@ -28,9 +25,8 @@
         </button>
     </div>
 
-    <!-- Menu Container with flex layout -->
     <div class="menu-container d-flex flex-column">
-        <!-- User Profile Section - Moved to Top of Menu -->
+        
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
@@ -129,7 +125,6 @@
             $idDapur = session('id_dapur');
         @endphp
 
-        <!-- Subscription Status Alert -->
         @if (!$isSubscriptionActive && $subscriptionStatus)
             <div class="px-3 mb-3">
                 <div class="alert alert-warning alert-dismissible fade show py-2 px-3" role="alert"
@@ -161,9 +156,8 @@
             </div>
         @endif
 
-        <!-- Menu Utama -->
         <ul class="menu-inner py-1 flex-grow-1">
-            <!-- Dashboard - Always accessible -->
+            
             <li class="menu-item {{ request()->routeIs('kepala-dapur.dashboard') ? 'active' : '' }}">
                 <a href="{{ route('kepala-dapur.dashboard', ['dapur' => $idDapur]) }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -172,12 +166,11 @@
             </li>
 
             @if ($isSubscriptionActive)
-                <!-- Kepala Dapur Header - Only show when subscription active -->
+                
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text">Kepala Dapur</span>
                 </li>
 
-                <!-- Approval Permintaan Stok -->
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.approvals.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.approvals.index', ['dapur' => $idDapur]) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-check-circle"></i>
@@ -190,7 +183,6 @@
                     </a>
                 </li>
 
-                <!-- Approval Transaksi Dapur -->
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.approval-transaksi.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.approval-transaksi.index', ['dapur' => $idDapur]) }}"
                         class="menu-link">
@@ -205,8 +197,25 @@
                         @endif
                     </a>
                 </li>
+                
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text">Pesanan</span>
+                </li>
 
-                <!-- Laporan Kekurangan Stok -->
+                <li class="menu-item {{ request()->routeIs('kepala-dapur.order-produksi.*') ? 'active' : '' }}">
+                    <a href="{{ route('kepala-dapur.order-produksi.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-restaurant"></i>
+                        <div data-i18n="Order Produksi">Order Produksi</div>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ request()->routeIs('kepala-dapur.order-distribusi.*') ? 'active' : '' }}">
+                    <a href="{{ route('kepala-dapur.order-distribusi.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-car"></i>
+                        <div data-i18n="Order Pengiriman">Order Pengiriman</div>
+                    </a>
+                </li>
+
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.laporan-kekurangan.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.laporan-kekurangan.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-error"></i>
@@ -221,12 +230,10 @@
                     </a>
                 </li>
 
-                <!-- Konten Header - Only show when subscription active -->
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text">Konten</span>
                 </li>
 
-                <!-- Pengaturan Dapur -->
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.pengaturan-dapur.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.pengaturan-dapur.edit', ['dapur' => $idDapur]) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-store"></i>
@@ -236,7 +243,6 @@
                     </a>
                 </li>
 
-                <!-- Template Bahan -->
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.template-items.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-package"></i>
@@ -262,14 +268,13 @@
                     </ul>
                 </li>
 
-                <!-- Kelola Stok -->
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.stock.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.stock.index', ['dapur' => $idDapur]) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-food-menu"></i>
                         <div data-i18n="Kelola Stok">Kelola Stok</div>
                     </a>
                 </li>
-                <!-- Kelola Menu Makanan -->
+                
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.menu-makanan.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.menu-makanan.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-food-menu"></i>
@@ -279,7 +284,15 @@
                     </a>
                 </li>
 
-                <!-- Kelengkapan Prasarana -->
+                <li class="menu-item {{ request()->routeIs('kepala-dapur.supplier.*') ? 'active' : '' }}">
+                    <a href="{{ route('kepala-dapur.supplier.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bxs-truck"></i>
+                        <div data-i18n="Data Supplier">
+                            Data Supplier
+                        </div>
+                    </a>
+                </li>
+
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.prasarana.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.prasarana.index', ['dapur' => $idDapur]) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-building-house"></i>
@@ -289,7 +302,15 @@
                     </a>
                 </li>
 
-                <!-- Kelola Penerima MBG -->
+                <li class="menu-item {{ request()->routeIs('kepala-dapur.mitra-approval.*') ? 'active' : '' }}">
+                    <a href="{{ route('kepala-dapur.mitra-approval.index', ['dapur' => $idDapur]) }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-buildings"></i>
+                        <div data-i18n="Mitra Approval">
+                            Approval Mitra
+                        </div>
+                    </a>
+                </li>
+
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.penerima-mbg.*') ? 'active' : '' }}">
                     <a href="{{ route('kepala-dapur.penerima-mbg.index', ['dapur' => $idDapur]) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-group"></i>
@@ -299,7 +320,6 @@
                     </a>
                 </li>
 
-                <!-- Kelola User -->
                 <li class="menu-item {{ request()->routeIs('kepala-dapur.users.*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-user"></i>
@@ -321,14 +341,13 @@
                     </ul>
                 </li>
             @else
-                <!-- Limited Access Message -->
+                
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text text-warning">
                         Limited Access
                     </span>
                 </li>
 
-                <!-- Disabled menu items with tooltips -->
                 @php
                     $disabledMenus = [
                         'Approval Stok' => 'bx-check-circle',
@@ -355,7 +374,6 @@
                 @endforeach
             @endif
 
-            <!-- Subscription - Always accessible -->
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Account</span>
             </li>
@@ -398,7 +416,6 @@
     </div>
 </aside>
 
-<!-- Bottom Navigation untuk Mobile/Tablet -->
 <nav class="mobile-bottom-nav d-lg-none" id="mobileBottomNav">
     <div class="bottom-nav-container">
         @php
@@ -414,7 +431,9 @@
                 $mainMenus = [
                     ['icon' => 'bx-user', 'label' => 'Akun', 'hasSubmenu' => true, 'submenu' => $akunSubmenu],
                     ['route' => 'kepala-dapur.dashboard', 'icon' => 'bx-home-circle', 'label' => 'Dashboard', 'param' => ['dapur' => $idDapur]],
-                    ['icon' => 'bx-file', 'label' => 'Laporan', 'hasSubmenu' => true, 'submenu' => [
+                    ['icon' => 'bx-file', 'label' => 'Operasional', 'hasSubmenu' => true, 'submenu' => [
+                        ['type' => 'link', 'label' => 'Order Produksi', 'url' => route('kepala-dapur.order-produksi.index')],
+                        ['type' => 'link', 'label' => 'Order Pengiriman', 'url' => route('kepala-dapur.order-distribusi.index')],
                         ['type' => 'link', 'label' => 'Laporan Stok', 'url' => route('kepala-dapur.approvals.index', ['dapur' => $idDapur])],
                         ['type' => 'link', 'label' => 'Laporan Transaksi', 'url' => route('kepala-dapur.approval-transaksi.index', ['dapur' => $idDapur])],
                         ['type' => 'link', 'label' => 'Laporan Kekurangan Stok', 'url' => route('kepala-dapur.laporan-kekurangan.index')],
@@ -423,7 +442,9 @@
                         ['type' => 'link', 'label' => 'Pengaturan Dapur', 'url' => route('kepala-dapur.pengaturan-dapur.edit', ['dapur' => $idDapur])],
                         ['type' => 'link', 'label' => 'Kelola Template Bahan', 'url' => route('kepala-dapur.template-items.index')],
                         ['type' => 'link', 'label' => 'Kelola Menu Makanan', 'url' => route('kepala-dapur.menu-makanan.index')],
+                        ['type' => 'link', 'label' => 'Data Supplier', 'url' => route('kepala-dapur.supplier.index')],
                         ['type' => 'link', 'label' => 'Fasilitas & Prasarana', 'url' => route('kepala-dapur.prasarana.index', ['dapur' => $idDapur])],
+                        ['type' => 'link', 'label' => 'Approval Mitra', 'url' => route('kepala-dapur.mitra-approval.index', ['dapur' => $idDapur])],
                         ['type' => 'link', 'label' => 'Kelola User', 'url' => route('kepala-dapur.users.index', ['dapur' => $idDapur])],
                     ]],
                     ['icon' => 'bx-credit-card', 'label' => 'Subscription', 'hasSubmenu' => true, 'submenu' => [
@@ -483,8 +504,6 @@
         @endforeach
     </div>
 </nav>
-
-
 
 <style>
     /* CSS untuk toggle sidebar */

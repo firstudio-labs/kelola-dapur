@@ -13,10 +13,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_user_role');
             $table->timestamps();
 
-            // Foreign Keys
             $table->foreign('id_user_role')->references('id_user_role')->on('user_roles')->onDelete('cascade')->where('role_type', 'super_admin');
 
-            // Performance Indexes
             $table->index(['id_user_role'], 'idx_super_admin_user_role');
         });
     }

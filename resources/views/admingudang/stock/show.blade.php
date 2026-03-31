@@ -8,7 +8,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -61,12 +61,22 @@
                                 Ajukan Tambah Stok
                             </button>
                         @endif
+                        @if($roleType === 'kepala_dapur' || $roleType === 'admin_gudang')
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#konversiModal"
+                            >
+                                <i class="bx bx-cog me-1"></i>
+                                Set Konversi
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -95,7 +105,7 @@
         @endif
 
         <div class="row">
-            <!-- Stock Information -->
+            
             <div class="col-md-6 mb-4">
                 <div class="card h-100">
                     <div class="card-header">
@@ -199,12 +209,48 @@
                                     >
                                 </div>
                             @endif
+
+                            @if ($stockItem->konversi_nilai && $stockItem->konversi_satuan)
+                                <div class="col-12 mt-1">
+                                    <hr class="my-2">
+                                    <label class="form-label text-muted small fw-semibold text-uppercase">
+                                        <i class="bx bx-transfer me-1"></i> Informasi Konversi
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Nilai Konversi</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bx bx-math"></i>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            value="{{ rtrim(rtrim(number_format((float)$stockItem->konversi_nilai, 3), '0'), '.') }} {{ $stockItem->satuan }} = 1 {{ $stockItem->konversi_satuan }}"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Stok Terkonversi</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bx bx-package"></i>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            class="form-control fw-bold"
+                                            value="{{ $stockItem->getConvertedStock() }}"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Request Statistics -->
             <div class="col-md-6 mb-4">
                 <div class="card h-100">
                     <div class="card-header">
@@ -323,7 +369,6 @@
             </div>
         </div>
 
-        <!-- Request History -->
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
@@ -340,8 +385,10 @@
                                     <th style="width: 50px;">No</th>
                                     <th>Tanggal Permintaan</th>
                                     <th>Jumlah</th>
+                                    <th>Supplier</th>
                                     <th>Status</th>
                                     <th>Diminta Oleh</th>
+                                    <th>Dokumentasi</th>
                                     <th style="width: 80px;">Aksi</th>
                                 </tr>
                             </thead>
@@ -368,6 +415,17 @@
                                             <small class="text-muted">
                                                 {{ $stockItem->templateItem->satuan }}
                                             </small>
+                                        </td>
+                                        <td>
+                                            @if($history->suppliers->count() > 1)
+                                                <span class="badge bg-label-info">
+                                                    <i class="bx bx-store me-1"></i> {{ $history->suppliers->count() }} Supplier
+                                                </span>
+                                            @elseif($history->suppliers->count() === 1)
+                                                {{ $history->suppliers->first()->supplier->nama_supplier }}
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                         <td>
                                             @php
@@ -404,6 +462,25 @@
                                             </div>
                                         </td>
                                         <td>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @if($history->foto_bahan)
+                                                    <img src="{{ asset('storage/' . $history->foto_bahan) }}" 
+                                                         class="img-thumbnail" style="width: 40px; height: 40px; object-fit: cover;" 
+                                                         title="Foto Bahan"
+                                                         onclick="window.open(this.src, '_blank')">
+                                                @endif
+                                                @foreach($history->dokumentasi as $doc)
+                                                    <img src="{{ asset('storage/' . $doc->foto_path) }}" 
+                                                         class="img-thumbnail" style="width: 40px; height: 40px; object-fit: cover;" 
+                                                         title="Foto Supplier"
+                                                         onclick="window.open(this.src, '_blank')">
+                                                @endforeach
+                                                @if(!$history->foto_bahan && $history->dokumentasi->isEmpty())
+                                                    <span class="text-muted small">Tidak ada</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
                                             <button
                                                 type="button"
                                                 class="btn btn-sm btn-outline-primary"
@@ -411,7 +488,7 @@
                                                 data-bs-target="#approvalStockDetailModal"
                                                 data-approval-data="{{ json_encode([
                                                     'tanggal_permintaan' => $history->created_at->format('d M Y H:i'),
-                                                    'jumlah_diminta' => rtrim(rtrim(number_format($history->jumlah, 3), '0'), '.') . ' ' . $stockItem->templateItem->satuan,
+                                                    'jumlah_diminta' => rtrim(rtrim(number_format($history->jumlah, 3), '0'), '.') . ' ' . ($history->satuan ?? ($stockItem->templateItem->satuan ?? '')),
                                                     'status' => $history->status,
                                                     'tanggal_diproses' => $history->approved_at ? $history->approved_at->format('d M Y H:i') : '-',
                                                     'nama_pemohon' => $history->adminGudang->user->nama ?? 'Admin Gudang',
@@ -422,7 +499,12 @@
                                                     'suhu' => $history->suhu_bahan_makanan,
                                                     'warna' => $history->warna_bahan_makanan,
                                                     'foto_bahan' => $history->foto_bahan ? asset('storage/' . $history->foto_bahan) : null,
-                                                    'keterangan' => $history->keterangan
+                                                    'keterangan' => $history->keterangan,
+                                                    'suppliers' => $history->suppliers->map(fn($s) => [
+                                                        'nama_supplier' => $s->supplier->nama_supplier ?? 'Unknown',
+                                                        'jumlah' => rtrim(rtrim(number_format($s->jumlah, 3), '0'), '.') . ' ' . ($history->satuan ?? ($stockItem->templateItem->satuan ?? '')),
+                                                        'fotos' => $s->dokumentasi->map(fn($d) => asset('storage/' . $d->foto_path))->values()->toArray()
+                                                    ])->values()->toArray()
                                                 ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                 onclick="showApprovalStockDetailModal(JSON.parse(this.getAttribute('data-approval-data')))"
                                                 title="Lihat Detail"
@@ -436,14 +518,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($approvalHistory->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $approvalHistory->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         <i class="bx bx-history bx-lg text-muted mb-3"></i>
                         <h5 class="mb-1">Belum ada riwayat permintaan</h5>
@@ -468,15 +549,64 @@
         </div>
     </div>
 
-    <!-- Request Stock Modal -->
     @if($roleType === 'admin_gudang')
         @include('partials.request-stock-modal')
     @endif
 
-    <!-- Approval Stock Detail Modal -->
+    @if($roleType === 'kepala_dapur' || $roleType === 'admin_gudang')
+        <div class="modal fade" id="konversiModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bx bx-cog me-1"></i> Set Konversi Stok
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route($routePrefix . '.stock.update-konversi', [$dapur, $stockItem]) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            <p class="text-muted mb-3">
+                                Atur konversi untuk <strong>{{ $stockItem->templateItem->nama_bahan }}</strong>.
+                                Kosongkan untuk menghapus konversi.
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label">Nilai Konversi</label>
+                                <input
+                                    type="number"
+                                    step="0.001"
+                                    min="0.001"
+                                    name="konversi_nilai"
+                                    class="form-control"
+                                    placeholder="Contoh: 10"
+                                    value="{{ $stockItem->konversi_nilai ? (float)$stockItem->konversi_nilai : '' }}"
+                                >
+                                <div class="form-text">Berapa {{ $stockItem->satuan }} per 1 satuan baru?</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nama Satuan Baru</label>
+                                <input
+                                    type="text"
+                                    name="konversi_satuan"
+                                    class="form-control"
+                                    placeholder="Contoh: Karung"
+                                    value="{{ $stockItem->konversi_satuan }}"
+                                >
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @include('partials.approval-stock-detail-modal')
 
-    <!-- Custom Styling -->
     <style>
         .avatar-initial {
             width: 40px;
@@ -507,7 +637,6 @@
         }
     </style>
 
-    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize Bootstrap tooltips

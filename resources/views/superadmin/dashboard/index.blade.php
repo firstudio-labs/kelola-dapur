@@ -2,15 +2,13 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
-                            {{-- <div class="avatar avatar-md me-3">
-                                <img src="{{ asset('storage/profil/' . $profil->logo_perusahaan) }}" alt="Logo Kecamatan" class="rounded-circle">
-                            </div> --}}
+                            
                             <div>
                                 <h4 class="mb-1">Dashboard</h4>
                                 <p class="mb-0 text-muted">
@@ -23,7 +21,6 @@
             </div>
         </div>
 
-        <!-- Statistik Utama -->
         <div class="row">
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
@@ -98,7 +95,6 @@
             </div>
         </div>
 
-        <!-- Statistik Tim -->
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="card">

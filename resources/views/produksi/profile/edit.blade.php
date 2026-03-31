@@ -19,7 +19,7 @@
             
             <div class="card mb-4">
                 <h5 class="card-header">Detail Profil</h5>
-                <!-- Account -->
+                
                 <div class="card-body text-center">
                     <div class="d-flex align-items-start align-items-sm-center justify-content-center gap-4">
                         <img src="{{ $produksi && $produksi->foto_diri ? Storage::url($produksi->foto_diri) : asset('admin/assets/img/avatars/1.png') }}" 

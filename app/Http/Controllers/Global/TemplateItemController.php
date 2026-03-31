@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Global;
+namespace App\Http\Controllers\General;
 
 use App\Http\Controllers\Controller;
 use App\Models\TemplateItem;

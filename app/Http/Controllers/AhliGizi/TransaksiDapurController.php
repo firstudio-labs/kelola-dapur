@@ -67,7 +67,6 @@ class TransaksiDapurController extends Controller
                 ->with('info', 'Anda memiliki draft Input Paket Menu yang belum selesai. Silakan lanjutkan atau hapus terlebih dahulu.');
         }
 
-        // Cari transaksi terakhir untuk mengambil tanggalnya
         $latestTransaksi = TransaksiDapur::where('id_dapur', $ahliGizi->id_dapur)
             ->where('created_by', $user->id_user)
             ->orderBy('tanggal_transaksi', 'desc')
@@ -96,7 +95,6 @@ class TransaksiDapurController extends Controller
             
             'keterangan' => 'nullable|string|max:500'
         ]);
-
 
         $existingDraft = TransaksiDapur::where('id_dapur', $ahliGizi->id_dapur)
             ->where('created_by', $user->id_user)
@@ -639,7 +637,6 @@ class TransaksiDapurController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        
         $existingDraft = TransaksiDapur::where('created_by', $user->id_user)
             ->where('id_dapur', $ahliGizi->id_dapur)
             ->where('status', 'draft')

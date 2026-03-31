@@ -31,7 +31,6 @@ class SubscriptionPackage extends Model
         return $this->hasMany(SubscriptionRequest::class, 'id_package');
     }
 
-    // Helper methods
     public function getFormattedHargaAttribute(): string
     {
         return 'Rp ' . number_format($this->harga, 0, ',', '.');
@@ -57,17 +56,14 @@ class SubscriptionPackage extends Model
     {
         $basePrice = $this->harga;
 
-        // Apply promo discount
         if ($promoCode && $promoCode->isValid()) {
             $discount = ($basePrice * $promoCode->persentase_diskon) / 100;
             $basePrice -= $discount;
         }
 
-        // Add dapur ID to final price
         return $basePrice + $dapurId;
     }
 
-    // Scope methods
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

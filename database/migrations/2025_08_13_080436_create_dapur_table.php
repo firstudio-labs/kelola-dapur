@@ -25,7 +25,6 @@ return new class extends Migration
             $table->date('subscription_end')->nullable();
             $table->timestamps();
 
-            // Performance Indexes
             $table->index(['status'], 'idx_dapur_status');
             $table->index(['province_code'], 'idx_dapur_province_code');
             $table->index(['regency_code'], 'idx_dapur_regency_code');

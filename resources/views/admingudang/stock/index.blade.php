@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -26,20 +26,11 @@
                             {{ $dapur->nama_dapur }}
                         </p>
                     </div>
-                    <!-- <div class="d-flex gap-2">
-                        <a
-                            href="{{ route("admin-gudang.stock.export", $dapur) }}"
-                            class="btn btn-success btn-sm"
-                        >
-                            <i class="bx bx-download me-1"></i>
-                            Export CSV
-                        </a>
-                    </div> -->
+                    
                 </div>
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -67,7 +58,6 @@
             </div>
         @endif
 
-        <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
                 <div class="card">
@@ -169,7 +159,6 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-body">
                 <form
@@ -306,7 +295,6 @@
             </div>
         </div>
 
-        <!-- Stock Items Table -->
         <div class="card">
             <div class="card-body">
                 @if ($stockItems->isNotEmpty())
@@ -317,6 +305,7 @@
                                     <th>No</th>
                                     <th>Nama Bahan</th>
                                     <th>Jumlah Stok</th>
+                                    <th>Konversi Stok</th>
                                     <th>Satuan</th>
                                     <th>Status</th>
                                     <th>Tanggal Restok Terakhir</th>
@@ -351,6 +340,19 @@
                                             <span class="fw-medium">
                                                 {{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}
                                             </span>
+                                        </td>
+                                        <td>
+                                            @if ($stockItem->getConvertedStock())
+                                                <span class="fw-medium text-primary">
+                                                    {{ $stockItem->getConvertedStock() }}
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ rtrim(rtrim(number_format((float)$stockItem->konversi_nilai, 3), '0'), '.') }} {{ $stockItem->satuan }} = 1 {{ $stockItem->konversi_satuan }}
+                                                </small>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <span class="badge bg-label-info">
@@ -400,6 +402,8 @@
                                                     data-bahan-name="{{ $stockItem->templateItem->nama_bahan }}"
                                                     data-current-stock="{{ $stockItem->jumlah }}"
                                                     data-satuan="{{ $stockItem->satuan }}"
+                                                    data-konversi-nilai="{{ $stockItem->konversi_nilai ?? 0 }}"
+                                                    data-konversi-satuan="{{ $stockItem->konversi_satuan ?? '' }}"
                                                     title="Ajukan Tambah Stok"
                                                 >
                                                     <i
@@ -414,14 +418,13 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     @if ($stockItems->hasPages())
                         <div class="mt-4 d-flex justify-content-center">
                             {{ $stockItems->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
+                    
                     <div class="text-center py-6">
                         <i class="bx bx-package bx-lg text-muted mb-3"></i>
                         <h5 class="mb-1">Tidak ada data stok</h5>
@@ -442,16 +445,13 @@
         </div>
     </div>
 
-    <!-- Request Stock Modal -->
     @include('partials.request-stock-modal')
 
-    <!-- Choices.js CSS -->
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
     />
 
-    <!-- Custom Styling -->
     <style>
         .choices__inner {
             background-color: #fff;
@@ -500,10 +500,8 @@
         }
     </style>
 
-    <!-- Choices.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
-    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize Choices.js
@@ -532,10 +530,12 @@
                     const bahanName = button.getAttribute('data-bahan-name');
                     const currentStock = button.getAttribute('data-current-stock');
                     const satuan = button.getAttribute('data-satuan');
+                    const konversiNilai = button.getAttribute('data-konversi-nilai');
+                    const konversiSatuan = button.getAttribute('data-konversi-satuan');
 
                     // Call the update function from partial
                     if (window.updateRequestStockModal) {
-                        window.updateRequestStockModal(stockId, bahanName, currentStock, satuan);
+                        window.updateRequestStockModal(stockId, bahanName, currentStock, satuan, '', konversiNilai, konversiSatuan);
                     }
                 });
             }

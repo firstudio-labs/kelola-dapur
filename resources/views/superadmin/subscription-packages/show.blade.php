@@ -2,7 +2,7 @@
 
 @section("content")
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+        
         <div class="card mb-4">
             <div class="card-body">
                 <nav class="d-flex align-items-center mb-2">
@@ -62,7 +62,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session("success"))
             <div
                 class="alert alert-success alert-dismissible mb-4"
@@ -79,7 +78,7 @@
         @endif
 
         <div class="row">
-            <!-- Package Details -->
+            
             <div class="col-lg-8">
                 <div class="card mb-4">
                     <div
@@ -156,7 +155,6 @@
                     </div>
                 </div>
 
-                <!-- Subscription Requests -->
                 @if ($subscriptionPackage->subscriptionRequests->count() > 0)
                     <div class="card">
                         <div class="card-header">
@@ -290,9 +288,8 @@
                 @endif
             </div>
 
-            <!-- Sidebar -->
             <div class="col-lg-4">
-                <!-- Package Preview -->
+                
                 <div class="card mb-4">
                     <div class="card-body text-center">
                         <div class="avatar mx-auto mb-3">
@@ -324,7 +321,6 @@
                     </div>
                 </div>
 
-                <!-- Statistics -->
                 <div class="card mb-4">
                     <div class="card-body">
                         <h6 class="card-title mb-3">
@@ -375,7 +371,6 @@
                     </div>
                 </div>
 
-                <!-- Price Calculator -->
                 <div class="card">
                     <div class="card-body">
                         <h6 class="card-title mb-3">
