@@ -25,6 +25,7 @@ class Mitra extends Model
         'village_code',
         'village_name',
         'alamat_detail',
+        'foto_diri',
     ];
 
     public function userRole()

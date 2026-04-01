@@ -466,6 +466,8 @@ Route::middleware(['auth', 'dapur.access:admin_gudang', 'check.subscription'])
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/edit', [AdminGudangProfileController::class, 'edit'])->name('edit');
             Route::put('/update', [AdminGudangProfileController::class, 'update'])->name('update');
+            Route::get('/security', [AdminGudangProfileController::class, 'editSecurity'])->name('security.edit');
+            Route::put('/security', [AdminGudangProfileController::class, 'updatePassword'])->name('security.update');
         });
 
         // Laporan Kekurangan Stock
@@ -580,6 +582,8 @@ Route::middleware(['auth', 'role:ahli_gizi', 'check.subscription'])->prefix('ahl
     // Profil Saya
     Route::get('/dapur/{dapur}/profile/edit', [AhliGiziProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/dapur/{dapur}/profile', [AhliGiziProfileController::class, 'update'])->name('profile.update');
+    Route::get('/dapur/{dapur}/profile/security', [AhliGiziProfileController::class, 'editSecurity'])->name('profile.security.edit');
+    Route::put('/dapur/{dapur}/profile/security', [AhliGiziProfileController::class, 'updatePassword'])->name('profile.security.update');
 
     // Menu Makanan - Requires active subscription
     Route::prefix('menu-makanan')->name('menu-makanan.')->group(function () {
@@ -711,6 +715,8 @@ Route::middleware(['auth', 'role:produksi', 'check.subscription'])
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/edit', [ProduksiProfileController::class, 'edit'])->name('edit');
             Route::put('/', [ProduksiProfileController::class, 'update'])->name('update');
+            Route::get('/security', [ProduksiProfileController::class, 'editSecurity'])->name('security.edit');
+            Route::put('/security', [ProduksiProfileController::class, 'updatePassword'])->name('security.update');
         });
 
         Route::prefix("order-produksi")
@@ -733,6 +739,78 @@ Route::middleware(['auth', 'role:produksi', 'check.subscription'])
 
 
 // ============================
+// Akuntan Area
+// ============================
+Route::middleware(['auth', 'role:akuntan', 'check.subscription'])
+    ->prefix('akuntan')
+    ->name('akuntan.')
+    ->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Akuntan\DashboardController::class, 'index'])->name('dashboard');
+
+        // Profile
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/edit', [\App\Http\Controllers\Akuntan\ProfileController::class, 'edit'])->name('edit');
+            Route::put('/', [\App\Http\Controllers\Akuntan\ProfileController::class, 'update'])->name('update');
+            Route::get('/security', [\App\Http\Controllers\Akuntan\ProfileController::class, 'editSecurity'])->name('security.edit');
+            Route::put('/security', [\App\Http\Controllers\Akuntan\ProfileController::class, 'updatePassword'])->name('security.update');
+        });
+
+        // Transaksi
+        Route::prefix('transaksi')->name('transaksi.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'store'])->name('store');
+            Route::get('/{transaksi}/edit', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'edit'])->name('edit');
+            Route::put('/{transaksi}', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'update'])->name('update');
+            Route::delete('/{transaksi}', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'destroy'])->name('destroy');
+            Route::get('/get/balance-preview', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'getBalance'])->name('getBalance');
+        });
+
+        // Buku Kas Umum
+        Route::prefix('buku-kas')->name('buku-kas.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Akuntan\BukuKasController::class, 'index'])->name('index');
+            Route::get('/export-pdf', [\App\Http\Controllers\Akuntan\BukuKasController::class, 'exportPdf'])->name('export-pdf');
+        });
+
+        // Buku Pembantu
+        Route::get('/buku-pembantu', [\App\Http\Controllers\Akuntan\BukuPembantuController::class, 'index'])->name('buku-pembantu.index');
+
+        // Laporan
+        Route::prefix('laporan')->name('laporan.')->group(function () {
+            Route::get('/resume', [\App\Http\Controllers\Akuntan\LaporanController::class, 'resume'])->name('resume');
+            Route::get('/anggaran', [\App\Http\Controllers\Akuntan\LaporanController::class, 'anggaran'])->name('anggaran');
+            Route::get('/bulanan', [\App\Http\Controllers\Akuntan\LaporanController::class, 'bulanan'])->name('bulanan');
+        });
+
+        // Dokumen
+        Route::prefix('dokumen')->name('dokumen.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Akuntan\DokumenController::class, 'index'])->name('index');
+            Route::get('/preview/{type}', [\App\Http\Controllers\Akuntan\DokumenController::class, 'preview'])->name('preview');
+            Route::get('/export-pdf/{type}', [\App\Http\Controllers\Akuntan\DokumenController::class, 'exportPdf'])->name('export-pdf');
+        });
+
+        // Pengaturan
+        Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'index'])->name('index');
+            Route::put('/settings', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'updateSettings'])->name('settings.update');
+            // Periode
+            Route::post('/periode', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'storePeriode'])->name('periode.store');
+            Route::put('/periode/{periode}', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'updatePeriode'])->name('periode.update');
+            Route::patch('/periode/{periode}/close', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'closePeriode'])->name('periode.close');
+            Route::patch('/periode/{periode}/open', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'openPeriode'])->name('periode.open');
+            Route::delete('/periode/{periode}', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'destroyPeriode'])->name('periode.destroy');
+            // Kategori
+            Route::post('/kategori', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'storeKategori'])->name('kategori.store');
+            Route::put('/kategori/{kategori}', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'updateKategori'])->name('kategori.update');
+            Route::delete('/kategori/{kategori}', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'destroyKategori'])->name('kategori.destroy');
+            // Akun Kas
+            Route::post('/kas', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'storeKas'])->name('kas.store');
+            Route::put('/kas/{kas}', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'updateKas'])->name('kas.update');
+            Route::delete('/kas/{kas}', [\App\Http\Controllers\Akuntan\PengaturanController::class, 'destroyKas'])->name('kas.destroy');
+        });
+    });
+
+// ============================
 // Distributor Area
 // ============================
 Route::middleware(['auth', 'role:distributor', 'check.subscription'])
@@ -744,6 +822,8 @@ Route::middleware(['auth', 'role:distributor', 'check.subscription'])
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/edit', [DistributorProfileController::class, 'edit'])->name('edit');
             Route::put('/', [DistributorProfileController::class, 'update'])->name('update');
+            Route::get('/security', [DistributorProfileController::class, 'editSecurity'])->name('security.edit');
+            Route::put('/security', [DistributorProfileController::class, 'updatePassword'])->name('security.update');
         });
 
         Route::prefix('order-distribusi')
@@ -752,5 +832,6 @@ Route::middleware(['auth', 'role:distributor', 'check.subscription'])
                 Route::get('/', [DistributorOrderController::class, 'index'])->name('index');
                 Route::get('/{order}', [DistributorOrderController::class, 'show'])->name('show');
                 Route::patch('/{order}/update-status', [DistributorOrderController::class, 'updateStatus'])->name('update-status');
+                Route::patch('/{order}/detail/{detail}/update-status', [DistributorOrderController::class, 'updateDetailStatus'])->name('updateDetailStatus');
             });
     });

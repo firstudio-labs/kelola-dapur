@@ -15,11 +15,11 @@
         <ul class="navbar-nav flex-row align-items-center ms-auto">
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                    <div class="avatar avatar-online">
+                    <div class="avatar avatar-online" style="width: 40px; height: 40px; flex-shrink: 0;">
                         @php
                             $foto = auth()->user()->distributor->foto_diri ?? null;
                         @endphp
-                        <img src="{{ $foto ? Storage::url($foto) : asset('admin/assets/img/avatars/1.png') }}" class="w-px-40 h-auto rounded-circle" />
+                        <img src="{{ $foto ? Storage::url($foto) : asset('admin/assets/img/avatars/1.png') }}" class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -27,8 +27,8 @@
                         <a class="dropdown-item" href="{{ route('distributor.profile.edit') }}">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online">
-                                        <img src="{{ $foto ? Storage::url($foto) : asset('admin/assets/img/avatars/1.png') }}" class="w-px-40 h-auto rounded-circle" />
+                                    <div class="avatar avatar-online" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                        <img src="{{ $foto ? Storage::url($foto) : asset('admin/assets/img/avatars/1.png') }}" class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">

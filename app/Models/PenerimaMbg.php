@@ -31,6 +31,7 @@ class PenerimaMbg extends Model
         'longitude',
         'link_gmaps',
         'foto_lokasi',
+        'foto_diri',
         'jumlah_porsi',
         'status_approval',
         'catatan_approval',

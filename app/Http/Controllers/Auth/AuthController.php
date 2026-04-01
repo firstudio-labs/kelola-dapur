@@ -212,8 +212,7 @@ class AuthController extends Controller
             'village_code'         => 'nullable|string',
             'village_name'         => 'nullable|string|max:100',
             'alamat_detail'        => 'required|string|max:500',
-            'latitude'             => 'nullable|numeric|between:-90,90',
-            'longitude'            => 'nullable|numeric|between:-180,180',
+
             'link_gmaps'           => 'nullable|url|max:500',
             'foto_lokasi'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'h-captcha-response'   => 'required',
@@ -298,8 +297,7 @@ class AuthController extends Controller
                 'village_code'     => $request->village_code,
                 'village_name'     => $request->village_name,
                 'alamat_detail'    => $request->alamat_detail,
-                'latitude'         => $request->latitude,
-                'longitude'        => $request->longitude,
+
                 'link_gmaps'       => $request->link_gmaps,
                 'foto_lokasi'      => $fotoPath,
                 'jumlah_porsi'     => 1,
@@ -745,6 +743,13 @@ class AuthController extends Controller
                         ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
                 }
                 return redirect()->route('distributor.dashboard');
+            case 'akuntan':
+                if ($user->userRole->dapur && $user->userRole->dapur->status !== 'active') {
+                    Auth::logout();
+                    return redirect()->route('login')
+                        ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
+                }
+                return redirect()->route('akuntan.dashboard');
             case 'penerima_mbg':
                 return redirect()->route('penerima-mbg.dashboard');
             case 'mitra':

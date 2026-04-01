@@ -40,8 +40,7 @@ class ProfileController extends Controller
             'village_code'     => 'nullable|string',
             'village_name'     => 'nullable|string|max:100',
             'alamat_detail'    => 'required|string|max:500',
-            'latitude'         => 'nullable|numeric|between:-90,90',
-            'longitude'        => 'nullable|numeric|between:-180,180',
+
             'link_gmaps'       => 'nullable|url|max:500',
             'foto_lokasi'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
         ]);

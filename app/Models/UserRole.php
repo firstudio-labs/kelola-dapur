@@ -63,4 +63,9 @@ class UserRole extends Model
     {
         return $this->hasOne(Mitra::class, 'id_user_role');
     }
+
+    public function akuntan()
+    {
+        return $this->hasOne(Akuntan::class, 'id_user_role');
+    }
 }

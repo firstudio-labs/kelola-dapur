@@ -25,9 +25,9 @@
                     "
                     onmouseover="this.style.background='rgba(255,255,255,0.25)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                    <div class="avatar avatar-online me-3">
+                    <div class="avatar avatar-online me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
                         <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt="Foto"
-                            class="w-px-40 h-auto rounded-circle" style="object-fit: cover; aspect-ratio: 1/1;" />
+                            class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
@@ -44,10 +44,10 @@
                         <a class="dropdown-item" href="{{ route('mitra.profile.index') }}">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online">
-                                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt="Foto"
-                                            class="w-px-40 h-auto rounded-circle"
-                                            style="object-fit: cover; aspect-ratio: 1/1;" />
+                                    <div class="avatar avatar-online" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                        <img src="{{ $mitra && $mitra->foto_diri ? Storage::url($mitra->foto_diri) : asset('admin/assets/img/avatars/1.png') }}" alt="Foto"
+                                            class="rounded-circle"
+                                            style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">

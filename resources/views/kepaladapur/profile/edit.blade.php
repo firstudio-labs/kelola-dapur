@@ -46,16 +46,31 @@
 
                     <div class="col-md-6">
                         <label for="nama" class="form-label">
-                            Nama Lengkap <span class="text-danger">*</span>
+                            Nama Akun (Login) <span class="text-danger">*</span>
                         </label>
                         <input type="text" 
                                name="nama" 
                                id="nama"
                                class="form-control @error('nama') is-invalid @enderror"
-                               placeholder="Nama Lengkap"
+                               placeholder="Nama Akun"
                                value="{{ old('nama', $user->nama) }}" 
                                required>
                         @error('nama')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="nama_lengkap" class="form-label">
+                            Nama Lengkap Sesuai KTP
+                        </label>
+                        <input type="text" 
+                               name="nama_lengkap" 
+                               id="nama_lengkap"
+                               class="form-control @error('nama_lengkap') is-invalid @enderror"
+                               placeholder="Nama Lengkap"
+                               value="{{ old('nama_lengkap', $kepalaDapur->nama_lengkap) }}">
+                        @error('nama_lengkap')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -123,25 +138,35 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-12">
-                        <label for="foto_diri" class="form-label">
-                            Foto Diri
-                        </label>
-                        <input type="file" 
-                               name="foto_diri" 
-                               id="foto_diri"
-                               accept="image/*"
-                               class="form-control @error('foto_diri') is-invalid @enderror">
-                        @error('foto_diri')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        
-                        <div class="mt-3">
-                            <img id="image_preview" 
-                                 src="{{ $kepalaDapur->foto_diri ? Storage::url($kepalaDapur->foto_diri) : '#' }}" 
-                                 alt="Preview Foto Diri" 
-                                 class="img-fluid rounded border" 
-                                 style="max-height: 200px; object-fit: cover; {{ $kepalaDapur->foto_diri ? 'display: block;' : 'display: none;' }}">
+                    <div class="col-12">
+                        <hr class="my-3">
+                        <label class="form-label d-block text-center mb-3">Foto Profil</label>
+                        <div class="d-flex align-items-start align-items-sm-center justify-content-center gap-4">
+                            <div class="position-relative">
+                                <img id="uploadedAvatar"
+                                    src="{{ $kepalaDapur->foto_diri ? Storage::url($kepalaDapur->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
+                                    alt="user-avatar" class="rounded-3 border" height="100" width="100"
+                                    style="object-fit: cover" />
+                                <label for="upload"
+                                    class="btn btn-icon btn-primary rounded-circle position-absolute @error('foto_diri') border-danger @enderror"
+                                    style="bottom: -10px; right: -10px; width: 32px; height: 32px; padding: 0; cursor: pointer;"
+                                    title="Unggah Foto Baru">
+                                    <i class="bx bx-camera fs-6"></i>
+                                    <input type="file" id="upload" name="foto_diri" class="account-file-input"
+                                        hidden accept="image/png, image/jpeg, image/jpg, image/webp" />
+                                </label>
+                            </div>
+                            <div class="button-wrapper text-start">
+                                <button type="button"
+                                    class="btn btn-outline-secondary btn-sm mb-2 account-image-reset {{ !$kepalaDapur->foto_diri ? 'd-none' : '' }}">
+                                    <i class="bx bx-reset me-1"></i> Reset
+                                </button>
+                                <p class="text-muted mb-0 small">Format yang diizinkan JPG, GIF atau PNG.</p>
+                                <p class="text-muted mb-0 small">Ukuran maksimal 2MB.</p>
+                                @error('foto_diri')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                     </div>
 
@@ -266,13 +291,13 @@
                 const villageCodeInput = document.getElementById('village_code');
 
                 const currentProvinsi =
-                    '{{ old('provinsi', $dapur->province_name ?? '') }}';
+                    '{{ old('province_code', $kepalaDapur->province_code ?? '') }}';
                 const currentKabupaten =
-                    '{{ old('kabupaten_kota', $dapur->regency_name ?? '') }}';
+                    '{{ old('regency_code', $kepalaDapur->regency_code ?? '') }}';
                 const currentKecamatan =
-                    '{{ old('kecamatan', $dapur->district_name ?? '') }}';
+                    '{{ old('district_code', $kepalaDapur->district_code ?? '') }}';
                 const currentKelurahan =
-                    '{{ old('kelurahan', $dapur->village_name ?? '') }}';
+                    '{{ old('village_code', $kepalaDapur->village_code ?? '') }}';
 
                 const LoadingState = {
                     show(select, message = 'Memuat...') {
@@ -336,7 +361,7 @@
                     const options = data
                         .map((item) => {
                             const selected =
-                                item.name === selectedValue ? 'selected' : '';
+                                String(item[codeField]) === String(selectedValue) ? 'selected' : '';
                             return `<option value="${item.name}" data-code="${item[codeField]}" ${selected}>${item.name}</option>`;
                         })
                         .join('');
@@ -348,12 +373,18 @@
 
                     if (selectedValue) {
                         const selectedOption = select.querySelector(
-                            `option[value="${selectedValue}"]`,
+                            `option[data-code="${selectedValue}"]`,
                         );
                         if (selectedOption) {
                             const codeInput = getCodeInput(select.id);
                             if (codeInput) {
                                 codeInput.value = selectedOption.dataset.code;
+                            }
+                            
+                            // Update the hidden name input as well
+                            const nameInput = document.getElementById(`${select.id === 'select_provinsi' ? 'provinsi' : select.id.replace('select_', '')}_name_hidden`);
+                            if (nameInput) {
+                                nameInput.value = selectedOption.value;
                             }
                         }
                     }
@@ -411,7 +442,7 @@
 
                         if (currentProvinsi) {
                             const selectedOption = provinsiSelect.querySelector(
-                                `option[value="${currentProvinsi}"]`,
+                                `option[data-code="${currentProvinsi}"]`,
                             );
                             if (selectedOption) {
                                 await loadKabupaten(selectedOption.dataset.code);
@@ -446,7 +477,7 @@
 
                         if (currentKabupaten) {
                             const selectedOption = kabupatenSelect.querySelector(
-                                `option[value="${currentKabupaten}"]`,
+                                `option[data-code="${currentKabupaten}"]`,
                             );
                             if (selectedOption) {
                                 await loadKecamatan(selectedOption.dataset.code);
@@ -482,7 +513,7 @@
 
                         if (currentKecamatan) {
                             const selectedOption = kecamatanSelect.querySelector(
-                                `option[value="${currentKecamatan}"]`,
+                                `option[data-code="${currentKecamatan}"]`,
                             );
                             if (selectedOption) {
                                 await loadKelurahan(selectedOption.dataset.code);
@@ -550,6 +581,11 @@
                         provinsiSelect.value,
                     ].filter((part) => part);
 
+                    // Also update hidden name inputs when user manually changes values
+                    if (provinsiSelect.value) document.getElementById('provinsi_name_hidden').value = provinsiSelect.value;
+                    if (kabupatenSelect.value) document.getElementById('kabupaten_kota_name_hidden').value = kabupatenSelect.value;
+                    if (kecamatanSelect.value) document.getElementById('kecamatan_name_hidden').value = kecamatanSelect.value;
+                    if (kelurahanSelect.value) document.getElementById('kelurahan_name_hidden').value = kelurahanSelect.value;
                 }
 
                 provinsiSelect.addEventListener('change', function() {
@@ -650,37 +686,29 @@
                 });
 
                 // Image Preview Logic
-                document.getElementById('foto_diri').addEventListener('change', function(e) {
-                    const preview = document.getElementById('image_preview');
-                    const file = e.target.files[0];
-                    
-                    if (file) {
-                        // Validate if it's an image
-                        if (!file.type.match('image.*')) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Format Tidak Valid',
-                                text: 'Harap pilih file gambar (JPG, PNG).',
-                                confirmButtonText: 'Mengerti',
-                                customClass: { confirmButton: 'btn btn-primary' },
-                                buttonsStyling: false
-                            });
-                            this.value = ''; // Reset input
-                            preview.style.display = 'none';
-                            return;
-                        }
+                const uploadInput = document.getElementById('upload');
+                const uploadedAvatar = document.getElementById('uploadedAvatar');
+                const accountImageReset = document.querySelector('.account-image-reset');
 
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            preview.src = e.target.result;
-                            preview.style.display = 'block';
+                if (uploadInput) {
+                    uploadInput.onchange = (e) => {
+                        const [file] = uploadInput.files;
+                        if (file) {
+                            uploadedAvatar.src = URL.createObjectURL(file);
+                            accountImageReset.classList.remove('d-none');
                         }
-                        reader.readAsDataURL(file);
-                    } else {
-                        preview.src = '#';
-                        preview.style.display = 'none';
-                    }
-                });
+                    };
+                }
+
+                if (accountImageReset) {
+                    accountImageReset.onclick = () => {
+                        uploadInput.value = '';
+                        uploadedAvatar.src = "{{ $kepalaDapur->foto_diri ? Storage::url($kepalaDapur->foto_diri) : asset('admin/assets/img/avatars/1.png') }}";
+                        if (!{{ $kepalaDapur->foto_diri ? 'true' : 'false' }}) {
+                            accountImageReset.classList.add('d-none');
+                        }
+                    };
+                }
             });
         </script>
     @endpush

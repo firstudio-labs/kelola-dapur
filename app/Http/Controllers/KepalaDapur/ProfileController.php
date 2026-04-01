@@ -41,6 +41,7 @@ class ProfileController extends Controller
 
         $request->validate([
             'nama' => 'required|string|max:255',
+            'nama_lengkap' => 'nullable|string|max:255',
             'nik_kepala_sppg' => 'nullable|string|max:16',
             'kontak_wa' => 'nullable|string|max:20',
             'pendidikan_terakhir' => 'nullable|in:SD,SMP,SMA,D1,D2,D3,Sarjana',
@@ -52,7 +53,7 @@ class ProfileController extends Controller
             'alamat_detail' => 'nullable|string',
             'foto_diri' => 'nullable|image|max:2048', 
         ], [
-            'nama.required' => 'Nama lengkap harus diisi',
+            'nama.required' => 'Nama akun harus diisi',
             'foto_diri.image' => 'File harus berupa gambar',
             'foto_diri.max' => 'Ukuran gambar maksimal 2MB',
             'pendidikan_terakhir.in' => 'Pilihan pendidikan tidak valid',
@@ -90,6 +91,7 @@ class ProfileController extends Controller
         }
 
         $kepalaDapur->update([
+            'nama_lengkap' => $request->nama_lengkap,
             'nik_kepala_sppg' => $request->nik_kepala_sppg,
             'kontak_wa' => $request->kontak_wa,
             'pendidikan_terakhir' => $request->pendidikan_terakhir,

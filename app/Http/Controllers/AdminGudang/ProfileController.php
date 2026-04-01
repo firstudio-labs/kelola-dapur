@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -39,6 +40,8 @@ class ProfileController extends Controller
 
         $request->validate([
             'nama' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id_user . ',id_user',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id_user . ',id_user',
             'nik_admin_gudang' => 'nullable|string|max:16',
             'nama_lengkap' => 'nullable|string|max:255',
             'jabatan' => 'nullable|in:Penanggung jawab,Anggota',
@@ -57,6 +60,11 @@ class ProfileController extends Controller
             'foto_diri' => 'nullable|image|max:2048', 
         ], [
             'nama.required' => 'Nama wajib diisi',
+            'username.required' => 'Username wajib diisi',
+            'username.unique' => 'Username sudah digunakan',
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah digunakan',
             'foto_diri.image' => 'File harus berupa gambar',
             'foto_diri.max' => 'Ukuran gambar maksimal 2MB',
             'pendidikan_terakhir.in' => 'Pilihan pendidikan tidak valid',
@@ -65,7 +73,9 @@ class ProfileController extends Controller
         ]);
 
         $user->update([
-            'nama' => $request->nama
+            'nama' => $request->nama,
+            'username' => $request->username,
+            'email' => $request->email,
         ]);
 
         $province_code = $request->filled('province_code') ? $request->province_code : $adminGudang->province_code;
@@ -114,5 +124,47 @@ class ProfileController extends Controller
 
         return redirect()->route('admin-gudang.profile.edit', $dapur)
             ->with('success', 'Profil berhasil diperbarui');
+    }
+
+    public function editSecurity(Dapur $dapur)
+    {
+        $user = Auth::user();
+
+        if (!$user->isAdminGudang($dapur->id_dapur)) {
+            abort(403, 'Anda tidak memiliki akses ke halaman ini untuk dapur ini');
+        }
+
+        $adminGudang = $user->adminGudang()->where('admin_gudang.id_dapur', $dapur->id_dapur)->first();
+
+        return view('admingudang.profile.security', compact('dapur', 'user', 'adminGudang'));
+    }
+
+    public function updatePassword(Request $request, Dapur $dapur)
+    {
+        $user = Auth::user();
+
+        if (!$user->isAdminGudang($dapur->id_dapur)) {
+            abort(403, 'Anda tidak memiliki akses ke halaman ini untuk dapur ini');
+        }
+
+        $request->validate([
+            'current_password' => 'required|current_password',
+            'new_password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'],
+        ], [
+            'new_password.regex' => 'Password baru harus mengandung minimal 1 huruf kecil, 1 huruf besar, dan 1 angka.',
+            'new_password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+            'current_password.current_password' => 'Password saat ini salah.',
+        ]);
+
+        try {
+            $user->update([
+                'password' => Hash::make($request->new_password)
+            ]);
+
+            return redirect()->route('admin-gudang.profile.security.edit', $dapur)
+                ->with('success', 'Password berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui password.');
+        }
     }
 }

@@ -63,7 +63,7 @@
                         @error('id_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Nama Penanggung Jawab <span class="text-danger">*</span></label>
+                        <label class="form-label">Nama Penanggung Jawab (Sesuai KTP) <span class="text-danger">*</span></label>
                         <input type="text" name="penanggung_jawab" class="form-control @error('penanggung_jawab') is-invalid @enderror" value="{{ old('penanggung_jawab', $penerima->penanggung_jawab) }}" required>
                         @error('penanggung_jawab')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
@@ -121,14 +121,7 @@
             <div class="card-body">
                 <h5 class="card-title mb-3">Lokasi & Foto</h5>
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Latitude</label>
-                        <input type="text" name="latitude" class="form-control" value="{{ old('latitude', $penerima->latitude) }}" placeholder="-7.12345678">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Longitude</label>
-                        <input type="text" name="longitude" class="form-control" value="{{ old('longitude', $penerima->longitude) }}" placeholder="110.12345678">
-                    </div>
+
                     <div class="col-md-4">
                         <label class="form-label">Link Google Maps</label>
                         <input type="url" name="link_gmaps" class="form-control @error('link_gmaps') is-invalid @enderror" value="{{ old('link_gmaps', $penerima->link_gmaps) }}" placeholder="https://maps.google.com/...">

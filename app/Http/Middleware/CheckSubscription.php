@@ -74,6 +74,9 @@ class CheckSubscription
             case 'distributor':
                 return $this->handleStaffAccess($request, $next, $isSubscriptionActive, $currentRoute, $roleType, $idDapur);
 
+            case 'akuntan':
+                return $this->handleStaffAccess($request, $next, $isSubscriptionActive, $currentRoute, $roleType, $idDapur);
+
             default:
                 Log::warning('Unknown role type', [
                     'user_id' => $user->id_user,
@@ -135,6 +138,8 @@ class CheckSubscription
             $allowedRoutes[] = 'produksi.dashboard';
         } elseif ($roleType === 'distributor') {
             $allowedRoutes[] = 'distributor.dashboard';
+        } elseif ($roleType === 'akuntan') {
+            $allowedRoutes[] = 'akuntan.dashboard';
         }
 
         if ($isSubscriptionActive) {
@@ -150,6 +155,7 @@ class CheckSubscription
             'ahli_gizi' => 'ahli-gizi.dashboard',
             'produksi' => 'produksi.dashboard',
             'distributor' => 'distributor.dashboard',
+            'akuntan' => 'akuntan.dashboard',
             default => 'login'
         };
 

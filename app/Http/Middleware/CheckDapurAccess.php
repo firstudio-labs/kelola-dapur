@@ -22,7 +22,7 @@ class CheckDapurAccess
             return $next($request);
         }
 
-        $validRoles = ['kepala_dapur', 'admin_gudang', 'ahli_gizi', 'penerima_mbg', 'produksi', 'distributor', 'mitra'];
+        $validRoles = ['kepala_dapur', 'admin_gudang', 'ahli_gizi', 'penerima_mbg', 'produksi', 'distributor', 'mitra', 'akuntan'];
         foreach ($roles as $role) {
             if (!in_array($role, $validRoles)) {
                 throw new \InvalidArgumentException("Invalid role: {$role}");
@@ -96,6 +96,7 @@ class CheckDapurAccess
                 'produksi' => $user->isProduksi($dapurId),
                 'distributor' => $user->isDistributor($dapurId),
                 'mitra' => $user->isMitraInDapur($dapurId),
+                'akuntan' => $user->isAkuntan($dapurId),
                 default => false
             };
 

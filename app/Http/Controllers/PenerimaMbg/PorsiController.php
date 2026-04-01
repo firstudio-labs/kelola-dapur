@@ -28,12 +28,12 @@ class PorsiController extends Controller
         }
 
         $validated = $request->validate([
-            'jumlah_porsi' => 'required|integer|min:1|max:999',
+            'jumlah_porsi' => 'required|integer|min:1|max:9999999',
         ], [
             'jumlah_porsi.required' => 'Jumlah porsi wajib diisi',
             'jumlah_porsi.integer'  => 'Jumlah porsi harus berupa angka bulat',
             'jumlah_porsi.min'      => 'Jumlah porsi minimal 1',
-            'jumlah_porsi.max'      => 'Jumlah porsi maksimal 999',
+            'jumlah_porsi.max'      => 'Jumlah porsi maksimal 9.999.999',
         ]);
 
         $penerima->update(['jumlah_porsi' => $validated['jumlah_porsi']]);

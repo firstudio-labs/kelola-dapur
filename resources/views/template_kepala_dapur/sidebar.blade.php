@@ -38,9 +38,9 @@
                     "
                     onmouseover="this.style.background='rgba(255,255,255,0.25)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                    <div class="avatar avatar-online me-3">
-                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
-                            class="w-px-40 h-auto rounded-circle" />
+                    <div class="avatar avatar-online me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                        <img src="{{ auth()->user()->kepalaDapur && auth()->user()->kepalaDapur->first() && auth()->user()->kepalaDapur->first()->foto_diri ? Storage::url(auth()->user()->kepalaDapur->first()->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
+                            alt class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
@@ -71,9 +71,9 @@
                         <a class="dropdown-item" href="#">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online">
-                                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
-                                            class="w-px-40 h-auto rounded-circle" />
+                                    <div class="avatar avatar-online" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                        <img src="{{ auth()->user()->kepalaDapur && auth()->user()->kepalaDapur->first() && auth()->user()->kepalaDapur->first()->foto_diri ? Storage::url(auth()->user()->kepalaDapur->first()->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
+                                            alt class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
@@ -563,6 +563,13 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         flex-shrink: 0;
         min-height: 60px;
+    }
+
+    /* Force avatar image to be square and cover the area */
+    .avatar img {
+        width: 40px !important;
+        height: 40px !important;
+        object-fit: cover;
     }
 
     .menu-item.disabled .menu-link {

@@ -1,5 +1,9 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-    
+    @php
+        $isSubscriptionActive = session('is_subscription_active', false);
+        $subscriptionStatus = session('subscription_status', null);
+        $idDapur = session('id_dapur', $dapur->id_dapur ?? ($dapur ?? null));
+    @endphp    
     <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
         
         <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
@@ -22,9 +26,9 @@
                     "
                     onmouseover="this.style.background='rgba(255,255,255,0.25)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                    <div class="avatar avatar-online me-3">
-                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
-                            class="w-px-40 h-auto rounded-circle" />
+                    <div class="avatar avatar-online me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                        <img src="{{ auth()->user()->adminGudang && auth()->user()->adminGudang->foto_diri ? Storage::url(auth()->user()->adminGudang->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
+                            alt class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
@@ -53,9 +57,9 @@
                         <a class="dropdown-item" href="#">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online">
-                                        <img src="{{ asset('admin/assets/img/avatars/1.png') }}" alt
-                                            class="w-px-40 h-auto rounded-circle" />
+                                    <div class="avatar avatar-online" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                        <img src="{{ auth()->user()->adminGudang && auth()->user()->adminGudang->foto_diri ? Storage::url(auth()->user()->adminGudang->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
+                                            alt class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
@@ -82,6 +86,12 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
+                        <a class="dropdown-item" href="{{ route('admin-gudang.profile.edit', ['dapur' => $idDapur]) }}">
+                            <i class="bx bx-edit me-2"></i>
+                            <span class="align-middle">Edit Profil</span>
+                        </a>
+                    </li>
+                    <li>
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <button type="submit" class="dropdown-item">
@@ -94,11 +104,6 @@
             </div>
         </div>
 
-        @php
-            $isSubscriptionActive = session('is_subscription_active', false);
-            $subscriptionStatus = session('subscription_status', null);
-            $idDapur = session('id_dapur', $dapur->id_dapur ?? null);
-        @endphp
 
         @if (!$isSubscriptionActive && $subscriptionStatus)
             <div class="px-3 mb-3">
@@ -326,6 +331,13 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         flex-shrink: 0;
         min-height: 60px;
+    }
+
+    /* Force avatar image to be square and cover the area */
+    .avatar img {
+        width: 40px !important;
+        height: 40px !important;
+        object-fit: cover;
     }
 
     /* Disabled menu items styling */

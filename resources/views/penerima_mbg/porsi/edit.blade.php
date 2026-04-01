@@ -36,10 +36,10 @@
                             <input type="number" name="jumlah_porsi" id="jumlah_porsi"
                                 class="form-control form-control-lg text-center @error('jumlah_porsi') is-invalid @enderror"
                                 value="{{ old('jumlah_porsi', $penerima->jumlah_porsi) }}"
-                                min="1" max="999" required
+                                min="1" max="1000000" required
                                 {{ $penerima->status_approval !== 'approved' ? 'disabled' : '' }}>
                             @error('jumlah_porsi')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <div class="form-text text-center">Jumlah porsi yang Anda butuhkan per hari (1–999 porsi)</div>
+                            <div class="form-text text-center">Jumlah porsi yang Anda butuhkan per hari (1–1.000.000 porsi)</div>
                         </div>
                         <div class="d-grid gap-2">
                             @if($penerima->status_approval === 'approved')

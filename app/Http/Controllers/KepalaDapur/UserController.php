@@ -9,6 +9,7 @@ use App\Models\UserRole;
 use App\Models\AdminGudang;
 use App\Models\AhliGizi;
 use App\Models\Produksi;
+use App\Models\Akuntan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -36,7 +37,7 @@ class UserController extends Controller
 
             $users = User::whereHas('userRole', function ($query) use ($dapur) {
                 $query->where('id_dapur', $dapur->id_dapur)
-                    ->whereIn('role_type', ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor']);
+                    ->whereIn('role_type', ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan']);
             })->when($search, function ($query, $search) {
                 return $query->where('nama', 'like', "%{$search}%")
                     ->orWhere('username', 'like', "%{$search}%")
@@ -60,7 +61,9 @@ class UserController extends Controller
             $roles = [
                 'admin_gudang' => 'Admin Gudang', 
                 'ahli_gizi' => 'Ahli Gizi',
-                'produksi' => 'Produksi', 'distributor' => 'Distributor'
+                'produksi' => 'Produksi', 
+                'distributor' => 'Distributor',
+                'akuntan' => 'Akuntan'
             ];
 
             return view('kepaladapur.user.create', compact('dapur', 'roles'));
@@ -79,9 +82,10 @@ class UserController extends Controller
                 'username' => 'required|string|max:255|unique:users',
                 'email' => 'required|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
-                'role_type' => ['required', Rule::in(['admin_gudang', 'ahli_gizi', 'produksi', 'distributor'])],
+                'role_type' => ['required', Rule::in(['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan'])],
                 'nik_produksi' => 'nullable|string|max:16',
                 'nik_ahli_gizi' => 'nullable|string|max:16',
+                'nik_akuntan' => 'nullable|string|max:16',
                 'nama_lengkap' => 'nullable|string|max:255',
                 'kontak_wa' => 'nullable|string|max:20',
                 'jabatan' => 'nullable|in:Penanggung jawab,Anggota',
@@ -234,6 +238,38 @@ class UserController extends Controller
                     $distributorData['foto_diri'] = $path;
                 }
                 \App\Models\Distributor::create($distributorData);
+            } elseif ($validated['role_type'] === 'akuntan') {
+                $akuntanData = [
+                    'id_user_role' => $userRole->id_user_role,
+                    'id_dapur' => $dapur->id_dapur,
+                    'nik_akuntan' => $validated['nik_akuntan'] ?? null,
+                    'nama_lengkap' => $validated['nama_lengkap'] ?? null,
+                    'kontak_wa' => $validated['kontak_wa'] ?? null,
+                    'jabatan' => $validated['jabatan'] ?? 'Anggota',
+                    'pendidikan' => $validated['pendidikan'] ?? null,
+                    'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
+                    'alamat_detail' => $validated['alamat_detail'] ?? null,
+                    'province_code' => $validated['province_code'] ?? null,
+                    'province_name' => $validated['province_name'] ?? null,
+                    'regency_code' => $validated['regency_code'] ?? null,
+                    'regency_name' => $validated['regency_name'] ?? null,
+                    'district_code' => $validated['district_code'] ?? null,
+                    'district_name' => $validated['district_name'] ?? null,
+                    'village_code' => $validated['village_code'] ?? null,
+                    'village_name' => $validated['village_name'] ?? null,
+                ];
+
+                if ($request->hasFile('foto_diri')) {
+                    $image = $request->file('foto_diri');
+                    $filename = time() . '_' . uniqid() . '.webp';
+                    $path = 'dokumen_akuntan/foto_diri/' . $filename;
+                    $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                    $img = $manager->read($image->getRealPath());
+                    if ($img->width() > 1200) $img->scale(width: 1200);
+                    Storage::disk('public')->put($path, (string) $img->toWebp(80));
+                    $akuntanData['foto_diri'] = $path;
+                }
+                \App\Models\Akuntan::create($akuntanData);
             }
 
             return redirect()->route('kepala-dapur.users.index', ['dapur' => $dapur->id_dapur])->with('success', 'User berhasil ditambahkan.');
@@ -274,19 +310,20 @@ class UserController extends Controller
                 return redirect()->back()->with('error', "User {$user->nama} tidak memiliki akses ke dapur ini.");
             }
 
-            if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor'])) {
+            if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan'])) {
                 Log::warning('User has wrong role type', [
                     'user_id' => $user->id_user,
                     'role_type' => $user->userRole->role_type,
-                    'allowed_roles' => ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor']
+                    'allowed_roles' => ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan']
                 ]);
-                return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, atau distributor.");
+                return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, distributor, atau akuntan.");
             }
 
             $adminGudang = null;
             $ahliGizi = null;
             $produksi = null;
             $distributor = null;
+            $akuntan = null;
             if ($user->userRole->role_type === 'admin_gudang') {
                 $adminGudang = AdminGudang::where('id_user_role', $user->userRole->id_user_role)->first();
             } elseif ($user->userRole->role_type === 'ahli_gizi') {
@@ -295,6 +332,8 @@ class UserController extends Controller
                 $produksi = Produksi::where('id_user_role', $user->userRole->id_user_role)->first();
             } elseif ($user->userRole->role_type === 'distributor') {
                 $distributor = \App\Models\Distributor::where('id_user_role', $user->userRole->id_user_role)->first();
+            } elseif ($user->userRole->role_type === 'akuntan') {
+                $akuntan = \App\Models\Akuntan::where('id_user_role', $user->userRole->id_user_role)->first();
             }
 
             Log::info('User access granted', [
@@ -304,7 +343,7 @@ class UserController extends Controller
                 'dapur_id' => $dapur->id_dapur
             ]);
 
-            return view('kepaladapur.user.show', compact('user', 'dapur', 'adminGudang', 'ahliGizi', 'produksi', 'distributor'));
+            return view('kepaladapur.user.show', compact('user', 'dapur', 'adminGudang', 'ahliGizi', 'produksi', 'distributor', 'akuntan'));
         } catch (Exception $e) {
             Log::error('Failed to show user', [
                 'error' => $e->getMessage(),
@@ -344,25 +383,28 @@ class UserController extends Controller
                 return redirect()->back()->with('error', "User {$user->nama} tidak memiliki akses ke dapur ini.");
             }
 
-            if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor'])) {
+            if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan'])) {
                 Log::warning('Edit User: User has wrong role type', [
                     'user_id' => $user->id_user,
                     'role_type' => $user->userRole->role_type,
-                    'allowed_roles' => ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor']
+                    'allowed_roles' => ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan']
                 ]);
-                return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, atau distributor.");
+                return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, distributor, atau akuntan.");
             }
 
             $roles = [
                 'admin_gudang' => 'Admin Gudang', 
                 'ahli_gizi' => 'Ahli Gizi',
-                'produksi' => 'Produksi', 'distributor' => 'Distributor'
+                'produksi' => 'Produksi', 
+                'distributor' => 'Distributor',
+                'akuntan' => 'Akuntan'
             ];
 
             $adminGudang = null;
             $ahliGizi = null;
             $produksi = null;
             $distributor = null;
+            $akuntan = null;
             if ($user->userRole->role_type === 'admin_gudang') {
                 $adminGudang = AdminGudang::where('id_user_role', $user->userRole->id_user_role)->first();
             } elseif ($user->userRole->role_type === 'ahli_gizi') {
@@ -371,6 +413,8 @@ class UserController extends Controller
                 $produksi = Produksi::where('id_user_role', $user->userRole->id_user_role)->first();
             } elseif ($user->userRole->role_type === 'distributor') {
                 $distributor = \App\Models\Distributor::where('id_user_role', $user->userRole->id_user_role)->first();
+            } elseif ($user->userRole->role_type === 'akuntan') {
+                $akuntan = \App\Models\Akuntan::where('id_user_role', $user->userRole->id_user_role)->first();
             }
 
             Log::info('Edit User: Access granted', [
@@ -380,7 +424,7 @@ class UserController extends Controller
                 'dapur_id' => $dapur->id_dapur
             ]);
 
-            return view('kepaladapur.user.edit', compact('user', 'dapur', 'roles', 'current_user', 'adminGudang', 'ahliGizi', 'produksi', 'distributor'));
+            return view('kepaladapur.user.edit', compact('user', 'dapur', 'roles', 'current_user', 'adminGudang', 'ahliGizi', 'produksi', 'distributor', 'akuntan'));
         } catch (Exception $e) {
             Log::error('Failed to edit user', [
                 'error' => $e->getMessage(),
@@ -405,8 +449,8 @@ class UserController extends Controller
                 return redirect()->back()->with('error', "User {$user->nama} tidak memiliki akses ke dapur ini.");
             }
 
-            if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor'])) {
-                return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, atau distributor.");
+            if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan'])) {
+                return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, distributor, atau akuntan.");
             }
 
             $validated = $request->validate([
@@ -414,7 +458,7 @@ class UserController extends Controller
                 'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id_user, 'id_user')],
                 'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id_user, 'id_user')],
                 'password' => 'nullable|string|min:8|confirmed',
-                'role_type' => ['required', Rule::in(['admin_gudang', 'ahli_gizi', 'produksi', 'distributor'])],
+                'role_type' => ['required', Rule::in(['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan'])],
                 'is_active' => 'sometimes|boolean',
                 'nik_ahli_gizi' => 'nullable|string|max:16',
                 'jabatan' => 'nullable|in:Penanggung jawab,Anggota',
@@ -436,6 +480,7 @@ class UserController extends Controller
                 'pendidikan' => 'nullable|in:SD,SMP,SMA,D1,D2,D3,Sarjana',
                 'nik_distribusi' => 'nullable|string|max:16',
                 'nik_admin_gudang' => 'nullable|string|max:16',
+                'nik_akuntan' => 'nullable|string|max:16',
             ]);
 
             $user->update([
@@ -457,6 +502,8 @@ class UserController extends Controller
                     $userRole->ahliGizi->delete();
                 } elseif ($userRole->role_type === 'produksi' && $userRole->produksi) {
                     $userRole->produksi->delete();
+                } elseif ($userRole->role_type === 'akuntan' && $userRole->akuntan) {
+                    $userRole->akuntan->delete();
                 }
 
                 $userRole->update(['role_type' => $validated['role_type']]);
@@ -478,6 +525,11 @@ class UserController extends Controller
                     ]);
                 } elseif ($validated['role_type'] === 'distributor') {
                     \App\Models\Distributor::create([
+                        'id_user_role' => $userRole->id_user_role,
+                        'id_dapur' => $dapur->id_dapur,
+                    ]);
+                } elseif ($validated['role_type'] === 'akuntan') {
+                    $akuntan = \App\Models\Akuntan::create([
                         'id_user_role' => $userRole->id_user_role,
                         'id_dapur' => $dapur->id_dapur,
                     ]);
@@ -651,6 +703,48 @@ class UserController extends Controller
 
                     $distributor->update($distributorProfileData);
                 }
+            } elseif ($userRole->role_type === 'akuntan') {
+                $akuntan = \App\Models\Akuntan::where('id_user_role', $userRole->id_user_role)->first();
+                if ($akuntan) {
+                    $akuntanProfileData = [
+                        'nik_akuntan' => $validated['nik_akuntan'] ?? null,
+                        'nama_lengkap' => $validated['nama_lengkap'] ?? null,
+                        'jabatan' => $validated['jabatan'] ?? null,
+                        'pendidikan' => $validated['pendidikan'] ?? null,
+                        'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
+                        'kontak_wa' => $validated['kontak_wa'] ?? null,
+                        'alamat_detail' => $validated['alamat_detail'] ?? null,
+                        'province_code' => $validated['province_code'] ?? null,
+                        'province_name' => $validated['province_name'] ?? null,
+                        'regency_code' => $validated['regency_code'] ?? null,
+                        'regency_name' => $validated['regency_name'] ?? null,
+                        'district_code' => $validated['district_code'] ?? null,
+                        'district_name' => $validated['district_name'] ?? null,
+                        'village_code' => $validated['village_code'] ?? null,
+                        'village_name' => $validated['village_name'] ?? null,
+                    ];
+
+                    if ($request->hasFile('foto_diri')) {
+                        if ($akuntan->foto_diri && Storage::disk('public')->exists($akuntan->foto_diri)) {
+                            Storage::disk('public')->delete($akuntan->foto_diri);
+                        }
+
+                        $image = $request->file('foto_diri');
+                        $filename = time() . '_' . uniqid() . '.webp';
+                        $path = 'dokumen_akuntan/foto_diri/' . $filename;
+                        
+                        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                        $img = $manager->read($image->getRealPath());
+                        if ($img->width() > 1200) {
+                            $img->scale(width: 1200);
+                        }
+                        
+                        Storage::disk('public')->put($path, (string) $img->toWebp(80));
+                        $akuntanProfileData['foto_diri'] = $path;
+                    }
+
+                    $akuntan->update($akuntanProfileData);
+                }
             }
 
             return redirect()->route('kepala-dapur.users.index', ['dapur' => $dapur->id_dapur])->with('success', 'User berhasil diperbarui.');
@@ -689,13 +783,13 @@ class UserController extends Controller
                 return redirect()->back()->with('error', "User {$user->nama} tidak memiliki akses ke dapur ini.");
             }
 
-            if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor'])) {
+            if (!in_array($user->userRole->role_type, ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan'])) {
                 Log::warning('Destroy User: User has wrong role type', [
                     'user_id' => $user->id_user,
                     'role_type' => $user->userRole->role_type,
-                    'allowed_roles' => ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor']
+                    'allowed_roles' => ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan']
                 ]);
-                return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, atau distributor.");
+                return redirect()->back()->with('error', "User {$user->nama} bukan admin gudang, ahli gizi, produksi, distributor, atau akuntan.");
             }
 
             if ($user->userRole->role_type === 'admin_gudang' && $user->userRole->adminGudang) {
@@ -706,6 +800,8 @@ class UserController extends Controller
                 $user->userRole->produksi->delete();
             } elseif ($user->userRole->role_type === 'distributor' && $user->userRole->distributor) {
                 $user->userRole->distributor->delete();
+            } elseif ($user->userRole->role_type === 'akuntan' && $user->userRole->akuntan) {
+                $user->userRole->akuntan->delete();
             }
 
             $user->userRole()->delete();

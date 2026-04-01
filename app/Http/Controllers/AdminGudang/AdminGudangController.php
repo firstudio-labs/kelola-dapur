@@ -37,9 +37,13 @@ class AdminGudangController extends Controller
             'myRequests' => $adminGudang
                 ? $adminGudang->approvalStockItems()->latest()->take(5)->get()
                 : collect(),
+            'pendingRequestsCount' => $adminGudang
+                ? $adminGudang->approvalStockItems()->where('status', 'pending')->count()
+                : 0,
             'totalStock' => $this->getTotalStockForDapur($dapur),
             'lowStockItems' => $this->getLowStockItemsForDapur($dapur),
-            'recentStockMovements' => $this->getRecentStockMovementsForDapur($dapur),
+            'pendingShortagesCount' => $this->getPendingShortagesCountForDapur($dapur),
+            'recentShortages' => $this->getRecentShortagesForDapur($dapur),
         ];
 
         return view('admingudang.dashboard.index', $dashboardData);
@@ -47,16 +51,33 @@ class AdminGudangController extends Controller
 
     private function getTotalStockForDapur(Dapur $dapur)
     {
-        return 0;
+        return \App\Models\StockItem::where('id_dapur', $dapur->id_dapur)->count();
     }
 
     private function getLowStockItemsForDapur(Dapur $dapur)
     {
-        return collect();
+        return \App\Models\StockItem::where('id_dapur', $dapur->id_dapur)
+            ->where('jumlah', '<=', 10)
+            ->count();
     }
 
-    private function getRecentStockMovementsForDapur(Dapur $dapur)
+    private function getPendingShortagesCountForDapur(Dapur $dapur)
     {
-        return collect();
+        return \App\Models\LaporanKekuranganStock::whereHas('transaksiDapur', function ($query) use ($dapur) {
+                $query->where('id_dapur', $dapur->id_dapur);
+            })
+            ->where('status', 'pending')
+            ->count();
+    }
+
+    private function getRecentShortagesForDapur(Dapur $dapur)
+    {
+        return \App\Models\LaporanKekuranganStock::whereHas('transaksiDapur', function ($query) use ($dapur) {
+                $query->where('id_dapur', $dapur->id_dapur);
+            })
+            ->with(['templateItem', 'transaksiDapur'])
+            ->latest('created_at')
+            ->take(5)
+            ->get();
     }
 }

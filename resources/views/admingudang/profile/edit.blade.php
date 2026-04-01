@@ -14,9 +14,27 @@
                             <i class="bx bx-chevron-right me-2"></i>
                             <span class="text-dark">Profil Saya</span>
                         </nav>
-                        <h4 class="mb-0">Edit Profil</h4>
+                        <h4 class="mb-0">Pengaturan Akun</h4>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="javascript:void(0);">
+                            <i class="bx bx-user me-1"></i> Profil Saya
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin-gudang.profile.security.edit', $dapur) }}">
+                            <i class="bx bx-lock-alt me-1"></i> Keamanan
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
 
@@ -36,199 +54,233 @@
 
         <div class="card mb-4">
             <div class="card-body">
-                <form id="profileForm" action="{{ route('admin-gudang.profile.update', $dapur) }}" method="POST" class="row g-3" enctype="multipart/form-data">
+                <form id="profileForm" action="{{ route('admin-gudang.profile.update', $dapur) }}" method="POST" class="row g-4" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
-                    <div class="col-12 mb-2">
-                        <h6 class="fw-semibold pb-2 border-bottom">Informasi Dasar</h6>
+                    <div class="col-12">
+                        <h5 class="card-title mb-0">Informasi Dasar</h5>
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <label for="nama" class="form-label">Nama Akun (Login) <span class="text-danger">*</span></label>
+                                <input type="text" name="nama" id="nama" required
+                                    class="form-control @error('nama') is-invalid @enderror" placeholder="Contoh: John Doe"
+                                    value="{{ old('nama', $user->nama) }}">
+                                @error('nama')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                                <input type="text" name="username" id="username" required
+                                    class="form-control @error('username') is-invalid @enderror"
+                                    placeholder="Contoh: johndoe" value="{{ old('username', $user->username) }}">
+                                @error('username')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" id="email" required
+                                    class="form-control @error('email') is-invalid @enderror"
+                                    placeholder="Contoh: john@example.com" value="{{ old('email', $user->email) }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <label for="nama" class="form-label">
-                            Nama Akun (Login) <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" 
-                               name="nama" 
-                               id="nama"
-                               class="form-control @error('nama') is-invalid @enderror"
-                               placeholder="Nama Lengkap"
-                               value="{{ old('nama', $user->nama) }}" 
-                               required>
-                        @error('nama')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="nama_lengkap" class="form-label">
-                            Nama Lengkap Logistik <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" 
-                               name="nama_lengkap" 
-                               id="nama_lengkap"
-                               class="form-control @error('nama_lengkap') is-invalid @enderror"
-                               placeholder="Nama Lengkap Logistik"
-                               value="{{ old('nama_lengkap', $adminGudang->nama_lengkap) }}" 
-                               required>
-                        @error('nama_lengkap')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="nik_admin_gudang" class="form-label">
-                            NIK Logistik
-                        </label>
-                        <input type="text" 
-                               name="nik_admin_gudang" 
-                               id="nik_admin_gudang"
-                               class="form-control @error('nik_admin_gudang') is-invalid @enderror"
-                               placeholder="Contoh: 3171234567890001"
-                               value="{{ old('nik_admin_gudang', $adminGudang->nik_admin_gudang) }}">
-                        @error('nik_admin_gudang')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label for="jabatan" class="form-label">
-                            Jabatan
-                        </label>
-                        <select name="jabatan" id="jabatan" class="form-select @error('jabatan') is-invalid @enderror">
-                            <option value="">Pilih Jabatan</option>
-                            <option value="Penanggung jawab" {{ old('jabatan', $adminGudang->jabatan) === 'Penanggung jawab' ? 'selected' : '' }}>Penanggung jawab</option>
-                            <option value="Anggota" {{ old('jabatan', $adminGudang->jabatan) === 'Anggota' ? 'selected' : '' }}>Anggota</option>
-                        </select>
-                        @error('jabatan')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="kontak_wa" class="form-label">
-                            Nomor WhatsApp / Telepon
-                        </label>
-                        <input type="text" 
-                               name="kontak_wa" 
-                               id="kontak_wa"
-                               class="form-control @error('kontak_wa') is-invalid @enderror"
-                               placeholder="Contoh: 08123456789"
-                               value="{{ old('kontak_wa', $adminGudang->kontak_wa) }}">
-                        @error('kontak_wa')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="jenis_kelamin" class="form-label">
-                            Jenis Kelamin
-                        </label>
-                        <select name="jenis_kelamin" id="jenis_kelamin" class="form-select @error('jenis_kelamin') is-invalid @enderror">
-                            <option value="">Pilih Jenis Kelamin</option>
-                            <option value="Pria" {{ old('jenis_kelamin', $adminGudang->jenis_kelamin) === 'Pria' ? 'selected' : '' }}>Pria</option>
-                            <option value="Wanita" {{ old('jenis_kelamin', $adminGudang->jenis_kelamin) === 'Wanita' ? 'selected' : '' }}>Wanita</option>
-                        </select>
-                        @error('jenis_kelamin')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="pendidikan_terakhir" class="form-label">
-                            Pendidikan Terakhir
-                        </label>
-                        <select name="pendidikan_terakhir" id="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') is-invalid @enderror">
-                            <option value="">Pilih Pendidikan</option>
-                            <option value="SD" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'SD' ? 'selected' : '' }}>SD</option>
-                            <option value="SMP" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'SMP' ? 'selected' : '' }}>SMP</option>
-                            <option value="SMA" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'SMA' ? 'selected' : '' }}>SMA</option>
-                            <option value="D1" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'D1' ? 'selected' : '' }}>D1</option>
-                            <option value="D2" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'D2' ? 'selected' : '' }}>D2</option>
-                            <option value="D3" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'D3' ? 'selected' : '' }}>D3</option>
-                            <option value="Sarjana" {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'Sarjana' ? 'selected' : '' }}>Sarjana (S1/S2/S3)</option>
-                        </select>
-                        @error('pendidikan_terakhir')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-12">
-                        <label for="foto_diri" class="form-label">
-                            Foto Diri
-                        </label>
-                        <input type="file" 
-                               name="foto_diri" 
-                               id="foto_diri"
-                               accept="image/*"
-                               class="form-control @error('foto_diri') is-invalid @enderror">
-                        @error('foto_diri')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    <div class="col-12">
+                        <hr class="my-3">
+                        <h5 class="card-title mb-3">Detail Personal Admin Gudang</h5>
                         
-                        <div class="mt-3">
-                            <img id="image_preview" 
-                                 src="{{ $adminGudang->foto_diri ? Storage::url($adminGudang->foto_diri) : '#' }}" 
-                                 alt="Preview Foto Diri" 
-                                 class="img-fluid rounded border" 
-                                 style="max-height: 200px; object-fit: cover; {{ $adminGudang->foto_diri ? 'display: block;' : 'display: none;' }}">
+                        <label class="form-label d-block text-center mb-3">Foto Profil</label>
+                        <div class="d-flex align-items-start align-items-sm-center justify-content-center gap-4 mb-4">
+                            <div class="position-relative">
+                                <img id="uploadedAvatar"
+                                    src="{{ $adminGudang->foto_diri ? Storage::url($adminGudang->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
+                                    alt="user-avatar" class="rounded-3 border" height="100" width="100"
+                                    style="object-fit: cover" />
+                                <label for="upload"
+                                    class="btn btn-icon btn-primary rounded-circle position-absolute @error('foto_diri') border-danger @enderror"
+                                    style="bottom: -10px; right: -10px; width: 32px; height: 32px; padding: 0; cursor: pointer;"
+                                    title="Unggah Foto Baru">
+                                    <i class="bx bx-camera fs-6"></i>
+                                    <input type="file" id="upload" name="foto_diri" class="account-file-input"
+                                        hidden accept="image/png, image/jpeg, image/jpg, image/webp" />
+                                </label>
+                            </div>
+                            <div class="button-wrapper text-start">
+                                <button type="button"
+                                    class="btn btn-outline-secondary btn-sm mb-2 account-image-reset {{ !$adminGudang->foto_diri ? 'd-none' : '' }}">
+                                    <i class="bx bx-reset me-1"></i> Reset
+                                </button>
+                                <p class="text-muted mb-0 small">Format yang diizinkan JPG, GIF atau PNG.</p>
+                                <p class="text-muted mb-0 small">Ukuran maksimal 2MB.</p>
+                                @error('foto_diri')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label for="nik_admin_gudang" class="form-label">NIK Admin Gudang</label>
+                                <input type="text" name="nik_admin_gudang" id="nik_admin_gudang"
+                                    class="form-control @error('nik_admin_gudang') is-invalid @enderror"
+                                    placeholder="Contoh: 3171234567890001"
+                                    value="{{ old('nik_admin_gudang', $adminGudang->nik_admin_gudang) }}">
+                                @error('nik_admin_gudang')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="nama_lengkap" class="form-label">Nama Lengkap Sesuai KTP</label>
+                                <input type="text" name="nama_lengkap" id="nama_lengkap"
+                                    class="form-control @error('nama_lengkap') is-invalid @enderror"
+                                    placeholder="Nama lengkap sesuai KTP"
+                                    value="{{ old('nama_lengkap', $adminGudang->nama_lengkap) }}">
+                                @error('nama_lengkap')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="jabatan" class="form-label">Jabatan</label>
+                                <select name="jabatan" id="jabatan"
+                                    class="form-select @error('jabatan') is-invalid @enderror">
+                                    <option value="">Pilih Jabatan</option>
+                                    <option value="Penanggung jawab"
+                                        {{ old('jabatan', $adminGudang->jabatan) === 'Penanggung jawab' ? 'selected' : '' }}>
+                                        Penanggung jawab</option>
+                                    <option value="Anggota"
+                                        {{ old('jabatan', $adminGudang->jabatan) === 'Anggota' ? 'selected' : '' }}>
+                                        Anggota</option>
+                                </select>
+                                @error('jabatan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="kontak_wa" class="form-label">Nomor WhatsApp / Telepon</label>
+                                <input type="text" name="kontak_wa" id="kontak_wa"
+                                    class="form-control @error('kontak_wa') is-invalid @enderror"
+                                    placeholder="Contoh: 08123456789"
+                                    value="{{ old('kontak_wa', $adminGudang->kontak_wa) }}">
+                                @error('kontak_wa')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+                                <select name="jenis_kelamin" id="jenis_kelamin"
+                                    class="form-select @error('jenis_kelamin') is-invalid @enderror">
+                                    <option value="">Pilih Jenis Kelamin</option>
+                                    <option value="Pria"
+                                        {{ old('jenis_kelamin', $adminGudang->jenis_kelamin) === 'Pria' ? 'selected' : '' }}>
+                                        Pria</option>
+                                    <option value="Wanita"
+                                        {{ old('jenis_kelamin', $adminGudang->jenis_kelamin) === 'Wanita' ? 'selected' : '' }}>
+                                        Wanita</option>
+                                </select>
+                                @error('jenis_kelamin')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="pendidikan_terakhir" class="form-label">Pendidikan Terakhir</label>
+                                <select name="pendidikan_terakhir" id="pendidikan_terakhir"
+                                    class="form-select @error('pendidikan_terakhir') is-invalid @enderror">
+                                    <option value="">Pilih Pendidikan</option>
+                                    <option value="SD"
+                                        {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'SD' ? 'selected' : '' }}>
+                                        SD</option>
+                                    <option value="SMP"
+                                        {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'SMP' ? 'selected' : '' }}>
+                                        SMP</option>
+                                    <option value="SMA"
+                                        {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'SMA' ? 'selected' : '' }}>
+                                        SMA</option>
+                                    <option value="D1"
+                                        {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'D1' ? 'selected' : '' }}>
+                                        D1</option>
+                                    <option value="D2"
+                                        {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'D2' ? 'selected' : '' }}>
+                                        D2</option>
+                                    <option value="D3"
+                                        {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'D3' ? 'selected' : '' }}>
+                                        D3</option>
+                                    <option value="Sarjana"
+                                        {{ old('pendidikan_terakhir', $adminGudang->pendidikan_terakhir) === 'Sarjana' ? 'selected' : '' }}>
+                                        Sarjana (S1/S2/S3)</option>
+                                </select>
+                                @error('pendidikan_terakhir')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                     </div>
 
-                    <div class="col-12 mt-4 mb-2">
-                        <h6 class="fw-semibold pb-2 border-bottom">Informasi Alamat Pribadi</h6>
-                    </div>
+                    <div class="col-12">
+                        <hr class="my-3">
+                        <h5 class="card-title mb-3">Informasi Alamat</h5>
+                        <div class="row g-4">
+                            <input type="hidden" name="province_code" id="province_code" value="{{ old('province_code', $adminGudang->province_code) }}">
+                            <input type="hidden" name="regency_code" id="regency_code" value="{{ old('regency_code', $adminGudang->regency_code) }}">
+                            <input type="hidden" name="district_code" id="district_code" value="{{ old('district_code', $adminGudang->district_code) }}">
+                            <input type="hidden" name="village_code" id="village_code" value="{{ old('village_code', $adminGudang->village_code) }}">
 
-                    <input type="hidden" name="province_code" id="province_code" value="{{ old('province_code', $adminGudang->province_code) }}">
-                    <input type="hidden" name="regency_code" id="regency_code" value="{{ old('regency_code', $adminGudang->regency_code) }}">
-                    <input type="hidden" name="district_code" id="district_code" value="{{ old('district_code', $adminGudang->district_code) }}">
-                    <input type="hidden" name="village_code" id="village_code" value="{{ old('village_code', $adminGudang->village_code) }}">
+                            <input type="hidden" name="provinsi" id="provinsi_name" value="{{ old('provinsi', $adminGudang->province_name) }}">
+                            <input type="hidden" name="kabupaten_kota" id="kabupaten_name" value="{{ old('kabupaten_kota', $adminGudang->regency_name) }}">
+                            <input type="hidden" name="kecamatan" id="kecamatan_name" value="{{ old('kecamatan', $adminGudang->district_name) }}">
+                            <input type="hidden" name="kelurahan" id="kelurahan_name" value="{{ old('kelurahan', $adminGudang->village_name) }}">
 
-                    <input type="hidden" name="provinsi" id="provinsi_name" value="{{ old('provinsi', $adminGudang->province_name) }}">
-                    <input type="hidden" name="kabupaten_kota" id="kabupaten_name" value="{{ old('kabupaten_kota', $adminGudang->regency_name) }}">
-                    <input type="hidden" name="kecamatan" id="kecamatan_name" value="{{ old('kecamatan', $adminGudang->district_name) }}">
-                    <input type="hidden" name="kelurahan" id="kelurahan_name" value="{{ old('kelurahan', $adminGudang->village_name) }}">
+                            <div class="col-md-6 border-end pe-3">
+                                <div class="mb-3">
+                                    <label for="provinsi_select" class="form-label">Provinsi</label>
+                                    <select id="provinsi_select" class="form-select select2">
+                                        <option value="">Pilih Provinsi</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="kabupaten_select" class="form-label">Kabupaten / Kota</label>
+                                    <select id="kabupaten_select" class="form-select select2" disabled>
+                                        <option value="">Pilih Kabupaten/Kota</option>
+                                    </select>
+                                </div>
 
-                    <div class="col-md-6 border-end pe-3">
-                        <div class="mb-3">
-                            <label for="provinsi_select" class="form-label">Provinsi</label>
-                            <select id="provinsi_select" class="form-select select2">
-                                <option value="">Pilih Provinsi</option>
-                            </select>
+                                <div class="mb-3">
+                                    <label for="kecamatan_select" class="form-label">Kecamatan</label>
+                                    <select id="kecamatan_select" class="form-select select2" disabled>
+                                        <option value="">Pilih Kecamatan</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="kelurahan_select" class="form-label">Desa / Kelurahan</label>
+                                    <select id="kelurahan_select" class="form-select select2" disabled>
+                                        <option value="">Pilih Desa/Kelurahan</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 ps-3">
+                                <label for="alamat_detail" class="form-label">Alamat Lengkap (Keterangan)</label>
+                                <textarea name="alamat_detail" id="alamat_detail" class="form-control @error('alamat_detail') is-invalid @enderror"
+                                    rows="6" placeholder="Nama jalan, gedung, no rumah, RT/RW, patokan">{{ old('alamat_detail', $adminGudang->alamat_detail) }}</textarea>
+                                @error('alamat_detail')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="kabupaten_select" class="form-label">Kabupaten / Kota</label>
-                            <select id="kabupaten_select" class="form-select select2" disabled>
-                                <option value="">Pilih Kabupaten/Kota</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="kecamatan_select" class="form-label">Kecamatan</label>
-                            <select id="kecamatan_select" class="form-select select2" disabled>
-                                <option value="">Pilih Kecamatan</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="kelurahan_select" class="form-label">Desa / Kelurahan</label>
-                            <select id="kelurahan_select" class="form-select select2" disabled>
-                                <option value="">Pilih Desa/Kelurahan</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 ps-3">
-                        <label for="alamat_detail" class="form-label">Alamat Lengkap</label>
-                        <textarea name="alamat_detail" 
-                                  id="alamat_detail" 
-                                  class="form-control @error('alamat_detail') is-invalid @enderror" 
-                                  rows="6" 
-                                  placeholder="Nama jalan, gedung, no rumah, RT/RW, patokan">{{ old('alamat_detail', $adminGudang->alamat_detail) }}</textarea>
-                        @error('alamat_detail')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
                     </div>
 
                     <div class="col-12 mt-4 text-end">
@@ -263,30 +315,29 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Foto Preview Logic
-    const fotoInput = document.getElementById('foto_diri');
-    const imagePreview = document.getElementById('image_preview');
+    const uploadInput = document.getElementById('upload');
+    const uploadedAvatar = document.getElementById('uploadedAvatar');
+    const accountImageReset = document.querySelector('.account-image-reset');
 
-    fotoInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
+    if (uploadInput) {
+        uploadInput.onchange = (e) => {
+            const [file] = uploadInput.files;
+            if (file) {
+                uploadedAvatar.src = URL.createObjectURL(file);
+                accountImageReset.classList.remove('d-none');
             }
-            reader.readAsDataURL(file);
-        } else {
-            // Revert back to original image if no file selected
-            const defaultSrc = "{{ $adminGudang->foto_diri ? Storage::url($adminGudang->foto_diri) : '#' }}";
-            if (defaultSrc !== '#') {
-                imagePreview.src = defaultSrc;
-            } else {
-                imagePreview.style.display = 'none';
-                imagePreview.src = '#';
+        };
+    }
+
+    if (accountImageReset) {
+        accountImageReset.onclick = () => {
+            uploadInput.value = '';
+            uploadedAvatar.src = "{{ $adminGudang->foto_diri ? Storage::url($adminGudang->foto_diri) : asset('admin/assets/img/avatars/1.png') }}";
+            if (!{{ $adminGudang->foto_diri ? 'true' : 'false' }}) {
+                accountImageReset.classList.add('d-none');
             }
-        }
-    });
+        };
+    }
 
     // Initialize Select2
     $('.select2').select2({
@@ -309,9 +360,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const nameDist = document.getElementById('kecamatan_name');
     const codeVill = document.getElementById('village_code');
     const nameVill = document.getElementById('kelurahan_name');
-
-    // Submit button logic to ensure data is loaded
-    const submitBtn = document.getElementById('submitBtn');
 
     // Pre-filled data
     const savedProvCode = codeProv.value;
@@ -342,7 +390,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             provinsiSelect.html(options);
 
-            // Pre-load regency if province exists
             if (savedProvCode) {
                 loadKabupaten(savedProvCode, savedRegencyCode);
             }
@@ -357,7 +404,6 @@ document.addEventListener('DOMContentLoaded', function () {
         codeProv.value = id;
         nameProv.value = nama;
 
-        // Reset descendants
         resetSelect(kabupatenSelect, 'Pilih Kabupaten/Kota');
         resetSelect(kecamatanSelect, 'Pilih Kecamatan');
         resetSelect(kelurahanSelect, 'Pilih Desa/Kelurahan');
@@ -398,7 +444,6 @@ document.addEventListener('DOMContentLoaded', function () {
         codeReg.value = id;
         nameReg.value = nama;
 
-        // Reset descendants
         resetSelect(kecamatanSelect, 'Pilih Kecamatan');
         resetSelect(kelurahanSelect, 'Pilih Desa/Kelurahan');
         
@@ -437,7 +482,6 @@ document.addEventListener('DOMContentLoaded', function () {
         codeDist.value = id;
         nameDist.value = nama;
 
-        // Reset descendants
         resetSelect(kelurahanSelect, 'Pilih Desa/Kelurahan');
         codeVill.value = ''; nameVill.value = '';
 
@@ -470,3 +514,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+

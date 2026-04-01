@@ -23,9 +23,9 @@
                     "
                     onmouseover="this.style.background='rgba(255,255,255,0.25)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                    <div class="avatar avatar-online me-3">
-                        <img src="{{ isset($ahliGizi) && $ahliGizi->foto_diri ? Storage::url($ahliGizi->foto_diri) : (auth()->user()->foto_diri ? Storage::url(auth()->user()->foto_diri) : asset('admin/assets/img/avatars/1.png')) }}" alt="Foto"
-                            class="w-px-40 h-auto rounded-circle" style="object-fit: cover; aspect-ratio: 1/1;" />
+                    <div class="avatar avatar-online me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                        <img src="{{ auth()->user()->ahliGizi && auth()->user()->ahliGizi->first() && auth()->user()->ahliGizi->first()->foto_diri ? Storage::url(auth()->user()->ahliGizi->first()->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
+                            alt class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
@@ -56,9 +56,9 @@
                         <a class="dropdown-item" href="{{ route('ahli-gizi.profile.edit', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online">
+                                    <div class="avatar avatar-online" style="width: 40px; height: 40px; flex-shrink: 0;">
                                         <img src="{{ isset($ahliGizi) && $ahliGizi->foto_diri ? Storage::url($ahliGizi->foto_diri) : (auth()->user()->foto_diri ? Storage::url(auth()->user()->foto_diri) : asset('admin/assets/img/avatars/1.png')) }}" alt="Foto"
-                                            class="w-px-40 h-auto rounded-circle" style="object-fit: cover; aspect-ratio: 1/1;" />
+                                            class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
@@ -68,18 +68,23 @@
                                     <small class="text-muted">
                                         {{ ucfirst(str_replace('_', ' ', session('role_type') ?? 'Unknown')) }}
                                     </small>
-                                    @if (session('subscription_end'))
-                                        <small class="text-info d-block">
-                                            Dapur:
-                                            {{ session('dapur_name') ?? 'Tidak Tersedia' }}
-                                        </small>
-                                        <small class="text-muted d-block">
-                                            Expires:
-                                            {{ \Carbon\Carbon::parse(session('subscription_end'))->format('d M Y') }}
-                                        </small>
-                                    @endif
                                 </div>
                             </div>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('ahli-gizi.profile.edit', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}">
+                            <i class="bx bx-user me-2"></i>
+                            <span class="align-middle">Profil Saya</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('ahli-gizi.profile.security.edit', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}">
+                            <i class="bx bx-lock-alt me-2"></i>
+                            <span class="align-middle">Keamanan</span>
                         </a>
                     </li>
                     <li>

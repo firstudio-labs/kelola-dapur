@@ -195,20 +195,14 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <div
-                            class="d-flex justify-content-between align-items-center"
-                        >
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="mb-2">Total Menu</h6>
-                                <h4 class="mb-0">
-                                    {{ number_format($totalMenus ?? 0) }}
-                                </h4>
+                                <h6 class="mb-2">Total Item Bahan</h6>
+                                <h4 class="mb-0">{{ number_format($totalStock ?? 0) }}</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-primary"
-                                >
-                                    <i class="bx bx-food-menu"></i>
+                                <span class="avatar-initial rounded bg-label-primary">
+                                    <i class="bx bx-package"></i>
                                 </span>
                             </div>
                         </div>
@@ -219,20 +213,14 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <div
-                            class="d-flex justify-content-between align-items-center"
-                        >
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="mb-2">Menu Aktif</h6>
-                                <h4 class="mb-0">
-                                    {{ number_format($activeMenus ?? 0) }}
-                                </h4>
+                                <h6 class="mb-2">Stok Menipis</h6>
+                                <h4 class="mb-0">{{ number_format($lowStockItems ?? 0) }}</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-success"
-                                >
-                                    <i class="bx bx-check-circle"></i>
+                                <span class="avatar-initial rounded bg-label-{{ ($lowStockItems ?? 0) > 0 ? 'warning' : 'success' }}">
+                                    <i class="bx bx-trending-down"></i>
                                 </span>
                             </div>
                         </div>
@@ -243,20 +231,14 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <div
-                            class="d-flex justify-content-between align-items-center"
-                        >
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="mb-2">Menu Tidak Aktif</h6>
-                                <h4 class="mb-0">
-                                    {{ number_format($inactiveMenus ?? 0) }}
-                                </h4>
+                                <h6 class="mb-2">Restok Pending</h6>
+                                <h4 class="mb-0">{{ number_format($pendingRequestsCount ?? 0) }}</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-danger"
-                                >
-                                    <i class="bx bx-x-circle"></i>
+                                <span class="avatar-initial rounded bg-label-info">
+                                    <i class="bx bx-loader-circle"></i>
                                 </span>
                             </div>
                         </div>
@@ -267,20 +249,14 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <div
-                            class="d-flex justify-content-between align-items-center"
-                        >
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="mb-2">Transaksi Bulanan</h6>
-                                <h4 class="mb-0">
-                                    {{ number_format($totalTransactions ?? 0) }}
-                                </h4>
+                                <h6 class="mb-2">Kekurangan Stok</h6>
+                                <h4 class="mb-0">{{ number_format($pendingShortagesCount ?? 0) }}</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-info"
-                                >
-                                    <i class="bx bx-cart"></i>
+                                <span class="avatar-initial rounded bg-label-{{ ($pendingShortagesCount ?? 0) > 0 ? 'danger' : 'success' }}">
+                                    <i class="bx bx-error-circle"></i>
                                 </span>
                             </div>
                         </div>
@@ -289,30 +265,17 @@
             </div>
         </div>
 
-        @if (isset($recentMenus) && $recentMenus->isNotEmpty())
+        @if (isset($recentShortages) && $recentShortages->isNotEmpty())
             <div class="row">
                 <div class="col-12 mb-4">
                     <div class="card">
-                        <div
-                            class="card-header d-flex justify-content-between align-items-center"
-                        >
-                            <h5 class="mb-0">Menu Terbaru</h5>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Kekurangan Terkini</h5>
 
                             @if (isset($dapur->id_dapur))
-                                <a
-                                    href="{{ route("ahli-gizi.menu-makanan.create", $dapur->id_dapur) }}"
-                                    class="btn btn-sm btn-primary"
-                                >
-                                    <i class="bx bx-plus me-1"></i>
-                                    Tambah Menu
-                                </a>
-                            @else
-                                <a
-                                    href="{{ route("ahli-gizi.menu-makanan.create") }}"
-                                    class="btn btn-sm btn-primary"
-                                >
-                                    <i class="bx bx-plus me-1"></i>
-                                    Tambah Menu
+                                <a href="{{ route("admin-gudang.laporan-kekurangan.index", $dapur->id_dapur) }}" class="btn btn-sm btn-primary">
+                                    <i class="bx bx-list-ul me-1"></i>
+                                    Lihat Semua
                                 </a>
                             @endif
                         </div>
@@ -321,67 +284,33 @@
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>Nama Menu</th>
-                                            <th>Deskripsi</th>
+                                            <th>Item Bahan</th>
+                                            <th>Kurang</th>
                                             <th>Status</th>
-                                            <th>Terakhir Diperbarui</th>
+                                            <th>Tanggal</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($recentMenus as $menu)
+                                        @foreach ($recentShortages as $shortage)
                                             <tr>
+                                                <td>{{ $shortage->templateItem->nama_bahan ?? "N/A" }}</td>
+                                                <td>{{ $shortage->getFormattedJumlahKurang() }}</td>
                                                 <td>
-                                                    {{ $menu->nama_menu ?? "N/A" }}
-                                                </td>
-                                                <td>
-                                                    {{ Str::limit($menu->deskripsi ?? "Tidak ada deskripsi", 50) }}
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        class="badge bg-label-{{ $menu->is_active ?? false ? "success" : "danger" }}"
-                                                    >
-                                                        {{ $menu->is_active ?? false ? "Aktif" : "Tidak Aktif" }}
+                                                    <span class="badge {{ $shortage->getStatusBadgeClass() }}">
+                                                        {{ ucfirst($shortage->status) }}
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    @if (
-                                                    isset($menu->updated_at) && $menu->updated_at                                                    )
-                                                        {{ $menu->updated_at->format("d M Y H:i") }}
-                                                    @else
-                                                        <span
-                                                            class="text-muted"
-                                                        >
-                                                            Tidak ada data
-                                                        </span>
-                                                    @endif
+                                                    {{ $shortage->created_at ? $shortage->created_at->format('d M Y H:i') : '-' }}
                                                 </td>
                                                 <td>
-                                                    @if (isset($menu->id_menu))
-                                                        <a
-                                                            href="{{ route("ahli-gizi.menu-makanan.show", $menu->id_menu) }}"
-                                                            class="btn btn-sm btn-icon btn-outline-info me-1"
-                                                            title="Lihat Detail"
-                                                        >
-                                                            <i
-                                                                class="bx bx-show"
-                                                            ></i>
-                                                        </a>
-                                                        <a
-                                                            href="{{ route("ahli-gizi.menu-makanan.edit", $menu->id_menu) }}"
-                                                            class="btn btn-sm btn-icon btn-outline-primary"
-                                                            title="Edit"
-                                                        >
-                                                            <i
-                                                                class="bx bx-edit"
-                                                            ></i>
+                                                    @if (isset($dapur->id_dapur))
+                                                        <a href="{{ route("admin-gudang.laporan-kekurangan.index", $dapur->id_dapur) }}" class="btn btn-sm btn-icon btn-outline-info" title="Lihat Detail">
+                                                            <i class="bx bx-show"></i>
                                                         </a>
                                                     @else
-                                                        <span
-                                                            class="text-muted"
-                                                        >
-                                                            -
-                                                        </span>
+                                                        <span class="text-muted">-</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -394,44 +323,19 @@
                 </div>
             </div>
         @else
-            
             <div class="row">
                 <div class="col-12 mb-4">
                     <div class="card">
                         <div class="card-body text-center py-5">
                             <div class="avatar avatar-lg mx-auto mb-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-primary"
-                                >
-                                    <i
-                                        class="bx bx-food-menu"
-                                        style="font-size: 2rem"
-                                    ></i>
+                                <span class="avatar-initial rounded bg-label-success">
+                                    <i class="bx bx-check-shield" style="font-size: 2rem"></i>
                                 </span>
                             </div>
-                            <h5 class="mb-2">Belum Ada Menu</h5>
-                            <p class="text-muted mb-4">
-                                Anda belum membuat menu makanan. Mulai dengan
-                                membuat menu pertama Anda.
+                            <h5 class="mb-2">Tidak Ada Laporan Kekurangan</h5>
+                            <p class="text-muted mb-0">
+                                Saat ini tidak ada laporan kekurangan stok yang perlu ditangani.
                             </p>
-
-                            @if (isset($dapur->id_dapur))
-                                <a
-                                    href="{{ route("ahli-gizi.menu-makanan.create", $dapur->id_dapur) }}"
-                                    class="btn btn-primary"
-                                >
-                                    <i class="bx bx-plus me-1"></i>
-                                    Buat Menu Pertama
-                                </a>
-                            @else
-                                <a
-                                    href="{{ route("ahli-gizi.menu-makanan.create") }}"
-                                    class="btn btn-primary"
-                                >
-                                    <i class="bx bx-plus me-1"></i>
-                                    Buat Menu Pertama
-                                </a>
-                            @endif
                         </div>
                     </div>
                 </div>

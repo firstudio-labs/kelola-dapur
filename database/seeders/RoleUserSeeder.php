@@ -14,6 +14,7 @@ use App\Models\Produksi;
 use App\Models\Distributor;
 use App\Models\PenerimaMbg;
 use App\Models\Mitra;
+use App\Models\Akuntan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
@@ -90,6 +91,12 @@ class RoleUserSeeder extends Seeder
                     'nama' => 'Anom Mitra',
                     'model' => Mitra::class,
                     'needs_dapur' => false,
+                ],
+                'akuntan' => [
+                    'username' => 'anomakuntan',
+                    'nama' => 'Anom Akuntan',
+                    'model' => Akuntan::class,
+                    'needs_dapur' => true,
                 ],
             ];
 

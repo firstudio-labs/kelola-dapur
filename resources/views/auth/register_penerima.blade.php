@@ -161,14 +161,7 @@
 
                         <h6 class="fw-semibold pb-2 border-bottom mb-3">Titik Lokasi & Foto</h6>
                         <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label">Latitude</label>
-                                <input type="text" name="latitude" class="form-control" value="{{ old('latitude') }}" placeholder="-7.12345">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Longitude</label>
-                                <input type="text" name="longitude" class="form-control" value="{{ old('longitude') }}" placeholder="110.12345">
-                            </div>
+
                             <div class="col-md-4">
                                 <label class="form-label">Link Google Maps</label>
                                 <input type="url" name="link_gmaps" class="form-control" value="{{ old('link_gmaps') }}" placeholder="https://maps.google.com/...">

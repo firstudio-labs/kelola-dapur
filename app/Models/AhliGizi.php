@@ -15,6 +15,7 @@ class AhliGizi extends Model
     protected $fillable = [
         'id_user_role', 
         'id_dapur',
+        'nama_lengkap',
         'nik_ahli_gizi',
         'jabatan',
         'alamat_detail',

@@ -2,263 +2,407 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Pengaturan /</span> Profil Saya</h4>
-
-@if(session('success'))
-<div class="alert alert-success alert-dismissible" role="alert">
-    {{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-@endif
-
-<div class="row">
-    <div class="col-md-12">
-        <form action="{{ route('produksi.profile.update') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
-            
-            <div class="card mb-4">
-                <h5 class="card-header">Detail Profil</h5>
-                
-                <div class="card-body text-center">
-                    <div class="d-flex align-items-start align-items-sm-center justify-content-center gap-4">
-                        <img src="{{ $produksi && $produksi->foto_diri ? Storage::url($produksi->foto_diri) : asset('admin/assets/img/avatars/1.png') }}" 
-                             alt="user-avatar" 
-                             class="d-block rounded border" 
-                             height="150" 
-                             width="150" 
-                             id="uploadedAvatar" 
-                             style="object-fit: cover;" />
-                        <div class="button-wrapper text-start">
-                            <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
-                                <span class="d-none d-sm-block">Unggah Foto Baru</span>
-                                <i class="bx bx-upload d-block d-sm-none"></i>
-                                <input type="file" id="upload" name="foto_diri" class="account-file-input" hidden accept="image/png, image/jpeg, image/jpg, image/webp" />
-                            </label>
-                            <p class="text-muted mb-0">Format JPG, PNG, atau WEBP. Ukuran Maks 2MB.</p>
-                            @error('foto_diri')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <nav class="d-flex align-items-center mb-2">
+                            <a href="{{ route('produksi.dashboard') }}" class="text-muted me-2">
+                                <i class="bx bx-home-alt me-1"></i> Dashboard
+                            </a>
+                            <i class="bx bx-chevron-right me-2"></i>
+                            <span class="text-dark">Profil Saya</span>
+                        </nav>
+                        <h4 class="mb-0">Pengaturan Akun</h4>
                     </div>
-                </div>
-                <hr class="my-0" />
-                <div class="card-body">
-                    <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label for="nama" class="form-label">Nama Panggilan / Singkat</label>
-                            <input class="form-control" type="text" id="nama" name="nama" value="{{ old('nama', $user->nama) }}" />
-                            @error('nama') <div class="text-danger small">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="username" class="form-label">Username</label>
-                            <input class="form-control" type="text" name="username" id="username" value="{{ old('username', $user->username) }}" />
-                            @error('username') <div class="text-danger small">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="email" class="form-label">Email</label>
-                            <input class="form-control" type="text" id="email" name="email" value="{{ old('email', $user->email) }}" />
-                            @error('email') <div class="text-danger small">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="kontak_wa" class="form-label">Nomor WhatsApp</label>
-                            <input class="form-control" type="text" id="kontak_wa" name="kontak_wa" value="{{ old('kontak_wa', $produksi->kontak_wa) }}" />
-                            @error('kontak_wa') <div class="text-danger small">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="password" class="form-label">Password Baru (Kosongkan jika tidak ganti)</label>
-                            <input class="form-control" type="password" id="password" name="password" placeholder="········" />
-                            @error('password') <div class="text-danger small">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
-                            <input class="form-control" type="password" id="password_confirmation" name="password_confirmation" placeholder="········" />
-                        </div>
-                    </div>
-                </div>
-                <hr class="my-0" />
-                <div class="card-body">
-                    <h5 class="mb-4">Informasi Tambahan Produksi</h5>
-                    <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label for="nik_produksi" class="form-label">NIK (Nomor Induk Kependudukan)</label>
-                            <input class="form-control" type="text" id="nik_produksi" name="nik_produksi" value="{{ old('nik_produksi', $produksi->nik_produksi) }}" />
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="nama_lengkap" class="form-label">Nama Lengkap Sesuai KTP</label>
-                            <input class="form-control" type="text" id="nama_lengkap" name="nama_lengkap" value="{{ old('nama_lengkap', $produksi->nama_lengkap) }}" />
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="pendidikan" class="form-label">Pendidikan Terakhir</label>
-                            <select name="pendidikan" id="pendidikan" class="form-select">
-                                <option value="">Pilih Pendidikan</option>
-                                @foreach(['SD', 'SMP', 'SMA', 'D1', 'D2', 'D3', 'Sarjana'] as $edu)
-                                    <option value="{{ $edu }}" {{ old('pendidikan', $produksi->pendidikan) == $edu ? 'selected' : '' }}>{{ $edu }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
-                            <select name="jenis_kelamin" id="jenis_kelamin" class="form-select">
-                                <option value="">Pilih Jenis Kelamin</option>
-                                <option value="Pria" {{ old('jenis_kelamin', $produksi->jenis_kelamin) == 'Pria' ? 'selected' : '' }}>Pria</option>
-                                <option value="Wanita" {{ old('jenis_kelamin', $produksi->jenis_kelamin) == 'Wanita' ? 'selected' : '' }}>Wanita</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-0" />
-                <div class="card-body">
-                    <h5 class="mb-4">Informasi Alamat</h5>
-                    <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Provinsi</label>
-                            <select id="provinsi_select" class="form-select select2-location">
-                                <option value="">Pilih Provinsi</option>
-                            </select>
-                            <input type="hidden" name="province_code" id="province_code" value="{{ old('province_code', $produksi->province_code) }}">
-                            <input type="hidden" name="province_name" id="province_name" value="{{ old('province_name', $produksi->province_name) }}">
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Kabupaten/Kota</label>
-                            <select id="kabupaten_select" class="form-select select2-location" disabled>
-                                <option value="">Pilih Kabupaten/Kota</option>
-                            </select>
-                            <input type="hidden" name="regency_code" id="regency_code" value="{{ old('regency_code', $produksi->regency_code) }}">
-                            <input type="hidden" name="regency_name" id="regency_name" value="{{ old('regency_name', $produksi->regency_name) }}">
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Kecamatan</label>
-                            <select id="kecamatan_select" class="form-select select2-location" disabled>
-                                <option value="">Pilih Kecamatan</option>
-                            </select>
-                            <input type="hidden" name="district_code" id="district_code" value="{{ old('district_code', $produksi->district_code) }}">
-                            <input type="hidden" name="district_name" id="district_name" value="{{ old('district_name', $produksi->district_name) }}">
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Desa/Kelurahan</label>
-                            <select id="kelurahan_select" class="form-select select2-location" disabled>
-                                <option value="">Pilih Desa/Kelurahan</option>
-                            </select>
-                            <input type="hidden" name="village_code" id="village_code" value="{{ old('village_code', $produksi->village_code) }}">
-                            <input type="hidden" name="village_name" id="village_name" value="{{ old('village_name', $produksi->village_name) }}">
-                        </div>
-                        <div class="mb-3 col-12">
-                            <label for="alamat_detail" class="form-label">Alamat Lengkap (Keterangan)</label>
-                            <textarea name="alamat_detail" id="alamat_detail" class="form-control" rows="3">{{ old('alamat_detail', $produksi->alamat_detail) }}</textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-footer text-end mt-3">
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                 </div>
             </div>
-        </form>
+        </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="javascript:void(0);">
+                        <i class="bx bx-user me-1"></i> Profil Saya
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('produksi.profile.security.edit') }}">
+                        <i class="bx bx-lock-alt me-1"></i> Keamanan
+                    </a>
+                </li>
+            </ul>
+
+            <div class="card mb-4">
+                <h5 class="card-header">Detail Profil</h5>
+                <form id="formAccountSettings" method="POST" action="{{ route('produksi.profile.update') }}"
+                    enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="card-body">
+                        @if (session('success'))
+                            <div class="alert alert-success alert-dismissible mb-3" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <h6 class="fw-semibold">Informasi Dasar</h6>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="nama" class="form-label">Nama Akun (Login) <span
+                                        class="text-danger">*</span></label>
+                                <input class="form-control @error('nama') is-invalid @enderror" type="text" id="nama"
+                                    name="nama" value="{{ old('nama', $user->nama) }}" autofocus required />
+                                @error('nama')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="username" class="form-label">Username <span
+                                        class="text-danger">*</span></label>
+                                <input class="form-control @error('username') is-invalid @enderror" type="text"
+                                    name="username" id="username" value="{{ old('username', $user->username) }}"
+                                    required />
+                                @error('username')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="email" class="form-label">E-mail <span
+                                        class="text-danger">*</span></label>
+                                <input class="form-control @error('email') is-invalid @enderror" type="email"
+                                    id="email" name="email" value="{{ old('email', $user->email) }}"
+                                    placeholder="john.doe@example.com" required />
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12">
+                                <hr class="my-3">
+                                <h6 class="fw-semibold mb-3">Detail Personal Produksi</h6>
+                                
+                                <label class="form-label d-block text-center mb-3">Foto Profil</label>
+                                <div class="d-flex align-items-start align-items-sm-center justify-content-center gap-4 mb-4">
+                                    <div class="position-relative">
+                                        <img id="uploadedAvatar"
+                                            src="{{ $produksi->foto_diri ? Storage::url($produksi->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
+                                            alt="user-avatar" class="rounded-3 border" height="100" width="100"
+                                            style="object-fit: cover" />
+                                        <label for="upload"
+                                            class="btn btn-icon btn-primary rounded-circle position-absolute @error('foto_diri') border-danger @enderror"
+                                            style="bottom: -10px; right: -10px; width: 32px; height: 32px; padding: 0; cursor: pointer;"
+                                            title="Unggah Foto Baru">
+                                            <i class="bx bx-camera fs-6"></i>
+                                            <input type="file" id="upload" name="foto_diri" class="account-file-input"
+                                                hidden accept="image/png, image/jpeg, image/jpg, image/webp" />
+                                        </label>
+                                    </div>
+                                    <div class="button-wrapper text-start">
+                                        <button type="button"
+                                            class="btn btn-outline-secondary btn-sm mb-2 account-image-reset {{ !$produksi->foto_diri ? 'd-none' : '' }}">
+                                            <i class="bx bx-reset me-1"></i> Reset
+                                        </button>
+                                        <p class="text-muted mb-0 small">Format yang diizinkan JPG, GIF atau PNG.</p>
+                                        <p class="text-muted mb-0 small">Ukuran maksimal 2MB.</p>
+                                        @error('foto_diri')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="mb-3 col-md-6">
+                                        <label for="nik_produksi" class="form-label">NIK (Nomor Induk
+                                            Kependudukan)</label>
+                                        <input class="form-control @error('nik_produksi') is-invalid @enderror"
+                                            type="text" id="nik_produksi" name="nik_produksi"
+                                            value="{{ old('nik_produksi', $produksi->nik_produksi) }}" />
+                                        @error('nik_produksi')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3 col-md-6">
+                                        <label for="nama_lengkap" class="form-label">Nama Lengkap Sesuai KTP</label>
+                                        <input class="form-control @error('nama_lengkap') is-invalid @enderror"
+                                            type="text" id="nama_lengkap" name="nama_lengkap"
+                                            value="{{ old('nama_lengkap', $produksi->nama_lengkap) }}" />
+                                        @error('nama_lengkap')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3 col-md-6">
+                                        <label for="kontak_wa" class="form-label">Nomor WhatsApp / Telepon</label>
+                                        <input class="form-control @error('kontak_wa') is-invalid @enderror" type="text"
+                                            id="kontak_wa" name="kontak_wa"
+                                            value="{{ old('kontak_wa', $produksi->kontak_wa) }}" />
+                                        @error('kontak_wa')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3 col-md-6">
+                                        <label for="pendidikan" class="form-label">Pendidikan Terakhir</label>
+                                        <select name="pendidikan" id="pendidikan"
+                                            class="form-select @error('pendidikan') is-invalid @enderror">
+                                            <option value="">Pilih Pendidikan</option>
+                                            @foreach (['SD', 'SMP', 'SMA', 'D1', 'D2', 'D3', 'Sarjana'] as $edu)
+                                                <option value="{{ $edu }}"
+                                                    {{ old('pendidikan', $produksi->pendidikan) === $edu ? 'selected' : '' }}>
+                                                    {{ $edu }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('pendidikan')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3 col-md-6">
+                                        <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+                                        <select name="jenis_kelamin" id="jenis_kelamin"
+                                            class="form-select @error('jenis_kelamin') is-invalid @enderror">
+                                            <option value="">Pilih Jenis Kelamin</option>
+                                            <option value="Pria"
+                                                {{ old('jenis_kelamin', $produksi->jenis_kelamin) === 'Pria' ? 'selected' : '' }}>
+                                                Pria</option>
+                                            <option value="Wanita"
+                                                {{ old('jenis_kelamin', $produksi->jenis_kelamin) === 'Wanita' ? 'selected' : '' }}>
+                                                Wanita</option>
+                                        </select>
+                                        @error('jenis_kelamin')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3 col-md-6">
+                                        <label for="jabatan" class="form-label">Jabatan (Opsional)</label>
+                                        <input class="form-control @error('jabatan') is-invalid @enderror" type="text"
+                                            id="jabatan" name="jabatan" value="{{ old('jabatan', $produksi->jabatan) }}" />
+                                        @error('jabatan')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4 mb-3">
+                                <hr class="my-3">
+                                <h6 class="fw-semibold">Alamat Lengkap</h6>
+                            </div>
+
+                            <div class="mb-3 col-md-6">
+                                <label for="province_id" class="form-label">Provinsi</label>
+                                <select id="province_id" name="province_code" class="form-select select2">
+                                    <option value="">Pilih Provinsi</option>
+                                </select>
+                                <input type="hidden" name="province_name" id="province_name_hidden"
+                                    value="{{ old('province_name', $produksi->province_name) }}">
+                            </div>
+
+                            <div class="mb-3 col-md-6">
+                                <label for="regency_id" class="form-label">Kabupaten / Kota</label>
+                                <select id="regency_id" name="regency_code" class="form-select select2" disabled>
+                                    <option value="">Pilih Kabupaten/Kota</option>
+                                </select>
+                                <input type="hidden" name="regency_name" id="regency_name_hidden"
+                                    value="{{ old('regency_name', $produksi->regency_name) }}">
+                            </div>
+
+                            <div class="mb-3 col-md-6">
+                                <label for="district_id" class="form-label">Kecamatan</label>
+                                <select id="district_id" name="district_code" class="form-select select2" disabled>
+                                    <option value="">Pilih Kecamatan</option>
+                                </select>
+                                <input type="hidden" name="district_name" id="district_name_hidden"
+                                    value="{{ old('district_name', $produksi->district_name) }}">
+                            </div>
+
+                            <div class="mb-3 col-md-6">
+                                <label for="village_id" class="form-label">Desa / Kelurahan</label>
+                                <select id="village_id" name="village_code" class="form-select select2" disabled>
+                                    <option value="">Pilih Desa/Kelurahan</option>
+                                </select>
+                                <input type="hidden" name="village_name" id="village_name_hidden"
+                                    value="{{ old('village_name', $produksi->village_name) }}">
+                            </div>
+
+                            <div class="mb-3 col-md-12">
+                                <label for="alamat_detail" class="form-label">Alamat Detail</label>
+                                <textarea class="form-control @error('alamat_detail') is-invalid @enderror"
+                                    id="alamat_detail" name="alamat_detail" rows="3"
+                                    placeholder="Nama jalan, gedung, no rumah, RT/RW, dsb.">{{ old('alamat_detail', $produksi->alamat_detail) }}</textarea>
+                                @error('alamat_detail')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="mt-2 text-end">
+                            <button type="submit" class="btn btn-primary me-2">Simpan Perubahan</button>
+                            <a href="{{ route('produksi.dashboard') }}" class="btn btn-outline-secondary">Batal</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-</div>
 </div>
 @endsection
 
 @push('styles')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<style>
-    .select2-container .select2-selection--single { height: 38px; border: 1px solid #d9dee3; }
-    .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 38px; color: #697a8d; }
-    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
-</style>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 38px;
+            border: 1px solid #d9dee3;
+            border-radius: 0.375rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+            padding-left: 12px;
+            color: #697a8d;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #696cff;
+        }
+    </style>
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Foto Preview
-    const uploadInput = document.getElementById('upload');
-    const avatarImg = document.getElementById('uploadedAvatar');
-    uploadInput.onchange = evt => {
-        const [file] = uploadInput.files;
-        if (file) avatarImg.src = URL.createObjectURL(file);
-    }
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Image Preview
+            const uploadInput = document.getElementById('upload');
+            const uploadedAvatar = document.getElementById('uploadedAvatar');
+            const accountImageReset = document.querySelector('.account-image-reset');
 
-    // API Wilayah
-    const provSel = $('#provinsi_select'), kabSel = $('#kabupaten_select'), kecSel = $('#kecamatan_select'), kelSel = $('#kelurahan_select');
-    const provC = $('#province_code'), provN = $('#province_name'), regC = $('#regency_code'), regN = $('#regency_name'), distC = $('#district_code'), distN = $('#district_name'), villC = $('#village_code'), villN = $('#village_name');
+            if (uploadInput) {
+                uploadInput.onchange = (e) => {
+                    const [file] = uploadInput.files;
+                    if (file) {
+                        uploadedAvatar.src = URL.createObjectURL(file);
+                    }
+                };
+            }
 
-    $('.select2-location').select2({ width: '100%' });
+            if (accountImageReset) {
+                accountImageReset.onclick = () => {
+                    uploadInput.value = '';
+                    uploadedAvatar.src =
+                        "{{ $produksi->foto_diri ? Storage::url($produksi->foto_diri) : asset('admin/assets/img/avatars/1.png') }}";
+                };
+            }
 
-    // Load Provinces
-    fetch('https://ibnux.github.io/data-indonesia/provinsi.json')
-        .then(r => r.json()).then(data => {
-            let opts = '<option value="">Pilih Provinsi</option>';
-            data.forEach(p => opts += `<option value="${p.id}" data-nama="${p.nama}" ${provC.val() == p.id ? 'selected' : ''}>${p.nama}</option>`);
-            provSel.html(opts);
-            if(provC.val()) loadKab(provC.val(), regC.val());
+            // Helper: init or reinit Select2 on an element
+            function initSelect2(el) {
+                if ($(el).data('select2')) {
+                    $(el).select2('destroy');
+                }
+                $(el).select2({ theme: 'default', width: '100%' });
+            }
+
+            // Initialize all select2 elements
+            $('.select2').each(function() { initSelect2(this); });
+
+            // Wilayah API Logic
+            const provinceSelect = $('#province_id');
+            const regencySelect  = $('#regency_id');
+            const districtSelect = $('#district_id');
+            const villageSelect  = $('#village_id');
+
+            const provinceNameInput = $('#province_name_hidden');
+            const regencyNameInput  = $('#regency_name_hidden');
+            const districtNameInput = $('#district_name_hidden');
+            const villageNameInput  = $('#village_name_hidden');
+
+            const currentProv = "{{ old('province_code', $produksi->province_code) }}";
+            const currentReg  = "{{ old('regency_code', $produksi->regency_code) }}";
+            const currentDist = "{{ old('district_code', $produksi->district_code) }}";
+            const currentVill = "{{ old('village_code', $produksi->village_code) }}";
+
+            function resetSelect(el, placeholder) {
+                el.html('<option value="">' + placeholder + '</option>');
+                el.prop('disabled', true);
+                initSelect2(el[0]);
+            }
+
+            // Load Provinces
+            $.get("{{ route('api.wilayah.provinces') }}", function(response) {
+                (response.data || response).forEach(function(item) { provinceSelect.append(new Option(item.name, item.id)); });
+                initSelect2(provinceSelect[0]);
+                if (currentProv) {
+                    provinceSelect.val(currentProv).trigger('change');
+                }
+            });
+
+            provinceSelect.on('change', function() {
+                const id = $(this).val();
+                provinceNameInput.val($(this).find('option:selected').text());
+
+                resetSelect(regencySelect, 'Pilih Kabupaten/Kota');
+                resetSelect(districtSelect, 'Pilih Kecamatan');
+                resetSelect(villageSelect, 'Pilih Desa/Kelurahan');
+
+                if (id) {
+                    $.get("{{ route('api.wilayah.regencies', '') }}/" + id, function(response) {
+                        (response.data || response).forEach(function(item) { regencySelect.append(new Option(item.name, item.id)); });
+                        regencySelect.prop('disabled', false);
+                        initSelect2(regencySelect[0]);
+                        if (currentReg && provinceSelect.val() === currentProv) {
+                            regencySelect.val(currentReg).trigger('change');
+                        }
+                    });
+                }
+            });
+
+            regencySelect.on('change', function() {
+                const id = $(this).val();
+                regencyNameInput.val($(this).find('option:selected').text());
+
+                resetSelect(districtSelect, 'Pilih Kecamatan');
+                resetSelect(villageSelect, 'Pilih Desa/Kelurahan');
+
+                if (id) {
+                    $.get("{{ route('api.wilayah.districts', '') }}/" + id, function(response) {
+                        (response.data || response).forEach(function(item) { districtSelect.append(new Option(item.name, item.id)); });
+                        districtSelect.prop('disabled', false);
+                        initSelect2(districtSelect[0]);
+                        if (currentDist && regencySelect.val() === currentReg) {
+                            districtSelect.val(currentDist).trigger('change');
+                        }
+                    });
+                }
+            });
+
+            districtSelect.on('change', function() {
+                const id = $(this).val();
+                districtNameInput.val($(this).find('option:selected').text());
+
+                resetSelect(villageSelect, 'Pilih Desa/Kelurahan');
+
+                if (id) {
+                    $.get("{{ route('api.wilayah.villages', '') }}/" + id, function(response) {
+                        (response.data || response).forEach(function(item) { villageSelect.append(new Option(item.name, item.id)); });
+                        villageSelect.prop('disabled', false);
+                        initSelect2(villageSelect[0]);
+                        if (currentVill && districtSelect.val() === currentDist) {
+                            villageSelect.val(currentVill).trigger('change');
+                        }
+                    });
+                }
+            });
+
+            villageSelect.on('change', function() {
+                villageNameInput.val($(this).find('option:selected').text());
+            });
         });
-
-    provSel.on('change', function(){
-        const opt = $(this).find(':selected');
-        provC.val(opt.val()); provN.val(opt.data('nama'));
-        reset(kabSel,'Pilih Kabupaten/Kota'); reset(kecSel,'Pilih Kecamatan'); reset(kelSel,'Pilih Desa/Kelurahan');
-        regC.val(''); regN.val(''); distC.val(''); distN.val(''); villC.val(''); villN.val('');
-        if(opt.val()) loadKab(opt.val());
-    });
-
-    function loadKab(id, selId=null){
-        kabSel.prop('disabled',true).html('<option>Memuat...</option>');
-        fetch(`https://ibnux.github.io/data-indonesia/kabupaten/${id}.json`)
-            .then(r=>r.json()).then(data => {
-                let opts = '<option value="">Pilih Kabupaten/Kota</option>';
-                data.forEach(k => opts += `<option value="${k.id}" data-nama="${k.nama}" ${selId == k.id ? 'selected' : ''}>${k.nama}</option>`);
-                kabSel.prop('disabled',false).html(opts);
-                if(selId && distC.val()) loadKec(selId, distC.val());
-            });
-    }
-
-    kabSel.on('change', function(){
-        const opt = $(this).find(':selected');
-        regC.val(opt.val()); regN.val(opt.data('nama'));
-        reset(kecSel,'Pilih Kecamatan'); reset(kelSel,'Pilih Desa/Kelurahan');
-        distC.val(''); distN.val(''); villC.val(''); villN.val('');
-        if(opt.val()) loadKec(opt.val());
-    });
-
-    function loadKec(id, selId=null){
-        kecSel.prop('disabled',true).html('<option>Memuat...</option>');
-        fetch(`https://ibnux.github.io/data-indonesia/kecamatan/${id}.json`)
-            .then(r=>r.json()).then(data => {
-                let opts = '<option value="">Pilih Kecamatan</option>';
-                data.forEach(k => opts += `<option value="${k.id}" data-nama="${k.nama}" ${selId == k.id ? 'selected' : ''}>${k.nama}</option>`);
-                kecSel.prop('disabled',false).html(opts);
-                if(selId && villC.val()) loadKel(selId, villC.val());
-            });
-    }
-
-    kecSel.on('change', function(){
-        const opt = $(this).find(':selected');
-        distC.val(opt.val()); distN.val(opt.data('nama'));
-        reset(kelSel,'Pilih Desa/Kelurahan');
-        villC.val(''); villN.val('');
-        if(opt.val()) loadKel(opt.val());
-    });
-
-    function loadKel(id, selId=null){
-        kelSel.prop('disabled',true).html('<option>Memuat...</option>');
-        fetch(`https://ibnux.github.io/data-indonesia/kelurahan/${id}.json`)
-            .then(r=>r.json()).then(data => {
-                let opts = '<option value="">Pilih Desa/Kelurahan</option>';
-                data.forEach(k => opts += `<option value="${k.id}" data-nama="${k.nama}" ${selId == k.id ? 'selected' : ''}>${k.nama}</option>`);
-                kelSel.prop('disabled',false).html(opts);
-            });
-    }
-
-    kelSel.on('change', function(){
-        const opt = $(this).find(':selected');
-        villC.val(opt.val()); villN.val(opt.data('nama'));
-    });
-
-    function reset(s, t){ s.html(`<option value="">${t}</option>`).prop('disabled', true); }
-});
-</script>
+    </script>
 @endpush

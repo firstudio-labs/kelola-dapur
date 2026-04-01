@@ -206,7 +206,7 @@
                     <p class="text-muted small mb-4">Ubah jumlah porsi kebutuhan harian Anda.</p>
                     <div class="input-group input-group-lg justify-content-center border rounded overflow-hidden">
                         <input type="number" name="jumlah_porsi" class="form-control text-center border-0"
-                               value="{{ old('jumlah_porsi', $penerima->jumlah_porsi) }}" min="1" max="9999" required>
+                               value="{{ old('jumlah_porsi', $penerima->jumlah_porsi) }}" min="1" max="1000000" required>
                         <span class="input-group-text border-0 bg-light">Porsi</span>
                     </div>
                 </div>

@@ -19,16 +19,16 @@ class DapurRoleGuard
         'menu.create' => ['ahli_gizi'],
         'menu.edit' => ['ahli_gizi'],
 
-        'transaction.view' => ['kepala_dapur', 'ahli_gizi'],
+        'transaction.view' => ['kepala_dapur', 'ahli_gizi', 'akuntan'],
         'transaction.create' => ['ahli_gizi'],
         'transaction.approve' => ['kepala_dapur'],
 
         'user.manage' => ['kepala_dapur'],
 
-        'report.view' => ['kepala_dapur', 'admin_gudang', 'ahli_gizi'],
+        'report.view' => ['kepala_dapur', 'admin_gudang', 'ahli_gizi', 'akuntan'],
         'report.stock' => ['kepala_dapur', 'admin_gudang'],
 
-        'view' => ['kepala_dapur', 'admin_gudang', 'ahli_gizi', 'distributor'],
+        'view' => ['kepala_dapur', 'admin_gudang', 'ahli_gizi', 'distributor', 'akuntan'],
     ];
 
     public function handle(Request $request, Closure $next, string $action = 'view'): Response

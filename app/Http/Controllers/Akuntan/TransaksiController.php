@@ -1,0 +1,272 @@
+<?php
+
+namespace App\Http\Controllers\Akuntan;
+
+use App\Http\Controllers\Controller;
+use App\Models\AccountingCategory;
+use App\Models\AccountingPeriod;
+use App\Models\AccountingTransaction;
+use App\Models\CashAccount;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+
+class TransaksiController extends Controller
+{
+    private function getDapurId(): int
+    {
+        return Auth::user()->userRole->id_dapur;
+    }
+
+    public function index(Request $request)
+    {
+        $dapurId = $this->getDapurId();
+        
+        // Get all available years for periods in this dapur
+        $years = AccountingPeriod::forDapur($dapurId)
+            ->select('year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year');
+
+        $selectedYear = $request->get('year', $years->first() ?? date('Y'));
+        
+        // Filter periods by selected year
+        $periods = AccountingPeriod::forDapur($dapurId)
+            ->where('year', $selectedYear)
+            ->orderByDesc('start_date')
+            ->get();
+
+        $categories = AccountingCategory::forDapur($dapurId)->orderBy('name')->get();
+
+        $selectedPeriodId = $request->get('period_id');
+        $activePeriod = $selectedPeriodId
+            ? $periods->firstWhere('id', $selectedPeriodId)
+            : ($periods->firstWhere('status', 'open') ?? $periods->first());
+
+        // If period doesn't match the selected year, reset to first period of that year
+        if ($activePeriod && $activePeriod->year != $selectedYear) {
+            $activePeriod = $periods->first();
+        }
+
+        $query = AccountingTransaction::with(['category', 'cashAccount', 'creator'])
+            ->forDapur($dapurId)
+            ->orderedByDate();
+
+        if ($activePeriod) {
+            $query->forPeriod($activePeriod->id);
+        }
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('date', '<=', $request->date_to);
+        }
+        if ($request->filled('search')) {
+            $q = $request->search;
+            $query->where(function ($sq) use ($q) {
+                $sq->where('description', 'like', "%{$q}%")
+                   ->orWhere('no_bukti', 'like', "%{$q}%");
+            });
+        }
+
+        $transactions = $query->paginate(20)->withQueryString();
+
+        return view('akuntan.transaksi.index', compact(
+            'transactions', 'periods', 'categories', 'activePeriod', 'years', 'selectedYear'
+        ));
+    }
+
+    public function create()
+    {
+        $dapurId    = $this->getDapurId();
+        $periods    = AccountingPeriod::forDapur($dapurId)->where('status', 'open')->orderByDesc('year')->get();
+        $categories = AccountingCategory::forDapur($dapurId)->orderBy('name')->get();
+        $cashAccounts = CashAccount::forDapur($dapurId)->orderBy('name')->get();
+
+        return view('akuntan.transaksi.create', compact('periods', 'categories', 'cashAccounts'));
+    }
+
+    public function store(Request $request)
+    {
+        $dapurId = $this->getDapurId();
+
+        $validated = $request->validate([
+            'period_id'       => 'required|exists:accounting_periods,id',
+            'date'            => 'required|date',
+            'no_bukti'        => 'nullable|string|max:50',
+            'description'     => 'required|string|max:255',
+            'category_id'     => 'required|exists:accounting_categories,id',
+            'cash_account_id' => 'nullable|exists:cash_accounts,id',
+            'debit'           => 'nullable|numeric|min:0',
+            'credit'          => 'nullable|numeric|min:0',
+        ]);
+
+        $debit  = (float) ($validated['debit']  ?? 0);
+        $credit = (float) ($validated['credit'] ?? 0);
+
+        // Validation rules
+        if ($debit > 0 && $credit > 0) {
+            throw ValidationException::withMessages([
+                'debit' => 'Debit dan kredit tidak boleh diisi bersamaan.',
+            ]);
+        }
+        if ($debit <= 0 && $credit <= 0) {
+            throw ValidationException::withMessages([
+                'debit' => 'Salah satu dari debit atau kredit harus lebih besar dari nol.',
+            ]);
+        }
+
+        $period = AccountingPeriod::findOrFail($validated['period_id']);
+        if ($period->id_dapur != $dapurId) {
+            abort(403);
+        }
+        if (!$period->isOpen()) {
+            return back()->withErrors(['period_id' => 'Transaksi tidak dapat ditambahkan pada periode yang sudah ditutup.'])->withInput();
+        }
+        $date = \Carbon\Carbon::parse($validated['date']);
+        if ($date->lt($period->start_date) || $date->gt($period->end_date)) {
+            throw ValidationException::withMessages([
+                'date' => "Tanggal harus berada dalam rentang periode ({$period->start_date->format('d/m/Y')} - {$period->end_date->format('d/m/Y')}).",
+            ]);
+        }
+
+        AccountingTransaction::create([
+            'period_id'       => $period->id,
+            'date'            => $validated['date'],
+            'month'           => $date->month,
+            'no_bukti'        => $validated['no_bukti'],
+            'description'     => $validated['description'],
+            'category_id'     => $validated['category_id'],
+            'cash_account_id' => $validated['cash_account_id'],
+            'debit'           => $debit,
+            'credit'          => $credit,
+            'created_by'      => Auth::id(),
+        ]);
+
+        return redirect()->route('akuntan.transaksi.index')
+            ->with('success', 'Transaksi berhasil ditambahkan.');
+    }
+
+    public function edit(AccountingTransaction $transaksi)
+    {
+        $dapurId = $this->getDapurId();
+        $this->authorizeTransaction($transaksi, $dapurId);
+
+        $periods      = AccountingPeriod::forDapur($dapurId)->where('status', 'open')->orderByDesc('year')->get();
+        $categories   = AccountingCategory::forDapur($dapurId)->orderBy('name')->get();
+        $cashAccounts = CashAccount::forDapur($dapurId)->orderBy('name')->get();
+
+        return view('akuntan.transaksi.edit', compact('transaksi', 'periods', 'categories', 'cashAccounts'));
+    }
+
+    public function update(Request $request, AccountingTransaction $transaksi)
+    {
+        $dapurId = $this->getDapurId();
+        $this->authorizeTransaction($transaksi, $dapurId);
+
+        if (!$transaksi->period->isOpen()) {
+            return back()->withErrors(['period_id' => 'Periode sudah ditutup, transaksi tidak dapat diubah.']);
+        }
+
+        $validated = $request->validate([
+            'period_id'       => 'required|exists:accounting_periods,id',
+            'date'            => 'required|date',
+            'no_bukti'        => 'nullable|string|max:50',
+            'description'     => 'required|string|max:255',
+            'category_id'     => 'required|exists:accounting_categories,id',
+            'cash_account_id' => 'nullable|exists:cash_accounts,id',
+            'debit'           => 'nullable|numeric|min:0',
+            'credit'          => 'nullable|numeric|min:0',
+        ]);
+
+        $debit  = (float) ($validated['debit']  ?? 0);
+        $credit = (float) ($validated['credit'] ?? 0);
+
+        if ($debit > 0 && $credit > 0) {
+            throw ValidationException::withMessages(['debit' => 'Debit dan kredit tidak boleh diisi bersamaan.']);
+        }
+        if ($debit <= 0 && $credit <= 0) {
+            throw ValidationException::withMessages(['debit' => 'Salah satu dari debit atau kredit harus lebih besar dari nol.']);
+        }
+
+        $period = AccountingPeriod::findOrFail($validated['period_id']);
+        $date   = \Carbon\Carbon::parse($validated['date']);
+        if ($date->lt($period->start_date) || $date->gt($period->end_date)) {
+            throw ValidationException::withMessages([
+                'date' => "Tanggal harus berada dalam rentang periode ({$period->start_date->format('d/m/Y')} - {$period->end_date->format('d/m/Y')}).",
+            ]);
+        }
+
+        $transaksi->update([
+            'period_id'       => $period->id,
+            'date'            => $validated['date'],
+            'month'           => $date->month,
+            'no_bukti'        => $validated['no_bukti'],
+            'description'     => $validated['description'],
+            'category_id'     => $validated['category_id'],
+            'cash_account_id' => $validated['cash_account_id'],
+            'debit'           => $debit,
+            'credit'          => $credit,
+        ]);
+
+        return redirect()->route('akuntan.transaksi.index')
+            ->with('success', 'Transaksi berhasil diperbarui.');
+    }
+
+    public function destroy(AccountingTransaction $transaksi)
+    {
+        $dapurId = $this->getDapurId();
+        $this->authorizeTransaction($transaksi, $dapurId);
+
+        if (!$transaksi->period->isOpen()) {
+            return back()->withErrors(['error' => 'Periode sudah ditutup, transaksi tidak dapat dihapus.']);
+        }
+
+        $transaksi->delete();
+        return redirect()->route('akuntan.transaksi.index')
+            ->with('success', 'Transaksi berhasil dihapus.');
+    }
+
+    public function getBalance(Request $request)
+    {
+        $dapurId = $this->getDapurId();
+        $periodId = $request->period_id;
+        $cashAccountId = $request->cash_account_id;
+        $excludeId = $request->exclude_id;
+
+        if (!$periodId) return response()->json(['current_balance' => 0]);
+
+        $period = AccountingPeriod::forDapur($dapurId)->findOrFail($periodId);
+        
+        $query = AccountingTransaction::forPeriod($periodId);
+        if ($cashAccountId) {
+            $query->where('cash_account_id', $cashAccountId);
+        }
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $totalDebit = $query->sum('debit');
+        $totalCredit = $query->sum('credit');
+
+        // Note: Opening balance is currently global per period.
+        // We show the global period opening balance + net flow of the filtered query.
+        $openingBalance = $period->balance->opening_balance ?? 0;
+        $currentBalance = $openingBalance + $totalDebit - $totalCredit;
+
+        return response()->json([
+            'current_balance' => (float)$currentBalance,
+        ]);
+    }
+
+    private function authorizeTransaction(AccountingTransaction $transaksi, int $dapurId): void
+    {
+        if ($transaksi->period->id_dapur != $dapurId) {
+            abort(403);
+        }
+    }
+}

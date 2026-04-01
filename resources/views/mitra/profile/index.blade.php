@@ -46,7 +46,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="nama" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+                        <label for="nama" class="form-label">Nama Akun (Login) <span class="text-danger">*</span></label>
                         <input type="text" name="nama" id="nama" class="form-control @error('nama') is-invalid @enderror"
                             value="{{ old('nama', $user->nama) }}" required>
                         @error('nama')
@@ -73,7 +73,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="nama_pemilik" class="form-label">Nama Pemilik <span class="text-danger">*</span></label>
+                        <label for="nama_pemilik" class="form-label">Nama Lengkap Sesuai KTP <span class="text-danger">*</span></label>
                         <input type="text" name="nama_pemilik" id="nama_pemilik" class="form-control @error('nama_pemilik') is-invalid @enderror"
                             value="{{ old('nama_pemilik', $mitra->nama_pemilik) }}" required>
                         @error('nama_pemilik')

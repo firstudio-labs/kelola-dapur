@@ -31,12 +31,12 @@ class ProfileController extends Controller
             'nama' => 'required|string|max:255',
             'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id_user, 'id_user')],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id_user, 'id_user')],
-            'password' => 'nullable|string|min:8|confirmed',
             'nik_produksi' => 'nullable|string|max:16',
             'nama_lengkap' => 'nullable|string|max:255',
             'kontak_wa' => 'nullable|string|max:20',
             'pendidikan' => 'nullable|in:SD,SMP,SMA,D1,D2,D3,Sarjana',
             'jenis_kelamin' => 'nullable|in:Pria,Wanita',
+            'jabatan' => 'nullable|string|max:255',
             'foto_diri' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'alamat_detail' => 'nullable|string',
             'province_code' => 'nullable|string',
@@ -55,16 +55,13 @@ class ProfileController extends Controller
             'email' => $validated['email'],
         ]);
 
-        if (!empty($validated['password'])) {
-            $user->update(['password' => Hash::make($validated['password'])]);
-        }
-
         $profileData = [
             'nik_produksi' => $validated['nik_produksi'],
             'nama_lengkap' => $validated['nama_lengkap'],
             'kontak_wa' => $validated['kontak_wa'],
             'pendidikan' => $validated['pendidikan'],
             'jenis_kelamin' => $validated['jenis_kelamin'],
+            'jabatan' => $validated['jabatan'],
             'alamat_detail' => $validated['alamat_detail'],
             'province_code' => $validated['province_code'],
             'province_name' => $validated['province_name'],
@@ -97,5 +94,37 @@ class ProfileController extends Controller
         $produksi->update($profileData);
 
         return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    public function editSecurity()
+    {
+        $user = auth()->user();
+        return view('produksi.profile.security', compact('user'));
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed|different:current_password',
+        ], [
+            'current_password.required' => 'Kata sandi saat ini wajib diisi',
+            'new_password.required' => 'Kata sandi baru wajib diisi',
+            'new_password.min' => 'Kata sandi baru minimal 8 karakter',
+            'new_password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok',
+            'new_password.different' => 'Kata sandi baru harus berbeda dengan kata sandi saat ini',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect()->back()->with('error', 'Kata sandi saat ini tidak cocok.');
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return redirect()->back()->with('success', 'Kata sandi berhasil diperbarui.');
     }
 }
