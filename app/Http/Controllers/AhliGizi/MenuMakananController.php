@@ -73,7 +73,13 @@ class MenuMakananController extends Controller
 
     public function create()
     {
-        $templateItems = TemplateItem::orderBy('nama_bahan', 'asc')->get();
+        $userDapurId = Auth::user()->userRole->id_dapur ?? null;
+        $templateItems = TemplateItem::with(['stockItems' => function ($query) use ($userDapurId) {
+            if ($userDapurId) {
+                $query->where('id_dapur', $userDapurId);
+            }
+        }])->orderBy('nama_bahan', 'asc')->get();
+
         $currentDapur = Auth::user()->userRole->dapur ?? null;
 
         return view('ahligizi.menu_makanan.create', compact('templateItems', 'currentDapur'));
@@ -158,7 +164,12 @@ class MenuMakananController extends Controller
 
     public function show(MenuMakanan $menuMakanan)
     {
-        $menuMakanan->load(['bahanMenu.templateItem', 'detailTransaksiDapur.transaksiDapur.dapur', 'createdByDapur']);
+        $userDapurId = auth()->user()->userRole->id_dapur ?? null;
+        $menuMakanan->load(['bahanMenu.templateItem.stockItems' => function($q) use ($userDapurId) {
+            if ($userDapurId) {
+                $q->where('id_dapur', $userDapurId);
+            }
+        }, 'detailTransaksiDapur.transaksiDapur.dapur', 'createdByDapur']);
 
         return view('ahligizi.menu_makanan.show', compact('menuMakanan'));
     }
@@ -171,7 +182,12 @@ class MenuMakananController extends Controller
         }
 
         $menuMakanan->load(['bahanMenu.templateItem']);
-        $templateItems = TemplateItem::orderBy('nama_bahan', 'asc')->get();
+        $userDapurId = Auth::user()->userRole->id_dapur ?? null;
+        $templateItems = TemplateItem::with(['stockItems' => function ($query) use ($userDapurId) {
+            if ($userDapurId) {
+                $query->where('id_dapur', $userDapurId);
+            }
+        }])->orderBy('nama_bahan', 'asc')->get();
         $currentDapur = Auth::user()->userRole->dapur ?? null;
 
         return view('ahligizi.menu_makanan.edit', compact('menuMakanan', 'templateItems', 'currentDapur'));
@@ -355,7 +371,14 @@ class MenuMakananController extends Controller
     public function detail($id)
     {
         try {
-            $menu = MenuMakanan::with(['bahanMenu.templateItem'])
+            $user = auth()->user();
+            $userDapurId = $user->userRole->id_dapur ?? null;
+
+            $menu = MenuMakanan::with(['bahanMenu.templateItem.stockItems' => function ($q) use ($userDapurId) {
+                    if ($userDapurId) {
+                        $q->where('id_dapur', $userDapurId);
+                    }
+                }])
                 ->find($id);
 
             if (!$menu) {
@@ -380,13 +403,16 @@ class MenuMakananController extends Controller
                 'kategori' => $menu->kategori,
                 'is_active' => $menu->is_active,
                 'bahan_menu' => $menu->bahanMenu->map(function ($bahan) {
+                    $stockItem = $bahan->templateItem->stockItems->first();
                     return [
                         'id_bahan_menu' => $bahan->id_bahan_menu,
                         'id_template_item' => $bahan->id_template_item,
                         'nama_bahan' => $bahan->templateItem->nama_bahan,
-                        'jumlah_per_porsi' => $bahan->jumlah_per_porsi,
+                        'jumlah_per_porsi' => (float) $bahan->jumlah_per_porsi,
                         'satuan' => $bahan->templateItem->satuan,
                         'is_bahan_basah' => $bahan->is_bahan_basah,
+                        'konversi_nilai' => $stockItem->konversi_nilai ?? null,
+                        'konversi_satuan' => $stockItem->konversi_satuan ?? null,
                         'template_item' => [
                             'id_template_item' => $bahan->templateItem->id_template_item,
                             'nama_bahan' => $bahan->templateItem->nama_bahan,
@@ -412,7 +438,14 @@ class MenuMakananController extends Controller
     public function getIngredientDetails(MenuMakanan $menu)
     {
         try {
-            $menu->load(['bahanMenu.templateItem']);
+            $user = auth()->user();
+            $userDapurId = $user->userRole->id_dapur ?? null;
+
+            $menu->load(['bahanMenu.templateItem.stockItems' => function ($q) use ($userDapurId) {
+                if ($userDapurId) {
+                    $q->where('id_dapur', $userDapurId);
+                }
+            }]);
 
             if (!$menu->is_active) {
                 return response()->json([
@@ -422,13 +455,16 @@ class MenuMakananController extends Controller
             }
 
             $bahanMenu = $menu->bahanMenu->map(function ($bahan) {
+                $stockItem = $bahan->templateItem ? $bahan->templateItem->stockItems->first() : null;
                 return [
                     'id_bahan_menu' => $bahan->id_bahan_menu,
                     'id_template_item' => $bahan->id_template_item,
                     'nama_bahan' => $bahan->templateItem ? $bahan->templateItem->nama_bahan : 'Unknown',
                     'jumlah_per_porsi' => (float) $bahan->jumlah_per_porsi,
                     'satuan' => $bahan->templateItem ? $bahan->templateItem->satuan : '',
-                    'is_bahan_basah' => $bahan->is_bahan_basah
+                    'is_bahan_basah' => $bahan->is_bahan_basah,
+                    'konversi_nilai' => $stockItem ? $stockItem->konversi_nilai : null,
+                    'konversi_satuan' => $stockItem ? $stockItem->konversi_satuan : null,
                 ];
             })->toArray();
 

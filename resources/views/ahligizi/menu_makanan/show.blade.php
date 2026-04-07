@@ -180,27 +180,32 @@
                                             </h6>
                                             <p class="mb-0 text-muted">
                                                 @php
+                                                    $stockItem = $bahan->templateItem->stockItems->first();
+                                                    $konversiNilai = $stockItem ? $stockItem->konversi_nilai : null;
+                                                    $konversiSatuan = $stockItem ? $stockItem->konversi_satuan : null;
+
                                                     $satuan = isset($bahan->templateItem->satuan) ? strtolower($bahan->templateItem->satuan) : "";
                                                     $jumlah = $bahan->jumlah_per_porsi ?? 0;
-                                                    $displayUnit = $satuan;
-
-                                                    // Convert to display unit
-                                                    if ($satuan === "kg") {
-                                                        $jumlah = $jumlah * 1000;
-                                                        $displayUnit = "gram";
-                                                    } elseif ($satuan === "liter" || $satuan === "l") {
-                                                        $jumlah = $jumlah * 1000;
-                                                        $displayUnit = "ml";
+                                                    
+                                                    if ($konversiNilai && $konversiSatuan) {
+                                                        $jumlah = $jumlah / $konversiNilai;
+                                                        $displayUnit = $konversiSatuan;
+                                                    } else {
+                                                        $displayUnit = $satuan;
+                                                        if ($satuan === "kg") {
+                                                            $jumlah = $jumlah * 1000;
+                                                            $displayUnit = "gram";
+                                                        } elseif ($satuan === "liter" || $satuan === "l") {
+                                                            $jumlah = $jumlah * 1000;
+                                                            $displayUnit = "ml";
+                                                        }
                                                     }
 
-                                                    // Format jumlah
                                                     $formattedJumlah = rtrim(rtrim(number_format($jumlah, 4, ".", ""), "0"), ".");
 
                                                     if ($bahan->is_bahan_basah) {
-                                                        // Calculate final weight with 7% increase
                                                         $finalJumlah = $jumlah * 1.07;
                                                         $formattedFinalJumlah = rtrim(rtrim(number_format($finalJumlah, 4, ".", ""), "0"), ".");
-
                                                         echo $formattedJumlah . " " . $displayUnit . " Bahan Matang - " . $formattedFinalJumlah . " " . $displayUnit . " per porsi";
                                                     } else {
                                                         echo $formattedJumlah . " " . $displayUnit . " per porsi ";

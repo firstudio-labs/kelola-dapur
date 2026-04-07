@@ -138,7 +138,12 @@ class TransaksiDapurController extends Controller
 
         $porsiBesar = $transaksi->detailTransaksiDapur()
             ->where('tipe_porsi', 'besar')
-            ->with('menuMakanan.bahanMenu.templateItem')
+            ->with([
+                'menuMakanan.bahanMenu.templateItem',
+                'menuMakanan.bahanMenu.templateItem.stockItems' => function ($q) use ($ahliGizi) {
+                    $q->where('id_dapur', $ahliGizi->id_dapur);
+                },
+            ])
             ->get();
 
         $menus = MenuMakanan::active()
@@ -169,8 +174,9 @@ class TransaksiDapurController extends Controller
         }
 
         $request->validate([
+            'jumlah_porsi' => 'required|integer|min:1|max:1000000',
             'menus' => 'required|array|min:1',
-            'menus.*.id_menu' => [
+            'menus.*' => [
                 'required',
                 'exists:menu_makanan,id_menu',
                 function ($attribute, $value, $fail) {
@@ -178,20 +184,18 @@ class TransaksiDapurController extends Controller
                     if (!$menu || !$menu->is_active) {
                         $fail('Menu yang dipilih tidak aktif.');
                     }
-                }
+                },
             ],
-            'menus.*.jumlah_porsi' => 'required|integer|min:1|max:1000000'
         ], [
+            'jumlah_porsi.required' => 'Jumlah porsi harus diisi',
+            'jumlah_porsi.min' => 'Jumlah porsi minimal 1',
+            'jumlah_porsi.max' => 'Jumlah porsi maksimal 1000000',
             'menus.required' => 'Minimal harus ada 1 menu untuk porsi besar',
-            'menus.*.id_menu.required' => 'Menu harus dipilih',
-            'menus.*.id_menu.exists' => 'Menu yang dipilih tidak valid',
-            'menus.*.jumlah_porsi.required' => 'Jumlah porsi harus diisi',
-            'menus.*.jumlah_porsi.min' => 'Jumlah porsi minimal 1',
-            'menus.*.jumlah_porsi.max' => 'Jumlah porsi maksimal 1000000'
+            'menus.*.required' => 'Menu harus dipilih',
+            'menus.*.exists' => 'Menu yang dipilih tidak valid',
         ]);
 
-        $menuIds = array_column($request->menus, 'id_menu');
-        if (count($menuIds) !== count(array_unique($menuIds))) {
+        if (count(array_unique($request->menus)) !== count($request->menus)) {
             return redirect()->back()
                 ->with('error', 'Menu tidak boleh duplikat')
                 ->withInput();
@@ -200,17 +204,17 @@ class TransaksiDapurController extends Controller
         DB::transaction(function () use ($request, $transaksi) {
             $transaksi->detailTransaksiDapur()->where('tipe_porsi', 'besar')->delete();
 
-            foreach ($request->menus as $menuData) {
+            $jumlahPorsi = (int) $request->jumlah_porsi;
+            foreach ($request->menus as $idMenu) {
                 DetailTransaksiDapur::create([
                     'id_transaksi' => $transaksi->id_transaksi,
-                    'id_menu' => $menuData['id_menu'],
-                    'jumlah_porsi' => $menuData['jumlah_porsi'],
-                    'tipe_porsi' => 'besar'
+                    'id_menu'      => $idMenu,
+                    'jumlah_porsi' => $jumlahPorsi,
+                    'tipe_porsi'   => 'besar',
                 ]);
             }
 
-            $totalPorsiBesar = collect($request->menus)->sum('jumlah_porsi');
-            $transaksi->update(['total_porsi_besar' => $totalPorsiBesar]);
+            $transaksi->update(['total_porsi_besar' => $jumlahPorsi]);
         });
 
         return redirect()->route('ahli-gizi.transaksi.edit-porsi-kecil', $transaksi)
@@ -243,7 +247,12 @@ class TransaksiDapurController extends Controller
 
         $porsiKecil = $transaksi->detailTransaksiDapur()
             ->where('tipe_porsi', 'kecil')
-            ->with('menuMakanan.bahanMenu.templateItem')
+            ->with([
+                'menuMakanan.bahanMenu.templateItem',
+                'menuMakanan.bahanMenu.templateItem.stockItems' => function ($q) use ($ahliGizi) {
+                    $q->where('id_dapur', $ahliGizi->id_dapur);
+                },
+            ])
             ->get();
 
         $menus = MenuMakanan::active()
@@ -274,8 +283,9 @@ class TransaksiDapurController extends Controller
         }
 
         $request->validate([
+            'jumlah_porsi' => 'nullable|integer|min:1|max:1000000',
             'menus' => 'nullable|array',
-            'menus.*.id_menu' => [
+            'menus.*' => [
                 'required',
                 'exists:menu_makanan,id_menu',
                 function ($attribute, $value, $fail) {
@@ -283,14 +293,12 @@ class TransaksiDapurController extends Controller
                     if (!$menu || !$menu->is_active) {
                         $fail('Menu yang dipilih tidak aktif.');
                     }
-                }
+                },
             ],
-            'menus.*.jumlah_porsi' => 'required|integer|min:1|max:1000000'
         ]);
 
         if ($request->has('menus') && !empty($request->menus)) {
-            $menuIds = array_column($request->menus, 'id_menu');
-            if (count($menuIds) !== count(array_unique($menuIds))) {
+            if (count(array_unique($request->menus)) !== count($request->menus)) {
                 return redirect()->back()
                     ->with('error', 'Menu tidak boleh duplikat')
                     ->withInput();
@@ -302,24 +310,25 @@ class TransaksiDapurController extends Controller
 
             $totalPorsiKecil = 0;
             if ($request->has('menus') && !empty($request->menus)) {
-                foreach ($request->menus as $menuData) {
+                $jumlahPorsi = (int) $request->jumlah_porsi;
+                foreach ($request->menus as $idMenu) {
                     DetailTransaksiDapur::create([
                         'id_transaksi' => $transaksi->id_transaksi,
-                        'id_menu' => $menuData['id_menu'],
-                        'jumlah_porsi' => $menuData['jumlah_porsi'],
-                        'tipe_porsi' => 'kecil'
+                        'id_menu'      => $idMenu,
+                        'jumlah_porsi' => $jumlahPorsi,
+                        'tipe_porsi'   => 'kecil',
                     ]);
-                    $totalPorsiKecil += $menuData['jumlah_porsi'];
                 }
+                $totalPorsiKecil = $jumlahPorsi;
             }
 
-            $totalPorsiBesar = $transaksi->detailTransaksiDapur()
+            $totalPorsiBesar = (int) ($transaksi->detailTransaksiDapur()
                 ->where('tipe_porsi', 'besar')
-                ->sum('jumlah_porsi');
+                ->value('jumlah_porsi') ?? 0);
 
             $transaksi->update([
                 'total_porsi_kecil' => $totalPorsiKecil,
-                'total_porsi' => $totalPorsiBesar + $totalPorsiKecil
+                'total_porsi'       => $totalPorsiBesar + $totalPorsiKecil,
             ]);
         });
 
@@ -344,15 +353,20 @@ class TransaksiDapurController extends Controller
 
         $transaksi->load([
             'detailTransaksiDapur.menuMakanan.bahanMenu.templateItem',
+            'detailTransaksiDapur.menuMakanan.bahanMenu.templateItem.stockItems' => function ($q) use ($ahliGizi) {
+                $q->where('id_dapur', $ahliGizi->id_dapur);
+            },
             'dapur',
-            'laporanKekuranganStock.templateItem'
+            'laporanKekuranganStock.templateItem',
         ]);
 
         $stockCheck = $transaksi->checkAllStockAvailability();
 
         $bahanKebutuhan = $transaksi->calculateIngredientNeeds();
 
-        return view('ahligizi.transaksi.preview', compact('transaksi', 'stockCheck', 'bahanKebutuhan', 'ahliGizi'));
+        $stockItems = StockItem::where('id_dapur', $ahliGizi->id_dapur)->get()->keyBy('id_template_item');
+
+        return view('ahligizi.transaksi.preview', compact('transaksi', 'stockCheck', 'bahanKebutuhan', 'ahliGizi', 'stockItems'));
     }
 
     public function submitApproval(Request $request, TransaksiDapur $transaksi)
@@ -536,48 +550,60 @@ class TransaksiDapurController extends Controller
 
         $transaksi->load([
             'detailTransaksiDapur.menuMakanan.bahanMenu.templateItem',
+            'detailTransaksiDapur.menuMakanan.bahanMenu.templateItem.stockItems' => function ($q) use ($ahliGizi) {
+                $q->where('id_dapur', $ahliGizi->id_dapur);
+            },
             'approvalTransaksi',
             'laporanKekuranganStock.templateItem',
             'dapur',
             'createdBy',
             'orderProduksi.dokumentasi',
-            'orderProduksi.distribusiOrder.dokumentasi'
+            'orderProduksi.distribusiOrder.dokumentasi',
         ]);
 
         $bahanKebutuhan = $transaksi->calculateIngredientNeeds();
         $bahanBesar = $transaksi->calculateIngredientNeedsByType('besar');
         $bahanKecil = $transaksi->calculateIngredientNeedsByType('kecil');
 
+        $stockItems = StockItem::where('id_dapur', $transaksi->id_dapur)->get()->keyBy('id_template_item');
+
         $stockData = [];
         $shortages = [];
         foreach ($bahanKebutuhan as $idTemplate => $bahan) {
-            $stockItem = StockItem::where('id_dapur', $transaksi->id_dapur)
-                ->where('id_template_item', $idTemplate)
-                ->first();
+            $stockItem = $stockItems->get($idTemplate);
+            $stockTersedia = $stockItem ? (float) $stockItem->jumlah : 0.0;
 
-            $stockTersedia = $stockItem ? (float)$stockItem->jumlah : 0.0;
+            $displayStok = $stockTersedia;
+            $satuanStok = $stockItem ? $stockItem->satuan : $bahan['satuan'];
+            if ($stockItem && $stockItem->konversi_nilai) {
+                $displayStok = round($stockTersedia / $stockItem->konversi_nilai, 4);
+                $satuanStok = $stockItem->konversi_satuan ?? $satuanStok;
+            }
 
             $stockData[$idTemplate] = [
-                'nama_bahan' => $bahan['nama_bahan'],
-                'satuan' => $bahan['satuan'],
-                'kebutuhan' => $bahan['total_kebutuhan'],
+                'nama_bahan'     => $bahan['nama_bahan'],
+                'satuan'         => $bahan['satuan'],
+                'kebutuhan'      => $bahan['total_kebutuhan'],
                 'stock_tersedia' => $stockTersedia,
-                'sufficient' => $stockTersedia >= $bahan['total_kebutuhan'],
-                'debug' => $stockItem ? 'found' : 'not_found',
-                'satuan_stok' => $stockItem ? $stockItem->satuan : $bahan['satuan']
+                'display_stok'   => $displayStok,
+                'sufficient'     => $stockTersedia >= $bahan['total_kebutuhan'],
+                'debug'          => $stockItem ? 'found' : 'not_found',
+                'satuan_stok'    => $satuanStok,
+                'konversi_nilai' => $stockItem?->konversi_nilai,
+                'konversi_satuan'=> $stockItem?->konversi_satuan,
             ];
 
             if ($stockTersedia < $bahan['total_kebutuhan']) {
                 $shortages[] = [
-                    'id_template_item' => $idTemplate,
-                    'nama_bahan' => $bahan['nama_bahan'],
-                    'kebutuhan' => $bahan['total_kebutuhan'],
-                    'stock_tersedia' => $stockTersedia,
-                    'kekurangan' => $bahan['total_kebutuhan'] - $stockTersedia,
-                    'satuan' => $bahan['satuan'],
-                    'percentage_shortage' => $stockTersedia > 0
+                    'id_template_item'   => $idTemplate,
+                    'nama_bahan'         => $bahan['nama_bahan'],
+                    'kebutuhan'          => $bahan['total_kebutuhan'],
+                    'stock_tersedia'     => $stockTersedia,
+                    'kekurangan'         => $bahan['total_kebutuhan'] - $stockTersedia,
+                    'satuan'             => $bahan['satuan'],
+                    'percentage_shortage'=> $stockTersedia > 0
                         ? round((($bahan['total_kebutuhan'] - $stockTersedia) / $bahan['total_kebutuhan']) * 100, 2)
-                        : 100
+                        : 100,
                 ];
             }
         }
@@ -679,31 +705,46 @@ class TransaksiDapurController extends Controller
                 ], 400);
             }
 
-            $menuMakanan->load(['bahanMenu.templateItem']);
+            $user = Auth::user();
+            $ahliGiziForMenu = AhliGizi::whereHas('userRole', function ($q) use ($user) {
+                $q->where('id_user', $user->id_user);
+            })->first();
+
+            $menuMakanan->load([
+                'bahanMenu.templateItem',
+                'bahanMenu.templateItem.stockItems' => function ($q) use ($ahliGiziForMenu) {
+                    if ($ahliGiziForMenu) {
+                        $q->where('id_dapur', $ahliGiziForMenu->id_dapur);
+                    }
+                },
+            ]);
 
             $menuData = [
-                'id_menu' => $menuMakanan->id_menu,
+                'id_menu'   => $menuMakanan->id_menu,
                 'nama_menu' => $menuMakanan->nama_menu,
-                'gambar' => $menuMakanan->gambar_url,
+                'gambar'    => $menuMakanan->gambar_url,
                 'deskripsi' => $menuMakanan->deskripsi,
-                'kategori' => $menuMakanan->kategori,
+                'kategori'  => $menuMakanan->kategori,
                 'is_active' => $menuMakanan->is_active,
                 'bahan_menu' => $menuMakanan->bahanMenu->map(function ($bahan) {
+                    $stockItem = $bahan->templateItem->stockItems->first();
                     return [
-                        'id_bahan_menu' => $bahan->id_bahan_menu,
+                        'id_bahan_menu'    => $bahan->id_bahan_menu,
                         'id_template_item' => $bahan->id_template_item,
-                        'nama_bahan' => $bahan->templateItem->nama_bahan,
+                        'nama_bahan'       => $bahan->templateItem->nama_bahan,
                         'jumlah_per_porsi' => (float) $bahan->jumlah_per_porsi,
-                        'satuan' => $bahan->templateItem->satuan,
-                        'is_bahan_basah' => $bahan->is_bahan_basah,
-                        'template_item' => [
+                        'satuan'           => $bahan->templateItem->satuan,
+                        'is_bahan_basah'   => $bahan->is_bahan_basah,
+                        'konversi_nilai'   => $stockItem?->konversi_nilai,
+                        'konversi_satuan'  => $stockItem?->konversi_satuan,
+                        'template_item'    => [
                             'id_template_item' => $bahan->templateItem->id_template_item,
-                            'nama_bahan' => $bahan->templateItem->nama_bahan,
-                            'satuan' => $bahan->templateItem->satuan,
-                            'keterangan' => $bahan->templateItem->keterangan ?? ''
-                        ]
+                            'nama_bahan'       => $bahan->templateItem->nama_bahan,
+                            'satuan'           => $bahan->templateItem->satuan,
+                            'keterangan'       => $bahan->templateItem->keterangan ?? '',
+                        ],
                     ];
-                })
+                }),
             ];
 
             return response()->json([
@@ -792,6 +833,8 @@ class TransaksiDapurController extends Controller
             $transaksi->load(['detailTransaksiDapur.menuMakanan.bahanMenu.templateItem']);
             $stockCheck = $transaksi->checkStockWithReservations();
 
+            $stockItems = \App\Models\StockItem::where('id_dapur', $ahliGizi->id_dapur)->get()->keyBy('id_template_item');
+
             $stockData = [];
             $shortages = [];
 
@@ -799,6 +842,8 @@ class TransaksiDapurController extends Controller
                 $idTemplate       = $ingredient['id_template_item'];
                 $effectiveStock   = $ingredient['effective_available'];
                 $needed           = $ingredient['needed'];
+                
+                $stockItem = $stockItems->get($idTemplate);
 
                 $stockData[$idTemplate] = [
                     'nama_bahan'    => $ingredient['nama_bahan'],
@@ -808,6 +853,8 @@ class TransaksiDapurController extends Controller
                     'sufficient'    => $ingredient['sufficient'],
                     'debug'         => 'found',
                     'satuan_stok'   => $ingredient['satuan'],
+                    'konversi_nilai' => $stockItem?->konversi_nilai,
+                    'konversi_satuan' => $stockItem?->konversi_satuan,
                 ];
 
                 if (!$ingredient['sufficient']) {
@@ -821,6 +868,8 @@ class TransaksiDapurController extends Controller
                         'percentage_shortage' => $effectiveStock > 0
                             ? round((($needed - $effectiveStock) / $needed) * 100, 2)
                             : 100,
+                        'konversi_nilai' => $stockItem?->konversi_nilai,
+                        'konversi_satuan' => $stockItem?->konversi_satuan,
                     ];
                 }
             }

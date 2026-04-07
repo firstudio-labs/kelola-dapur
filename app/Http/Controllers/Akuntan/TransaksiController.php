@@ -22,7 +22,6 @@ class TransaksiController extends Controller
     {
         $dapurId = $this->getDapurId();
         
-        // Get all available years for periods in this dapur
         $years = AccountingPeriod::forDapur($dapurId)
             ->select('year')
             ->distinct()
@@ -31,7 +30,6 @@ class TransaksiController extends Controller
 
         $selectedYear = $request->get('year', $years->first() ?? date('Y'));
         
-        // Filter periods by selected year
         $periods = AccountingPeriod::forDapur($dapurId)
             ->where('year', $selectedYear)
             ->orderByDesc('start_date')
@@ -44,7 +42,6 @@ class TransaksiController extends Controller
             ? $periods->firstWhere('id', $selectedPeriodId)
             : ($periods->firstWhere('status', 'open') ?? $periods->first());
 
-        // If period doesn't match the selected year, reset to first period of that year
         if ($activePeriod && $activePeriod->year != $selectedYear) {
             $activePeriod = $periods->first();
         }
@@ -253,8 +250,6 @@ class TransaksiController extends Controller
         $totalDebit = $query->sum('debit');
         $totalCredit = $query->sum('credit');
 
-        // Note: Opening balance is currently global per period.
-        // We show the global period opening balance + net flow of the filtered query.
         $openingBalance = $period->balance->opening_balance ?? 0;
         $currentBalance = $openingBalance + $totalDebit - $totalCredit;
 

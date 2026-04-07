@@ -346,10 +346,13 @@
             const templateOptionsData =
                 {!! json_encode(
                     $templateItems->map(function ($item) {
+                        $stock = $item->stockItems->first();
                         return [
                             'value' => $item->id_template_item,
                             'label' => $item->nama_bahan,
                             'satuan' => $item->satuan ?? '',
+                            'konversi_satuan' => $stock ? $stock->konversi_satuan : null,
+                            'konversi_nilai' => $stock ? $stock->konversi_nilai : null,
                         ];
                     }),
                 ) !!};
@@ -375,7 +378,8 @@
 
             let choicesInstances = [];
 
-            function getDisplayUnit(originalUnit) {
+            function getDisplayUnit(originalUnit, konversiSatuan = null) {
+                if (konversiSatuan) return konversiSatuan;
                 if (!originalUnit) return '';
                 const unit = originalUnit.toLowerCase();
                 if (unit === 'kg') return 'gram';
@@ -417,7 +421,9 @@
                                 label: item.label,
                                 selected: item.value == currentValue,
                                 customProperties: {
-                                    satuan: item.satuan
+                                    satuan: item.satuan,
+                                    konversi_satuan: item.konversi_satuan,
+                                    konversi_nilai: item.konversi_nilai
                                 }
                             })),
                             'value',
@@ -440,6 +446,12 @@
                     option.value = item.value;
                     option.textContent = item.label;
                     option.dataset.satuan = item.satuan;
+                    if (item.konversi_satuan) {
+                        option.dataset.konversiSatuan = item.konversi_satuan;
+                    }
+                    if (item.konversi_nilai) {
+                        option.dataset.konversiNilai = item.konversi_nilai;
+                    }
                     if (item.value == currentValue) {
                         option.selected = true;
                     }
@@ -488,17 +500,26 @@
                     return;
                 }
 
+                let konversiSatuan = selectedOption.dataset.konversiSatuan || '';
+                let konversiNilai = selectedOption.dataset.konversiNilai || '';
                 let originalSatuan = selectedOption.dataset.satuan || '';
-                if (!originalSatuan) {
+
+                if (!originalSatuan && !konversiSatuan) {
                     const foundItem = templateOptionsData.find(
                         (item) => item.value == selectedOption.value,
                     );
-                    originalSatuan = foundItem ? foundItem.satuan : '';
+                    if (foundItem) {
+                        originalSatuan = foundItem.satuan || '';
+                        konversiSatuan = foundItem.konversi_satuan || '';
+                        konversiNilai = foundItem.konversi_nilai || '';
+                    }
                 }
 
-                const displayUnit = getDisplayUnit(originalSatuan);
+                const displayUnit = getDisplayUnit(originalSatuan, konversiSatuan);
                 inputElement.dataset.originalUnit = originalSatuan;
                 inputElement.dataset.displayUnit = displayUnit;
+                inputElement.dataset.hasKonversi = konversiSatuan ? 'true' : 'false';
+                inputElement.dataset.konversiNilai = konversiNilai;
 
                 // Convert value for display if in edit mode
                 if (isEdit && inputElement.dataset.originalValue) {
@@ -659,11 +680,14 @@
                     inputs.forEach((input) => {
                         const originalUnit = input.dataset.originalUnit;
                         const displayUnit = input.dataset.displayUnit;
+                        const konversiNilai = parseFloat(input.dataset.konversiNilai);
                         let value = parseFloat(input.value);
 
                         if (isNaN(value)) return;
 
-                        if (originalUnit && displayUnit !== originalUnit) {
+                        if (konversiNilai && input.dataset.hasKonversi === 'true') {
+                            input.value = value * konversiNilai;
+                        } else if (originalUnit && displayUnit !== originalUnit) {
                             if (
                                 originalUnit.toLowerCase() === 'kg' &&
                                 displayUnit === 'gram'
@@ -764,16 +788,19 @@
                         if (!displayUnit) {
                             const originalSatuan =
                                 selectedOption.dataset.satuan || '';
-                            if (!originalSatuan) {
+                            const konversiSatuan =
+                                selectedOption.dataset.konversiSatuan || '';
+                            if (!originalSatuan && !konversiSatuan) {
                                 const foundItem = templateOptionsData.find(
                                     (item) =>
                                     item.value == selectedOption.value,
                                 );
                                 displayUnit = getDisplayUnit(
                                     foundItem ? foundItem.satuan : '',
+                                    foundItem ? foundItem.konversi_satuan : ''
                                 );
                             } else {
-                                displayUnit = getDisplayUnit(originalSatuan);
+                                displayUnit = getDisplayUnit(originalSatuan, konversiSatuan);
                             }
                         }
 

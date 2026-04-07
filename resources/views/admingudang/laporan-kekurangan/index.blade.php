@@ -1,17 +1,15 @@
-@extends("template_admin_gudang.layout")
+@extends('template_admin_gudang.layout')
 
-@section("content")
+@section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        
+
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <nav class="d-flex align-items-center mb-2">
-                            <a
-                                href="{{ route('admin-gudang.dashboard', $currentDapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
-                                class="text-muted me-2"
-                            >
+                            <a href="{{ route('admin-gudang.dashboard', $currentDapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
+                                class="text-muted me-2">
                                 <i class="bx bx-home-alt me-1"></i>
                                 Dashboard
                             </a>
@@ -26,22 +24,14 @@
                         </p>
                     </div>
                     <div class="d-flex gap-2">
-                        <button
-                            type="button"
-                            class="btn btn-outline-success btn-sm"
-                            data-bs-toggle="modal"
-                            data-bs-target="#exportModal"
-                        >
+                        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#exportModal">
                             <i class="bx bx-export me-1"></i>
                             Export
                         </button>
                         @if ($stats['pending'] > 0)
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#bulkActionModal"
-                            >
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#bulkActionModal">
                                 <i class="bx bx-check-double me-1"></i>
                                 Aksi Massal
                             </button>
@@ -52,29 +42,16 @@
         </div>
 
         @if (session('success'))
-            <div
-                class="alert alert-success alert-dismissible mb-4"
-                role="alert"
-            >
+            <div class="alert alert-success alert-dismissible mb-4" role="alert">
                 {{ session('success') }}
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"
-                ></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
         @if (session('error'))
             <div class="alert alert-danger alert-dismissible mb-4" role="alert">
                 {{ session('error') }}
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"
-                ></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
@@ -84,9 +61,7 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-primary"
-                                >
+                                <span class="avatar-initial rounded bg-label-primary">
                                     <i class="bx bx-receipt"></i>
                                 </span>
                             </div>
@@ -109,9 +84,7 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-warning"
-                                >
+                                <span class="avatar-initial rounded bg-label-warning">
                                     <i class="bx bx-time"></i>
                                 </span>
                             </div>
@@ -124,9 +97,7 @@
                                         {{ $stats['pending'] }}
                                     </h6>
                                     @if ($stats['pending'] > 0)
-                                        <span
-                                            class="badge bg-warning ms-1 pulse"
-                                        >
+                                        <span class="badge bg-warning ms-1 pulse">
                                             Baru
                                         </span>
                                     @endif
@@ -141,9 +112,7 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-success"
-                                >
+                                <span class="avatar-initial rounded bg-label-success">
                                     <i class="bx bx-check-circle"></i>
                                 </span>
                             </div>
@@ -166,9 +135,7 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span
-                                    class="avatar-initial rounded bg-label-danger"
-                                >
+                                <span class="avatar-initial rounded bg-label-danger">
                                     <i class="bx bx-x-circle"></i>
                                 </span>
                             </div>
@@ -190,29 +157,18 @@
 
         <div class="card mb-4">
             <div class="card-body">
-                <form
-                    method="GET"
+                <form method="GET"
                     action="{{ route('admin-gudang.laporan-kekurangan.index', ['dapur' => $dapur->id_dapur]) }}"
-                    class="row g-3"
-                >
+                    class="row g-3">
                     <div class="col-md-3">
                         <label for="search-input" class="form-label">
                             Cari Transaksi
                         </label>
                         <div class="input-group">
-                            <input
-                                type="text"
-                                name="search"
-                                id="search-input"
-                                value="{{ request('search') }}"
-                                class="form-control"
-                                placeholder="Cari pembuat..."
-                            />
-                            <button
-                                type="button"
-                                class="btn btn-outline-secondary"
-                                onclick="document.getElementById('search-input').value='';this.form.submit();"
-                            >
+                            <input type="text" name="search" id="search-input" value="{{ request('search') }}"
+                                class="form-control" placeholder="Cari pembuat..." />
+                            <button type="button" class="btn btn-outline-secondary"
+                                onclick="document.getElementById('search-input').value='';this.form.submit();">
                                 <i class="bx bx-x"></i>
                             </button>
                         </div>
@@ -221,27 +177,14 @@
                         <label for="status-filter" class="form-label">
                             Status
                         </label>
-                        <select
-                            name="status"
-                            id="status-filter"
-                            class="choices-select form-select"
-                        >
-                            <option
-                                value=""
-                                {{ request('status') === '' ? 'selected' : '' }}
-                            >
+                        <select name="status" id="status-filter" class="choices-select form-select">
+                            <option value="" {{ request('status') === '' ? 'selected' : '' }}>
                                 Semua Status
                             </option>
-                            <option
-                                value="pending"
-                                {{ request('status') === 'pending' ? 'selected' : '' }}
-                            >
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>
                                 Menunggu
                             </option>
-                            <option
-                                value="resolved"
-                                {{ request('status') === 'resolved' ? 'selected' : '' }}
-                            >
+                            <option value="resolved" {{ request('status') === 'resolved' ? 'selected' : '' }}>
                                 Diselesaikan
                             </option>
                         </select>
@@ -250,61 +193,36 @@
                         <label for="date-from" class="form-label">
                             Dari Tanggal
                         </label>
-                        <input
-                            type="date"
-                            name="date_from"
-                            id="date-from"
-                            value="{{ request('date_from') }}"
-                            class="form-control"
-                        />
+                        <input type="date" name="date_from" id="date-from" value="{{ request('date_from') }}"
+                            class="form-control" />
                     </div>
                     <div class="col-md-2">
                         <label for="date-to" class="form-label">
                             Sampai Tanggal
                         </label>
-                        <input
-                            type="date"
-                            name="date_to"
-                            id="date-to"
-                            value="{{ request('date_to') }}"
-                            class="form-control"
-                        />
+                        <input type="date" name="date_to" id="date-to" value="{{ request('date_to') }}"
+                            class="form-control" />
                     </div>
                     <div class="col-md-3">
                         <label for="sort-filter" class="form-label">
                             Urutkan
                         </label>
-                        <select
-                            name="sort"
-                            id="sort-filter"
-                            class="choices-select form-select"
-                        >
-                            <option
-                                value="created_at"
-                                {{ request('sort') === 'created_at' ? 'selected' : '' }}
-                            >
+                        <select name="sort" id="sort-filter" class="choices-select form-select">
+                            <option value="created_at" {{ request('sort') === 'created_at' ? 'selected' : '' }}>
                                 Tanggal Transaksi
                             </option>
-                            <option
-                                value="created_by"
-                                {{ request('sort') === 'created_by' ? 'selected' : '' }}
-                            >
+                            <option value="created_by" {{ request('sort') === 'created_by' ? 'selected' : '' }}>
                                 Dibuat Oleh
                             </option>
-                            <option
-                                value="total_porsi"
-                                {{ request('sort') === 'total_porsi' ? 'selected' : '' }}
-                            >
+                            <option value="total_porsi" {{ request('sort') === 'total_porsi' ? 'selected' : '' }}>
                                 Total Porsi
                             </option>
                         </select>
                     </div>
                     <div class="col-12 d-flex justify-content-end gap-2 mt-3">
                         @if (request()->hasAny(['search', 'status', 'date_from', 'date_to', 'sort']))
-                            <a
-                                href="{{ route('admin-gudang.laporan-kekurangan.index', ['dapur' => $dapur->id_dapur]) }}"
-                                class="btn btn-outline-secondary"
-                            >
+                            <a href="{{ route('admin-gudang.laporan-kekurangan.index', ['dapur' => $dapur->id_dapur]) }}"
+                                class="btn btn-outline-secondary">
                                 Reset Filter
                             </a>
                         @endif
@@ -319,14 +237,9 @@
         <div class="card">
             <div class="card-body">
                 @if ($transaksi->isNotEmpty())
-                    
                     @if ($transaksi->where('laporanKekuranganStock.status', 'pending')->count() > 0)
                         <div class="mb-3 d-flex align-items-center">
-                            <input
-                                type="checkbox"
-                                id="select-all"
-                                class="form-check-input me-2"
-                            />
+                            <input type="checkbox" id="select-all" class="form-check-input me-2" />
                             <label for="select-all" class="form-check-label">
                                 Pilih Semua Pending
                             </label>
@@ -360,17 +273,13 @@
                             <tbody>
                                 @foreach ($transaksi as $index => $transaksiItem)
                                     <tr
-                                        class="{{ $transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty() ? 'table-warning-subtle' : '' }}"
-                                    >
+                                        class="{{ $transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty() ? 'table-warning-subtle' : '' }}">
                                         @if ($transaksi->where('laporanKekuranganStock.status', 'pending')->count() > 0)
                                             <td>
                                                 @if ($transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty())
-                                                    <input
-                                                        type="checkbox"
-                                                        class="form-check-input bulk-checkbox"
+                                                    <input type="checkbox" class="form-check-input bulk-checkbox"
                                                         value="{{ $transaksiItem->id_transaksi }}"
-                                                        data-laporan-ids="{{ json_encode($transaksiItem->laporanKekuranganStock->where('status', 'pending')->pluck('id_laporan')) }}"
-                                                    />
+                                                        data-laporan-ids="{{ json_encode($transaksiItem->laporanKekuranganStock->where('status', 'pending')->pluck('id_laporan')) }}" />
                                                 @endif
                                             </td>
                                         @endif
@@ -409,7 +318,7 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                
+
                                                 <div>
                                                     <span class="fw-medium">
                                                         {{ $transaksiItem->createdBy->nama ?? 'Unknown' }}
@@ -423,8 +332,16 @@
                                         </td>
                                         <td>
                                             @php
-                                                $statusClass = $transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty() ? 'bg-label-warning' : 'bg-label-success';
-                                                $statusText = $transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty() ? 'Menunggu' : 'Diselesaikan';
+                                                $statusClass = $transaksiItem->laporanKekuranganStock
+                                                    ->where('status', 'pending')
+                                                    ->isNotEmpty()
+                                                    ? 'bg-label-warning'
+                                                    : 'bg-label-success';
+                                                $statusText = $transaksiItem->laporanKekuranganStock
+                                                    ->where('status', 'pending')
+                                                    ->isNotEmpty()
+                                                    ? 'Menunggu'
+                                                    : 'Diselesaikan';
                                             @endphp
                                             <span class="badge {{ $statusClass }}">
                                                 {{ $statusText }}
@@ -437,28 +354,22 @@
                                         </td>
                                         <td>
                                             <div class="d-flex gap-1">
-                                                <a
-                                                    href="{{ route('admin-gudang.laporan-kekurangan.show', ['dapur' => $dapur->id_dapur, 'transaksi' => $transaksiItem->id_transaksi]) }}"
+                                                <a href="{{ route('admin-gudang.laporan-kekurangan.show', ['dapur' => $dapur->id_dapur, 'transaksi' => $transaksiItem->id_transaksi]) }}"
                                                     class="btn btn-sm btn-outline-primary action-btn"
-                                                    data-bs-toggle="tooltip"
-                                                    title="Lihat Detail"
-                                                >
+                                                    data-bs-toggle="tooltip" title="Lihat Detail">
                                                     <i class="bx bx-show"></i>
                                                 </a>
-                                                @if ($transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty())
-                                                    <button
-                                                        type="button"
+                                                {{-- @if ($transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty())
+                                                    <button type="button"
                                                         class="btn btn-sm btn-outline-success action-btn"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#resolveModal"
+                                                        data-bs-toggle="modal" data-bs-target="#resolveModal"
                                                         data-transaksi-id="{{ $transaksiItem->id_transaksi }}"
                                                         data-created-by="{{ $transaksiItem->createdBy->nama ?? 'Unknown' }}"
                                                         data-laporan-ids="{{ json_encode($transaksiItem->laporanKekuranganStock->where('status', 'pending')->pluck('id_laporan')) }}"
-                                                        title="Selesaikan"
-                                                    >
+                                                        title="Selesaikan">
                                                         <i class="bx bx-check"></i>
                                                     </button>
-                                                @endif
+                                                @endif --}}
                                             </div>
                                         </td>
                                     </tr>
@@ -473,7 +384,6 @@
                         </div>
                     @endif
                 @else
-                    
                     <div class="text-center py-6">
                         <i class="bx bx-receipt bx-lg text-muted mb-3"></i>
                         <h5 class="mb-1">Tidak ada laporan kekurangan stok</h5>
@@ -481,10 +391,8 @@
                             Belum ada laporan kekurangan stok yang sesuai dengan filter.
                         </p>
                         @if (request()->hasAny(['search', 'status', 'date_from', 'date_to', 'sort']))
-                            <a
-                                href="{{ route('admin-gudang.laporan-kekurangan.index', ['dapur' => $dapur->id_dapur]) }}"
-                                class="btn btn-outline-primary"
-                            >
+                            <a href="{{ route('admin-gudang.laporan-kekurangan.index', ['dapur' => $dapur->id_dapur]) }}"
+                                class="btn btn-outline-primary">
                                 Reset Filter
                             </a>
                         @endif
@@ -493,74 +401,39 @@
             </div>
         </div>
 
-        <div
-            class="modal fade"
-            id="resolveModal"
-            tabindex="-1"
-            aria-labelledby="resolveModalLabel"
-            aria-hidden="true"
-        >
+        <div class="modal fade" id="resolveModal" tabindex="-1" aria-labelledby="resolveModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form
-                        id="resolveForm"
-                        method="POST"
-                        action="{{ route('admin-gudang.laporan-kekurangan.bulk-resolve', ['dapur' => $dapur->id_dapur]) }}"
-                    >
+                    <form id="resolveForm" method="POST"
+                        action="{{ route('admin-gudang.laporan-kekurangan.bulk-resolve', ['dapur' => $dapur->id_dapur]) }}">
                         @csrf
                         <div class="modal-header">
                             <h5 class="modal-title" id="resolveModalLabel">
                                 Selesaikan Laporan Kekurangan
                             </h5>
-                            <button
-                                type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                            ></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label
-                                    for="resolveCreatedBy"
-                                    class="form-label"
-                                >
+                                <label for="resolveCreatedBy" class="form-label">
                                     Dibuat Oleh
                                 </label>
-                                <input
-                                    type="text"
-                                    id="resolveCreatedBy"
-                                    class="form-control"
-                                    readonly
-                                />
+                                <input type="text" id="resolveCreatedBy" class="form-control" readonly />
                             </div>
                             <div class="mb-3">
-                                <label
-                                    for="keterangan_resolve"
-                                    class="form-label"
-                                >
+                                <label for="keterangan_resolve" class="form-label">
                                     Keterangan (Opsional)
                                 </label>
-                                <textarea
-                                    id="keterangan_resolve"
-                                    name="catatan"
-                                    class="form-control"
-                                    rows="4"
-                                ></textarea>
+                                <textarea id="keterangan_resolve" name="catatan" class="form-control" rows="4"></textarea>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button
-                                type="button"
-                                class="btn btn-secondary"
-                                data-bs-dismiss="modal"
-                            >
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                 Batal
                             </button>
-                            <button
-                                type="submit"
-                                class="btn btn-primary"
-                            >
+                            <button type="submit" class="btn btn-primary">
                                 Selesaikan
                             </button>
                         </div>
@@ -569,45 +442,27 @@
             </div>
         </div>
 
-        <div
-            class="modal fade"
-            id="bulkActionModal"
-            tabindex="-1"
-            aria-labelledby="bulkActionModalLabel"
-            aria-hidden="true"
-        >
+        <div class="modal fade" id="bulkActionModal" tabindex="-1" aria-labelledby="bulkActionModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="bulkActionModalLabel">
                             Aksi Massal
                         </h5>
-                        <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                        ></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form
-                        id="bulkActionForm"
+                    <form id="bulkActionForm"
                         action="{{ route('admin-gudang.laporan-kekurangan.bulk-resolve', ['dapur' => $dapur->id_dapur]) }}"
-                        method="POST"
-                    >
+                        method="POST">
                         @csrf
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="bulk_keterangan" class="form-label">
                                     Catatan Penyelesaian (Opsional)
                                 </label>
-                                <textarea
-                                    name="catatan"
-                                    id="bulk_keterangan"
-                                    class="form-control"
-                                    rows="3"
-                                    maxlength="500"
-                                    placeholder="Catatan untuk semua laporan yang dipilih..."
-                                ></textarea>
+                                <textarea name="catatan" id="bulk_keterangan" class="form-control" rows="3" maxlength="500"
+                                    placeholder="Catatan untuk semua laporan yang dipilih..."></textarea>
                                 <div class="form-text">Maksimal 500 karakter</div>
                             </div>
                             <div class="alert alert-info">
@@ -618,19 +473,10 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button
-                                type="button"
-                                class="btn btn-secondary"
-                                data-bs-dismiss="modal"
-                            >
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                 Batal
                             </button>
-                            <button
-                                type="submit"
-                                id="bulk-action-submit"
-                                class="btn btn-primary"
-                                disabled
-                            >
+                            <button type="submit" id="bulk-action-submit" class="btn btn-primary" disabled>
                                 <i class="bx bx-check-double me-1"></i>
                                 Selesaikan Laporan
                             </button>
@@ -647,22 +493,29 @@
                         <h5 class="modal-title" id="exportModalLabel">Export Laporan Kekurangan</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="{{ route('admin-gudang.laporan-kekurangan.export-bulk', ['dapur' => $dapur->id_dapur]) }}" method="GET">
+                    <form
+                        action="{{ route('admin-gudang.laporan-kekurangan.export-bulk', ['dapur' => $dapur->id_dapur]) }}"
+                        method="GET">
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="export_date_from" class="form-label">Dari Tanggal</label>
-                                <input type="date" name="date_from" id="export_date_from" class="form-control" value="{{ request('date_from') }}">
+                                <input type="date" name="date_from" id="export_date_from" class="form-control"
+                                    value="{{ request('date_from') }}">
                             </div>
                             <div class="mb-3">
                                 <label for="export_date_to" class="form-label">Sampai Tanggal</label>
-                                <input type="date" name="date_to" id="export_date_to" class="form-control" value="{{ request('date_to') }}">
+                                <input type="date" name="date_to" id="export_date_to" class="form-control"
+                                    value="{{ request('date_to') }}">
                             </div>
                             <div class="mb-3">
                                 <label for="export_status" class="form-label">Status (Opsional)</label>
                                 <select name="status" id="export_status" class="form-select">
-                                    <option value="" {{ request('status') === '' ? 'selected' : '' }}>Semua Status</option>
-                                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu</option>
-                                    <option value="resolved" {{ request('status') === 'resolved' ? 'selected' : '' }}>Diselesaikan</option>
+                                    <option value="" {{ request('status') === '' ? 'selected' : '' }}>Semua Status
+                                    </option>
+                                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>
+                                        Menunggu</option>
+                                    <option value="resolved" {{ request('status') === 'resolved' ? 'selected' : '' }}>
+                                        Diselesaikan</option>
                                 </select>
                             </div>
                         </div>
@@ -677,10 +530,8 @@
             </div>
         </div>
 
-        <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
-        />
+        <link rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" />
 
         <style>
             .choices__inner {
@@ -690,20 +541,25 @@
                 padding: 0.5rem;
                 font-size: 0.875rem;
             }
+
             .choices__list--dropdown {
                 border: 1px solid #dee2e6;
                 border-radius: 0.375rem;
                 box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
             }
+
             .choices__list--dropdown .choices__item--selectable.is-highlighted {
                 background-color: #f8f9fa;
             }
+
             .choices[data-type*='select-one'] .choices__inner {
                 padding-bottom: 0;
             }
+
             .choices.is-disabled .choices__inner {
                 background-color: #f8f9fa;
             }
+
             .action-btn {
                 min-width: 40px;
                 height: 32px;
@@ -714,13 +570,16 @@
                     transform 0.2s ease,
                     opacity 0.2s ease;
             }
+
             .action-btn:hover:not(.disabled) {
                 transform: scale(1.1);
                 opacity: 0.9;
             }
+
             .table td {
                 vertical-align: middle;
             }
+
             .avatar-initial {
                 width: 40px;
                 height: 40px;
@@ -728,24 +587,30 @@
                 align-items: center;
                 justify-content: center;
             }
+
             .avatar-sm .avatar-initial {
                 width: 32px;
                 height: 32px;
                 font-size: 12px;
             }
+
             .table-warning-subtle {
                 background-color: rgba(255, 243, 205, 0.3) !important;
             }
+
             .pulse {
                 animation: pulse 2s infinite;
             }
+
             @keyframes pulse {
                 0% {
                     opacity: 1;
                 }
+
                 50% {
                     opacity: 0.5;
                 }
+
                 100% {
                     opacity: 1;
                 }
@@ -755,7 +620,7 @@
         <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 // Initialize Choices.js
                 const selects = document.querySelectorAll('.choices-select');
                 selects.forEach((select) => {
@@ -777,7 +642,7 @@
                 // Handle resolve modal
                 const resolveModal = document.getElementById('resolveModal');
                 if (resolveModal) {
-                    resolveModal.addEventListener('show.bs.modal', function (event) {
+                    resolveModal.addEventListener('show.bs.modal', function(event) {
                         const button = event.relatedTarget;
                         const createdBy = button.getAttribute('data-created-by');
                         const laporanIds = JSON.parse(button.getAttribute('data-laporan-ids') || '[]');
@@ -832,9 +697,9 @@
                     }
 
                     if (bulkSelectionInfo) {
-                        bulkSelectionInfo.textContent = count > 0 
-                            ? `${count} transaksi dipilih (${totalLaporan} laporan kekurangan akan diselesaikan).`
-                            : 'Pilih transaksi dari tabel terlebih dahulu.';
+                        bulkSelectionInfo.textContent = count > 0 ?
+                            `${count} transaksi dipilih (${totalLaporan} laporan kekurangan akan diselesaikan).` :
+                            'Pilih transaksi dari tabel terlebih dahulu.';
                     }
 
                     // Update hidden inputs with laporan_ids
@@ -851,7 +716,7 @@
                 }
 
                 if (selectAllCheckbox) {
-                    selectAllCheckbox.addEventListener('change', function () {
+                    selectAllCheckbox.addEventListener('change', function() {
                         bulkCheckboxes.forEach(checkbox => {
                             checkbox.checked = this.checked;
                         });

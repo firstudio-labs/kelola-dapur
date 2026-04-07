@@ -92,12 +92,12 @@ class TransaksiDapur extends Model
 
     public function getTotalPorsiBesar(): int
     {
-        return $this->detailTransaksiDapur()->where('tipe_porsi', 'besar')->sum('jumlah_porsi');
+        return (int) ($this->detailTransaksiDapur()->where('tipe_porsi', 'besar')->value('jumlah_porsi') ?? 0);
     }
 
     public function getTotalPorsiKecil(): int
     {
-        return $this->detailTransaksiDapur()->where('tipe_porsi', 'kecil')->sum('jumlah_porsi') ?? 0;
+        return (int) ($this->detailTransaksiDapur()->where('tipe_porsi', 'kecil')->value('jumlah_porsi') ?? 0);
     }
 
     public function calculateIngredientNeeds()

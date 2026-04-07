@@ -129,8 +129,8 @@
                             </div>
                             <div class="col-md-6">
                                 @php
-                                    $totalPorsiBesar = $transaksi->detailTransaksiDapur->where("tipe_porsi", "besar")->sum("jumlah_porsi") ?? 0;
-                                    $totalPorsiKecil = $transaksi->detailTransaksiDapur->where("tipe_porsi", "kecil")->sum("jumlah_porsi") ?? 0;
+                                    $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()?->jumlah_porsi ?? 0;
+                                    $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()?->jumlah_porsi ?? 0;
                                     $totalKeseluruhan = $totalPorsiBesar + $totalPorsiKecil;
                                 @endphp
 
@@ -353,44 +353,50 @@
                                                 $bahanArray = is_object($bahan) ? (array) $bahan : $bahan;
                                                 $satuan = $bahanArray["satuan"] ?? "N/A";
                                                 $namaBahan = $bahanArray["nama_bahan"] ?? "Unknown";
-                                                $totalKebutuhan = isset($bahanArray["total_kebutuhan"]) ? (float) $bahanArray["total_kebutuhan"] : 0;
-                                                $stockInfo = isset($stockData[$idTemplate])
-                                                    ? (is_object($stockData[$idTemplate])
-                                                        ? (array) $stockData[$idTemplate]
-                                                        : $stockData[$idTemplate])
-                                                    : [
-                                                        "stock_tersedia" => 0,
-                                                        "sufficient" => false,
-                                                        "debug" => "not_found",
-                                                        "satuan_stok" => $satuan,
-                                                    ];
-                                                $stockTersedia = (float) ($stockInfo["stock_tersedia"] ?? 0);
-                                                $estimasiStok = $stockTersedia - $totalKebutuhan;
+                                                $totalKebutuhanAsli = isset($bahanArray["total_kebutuhan"]) ? (float) $bahanArray["total_kebutuhan"] : 0;
+                                                
+                                                $stockItemData = $stockData[$idTemplate] ?? null;
+                                                $stockInfo = is_object($stockItemData) ? (array) $stockItemData : ($stockItemData ?: [
+                                                    "stock_tersedia" => 0,
+                                                    "sufficient" => false,
+                                                    "debug" => "not_found",
+                                                    "satuan_stok" => $satuan,
+                                                    "konversi_nilai" => null,
+                                                    "konversi_satuan" => null,
+                                                ]);
+                                                
+                                                $stockTersediaDisplay = (float) ($stockInfo["display_stok"] ?? ($stockInfo["stock_tersedia"] ?? 0));
+                                                $konversiNilai = (float) ($stockInfo["konversi_nilai"] ?? 0);
+                                                $totalKebutuhanDisplay = $konversiNilai > 0 ? $totalKebutuhanAsli / $konversiNilai : $totalKebutuhanAsli;
+                                                $satuanDisplay = $stockInfo["konversi_satuan"] ?? $stockInfo["satuan_stok"] ?? $satuan;
+                                                
+                                                $estimasiStok = $stockTersediaDisplay - $totalKebutuhanDisplay;
+                                                $realSufficient = $estimasiStok >= 0;
                                             @endphp
 
                                             <tr>
                                                 <td>{{ $namaBahan }}</td>
                                                 <td>
-                                                    {{ number_format($totalKebutuhan, 2) }}
-                                                    {{ $satuan }}
+                                                    {{ number_format($totalKebutuhanDisplay, 2) }}
+                                                    {{ $satuanDisplay }}
                                                 </td>
                                                 <td>
-                                                    {{ number_format($stockTersedia, 2) }}
-                                                    {{ $stockInfo["satuan_stok"] }}
+                                                    {{ number_format($stockTersediaDisplay, 2) }}
+                                                    {{ $satuanDisplay }}
                                                 </td>
                                                 <td>
                                                     <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
                                                         {{ number_format($estimasiStok, 2) }}
-                                                        {{ $stockInfo["satuan_stok"] }}
+                                                        {{ $satuanDisplay }}
                                                     </span>
                                                 </td>
                                                 <td
                                                     class="stock-comparison-total-{{ $idTemplate }}"
                                                 >
                                                     <span class="fw-semibold">
-                                                        {{ number_format($totalKebutuhan, 2) }}
+                                                        {{ number_format($totalKebutuhanDisplay, 2) }}
                                                         :
-                                                        {{ number_format($stockTersedia, 2) }}
+                                                        {{ number_format($stockTersediaDisplay, 2) }}
                                                     </span>
                                                     <small
                                                         class="text-muted d-block"
@@ -407,13 +413,13 @@
                                                         >
                                                             Stok Tidak Ditemukan
                                                         </span>
-                                                    @elseif ($stockTersedia == 0)
+                                                    @elseif ($stockTersediaDisplay == 0)
                                                         <span
                                                             class="badge bg-danger"
                                                         >
                                                             Stok Kosong
                                                         </span>
-                                                    @elseif ($stockInfo["sufficient"])
+                                                    @elseif ($realSufficient)
                                                         <span
                                                             class="badge bg-success"
                                                         >
@@ -454,35 +460,40 @@
                                                     $bahanArray = is_object($bahan) ? (array) $bahan : $bahan;
                                                     $satuan = $bahanArray["satuan"] ?? "N/A";
                                                     $namaBahan = $bahanArray["nama_bahan"] ?? "Unknown";
-                                                    $totalKebutuhan = isset($bahanArray["total_kebutuhan"]) ? (float) $bahanArray["total_kebutuhan"] : 0;
-                                                    $stockInfo = isset($stockData[$idTemplate])
-                                                        ? (is_object($stockData[$idTemplate])
-                                                            ? (array) $stockData[$idTemplate]
-                                                            : $stockData[$idTemplate])
-                                                        : [
-                                                            "stock_tersedia" => 0,
-                                                            "sufficient" => false,
-                                                            "debug" => "not_found",
-                                                            "satuan_stok" => $satuan,
-                                                        ];
-                                                    $stockTersedia = (float) ($stockInfo["stock_tersedia"] ?? 0);
-                                                    $estimasiStok = $stockTersedia - $totalKebutuhan;
+                                                    $totalKebutuhanAsli = isset($bahanArray["total_kebutuhan"]) ? (float) $bahanArray["total_kebutuhan"] : 0;
+                                                    
+                                                    $stockItemData = $stockData[$idTemplate] ?? null;
+                                                    $stockInfo = is_object($stockItemData) ? (array) $stockItemData : ($stockItemData ?: [
+                                                        "stock_tersedia" => 0,
+                                                        "sufficient" => false,
+                                                        "debug" => "not_found",
+                                                        "satuan_stok" => $satuan,
+                                                        "konversi_nilai" => null,
+                                                        "konversi_satuan" => null,
+                                                    ]);
+                                                    
+                                                    $stockTersediaDisplay = (float) ($stockInfo["display_stok"] ?? ($stockInfo["stock_tersedia"] ?? 0));
+                                                    $konversiNilai = (float) ($stockInfo["konversi_nilai"] ?? 0);
+                                                    $totalKebutuhanDisplay = $konversiNilai > 0 ? $totalKebutuhanAsli / $konversiNilai : $totalKebutuhanAsli;
+                                                    $satuanDisplay = $stockInfo["konversi_satuan"] ?? $stockInfo["satuan_stok"] ?? $satuan;
+                                                    
+                                                    $estimasiStok = $stockTersediaDisplay - $totalKebutuhanDisplay;
                                                 @endphp
 
                                                 <tr>
                                                     <td>{{ $namaBahan }}</td>
                                                     <td>
-                                                        {{ number_format($totalKebutuhan, 2) }}
-                                                        {{ $satuan }}
+                                                        {{ number_format($totalKebutuhanDisplay, 2) }}
+                                                        {{ $satuanDisplay }}
                                                     </td>
                                                     <td>
-                                                        {{ number_format($stockTersedia, 2) }}
-                                                        {{ $stockInfo["satuan_stok"] }}
+                                                        {{ number_format($stockTersediaDisplay, 2) }}
+                                                        {{ $satuanDisplay }}
                                                     </td>
                                                     <td>
                                                         <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
                                                             {{ number_format($estimasiStok, 2) }}
-                                                            {{ $stockInfo["satuan_stok"] }}
+                                                            {{ $satuanDisplay }}
                                                         </span>
                                                     </td>
                                                     <td
@@ -491,9 +502,9 @@
                                                         <span
                                                             class="fw-semibold"
                                                         >
-                                                            {{ number_format($totalKebutuhan, 2) }}
+                                                            {{ number_format($totalKebutuhanDisplay, 2) }}
                                                             :
-                                                            {{ number_format($stockTersedia, 2) }}
+                                                            {{ number_format($stockTersediaDisplay, 2) }}
                                                         </span>
                                                         <small
                                                             class="text-muted d-block"
@@ -505,30 +516,13 @@
                                                         class="stock-status-{{ $idTemplate }}"
                                                     >
                                                         @if ($stockInfo["debug"] == "not_found")
-                                                            <span
-                                                                class="badge bg-warning"
-                                                            >
-                                                                Stok Tidak
-                                                                Ditemukan
-                                                            </span>
-                                                        @elseif ($stockTersedia == 0)
-                                                            <span
-                                                                class="badge bg-danger"
-                                                            >
-                                                                Stok Kosong
-                                                            </span>
-                                                        @elseif ($stockInfo["sufficient"])
-                                                            <span
-                                                                class="badge bg-success"
-                                                            >
-                                                                Stok Tersedia
-                                                            </span>
+                                                            <span class="badge bg-warning">Stok Tidak Ditemukan</span>
+                                                        @elseif ($stockTersediaDisplay == 0)
+                                                            <span class="badge bg-danger">Stok Kosong</span>
+                                                        @elseif ($estimasiStok >= 0)
+                                                            <span class="badge bg-success">Stok Tersedia</span>
                                                         @else
-                                                            <span
-                                                                class="badge bg-danger"
-                                                            >
-                                                                Stok Kurang
-                                                            </span>
+                                                            <span class="badge bg-danger">Stok Kurang</span>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -559,35 +553,40 @@
                                                     $bahanArray = is_object($bahan) ? (array) $bahan : $bahan;
                                                     $satuan = $bahanArray["satuan"] ?? "N/A";
                                                     $namaBahan = $bahanArray["nama_bahan"] ?? "Unknown";
-                                                    $totalKebutuhan = isset($bahanArray["total_kebutuhan"]) ? (float) $bahanArray["total_kebutuhan"] : 0;
-                                                    $stockInfo = isset($stockData[$idTemplate])
-                                                        ? (is_object($stockData[$idTemplate])
-                                                            ? (array) $stockData[$idTemplate]
-                                                            : $stockData[$idTemplate])
-                                                        : [
-                                                            "stock_tersedia" => 0,
-                                                            "sufficient" => false,
-                                                            "debug" => "not_found",
-                                                            "satuan_stok" => $satuan,
-                                                        ];
-                                                    $stockTersedia = (float) ($stockInfo["stock_tersedia"] ?? 0);
-                                                    $estimasiStok = $stockTersedia - $totalKebutuhan;
+                                                    $totalKebutuhanAsli = isset($bahanArray["total_kebutuhan"]) ? (float) $bahanArray["total_kebutuhan"] : 0;
+                                                    
+                                                    $stockItemData = $stockData[$idTemplate] ?? null;
+                                                    $stockInfo = is_object($stockItemData) ? (array) $stockItemData : ($stockItemData ?: [
+                                                        "stock_tersedia" => 0,
+                                                        "sufficient" => false,
+                                                        "debug" => "not_found",
+                                                        "satuan_stok" => $satuan,
+                                                        "konversi_nilai" => null,
+                                                        "konversi_satuan" => null,
+                                                    ]);
+                                                    
+                                                    $stockTersediaDisplay = (float) ($stockInfo["display_stok"] ?? ($stockInfo["stock_tersedia"] ?? 0));
+                                                    $konversiNilai = (float) ($stockInfo["konversi_nilai"] ?? 0);
+                                                    $totalKebutuhanDisplay = $konversiNilai > 0 ? $totalKebutuhanAsli / $konversiNilai : $totalKebutuhanAsli;
+                                                    $satuanDisplay = $stockInfo["konversi_satuan"] ?? $stockInfo["satuan_stok"] ?? $satuan;
+                                                    
+                                                    $estimasiStok = $stockTersediaDisplay - $totalKebutuhanDisplay;
                                                 @endphp
 
                                                 <tr>
                                                     <td>{{ $namaBahan }}</td>
                                                     <td>
-                                                        {{ number_format($totalKebutuhan, 2) }}
-                                                        {{ $satuan }}
+                                                        {{ number_format($totalKebutuhanDisplay, 2) }}
+                                                        {{ $satuanDisplay }}
                                                     </td>
                                                     <td>
-                                                        {{ number_format($stockTersedia, 2) }}
-                                                        {{ $stockInfo["satuan_stok"] }}
+                                                        {{ number_format($stockTersediaDisplay, 2) }}
+                                                        {{ $satuanDisplay }}
                                                     </td>
                                                     <td>
                                                         <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
                                                             {{ number_format($estimasiStok, 2) }}
-                                                            {{ $stockInfo["satuan_stok"] }}
+                                                            {{ $satuanDisplay }}
                                                         </span>
                                                     </td>
                                                     <td
@@ -596,9 +595,9 @@
                                                         <span
                                                             class="fw-semibold"
                                                         >
-                                                            {{ number_format($totalKebutuhan, 2) }}
+                                                            {{ number_format($totalKebutuhanDisplay, 2) }}
                                                             :
-                                                            {{ number_format($stockTersedia, 2) }}
+                                                            {{ number_format($stockTersediaDisplay, 2) }}
                                                         </span>
                                                         <small
                                                             class="text-muted d-block"
@@ -610,30 +609,13 @@
                                                         class="stock-status-kecil-{{ $idTemplate }}"
                                                     >
                                                         @if ($stockInfo["debug"] == "not_found")
-                                                            <span
-                                                                class="badge bg-warning"
-                                                            >
-                                                                Stok Tidak
-                                                                Ditemukan
-                                                            </span>
-                                                        @elseif ($stockTersedia == 0)
-                                                            <span
-                                                                class="badge bg-danger"
-                                                            >
-                                                                Stok Kosong
-                                                            </span>
-                                                        @elseif ($stockInfo["sufficient"])
-                                                            <span
-                                                                class="badge bg-success"
-                                                            >
-                                                                Stok Tersedia
-                                                            </span>
+                                                            <span class="badge bg-warning">Stok Tidak Ditemukan</span>
+                                                        @elseif ($stockTersediaDisplay == 0)
+                                                            <span class="badge bg-danger">Stok Kosong</span>
+                                                        @elseif ($estimasiStok >= 0)
+                                                            <span class="badge bg-success">Stok Tersedia</span>
                                                         @else
-                                                            <span
-                                                                class="badge bg-danger"
-                                                            >
-                                                                Stok Kurang
-                                                            </span>
+                                                            <span class="badge bg-danger">Stok Kurang</span>
                                                         @endif
                                                     </td>
                                                 </tr>

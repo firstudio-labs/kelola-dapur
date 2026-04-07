@@ -78,8 +78,8 @@
                             </div>
                             <div class="col-md-6">
                                 @php
-                                    $totalPorsiBesar = $transaksi->detailTransaksiDapur->where("tipe_porsi", "besar")->sum("jumlah_porsi") ?? 0;
-                                    $totalPorsiKecil = $transaksi->detailTransaksiDapur->where("tipe_porsi", "kecil")->sum("jumlah_porsi") ?? 0;
+                                    $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()?->jumlah_porsi ?? 0;
+                                    $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()?->jumlah_porsi ?? 0;
                                     $totalKeseluruhan = $totalPorsiBesar + $totalPorsiKecil;
                                 @endphp
 
@@ -347,25 +347,27 @@
                                                         {{ $bahan["nama_bahan"] }}
                                                     </td>
                                                     <td>
-                                                        {{ number_format($bahan["total_kebutuhan"], 2) }}
-                                                        {{ $bahan["satuan"] }}
+                                                        <span class="total-kebutuhan-besar-display-{{ $idTemplate }}">
+                                                            {{ number_format($bahan["total_kebutuhan"], 2) }}
+                                                            {{ $bahan["satuan"] }}
+                                                        </span>
                                                     </td>
                                                     <td
-                                                        class="stock-available-{{ $idTemplate }}"
+                                                        class="stock-available-besar-{{ $idTemplate }}"
                                                     >
                                                         <span class="text-muted">
                                                             Memuat...
                                                         </span>
                                                     </td>
                                                     <td
-                                                        class="stock-estimate-{{ $idTemplate }}"
+                                                        class="stock-estimate-besar-{{ $idTemplate }}"
                                                     >
                                                         <span class="text-muted">
                                                             Memuat...
                                                         </span>
                                                     </td>
                                                     <td
-                                                        class="stock-comparison-{{ $idTemplate }}"
+                                                        class="stock-comparison-besar-{{ $idTemplate }}"
                                                     >
                                                         <span
                                                             class="text-muted"
@@ -374,7 +376,7 @@
                                                         </span>
                                                     </td>
                                                     <td
-                                                        class="stock-status-{{ $idTemplate }}"
+                                                        class="stock-status-besar-{{ $idTemplate }}"
                                                     >
                                                         <span
                                                             class="badge bg-secondary"
@@ -422,8 +424,10 @@
                                                         {{ $bahan["nama_bahan"] }}
                                                     </td>
                                                     <td>
-                                                        {{ number_format($bahan["total_kebutuhan"], 2) }}
-                                                        {{ $bahan["satuan"] }}
+                                                        <span class="total-kebutuhan-kecil-display-{{ $idTemplate }}">
+                                                            {{ number_format($bahan["total_kebutuhan"], 2) }}
+                                                            {{ $bahan["satuan"] }}
+                                                        </span>
                                                     </td>
                                                     <td
                                                         class="stock-available-kecil-{{ $idTemplate }}"
@@ -527,7 +531,7 @@
                                                 </td>
                                                 <td>
                                                     <span
-                                                        class="fw-semibold text-primary"
+                                                        class="fw-semibold text-primary total-kebutuhan-total-display-{{ $idTemplate }}"
                                                     >
                                                         {{ number_format($bahan["total_kebutuhan"], 2) }}
                                                         {{ $bahan["satuan"] }}
@@ -932,7 +936,7 @@
                     @foreach($bahanKebutuhan as $idTemplate => $bahan)
                         updateSingleStockDisplay('{{ $idTemplate }}', data, {{ $bahan["total_kebutuhan"] }});
                         @if(isset($bahanBesar[$idTemplate]))
-                            updateSingleStockDisplayForType('{{ $idTemplate }}', '', data, {{ $bahanBesar[$idTemplate]["total_kebutuhan"] }});
+                            updateSingleStockDisplayForType('{{ $idTemplate }}', 'besar-', data, {{ $bahanBesar[$idTemplate]["total_kebutuhan"] }});
                         @endif
                         @if(isset($bahanKecil[$idTemplate]))
                             updateSingleStockDisplayForType('{{ $idTemplate }}', 'kecil-', data, {{ $bahanKecil[$idTemplate]["total_kebutuhan"] }});
@@ -942,36 +946,51 @@
             }
 
             function updateSingleStockDisplay(templateId, data, kebutuhan) {
-                const stockInfo = data.stock_data[templateId] || { stock_tersedia: 0, sufficient: false, debug: 'unknown', satuan_stok: '' };
-                const stockTersedia = parseFloat(stockInfo.stock_tersedia) || 0.0;
-                const estimasiStok = stockTersedia - parseFloat(kebutuhan);
-                console.log(`Debug for ${templateId} (${stockInfo.nama_bahan}):`, {
-                    debug: stockInfo.debug,
-                    stock_tersedia: stockTersedia,
-                    satuan: stockInfo.satuan_stok
-                });
+                const stockInfo = data.stock_data[templateId] || { stock_tersedia: 0, sufficient: false, debug: 'unknown', satuan_stok: '', konversi_nilai: null, konversi_satuan: null };
+                
+                let stockTersediaReal = parseFloat(stockInfo.stock_tersedia) || 0.0;
+                let kebutuhanReal = parseFloat(kebutuhan) || 0;
+                let estimasiStokReal = stockTersediaReal - kebutuhanReal;
+                
+                let displayStock = stockTersediaReal;
+                let displayKebutuhan = kebutuhanReal;
+                let displayEstimasi = estimasiStokReal;
+                let displaySatuan = stockInfo.satuan_stok;
+                
+                const konversiInfo = parseFloat(stockInfo.konversi_nilai);
+                if (!isNaN(konversiInfo) && konversiInfo > 0) {
+                    displayStock = stockTersediaReal / konversiInfo;
+                    displayKebutuhan = kebutuhanReal / konversiInfo;
+                    displayEstimasi = estimasiStokReal / konversiInfo;
+                    displaySatuan = stockInfo.konversi_satuan || displaySatuan;
+                }
+
+                const kebutuhanDisplayEl = document.querySelector('.total-kebutuhan-total-display-' + templateId);
+                if (kebutuhanDisplayEl) {
+                    kebutuhanDisplayEl.innerHTML = `${displayKebutuhan.toFixed(2)} ${displaySatuan}`;
+                }
 
                 const availableEl = document.querySelector('.stock-available-total-' + templateId);
                 if (availableEl) {
                     availableEl.innerHTML = `
-                        <span class="fw-semibold">${stockTersedia.toFixed(2)} ${stockInfo.satuan_stok}</span>
+                        <span class="fw-semibold">${displayStock.toFixed(2)} ${displaySatuan}</span>
                     `;
                 }
 
                 const comparisonEl = document.querySelector('.stock-comparison-total-' + templateId);
                 if (comparisonEl) {
                     comparisonEl.innerHTML = `
-                        <span class="fw-semibold">${parseFloat(kebutuhan).toFixed(2)} : ${stockTersedia.toFixed(2)}</span>
+                        <span class="fw-semibold">${displayKebutuhan.toFixed(2)} : ${displayStock.toFixed(2)}</span>
                         <small class="text-muted d-block">Kebutuhan : Stok Gudang</small>
                     `;
                 }
 
                 const estimateEl = document.querySelector('.stock-estimate-total-' + templateId);
                 if (estimateEl) {
-                    const estimateClass = estimasiStok < 0 ? 'text-danger' : (estimasiStok == 0 ? 'text-warning' : 'text-success');
+                    const estimateClass = displayEstimasi < 0 ? 'text-danger' : (displayEstimasi == 0 ? 'text-warning' : 'text-success');
                     estimateEl.innerHTML = `
                         <span class="${estimateClass}">
-                            ${estimasiStok.toFixed(2)} ${stockInfo.satuan_stok}
+                            ${displayEstimasi.toFixed(2)} ${displaySatuan}
                         </span>
                     `;
                 }
@@ -980,9 +999,9 @@
                 if (statusEl) {
                     if (stockInfo.debug === 'not_found') {
                         statusEl.innerHTML = '<span class="badge bg-warning">Stok Tidak Ditemukan</span>';
-                    } else if (stockTersedia === 0) {
+                    } else if (stockTersediaReal === 0) {
                         statusEl.innerHTML = '<span class="badge bg-danger">Stok Kosong</span>';
-                    } else if (stockInfo.sufficient) {
+                    } else if (estimasiStokReal >= 0) {
                         statusEl.innerHTML = '<span class="badge bg-success">Stok Tersedia</span>';
                     } else {
                         statusEl.innerHTML = '<span class="badge bg-danger">Stok Kurang</span>';
@@ -991,36 +1010,51 @@
             }
 
             function updateSingleStockDisplayForType(templateId, typePrefix, data, kebutuhan) {
-                const stockInfo = data.stock_data[templateId] || { stock_tersedia: 0, sufficient: false, debug: 'unknown', satuan_stok: '' };
-                const stockTersedia = parseFloat(stockInfo.stock_tersedia) || 0.0;
-                const estimasiStok = stockTersedia - parseFloat(kebutuhan);
-                console.log(`Debug for ${typePrefix}${templateId} (${stockInfo.nama_bahan}):`, {
-                    debug: stockInfo.debug,
-                    stock_tersedia: stockTersedia,
-                    satuan: stockInfo.satuan_stok
-                });
+                const stockInfo = data.stock_data[templateId] || { stock_tersedia: 0, sufficient: false, debug: 'unknown', satuan_stok: '', konversi_nilai: null, konversi_satuan: null };
+                
+                let stockTersediaReal = parseFloat(stockInfo.stock_tersedia) || 0.0;
+                let kebutuhanReal = parseFloat(kebutuhan) || 0;
+                let estimasiStokReal = stockTersediaReal - kebutuhanReal;
+                
+                let displayStock = stockTersediaReal;
+                let displayKebutuhan = kebutuhanReal;
+                let displayEstimasi = estimasiStokReal;
+                let displaySatuan = stockInfo.satuan_stok;
+                
+                const konversiInfo = parseFloat(stockInfo.konversi_nilai);
+                if (!isNaN(konversiInfo) && konversiInfo > 0) {
+                    displayStock = stockTersediaReal / konversiInfo;
+                    displayKebutuhan = kebutuhanReal / konversiInfo;
+                    displayEstimasi = estimasiStokReal / konversiInfo;
+                    displaySatuan = stockInfo.konversi_satuan || displaySatuan;
+                }
+
+                const kebutuhanDisplayEl = document.querySelector('.total-kebutuhan-' + typePrefix + 'display-' + templateId);
+                if (kebutuhanDisplayEl) {
+                    kebutuhanDisplayEl.innerHTML = `${displayKebutuhan.toFixed(2)} ${displaySatuan}`;
+                }
 
                 const availableEl = document.querySelector('.stock-available-' + typePrefix + templateId);
                 if (availableEl) {
                     availableEl.innerHTML = `
-                        <span class="fw-semibold">${stockTersedia.toFixed(2)} ${stockInfo.satuan_stok}</span>
+                        <span class="fw-semibold">${displayStock.toFixed(2)} ${displaySatuan}</span>
                     `;
                 }
 
                 const comparisonEl = document.querySelector('.stock-comparison-' + typePrefix + templateId);
                 if (comparisonEl) {
                     comparisonEl.innerHTML = `
-                        <span class="fw-semibold">${parseFloat(kebutuhan).toFixed(2)} : ${stockTersedia.toFixed(2)}</span>
+                        <span class="fw-semibold">${displayKebutuhan.toFixed(2)} : ${displayStock.toFixed(2)}</span>
                         <small class="text-muted d-block">Kebutuhan : Stok</small>
                     `;
                 }
 
                 const estimateEl = document.querySelector('.stock-estimate-' + typePrefix + templateId);
                 if (estimateEl) {
-                    const estimateClass = estimasiStok < 0 ? 'text-danger' : (estimasiStok == 0 ? 'text-warning' : 'text-success');
+                    const estimateClass = displayEstimasi < 0 ? 'text-danger' : (displayEstimasi == 0 ? 'text-warning' : 'text-success');
                     estimateEl.innerHTML = `
                         <span class="${estimateClass}">
-                            ${estimasiStok.toFixed(2)} ${stockInfo.satuan_stok}
+                            ${displayEstimasi.toFixed(2)} ${displaySatuan}
                         </span>
                     `;
                 }
@@ -1029,9 +1063,9 @@
                 if (statusEl) {
                     if (stockInfo.debug === 'not_found') {
                         statusEl.innerHTML = '<span class="badge bg-warning">Stok Tidak Ditemukan</span>';
-                    } else if (stockTersedia === 0) {
+                    } else if (stockTersediaReal === 0) {
                         statusEl.innerHTML = '<span class="badge bg-danger">Stok Kosong</span>';
-                    } else if (stockInfo.sufficient) {
+                    } else if (estimasiStokReal >= 0) {
                         statusEl.innerHTML = '<span class="badge bg-success">Stok Tersedia</span>';
                     } else {
                         statusEl.innerHTML = '<span class="badge bg-danger">Stok Kurang</span>';
@@ -1048,9 +1082,9 @@
                     listHtml += `
                         <li>
                             <strong>${shortage.nama_bahan}</strong>: 
-                            Butuh ${parseFloat(shortage.kebutuhan).toFixed(2)} ${shortage.satuan}, 
-                            tersedia ${parseFloat(shortage.stock_tersedia).toFixed(2)} ${shortage.satuan}
-                            <span class="text-danger">(kurang ${parseFloat(shortage.kekurangan).toFixed(2)} ${shortage.satuan})</span>
+                            Butuh ${(shortage.kebutuhan / (shortage.konversi_nilai || 1)).toFixed(2)} ${shortage.konversi_satuan || shortage.satuan}, 
+                            tersedia ${(shortage.stock_tersedia / (shortage.konversi_nilai || 1)).toFixed(2)} ${shortage.konversi_satuan || shortage.satuan}
+                            <span class="text-danger">(kurang ${(shortage.kekurangan / (shortage.konversi_nilai || 1)).toFixed(2)} ${shortage.konversi_satuan || shortage.satuan})</span>
                         </li>
                     `;
                 });

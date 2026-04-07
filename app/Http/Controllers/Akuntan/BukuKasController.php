@@ -20,7 +20,6 @@ class BukuKasController extends Controller
     {
         $dapurId = $this->getDapurId();
         
-        // Get all available years
         $years = AccountingPeriod::forDapur($dapurId)
             ->select('year')
             ->distinct()
@@ -29,7 +28,6 @@ class BukuKasController extends Controller
 
         $selectedYear = $request->get('year', $years->first() ?? date('Y'));
         
-        // Filter periods by selected year
         $periods = AccountingPeriod::forDapur($dapurId)
             ->where('year', $selectedYear)
             ->orderByDesc('start_date')
@@ -40,7 +38,6 @@ class BukuKasController extends Controller
             ? $periods->firstWhere('id', $selectedPeriodId)
             : ($periods->firstWhere('status', 'open') ?? $periods->first());
 
-        // If period doesn't match the selected year, reset
         if ($activePeriod && $activePeriod->year != $selectedYear) {
             $activePeriod = $periods->first();
         }
@@ -66,7 +63,6 @@ class BukuKasController extends Controller
 
             $transactions = $query->get();
 
-            // Compute running balance
             $running = $openingBalance;
             $rows = $transactions->map(function ($t) use (&$running) {
                 $running += (float) $t->debit - (float) $t->credit;
