@@ -15,20 +15,25 @@
 </head>
 <body>
 <h2>BUKU KAS UMUM</h2>
-<p class="sub">{{ $dapur->nama_dapur ?? '' }} &mdash; Periode: {{ $activePeriod->name ?? '-' }} ({{ $activePeriod->year ?? '' }})</p>
+<p class="sub">
+    {{ $dapur->nama_dapur ?? '' }} &mdash; 
+    Periode: {{ $activePeriod->name ?? '-' }} ({{ $activePeriod->year ?? '' }}) 
+    @if(isset($selectedAccount)) &mdash; Akun: {{ $selectedAccount->name }} @endif
+</p>
 <table>
     <thead>
         <tr>
-            <th>Tanggal</th><th>No. Bukti</th><th>Uraian</th>
+            <th>Tanggal</th><th>No. Bukti</th><th>Akun</th><th>Uraian</th>
             <th class="num">Debit (Rp)</th><th class="num">Kredit (Rp)</th><th class="num">Saldo (Rp)</th>
         </tr>
     </thead>
     <tbody>
-        <tr><td>{{ $activePeriod?->start_date?->format('d/m/Y') }}</td><td>-</td><td><b>Saldo Awal Periode</b></td><td class="num">-</td><td class="num">-</td><td class="num"><b>{{ number_format($openingBalance, 0, ',', '.') }}</b></td></tr>
+        <tr><td>{{ $activePeriod?->start_date?->format('d/m/Y') }}</td><td>-</td><td>-</td><td><b>Saldo Awal Periode</b></td><td class="num">-</td><td class="num">-</td><td class="num"><b>{{ number_format($openingBalance, 0, ',', '.') }}</b></td></tr>
         @foreach($rows as $row)
         <tr>
             <td>{{ $row->date->format('d/m/Y') }}</td>
             <td>{{ $row->no_bukti ?? '-' }}</td>
+            <td>{{ $row->cashAccount->name ?? '-' }}</td>
             <td>{{ $row->description }}</td>
             <td class="num">{{ $row->debit > 0 ? number_format($row->debit, 0, ',', '.') : '-' }}</td>
             <td class="num">{{ $row->credit > 0 ? number_format($row->credit, 0, ',', '.') : '-' }}</td>
@@ -36,7 +41,7 @@
         </tr>
         @endforeach
         <tr class="total">
-            <td colspan="3">TOTAL</td>
+            <td colspan="4">TOTAL</td>
             <td class="num">{{ number_format($rows->sum('debit'), 0, ',', '.') }}</td>
             <td class="num">{{ number_format($rows->sum('credit'), 0, ',', '.') }}</td>
             <td class="num">{{ number_format($rows->last()?->saldo ?? $openingBalance, 0, ',', '.') }}</td>

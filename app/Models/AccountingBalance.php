@@ -12,7 +12,7 @@ class AccountingBalance extends Model
     protected $table = 'accounting_balances';
 
     protected $fillable = [
-        'period_id', 'opening_balance', 'closing_balance',
+        'period_id', 'cash_account_id', 'opening_balance', 'closing_balance',
     ];
 
     protected $casts = [
@@ -23,5 +23,10 @@ class AccountingBalance extends Model
     public function period()
     {
         return $this->belongsTo(AccountingPeriod::class, 'period_id');
+    }
+
+    public function cashAccount()
+    {
+        return $this->belongsTo(CashAccount::class, 'cash_account_id');
     }
 }

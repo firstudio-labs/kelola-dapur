@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Akuntan;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountingBalance;
 use App\Models\AccountingCategory;
 use App\Models\AccountingPeriod;
 use App\Models\AccountingTransaction;
@@ -97,7 +98,7 @@ class TransaksiController extends Controller
             'no_bukti'        => 'nullable|string|max:50',
             'description'     => 'required|string|max:255',
             'category_id'     => 'required|exists:accounting_categories,id',
-            'cash_account_id' => 'nullable|exists:cash_accounts,id',
+            'cash_account_id' => 'required|exists:cash_accounts,id',
             'debit'           => 'nullable|numeric|min:0',
             'credit'          => 'nullable|numeric|min:0',
         ]);
@@ -175,7 +176,7 @@ class TransaksiController extends Controller
             'no_bukti'        => 'nullable|string|max:50',
             'description'     => 'required|string|max:255',
             'category_id'     => 'required|exists:accounting_categories,id',
-            'cash_account_id' => 'nullable|exists:cash_accounts,id',
+            'cash_account_id' => 'required|exists:cash_accounts,id',
             'debit'           => 'nullable|numeric|min:0',
             'credit'          => 'nullable|numeric|min:0',
         ]);
@@ -250,11 +251,23 @@ class TransaksiController extends Controller
         $totalDebit = $query->sum('debit');
         $totalCredit = $query->sum('credit');
 
-        $openingBalance = $period->balance->opening_balance ?? 0;
+        $openingBalance = 0;
+        if ($cashAccountId) {
+            $balance = AccountingBalance::where('period_id', $periodId)
+                ->where('cash_account_id', $cashAccountId)
+                ->first();
+            $openingBalance = $balance ? (float)$balance->opening_balance : 0;
+        } else {
+            $openingBalance = (float)AccountingBalance::where('period_id', $periodId)->sum('opening_balance');
+        }
+
         $currentBalance = $openingBalance + $totalDebit - $totalCredit;
+
+        $accountName = $cashAccountId ? CashAccount::find($cashAccountId)?->name : 'Semua Akun';
 
         return response()->json([
             'current_balance' => (float)$currentBalance,
+            'cash_account_name' => $accountName,
         ]);
     }
 

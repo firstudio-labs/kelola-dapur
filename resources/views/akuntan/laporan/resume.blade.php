@@ -94,25 +94,27 @@
                     <table class="report-table">
                         <tr class="report-gray report-bold report-center">
                             <td>URAIAN</td>
-                            <td style="width: 200px;">Jumlah Periode Sebelumnya</td>
-                            <td class="report-yellow" style="width: 150px;">On Going</td>
-                            <td style="width: 150px;">Jumlah</td>
+                            <td style="width: 150px;">AKUN KAS</td>
+                            <td style="width: 150px;">Jumlah Periode Sebelumnya</td>
+                            <td class="report-yellow" style="width: 130px;">On Going</td>
+                            <td style="width: 130px;">Jumlah</td>
                         </tr>
 
                         <!-- PENERIMAAN -->
                         <tr class="report-bold">
-                            <td colspan="4">PENERIMAAN</td>
+                            <td colspan="5">PENERIMAAN</td>
                         </tr>
                         @forelse($incomes as $inc)
                             <tr>
-                                <td>{{ $inc->name }}</td>
+                                <td>{{ $inc->category_name }}</td>
+                                <td class="report-center small">{{ $inc->account_name }}</td>
                                 <td class="report-center">-</td>
                                 <td class="report-right report-yellow">{{ number_format($inc->total, 0, ',', '.') }}</td>
                                 <td class="report-right">{{ number_format($inc->total, 0, ',', '.') }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="report-center text-muted">Belum ada penerimaan pada periode ini.
+                                <td colspan="5" class="report-center text-muted text-uppercase small py-3">Belum ada penerimaan pada periode ini.
                                 </td>
                             </tr>
                         @endforelse
@@ -120,28 +122,31 @@
                             <td>TOTAL PENERIMAAN</td>
                             <td></td>
                             <td></td>
+                            <td></td>
                             <td class="report-right">{{ number_format($totalPenerimaan, 0, ',', '.') }}</td>
                         </tr>
 
                         <!-- PENGELUARAN -->
                         <tr class="report-bold">
-                            <td colspan="4">PENGELUARAN</td>
+                            <td colspan="5">PENGELUARAN</td>
                         </tr>
                         @forelse($expenses as $exp)
                             <tr>
-                                <td>{{ $exp->name }}</td>
+                                <td>{{ $exp->category_name }}</td>
+                                <td class="report-center small">{{ $exp->account_name }}</td>
                                 <td class="report-center">-</td>
                                 <td class="report-right report-yellow">{{ number_format($exp->total, 0, ',', '.') }}</td>
                                 <td class="report-right">{{ number_format($exp->total, 0, ',', '.') }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="report-center text-muted">Belum ada pengeluaran pada periode ini.
+                                <td colspan="5" class="report-center text-muted text-uppercase small py-3">Belum ada pengeluaran pada periode ini.
                                 </td>
                             </tr>
                         @endforelse
                         <tr class="report-bold">
                             <td>TOTAL PENGELUARAN</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td class="report-right">{{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
@@ -152,20 +157,18 @@
                             <td>BUKU KAS UMUM (SALDO)</td>
                             <td></td>
                             <td></td>
+                            <td></td>
                             <td class="report-right">{{ number_format($saldo, 0, ',', '.') }}</td>
                         </tr>
+                        @foreach($cashAccountBalances as $acc)
                         <tr>
-                            <td>Petty Cash / Cash in Hand</td>
-                            <td></td>
-                            <td class="report-right report-yellow">{{ number_format($cash, 0, ',', '.') }}</td>
-                            <td class="report-right">{{ number_format($cash, 0, ',', '.') }}</td>
+                            <td>Kas: {{ $acc->name }}</td>
+                            <td class="report-center small">{{ $acc->type_label }}</td>
+                            <td class="report-center">-</td>
+                            <td class="report-right report-yellow">{{ number_format($acc->balance, 0, ',', '.') }}</td>
+                            <td class="report-right">{{ number_format($acc->balance, 0, ',', '.') }}</td>
                         </tr>
-                        <tr>
-                            <td>Kas di Bank</td>
-                            <td></td>
-                            <td class="report-right report-yellow">{{ number_format($bank, 0, ',', '.') }}</td>
-                            <td class="report-right">{{ number_format($bank, 0, ',', '.') }}</td>
-                        </tr>
+                        @endforeach
                     </table>
                 </div>
             </div>

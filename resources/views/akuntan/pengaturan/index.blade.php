@@ -139,9 +139,19 @@
                                                 <label class="form-label fw-semibold">Selesai <span class="text-danger">*</span></label>
                                                 <input type="date" name="end_date" class="form-control form-control-sm" required>
                                             </div>
-                                            <div class="col-6 col-md-2">
-                                                <label class="form-label fw-semibold">Saldo Awal (Rp) <span class="text-danger">*</span></label>
-                                                <input type="number" name="opening_balance" class="form-control form-control-sm" required value="0" min="0">
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold mb-2">Saldo Awal per Akun Kas (Rp) <span class="text-danger">*</span></label>
+                                                <div class="row g-2">
+                                                    @foreach($cashAccounts as $ca)
+                                                    <div class="col-md-3">
+                                                        <div class="input-group input-group-sm">
+                                                            <span class="input-group-text bg-light border-end-0"><i class="bx {{ $ca->type === 'tunai' ? 'bx-money' : 'bx-credit-card' }} small"></i></span>
+                                                            <input type="number" name="opening_balances[{{ $ca->id }}]" class="form-control form-control-sm border-start-0" required value="0" min="0" placeholder="{{ $ca->name }}">
+                                                        </div>
+                                                        <div class="form-text mt-0 ms-1 small text-truncate" title="{{ $ca->name }}">{{ $ca->name }}</div>
+                                                    </div>
+                                                    @endforeach
+                                                </div>
                                             </div>
                                             <div class="col-12 text-end">
                                                 <button type="submit" class="btn btn-primary btn-sm"><i class="bx bx-save me-1"></i> Simpan Periode</button>
@@ -222,8 +232,21 @@
                                                                             <input type="date" name="end_date" class="form-control" value="{{ $p->end_date->format('Y-m-d') }}" required>
                                                                         </div>
                                                                         <div class="col-12">
-                                                                            <label class="form-label fw-semibold">Saldo Awal (Rp)</label>
-                                                                            <input type="number" name="opening_balance" class="form-control" value="{{ (int)($p->balance->opening_balance ?? 0) }}" required min="0">
+                                                                            <label class="form-label fw-semibold mb-2">Saldo Awal per Akun Kas (Rp)</label>
+                                                                            <div class="row g-2">
+                                                                                @foreach($cashAccounts as $ca)
+                                                                                @php 
+                                                                                    $bal = $p->balances->where('cash_account_id', $ca->id)->first();
+                                                                                @endphp
+                                                                                <div class="col-md-6">
+                                                                                    <div class="input-group input-group-sm">
+                                                                                        <span class="input-group-text bg-light border-end-0"><i class="bx {{ $ca->type === 'tunai' ? 'bx-money' : 'bx-credit-card' }} small"></i></span>
+                                                                                        <input type="number" name="opening_balances[{{ $ca->id }}]" class="form-control border-start-0" value="{{ (int)($bal->opening_balance ?? 0) }}" required min="0">
+                                                                                    </div>
+                                                                                    <div class="form-text mt-1 small">{{ $ca->name }}</div>
+                                                                                </div>
+                                                                                @endforeach
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -444,6 +467,7 @@
                                         <tr>
                                             <th>Nama Akun Kas</th>
                                             <th>Tipe Akun</th>
+                                            <th class="text-end">Saldo Saat Ini</th>
                                             <th class="text-center">Aksi</th>
                                         </tr>
                                     </thead>
@@ -455,6 +479,7 @@
                                                 {{ $ca->name }}
                                             </td>
                                             <td><span class="badge bg-label-{{ $ca->type === 'tunai' ? 'success' : 'info' }}">{{ $ca->type_label }}</span></td>
+                                            <td class="text-end fw-bold">Rp {{ number_format($ca->current_balance, 0, ',', '.') }}</td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-icon btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editKasModal{{ $ca->id }}" title="Edit">
                                                     <i class="bx bx-edit-alt"></i>

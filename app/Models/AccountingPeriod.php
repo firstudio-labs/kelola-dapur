@@ -31,9 +31,17 @@ class AccountingPeriod extends Model
         return $this->hasMany(AccountingTransaction::class, 'period_id');
     }
 
-    public function balance()
+    public function balances()
     {
-        return $this->hasOne(AccountingBalance::class, 'period_id');
+        return $this->hasMany(AccountingBalance::class, 'period_id');
+    }
+
+    /**
+     * Get the balance for a specific cash account in this period.
+     */
+    public function getBalanceForAccount($cashAccountId)
+    {
+        return $this->balances()->where('cash_account_id', $cashAccountId)->first();
     }
 
     public function scopeForDapur($query, $dapurId)

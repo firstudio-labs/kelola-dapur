@@ -53,16 +53,10 @@ class LaporanController extends Controller
         $expenses = collect();
         $totalPenerimaan = 0;
         $totalPengeluaran = 0;
-        $cash = 0;
-        $bank = 0;
-        $openingBalance = 0; // TBD if we bring back Balance
+        $cashAccountBalances = collect();
 
         if ($activePeriod) {
             $periodId = $activePeriod->id;
-
-            // Get balance if required in the future (Left as 0 for now as per current specs where opening isn't explicitly requested to be added)
-            // $balance = AccountingBalance::where('period_id', $periodId)->first();
-            // $openingBalance = $balance ? (float) $balance->opening_balance : 0;
 
             // Dynamic Incomes (including taxes)
             $incomes = AccountingTransaction::where('period_id', $periodId)
@@ -70,8 +64,9 @@ class LaporanController extends Controller
                     $q->where('type', 'income')->orWhere('is_tax', true);
                 })
                 ->join('accounting_categories', 'accounting_transactions.category_id', '=', 'accounting_categories.id')
-                ->selectRaw('accounting_categories.name, SUM(debit) as total')
-                ->groupBy('accounting_categories.name')
+                ->join('cash_accounts', 'accounting_transactions.cash_account_id', '=', 'cash_accounts.id')
+                ->selectRaw('accounting_categories.name as category_name, cash_accounts.name as account_name, SUM(debit) as total')
+                ->groupBy('accounting_categories.name', 'cash_accounts.name')
                 ->orderBy('accounting_categories.name')
                 ->get();
             
@@ -83,20 +78,30 @@ class LaporanController extends Controller
                     $q->where('type', 'expense')->where('is_tax', false);
                 })
                 ->join('accounting_categories', 'accounting_transactions.category_id', '=', 'accounting_categories.id')
-                ->selectRaw('accounting_categories.name, SUM(credit) as total')
-                ->groupBy('accounting_categories.name')
+                ->join('cash_accounts', 'accounting_transactions.cash_account_id', '=', 'cash_accounts.id')
+                ->selectRaw('accounting_categories.name as category_name, cash_accounts.name as account_name, SUM(credit) as total')
+                ->groupBy('accounting_categories.name', 'cash_accounts.name')
                 ->orderBy('accounting_categories.name')
                 ->get();
 
             $totalPengeluaran = $expenses->sum('total');
 
-            $cash = AccountingTransaction::where('period_id', $periodId)
-                ->whereHas('cashAccount', fn($q) => $q->where('type', 'cash'))
-                ->sum(\Illuminate\Support\Facades\DB::raw('debit - credit'));
+            // Calculate balance per cash account dynamically
+            $cashAccountBalances = \App\Models\CashAccount::forDapur($dapurId)->get()->map(function ($acc) use ($periodId) {
+                $opening = (float) AccountingBalance::where('period_id', $periodId)
+                    ->where('cash_account_id', $acc->id)
+                    ->sum('opening_balance');
 
-            $bank = AccountingTransaction::where('period_id', $periodId)
-                ->whereHas('cashAccount', fn($q) => $q->where('type', 'bank'))
-                ->sum(\Illuminate\Support\Facades\DB::raw('debit - credit'));
+                $mutasi = (float) AccountingTransaction::where('period_id', $periodId)
+                    ->where('cash_account_id', $acc->id)
+                    ->sum(\Illuminate\Support\Facades\DB::raw('debit - credit'));
+
+                return (object) [
+                    'name' => $acc->name,
+                    'type_label' => $acc->type_label,
+                    'balance' => $opening + $mutasi
+                ];
+            });
         }
 
         $saldo = $totalPenerimaan - $totalPengeluaran;
@@ -105,7 +110,7 @@ class LaporanController extends Controller
             'periods', 'activePeriod', 'settings',
             'incomes', 'expenses',
             'totalPenerimaan', 'totalPengeluaran', 'saldo',
-            'cash', 'bank'
+            'cashAccountBalances'
         ));
     }
 

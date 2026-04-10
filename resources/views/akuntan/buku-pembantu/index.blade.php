@@ -73,6 +73,7 @@
                             <th>Tanggal</th>
                             <th>No. Bukti</th>
                             <th>Uraian</th>
+                            <th>Akun</th>
                             <th>Kategori</th>
                             <th>Kelompok</th>
                             <th class="text-end">Debit</th>
@@ -83,7 +84,7 @@
                     <tbody>
                         @if($activePeriod)
                         <tr class="table-secondary fw-semibold">
-                            <td class="ps-3" colspan="6">Saldo Awal Periode</td>
+                            <td class="ps-3" colspan="7">Saldo Awal Periode</td>
                             <td class="text-end">-</td>
                             <td class="text-end">-</td>
                             <td class="text-end pe-3 fw-bold">Rp {{ number_format($openingBalance, 0, ',', '.') }}</td>
@@ -96,6 +97,7 @@
                             <td>{{ $row->date->format('d/m/Y') }}</td>
                             <td><small class="text-muted">{{ $row->no_bukti ?? '-' }}</small></td>
                             <td>{{ $row->description }}</td>
+                            <td class="small">{{ $row->cashAccount->name ?? '-' }}</td>
                             <td>{{ $row->category->name ?? '-' }}</td>
                             <td><span class="badge bg-label-secondary small" style="font-size: 0.7rem;">{{ $row->category->group_label ?? '-' }}</span></td>
                             <td class="text-end text-success">{{ $row->debit > 0 ? 'Rp '.number_format($row->debit, 0, ',', '.') : '-' }}</td>
@@ -103,7 +105,7 @@
                             <td class="text-end pe-3 fw-semibold {{ $row->saldo >= 0 ? '' : 'text-danger' }}">Rp {{ number_format($row->saldo, 0, ',', '.') }}</td>
                         </tr>
                         @empty
-                        <tr><td colspan="9" class="text-center py-5 text-muted">
+                        <tr><td colspan="10" class="text-center py-5 text-muted">
                             @if(!$activePeriod) Pilih periode terlebih dahulu. @else Tidak ada transaksi ditemukan. @endif
                         </td></tr>
                         @endforelse

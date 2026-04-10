@@ -34,9 +34,9 @@ class DashboardController extends Controller
             'total_transaksi' => 0,
         ];
 
+        $cashAccountStats = [];
         if ($activePeriod) {
-            $balance = AccountingBalance::where('period_id', $activePeriod->id)->first();
-            $openingBalance = $balance ? (float) $balance->opening_balance : 0;
+            $openingBalance = (float) AccountingBalance::where('period_id', $activePeriod->id)->sum('opening_balance');
 
             $agg = AccountingTransaction::forPeriod($activePeriod->id)
                 ->selectRaw('SUM(debit) as total_debit, SUM(credit) as total_credit, COUNT(*) as total_transaksi')
@@ -49,8 +49,29 @@ class DashboardController extends Controller
                 'closing_balance' => $openingBalance + (float) ($agg->total_debit ?? 0) - (float) ($agg->total_credit ?? 0),
                 'total_transaksi' => (int) ($agg->total_transaksi ?? 0),
             ];
+
+            // Breakdown by account
+            $accounts = \App\Models\CashAccount::forDapur($dapurId)->get();
+            foreach ($accounts as $account) {
+                $opening = (float) AccountingBalance::where('period_id', $activePeriod->id)
+                    ->where('cash_account_id', $account->id)
+                    ->value('opening_balance');
+                
+                $trans = AccountingTransaction::forPeriod($activePeriod->id)
+                    ->where('cash_account_id', $account->id)
+                    ->selectRaw('SUM(debit) as debit, SUM(credit) as credit')
+                    ->first();
+                
+                $balance = $opening + ($trans->debit ?? 0) - ($trans->credit ?? 0);
+                
+                $cashAccountStats[] = [
+                    'name'    => $account->name,
+                    'type'    => $account->type,
+                    'balance' => $balance,
+                ];
+            }
         }
 
-        return view('akuntan.dashboard', compact('user', 'dapur', 'periods', 'activePeriod', 'stats'));
+        return view('akuntan.dashboard', compact('user', 'dapur', 'periods', 'activePeriod', 'stats', 'cashAccountStats'));
     }
 }

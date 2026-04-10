@@ -76,8 +76,8 @@
                         <input type="text" name="description" class="form-control" value="{{ old('description', $transaksi->description) }}" required placeholder="Deskripsi transaksi">
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label fw-semibold">Akun Kas</label>
-                        <select name="cash_account_id" class="form-select">
+                        <label class="form-label fw-semibold">Akun Kas <span class="text-danger">*</span></label>
+                        <select name="cash_account_id" class="form-select" required>
                             <option value="">-- Pilih Akun Kas --</option>
                             @foreach($cashAccounts as $ca)
                                 <option value="{{ $ca->id }}" {{ old('cash_account_id', $transaksi->cash_account_id) == $ca->id ? 'selected' : '' }}>{{ $ca->name }} ({{ $ca->type_label }})</option>
@@ -87,20 +87,25 @@
                     <div class="col-12">
                         <hr>
                         {{-- Preview Saldo --}}
-                        <div class="card bg-light border-0 mb-3" id="balance-preview-container" style="display: none;">
+                        <div class="card border-0 mb-3 shadow-none" id="balance-preview-container" style="display: none; background-color: #f8f9ff; border-left: 4px solid #696cff !important;">
                             <div class="card-body p-3">
-                                <h6 class="fw-bold mb-2 text-primary small"><i class="bx bx-stats me-1"></i> Preview Perubahan Saldo</h6>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <h6 class="fw-bold mb-0 text-primary small">
+                                        <i class="bx bx-stats me-1"></i> Preview Saldo: <span id="preview-account-name">-</span>
+                                    </h6>
+                                    <span class="badge bg-label-primary font-size-xs" id="preview-direction">Update Otomatis</span>
+                                </div>
                                 <div class="row text-center">
                                     <div class="col-4 border-end">
-                                        <div class="text-muted small mb-1">Saldo Sebelum</div>
+                                        <div class="text-muted small mb-1">Saldo Lainnya</div>
                                         <div class="fw-bold text-dark" id="preview-before">Rp 0</div>
                                     </div>
                                     <div class="col-4 border-end">
-                                        <div class="text-muted small mb-1">Efek Transaksi</div>
+                                        <div class="text-muted small mb-1">Estimasi Efek</div>
                                         <div class="fw-bold" id="preview-effect">Rp 0</div>
                                     </div>
                                     <div class="col-4">
-                                        <div class="text-muted small mb-1">Saldo Sesudah</div>
+                                        <div class="text-muted small mb-1">Proyeksi Akhir</div>
                                         <div class="fw-bold text-primary" id="preview-after">Rp 0</div>
                                     </div>
                                 </div>
@@ -139,7 +144,7 @@ async function updateBalancePreview() {
     const cashAccountId = document.querySelector('select[name="cash_account_id"]').value;
     const container = document.getElementById('balance-preview-container');
 
-    if (!periodId) {
+    if (!periodId || !cashAccountId) {
         container.style.display = 'none';
         return;
     }
@@ -151,6 +156,7 @@ async function updateBalancePreview() {
         currentBalance = data.current_balance;
         
         container.style.display = 'block';
+        document.getElementById('preview-account-name').textContent = data.cash_account_name;
         document.getElementById('preview-before').textContent = formatIDR(currentBalance);
         calculateAfter();
     } catch (error) {

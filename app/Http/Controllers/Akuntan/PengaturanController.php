@@ -72,10 +72,14 @@ class PengaturanController extends Controller
             'status'     => 'open',
         ]);
 
-        AccountingBalance::create([
-            'period_id'       => $period->id,
-            'opening_balance' => $validated['opening_balance'],
-        ]);
+        $balances = $request->input('opening_balances', []);
+        foreach ($balances as $cashAccountId => $amount) {
+            AccountingBalance::create([
+                'period_id'       => $period->id,
+                'cash_account_id' => $cashAccountId,
+                'opening_balance' => $amount ?? 0,
+            ]);
+        }
 
         return back()->with('success', 'Periode berhasil dibuat.');
     }
@@ -100,10 +104,13 @@ class PengaturanController extends Controller
             'end_date'   => $validated['end_date'],
         ]);
 
-        AccountingBalance::updateOrCreate(
-            ['period_id' => $periode->id],
-            ['opening_balance' => $validated['opening_balance']]
-        );
+        $balances = $request->input('opening_balances', []);
+        foreach ($balances as $cashAccountId => $amount) {
+            AccountingBalance::updateOrCreate(
+                ['period_id' => $periode->id, 'cash_account_id' => $cashAccountId],
+                ['opening_balance' => $amount ?? 0]
+            );
+        }
 
         return back()->with('success', 'Periode berhasil diperbarui.');
     }
@@ -189,7 +196,16 @@ class PengaturanController extends Controller
             'type' => 'required|in:tunai,bank',
         ]);
         $validated['id_dapur'] = $dapurId;
-        CashAccount::create($validated);
+        $cashAccount = CashAccount::create($validated);
+
+        // Add opening balance for existing open periods
+        $openPeriods = AccountingPeriod::forDapur($dapurId)->where('status', 'open')->get();
+        foreach ($openPeriods as $period) {
+            AccountingBalance::firstOrCreate(
+                ['period_id' => $period->id, 'cash_account_id' => $cashAccount->id],
+                ['opening_balance' => $request->input('opening_balance', 0)]
+            );
+        }
         return back()->with('success', 'Akun kas berhasil ditambahkan.');
     }
 

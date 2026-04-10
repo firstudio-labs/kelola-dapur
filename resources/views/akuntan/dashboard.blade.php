@@ -124,6 +124,51 @@
     </div>
 </div>
 
+@if(count($cashAccountStats) > 0)
+{{-- Cash Account Breakdown --}}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h6 class="text-muted fw-bold text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 1px;">Rincian Saldo Akun</h6>
+    </div>
+    @foreach($cashAccountStats as $cas)
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar flex-shrink-0 me-2">
+                        <span class="avatar-initial rounded bg-label-{{ $cas['type'] === 'tunai' ? 'success' : 'info' }}">
+                            <i class="bx {{ $cas['type'] === 'tunai' ? 'bx-money' : 'bx-credit-card' }}"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-dark fw-semibold small">{{ $cas['name'] }}</h6>
+                        <small class="text-muted" style="font-size: 0.7rem;">{{ ucfirst($cas['type']) }}</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-1 mt-1">
+                    <h5 class="fw-bold mb-0 text-dark">Rp {{ number_format($cas['balance'], 0, ',', '.') }}</h5>
+                </div>
+                {{-- Dynamic Progress Bar --}}
+                @php 
+                    $percent = $stats['closing_balance'] > 0 ? ($cas['balance'] / $stats['closing_balance']) * 100 : 0;
+                    $percent = max(0, min(100, $percent));
+                @endphp
+                <div class="progress mt-3" style="height: 4px;">
+                    <div class="progress-bar bg-{{ $cas['type'] === 'tunai' ? 'success' : 'info' }}" 
+                         role="progressbar" style="width: {{ $percent }}%" 
+                         aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <small class="text-muted" style="font-size: 0.65rem;">Kontribusi terhadap total</small>
+                    <small class="fw-semibold text-{{ $cas['type'] === 'tunai' ? 'success' : 'info' }}" style="font-size: 0.65rem;">{{ number_format($percent, 1) }}%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+@endif
+
 {{-- Quick Actions --}}
 <div class="row g-3">
     <div class="col-12">
