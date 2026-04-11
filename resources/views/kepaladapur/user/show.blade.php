@@ -215,6 +215,86 @@
         </div>
     </div>
     @endif
+
+    @if(isset($akuntan) && $user->userRole->role_type === 'akuntan')
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Profil Spesifik: Akuntan</h5>
+            <div class="row g-3">
+                <div class="col-md-3 text-center mb-3 mb-md-0">
+                    <img src="{{ $akuntan->foto_diri ? Storage::url($akuntan->foto_diri) : asset('assets/img/avatars/1.png') }}" 
+                         alt="Foto Akuntan" 
+                         class="img-fluid rounded border" 
+                         style="max-height: 200px; object-fit: cover;">
+                </div>
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <p class="mb-1"><strong>NIK:</strong> {{ $akuntan->nik_akuntan ?: '-' }}</p>
+                            <p class="mb-1"><strong>Nama Lengkap:</strong> {{ $akuntan->nama_lengkap ?: '-' }}</p>
+                            <p class="mb-1"><strong>Jabatan:</strong> {{ $akuntan->jabatan ?: '-' }}</p>
+                            <p class="mb-1"><strong>Pendidikan:</strong> {{ $akuntan->pendidikan ?: '-' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <p class="mb-1"><strong>Kontak WA:</strong> {{ $akuntan->kontak_wa ?: '-' }}</p>
+                            <p class="mb-1"><strong>Jenis Kelamin:</strong> {{ $akuntan->jenis_kelamin ?: '-' }}</p>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <p class="mb-1"><strong>Alamat Lengkap:</strong></p>
+                            <p class="text-muted mb-0">
+                                {{ $akuntan->alamat_detail ?: '-' }}<br>
+                                @if($akuntan->village_name || $akuntan->district_name)
+                                    Kel. {{ $akuntan->village_name ?: '-' }}, Kec. {{ $akuntan->district_name ?: '-' }}<br>
+                                    {{ $akuntan->regency_name ?: '-' }}, Prov. {{ $akuntan->province_name ?: '-' }}
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if(isset($sarpas) && $user->userRole->role_type === 'sarpas')
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Profil Spesifik: Sarpas</h5>
+            <div class="row g-3">
+                <div class="col-md-3 text-center mb-3 mb-md-0">
+                    <img src="{{ $sarpas->foto_diri ? Storage::url($sarpas->foto_diri) : asset('assets/img/avatars/1.png') }}" 
+                         alt="Foto Sarpas" 
+                         class="img-fluid rounded border" 
+                         style="max-height: 200px; object-fit: cover;">
+                </div>
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <p class="mb-1"><strong>NIK:</strong> {{ $sarpas->nik_sarpas ?: '-' }}</p>
+                            <p class="mb-1"><strong>Nama Lengkap:</strong> {{ $sarpas->nama_lengkap ?: '-' }}</p>
+                            <p class="mb-1"><strong>Jabatan:</strong> {{ $sarpas->jabatan ?: '-' }}</p>
+                            <p class="mb-1"><strong>Pendidikan:</strong> {{ $sarpas->pendidikan ?: '-' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <p class="mb-1"><strong>Kontak WA:</strong> {{ $sarpas->kontak_wa ?: '-' }}</p>
+                            <p class="mb-1"><strong>Jenis Kelamin:</strong> {{ $sarpas->jenis_kelamin ?: '-' }}</p>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <p class="mb-1"><strong>Alamat Lengkap:</strong></p>
+                            <p class="text-muted mb-0">
+                                {{ $sarpas->alamat_detail ?: '-' }}<br>
+                                @if($sarpas->village_name || $sarpas->district_name)
+                                    Kel. {{ $sarpas->village_name ?: '-' }}, Kec. {{ $sarpas->district_name ?: '-' }}<br>
+                                    {{ $sarpas->regency_name ?: '-' }}, Prov. {{ $sarpas->province_name ?: '-' }}
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
     <div class="alert alert-info alert-dismissible" role="alert">
         <h6 class="alert-heading mb-2">Informasi Detail User</h6>
         <ul class="mb-0">

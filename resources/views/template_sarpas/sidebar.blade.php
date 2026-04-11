@@ -1,0 +1,1213 @@
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+    
+    <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
+        
+        <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
+            <span class="app-brand-logo demo">
+                <img src="{{ asset('logo_kelola_dapur_black.png') }}" alt="Logo" style="height: 45px; width: auto" />
+            </span>
+            
+        </a>
+    </div>
+
+    <div class="menu-container d-flex flex-column h-100">
+        
+        <div class="user-profile-section mt-3 px-3 pb-3">
+            <div class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
+                    href="javascript:void(0);" data-bs-toggle="dropdown"
+                    style="
+                        background: rgba(255, 255, 255, 0.15);
+                        transition: all 0.3s ease;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    "
+                    onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                    <div class="avatar avatar-online me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                        @php
+                            $sarpasProfile = auth()->user()->sarpas ?? null;
+                            $foto = $sarpasProfile?->foto_diri ?? null;
+                        @endphp
+                        <img src="{{ $foto ? Storage::url($foto) : asset('admin/assets/img/avatars/1.png') }}"
+                            alt class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
+                    </div>
+                    <div class="flex-grow-1 text-start user-info">
+                        <div class="fw-semibold text-black">
+                            {{ auth()->user()->nama ?? 'Unknown' }}
+                        </div>
+                        <small class="text-muted">
+                            {{ ucfirst(str_replace('_', ' ', session('role_type') ?? 'Unknown')) }}
+                        </small>
+                        @if (session('subscription_status') && session('subscription_status') !== 'active')
+                            <small class="text-warning d-block">
+                                <i class="bx bx-warning-alt bx-xs"></i>
+                                @if (session('subscription_status') === 'expired')
+                                    Subscription Expired
+                                @elseif (session('subscription_status') === 'expiring_soon')
+                                    Expires in
+                                    {{ session('subscription_days_left', 0) }}
+                                    days
+                                @else
+                                    {{ ucfirst(str_replace('_', ' ', session('subscription_status'))) }}
+                                @endif
+                            </small>
+                        @endif
+                    </div>
+                    <i class="bx bx-chevron-up user-chevron"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('sarpas.profile.edit', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="avatar avatar-online" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                        <img src="{{ $foto ? Storage::url($foto) : asset('admin/assets/img/avatars/1.png') }}" alt="Foto"
+                                            class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold d-block">
+                                        {{ auth()->user()->nama ?? 'Unknown' }}
+                                    </span>
+                                    <small class="text-muted">
+                                        {{ ucfirst(str_replace('_', ' ', session('role_type') ?? 'Unknown')) }}
+                                    </small>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('sarpas.profile.edit', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}">
+                            <i class="bx bx-user me-2"></i>
+                            <span class="align-middle">Profil Saya</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('sarpas.profile.security.edit', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}">
+                            <i class="bx bx-lock-alt me-2"></i>
+                            <span class="align-middle">Keamanan</span>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dropdown-item">
+                                <i class="bx bx-power-off me-2"></i>
+                                <span class="align-middle">Log Out</span>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        @php
+            $isSubscriptionActive = session('is_subscription_active', false);
+            $subscriptionStatus = session('subscription_status');
+            $idDapur = session('id_dapur');
+        @endphp
+
+        @if (!$isSubscriptionActive && $subscriptionStatus)
+            <div class="px-3 mb-3">
+                <div class="alert alert-warning alert-dismissible fade show py-2 px-3" role="alert"
+                    style="font-size: 0.875rem; line-height: 1.2">
+                    <div class="d-flex align-items-start">
+                        <i class="bx bx-info-circle me-2 mt-1"></i>
+                        <div>
+                            @if ($subscriptionStatus === 'expired')
+                                <strong>Subscription Expired!</strong>
+                                <br />
+                                <small>Contact Kepala Dapur to renew</small>
+                            @elseif ($subscriptionStatus === 'expiring_soon')
+                                <strong>Subscription Expiring!</strong>
+                                <br />
+                                <small>
+                                    {{ session('subscription_days_left', 0) }}
+                                    days remaining
+                                </small>
+                            @else
+                                <strong>Limited Access</strong>
+                                <br />
+                                <small>Contact Kepala Dapur for renewal</small>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <ul class="menu-inner py-1 flex-grow-1">
+            
+            <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard', request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null)) }}"
+                    class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                    <div data-i18n="Dashboard">Dashboard</div>
+                </a>
+            </li>
+
+            @if ($isSubscriptionActive)
+                
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text">Sarpas</span>
+                </li>
+
+
+            @else
+                
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text text-warning">
+                        Limited Access
+                    </span>
+                </li>
+
+                @php
+                    $disabledMenus = [];
+                @endphp
+            @endif
+        </ul>
+    </div>
+</aside>
+
+<nav class="mobile-bottom-nav d-lg-none" id="mobileBottomNav">
+    <div class="bottom-nav-container">
+        @php
+            $mainMenus = [];
+            $idDapur = request()->current_dapur->id_dapur ?? (auth()->user()->userRole->id_dapur ?? null);
+            
+            // Menu Akun (selalu ada)
+            $akunSubmenu = [
+                ['type' => 'link', 'label' => 'Edit Profil', 'url' => route('sarpas.profile.edit', $idDapur)],
+                ['type' => 'logout', 'label' => 'Logout', 'url' => route('logout'), 'method' => 'POST'],
+            ];
+            
+            if ($isSubscriptionActive) {
+                $mainMenus = [
+                    ['icon' => 'bx-user', 'label' => 'Akun', 'hasSubmenu' => true, 'submenu' => $akunSubmenu],
+                    ['route' => 'sarpas.dashboard', 'icon' => 'bx-home-circle', 'label' => 'Dashboard', 'param' => $idDapur],
+                ];
+            } else {
+                $mainMenus = [
+                    ['icon' => 'bx-user', 'label' => 'Akun', 'hasSubmenu' => true, 'submenu' => $akunSubmenu],
+                    ['route' => 'sarpas.dashboard', 'icon' => 'bx-home-circle', 'label' => 'Dashboard', 'param' => $idDapur],
+                ];
+            }
+        @endphp
+
+        @foreach ($mainMenus as $menu)
+            @if(isset($menu['hasSubmenu']) && $menu['hasSubmenu'])
+                @php
+                    // Build submenu with full URLs
+                    $submenuWithUrls = [];
+                    foreach($menu['submenu'] as $sub) {
+                        $submenuWithUrls[] = [
+                            'label' => $sub['label'],
+                            'url' => $sub['url'],
+                            'type' => $sub['type'] ?? 'link',
+                            'method' => $sub['method'] ?? 'GET',
+                            'isActive' => isset($sub['url']) && $sub['url'] !== '#' && request()->url() === $sub['url']
+                        ];
+                    }
+                @endphp
+                <a href="javascript:void(0);" 
+                   class="bottom-nav-item {{ (isset($menu['route']) && request()->routeIs($menu['route'] . '*')) ? 'active' : '' }}"
+                   data-submenu-popup="true"
+                   data-menu-label="{{ $menu['label'] }}"
+                   data-submenu='@json($submenuWithUrls)'>
+                    <i class="bx {{ $menu['icon'] }}"></i>
+                    <span class="bottom-nav-label">{{ $menu['label'] }}</span>
+                </a>
+            @else
+                <a href="{{ route($menu['route'], $menu['param']) }}" 
+                   class="bottom-nav-item {{ request()->routeIs($menu['route'] . '*') ? 'active' : '' }}">
+                    <i class="bx {{ $menu['icon'] }}"></i>
+                    <span class="bottom-nav-label">{{ $menu['label'] }}</span>
+                </a>
+            @endif
+        @endforeach
+    </div>
+</nav>
+
+<div class="modal fade" id="subscriptionExpiredModal" tabindex="-1" aria-labelledby="subscriptionExpiredModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 0.5rem; overflow: hidden">
+            <div class="modal-header bg-gradient-danger text-white p-4">
+                <div class="d-flex align-items-center">
+                    <i class="bx bx-error-circle bx-md me-3"></i>
+                    <h5 class="modal-title mb-0" id="subscriptionExpiredModalLabel">
+                        Subscription Expired
+                    </h5>
+                </div>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <i
+                        class="bx bx-time-five bx-lg text-danger mb-3 animate__animated animate__pulse animate__infinite"></i>
+                    <h6 class="fw-semibold">
+                        Your Dapur Subscription Has Expired
+                    </h6>
+                    <p class="text-muted mb-0">
+                        To regain full access to all features, please contact
+                        your Kepala Dapur to renew the subscription.
+                    </p>
+                </div>
+                <div class="alert alert-info bg-light-info border-0 d-flex align-items-center justify-content-center p-3"
+                    role="alert">
+                    <i class="bx bx-info-circle me-2"></i>
+                    <small>
+                        Renew now to continue managing menus and transactions!
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3 justify-content-center">
+                <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">
+                    Understood
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CSS untuk toggle sidebar - IDENTICAL TO ADMIN GUDANG */
+    .layout-menu {
+        transition:
+            width 0.3s ease-in-out,
+            transform 0.3s ease-in-out;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 260px;
+        z-index: 1045;
+    }
+
+    /* Menu container styling */
+    .menu-container {
+        height: calc(100vh - 80px);
+        /* Adjust based on brand height */
+        min-height: 500px;
+        /* Ensure minimum height */
+        overflow-y: auto;
+        /* Allow scrolling if content is too long */
+    }
+
+    /* User profile section styling */
+    .user-profile-section {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        flex-shrink: 0;
+        /* Prevent shrinking */
+        min-height: 60px;
+        /* Reduced height for better positioning */
+    }
+
+    /* Disabled menu items styling */
+    .menu-item.disabled .menu-link {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .menu-item.disabled:hover .menu-link {
+        background: transparent !important;
+    }
+
+    /* Subscription warning styling */
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    /* Tooltip styling for disabled items */
+    .tooltip {
+        font-size: 0.875rem;
+    }
+
+    /* Alert styling */
+    .alert {
+        border: 1px solid transparent;
+        border-radius: 0.375rem;
+    }
+
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.3);
+        color: #856404;
+    }
+
+    /* State ketika sidebar collapsed */
+    .layout-menu.collapsed {
+        width: 78px;
+    }
+
+    /* Sembunyikan text saat collapsed */
+    .layout-menu.collapsed .app-brand-text,
+    .layout-menu.collapsed .menu-header-text,
+    .layout-menu.collapsed .menu-link>div:not(.menu-icon) {
+        display: none;
+    }
+
+    /* User profile collapsed state - hanya tampilkan avatar */
+    .layout-menu.collapsed .user-profile-section .user-info,
+    .layout-menu.collapsed .user-profile-section .user-chevron {
+        display: none;
+    }
+
+    /* Show only avatar when collapsed */
+    .layout-menu.collapsed .user-profile-section .nav-link {
+        justify-content: center;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: none;
+    }
+
+    .layout-menu.collapsed .user-profile-section .avatar {
+        margin: 0;
+        transform: scale(1.1);
+        /* Slightly larger avatar for visibility */
+    }
+
+    /* Hide subscription alert when collapsed */
+    .layout-menu.collapsed .alert {
+        display: none;
+    }
+
+    /* Pastikan user profile section tetap terlihat */
+    .layout-menu .user-profile-section {
+        display: block !important;
+        position: relative;
+        z-index: 1;
+        order: -1;
+        /* Move to top of menu-container */
+    }
+
+    /* Posisikan tombol toggle di samping logo saat collapsed */
+    .layout-menu.collapsed .layout-menu-toggle {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        z-index: 1050;
+        background: var(--bs-primary);
+        color: white;
+        border-radius: 4px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease-in-out;
+        font-size: 14px;
+    }
+
+    .layout-menu.collapsed .layout-menu-toggle:hover {
+        background: var(--bs-primary-dark);
+    }
+
+    /* Rotate icon saat collapsed */
+    .layout-menu.collapsed .layout-menu-toggle i {
+        transform: rotate(180deg);
+    }
+
+    /* Sembunyikan submenu saat collapsed */
+    .layout-menu.collapsed .menu-sub {
+        display: none !important;
+    }
+
+    /* Submenu styling */
+    .menu-sub {
+        display: none;
+        padding-left: 1rem;
+    }
+
+    .menu-item.open .menu-sub {
+        display: block;
+    }
+
+    /* Mobile styles - Sidebar disembunyikan, bottom nav ditampilkan */
+    @media (max-width: 991.98px) {
+        .layout-menu {
+            display: none !important;
+        }
+
+        .layout-page {
+            padding-left: 0 !important;
+            padding-bottom: 70px !important; /* Space untuk bottom nav */
+        }
+
+        /* Bottom Navigation Styles */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: #fff;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+        }
+
+        .bottom-nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .bottom-nav-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 60px;
+            padding: 8px 4px;
+            text-decoration: none;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .bottom-nav-item i {
+            font-size: 24px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .bottom-nav-label {
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--bs-primary, #696cff);
+        }
+
+        .bottom-nav-item.active i {
+            transform: scale(1.1);
+        }
+
+        .bottom-nav-item:active {
+            background-color: rgba(105, 108, 255, 0.1);
+            transform: scale(0.95);
+        }
+
+        .bottom-nav-badge {
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 18px;
+            text-align: center;
+            line-height: 14px;
+        }
+
+        /* Safe area untuk iPhone dengan notch */
+        @@supports (padding: max(0px)) {
+            .mobile-bottom-nav {
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Submenu Popup Drawer */
+        .submenu-popup {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1060;
+            max-height: 70vh;
+            overflow-y: auto;
+            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+
+        .submenu-popup.show {
+            bottom: 70px;
+        }
+
+        .submenu-popup-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 1;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .submenu-popup-header h5 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .submenu-popup-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .submenu-popup-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #333;
+        }
+
+        .submenu-popup-body {
+            padding: 10px 0;
+        }
+
+        .submenu-item {
+            display: block;
+            padding: 16px 20px;
+            text-decoration: none;
+            color: #333;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .submenu-item:last-child {
+            border-bottom: none;
+        }
+
+        .submenu-item:hover,
+        .submenu-item:active {
+            background: rgba(105, 108, 255, 0.05);
+            color: var(--bs-primary, #696cff);
+        }
+
+        .submenu-item.active {
+            background: rgba(105, 108, 255, 0.1);
+            color: var(--bs-primary, #696cff);
+            font-weight: 500;
+        }
+
+        .submenu-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--bs-primary, #696cff);
+        }
+
+        .submenu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1059;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .submenu-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    /* Adjust main content */
+    .layout-page {
+        padding-left: 260px;
+        transition: padding-left 0.3s ease-in-out;
+    }
+
+    .layout-page.sidebar-collapsed {
+        padding-left: 78px;
+    }
+
+    /* Desktop: Always visible */
+    @media (min-width: 992px) {
+        .layout-menu {
+            display: block !important;
+            transform: translateX(0) !important;
+        }
+
+        .layout-page {
+            padding-left: 260px;
+            padding-bottom: 0 !important;
+            transition: padding-left 0.3s ease-in-out;
+        }
+
+        /* Hide bottom nav di desktop */
+        .mobile-bottom-nav {
+            display: none !important;
+        }
+    }
+
+    /* Modal styling */
+    .modal-content {
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header.bg-gradient-danger {
+        background: linear-gradient(45deg, #dc3545, #e4606d);
+        border-bottom: none;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    /* Additional Sneat-inspired modal styling */
+    .modal-content {
+        transform: scale(0.95);
+        transition:
+            transform 0.3s ease-in-out,
+            opacity 0.3s ease-in-out;
+        opacity: 0;
+    }
+
+    .modal.fade.show .modal-content {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        transition: transform 0.2s ease;
+    }
+
+    .modal-header .btn-close:hover {
+        transform: scale(1.2);
+    }
+
+    .modal-body .alert.bg-light-info {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+        border-radius: 0.375rem;
+        color: #0057b8;
+    }
+
+    .modal-body .bx-time-five {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-footer .btn-primary {
+        background: #696cff;
+        border-color: #696cff;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .modal-footer .btn-primary:hover {
+        background: #5f61e6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('layout-menu');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const layoutPage =
+            document.querySelector('.layout-page') || document.body;
+
+        // Initialize tooltips for disabled menu items
+        if (typeof bootstrap !== 'undefined') {
+            const tooltipTriggerList = [].slice.call(
+                document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+            );
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        // Desktop toggle functionality
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                layoutPage.classList.toggle('sidebar-collapsed');
+
+                // Simpan state ke localStorage
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+
+                // Tutup semua submenu saat sidebar collapsed
+                if (isCollapsed) {
+                    document
+                        .querySelectorAll('.menu-item.open')
+                        .forEach(function(item) {
+                            item.classList.remove('open');
+                        });
+                }
+            });
+        }
+
+        // Mobile bottom navigation - tidak perlu toggle karena selalu visible
+
+        // Restore sidebar state from localStorage - Start expanded by default on desktop
+        const savedState = localStorage.getItem('sidebarCollapsed');
+        if (window.innerWidth >= 992) {
+            // Ensure sidebar is expanded by default on desktop
+            sidebar.classList.remove('collapsed');
+            layoutPage.classList.remove('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', 'false');
+        }
+
+        // Handle submenu toggles - only allow when subscription is active
+        document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Don't open submenu if sidebar is collapsed (desktop)
+                if (
+                    sidebar.classList.contains('collapsed') &&
+                    window.innerWidth >= 992
+                ) {
+                    return;
+                }
+
+                const menuItem = this.closest('.menu-item');
+
+                // Check if this is a disabled menu item
+                if (menuItem.classList.contains('disabled')) {
+                    return;
+                }
+
+                const isCurrentlyOpen = menuItem.classList.contains('open');
+
+                // Close all other submenus at the same level
+                const parent = menuItem.parentElement;
+                parent
+                    .querySelectorAll('.menu-item.open')
+                    .forEach(function(openItem) {
+                        if (openItem !== menuItem) {
+                            openItem.classList.remove('open');
+                        }
+                    });
+
+                // Toggle current submenu
+                if (isCurrentlyOpen) {
+                    menuItem.classList.remove('open');
+                } else {
+                    menuItem.classList.add('open');
+                }
+            });
+        });
+
+        // Handle disabled menu item clicks - show notification about contacting Kepala Dapur
+        document
+            .querySelectorAll('.menu-item.disabled .menu-link')
+            .forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Show a modal notification about contacting Kepala Dapur
+                    const subscriptionModal = new bootstrap.Modal(
+                        document.getElementById('subscriptionExpiredModal'), {
+                            backdrop: 'static',
+                            keyboard: false,
+                        },
+                    );
+                    subscriptionModal.show();
+                });
+            });
+
+        // Auto-show modal if completely expired
+        const subscriptionStatus = '{{ $subscriptionStatus ?? '' }}';
+        const isSubscriptionActive =
+            {{ $isSubscriptionActive ? 'true' : 'false' }};
+
+        if (!isSubscriptionActive && subscriptionStatus === 'expired') {
+            setTimeout(function() {
+                const subscriptionModal = new bootstrap.Modal(
+                    document.getElementById('subscriptionExpiredModal'), {
+                        backdrop: 'static',
+                        keyboard: false,
+                    },
+                );
+                subscriptionModal.show();
+            }, 3000); // Show after 3 seconds
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 992) {
+                // Desktop mode - restore sidebar
+                sidebar.style.display = 'block';
+            } else {
+                // Mobile mode - hide sidebar, show bottom nav
+                sidebar.style.display = 'none';
+            }
+        });
+
+        // Handle submenu popup
+        document.querySelectorAll('[data-submenu-popup="true"]').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const submenuData = JSON.parse(this.getAttribute('data-submenu'));
+                const menuLabel = this.getAttribute('data-menu-label');
+                showSubmenuPopup(menuLabel, submenuData);
+            });
+        });
+
+        // Function to show submenu popup
+        function showSubmenuPopup(title, submenuItems) {
+            // Remove existing popup if any
+            const existingPopup = document.getElementById('submenuPopup');
+            if (existingPopup) {
+                existingPopup.remove();
+            }
+
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'submenu-overlay';
+            overlay.id = 'submenuOverlay';
+            overlay.addEventListener('click', function() {
+                closeSubmenuPopup();
+            });
+
+            // Create popup
+            const popup = document.createElement('div');
+            popup.className = 'submenu-popup';
+            popup.id = 'submenuPopup';
+
+            // Create header
+            const header = document.createElement('div');
+            header.className = 'submenu-popup-header';
+            header.innerHTML = `
+                <h5>${title}</h5>
+                <button class="submenu-popup-close" onclick="closeSubmenuPopup()">
+                    <i class="bx bx-x"></i>
+                </button>
+            `;
+
+            // Create body
+            const body = document.createElement('div');
+            body.className = 'submenu-popup-body';
+            
+            submenuItems.forEach(function(submenu) {
+                const submenuItem = document.createElement(submenu.type === 'logout' ? 'button' : 'a');
+                submenuItem.className = 'submenu-item';
+                
+                if (submenu.type === 'logout') {
+                    submenuItem.type = 'button';
+                    submenuItem.textContent = submenu.label;
+                    submenuItem.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        closeSubmenuPopup();
+                        
+                        // Create and submit logout form
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = submenu.url;
+                        
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        form.appendChild(csrfToken);
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+                    });
+                } else {
+                    submenuItem.href = submenu.url;
+                    submenuItem.textContent = submenu.label;
+                    
+                    if (submenu.isActive) {
+                        submenuItem.classList.add('active');
+                    }
+
+                    submenuItem.addEventListener('click', function(e) {
+                        if (submenu.url === '#') {
+                            e.preventDefault();
+                            closeSubmenuPopup();
+                            return;
+                        }
+                        closeSubmenuPopup();
+                        // Navigation will happen via href
+                    });
+                }
+
+                body.appendChild(submenuItem);
+            });
+
+            popup.appendChild(header);
+            popup.appendChild(body);
+            document.body.appendChild(overlay);
+            document.body.appendChild(popup);
+
+            // Trigger animation
+            setTimeout(function() {
+                overlay.classList.add('show');
+                popup.classList.add('show');
+            }, 10);
+        }
+
+        // Function to close submenu popup
+        function closeSubmenuPopup() {
+            const popup = document.getElementById('submenuPopup');
+            const overlay = document.getElementById('submenuOverlay');
+            
+            if (popup) {
+                popup.classList.remove('show');
+                if (overlay) overlay.classList.remove('show');
+                
+                setTimeout(function() {
+                    if (popup) popup.remove();
+                    if (overlay) overlay.remove();
+                }, 300);
+            }
+        }
+
+        // Make function globally available
+        window.closeSubmenuPopup = closeSubmenuPopup;
+
+        // Initialize any additional subscription-related functionality
+        initializeSubscriptionFeatures();
+    });
+
+    // Function to handle subscription-related features for Sarpas
+    function initializeSubscriptionFeatures() {
+        const isSubscriptionActive =
+            {{ $isSubscriptionActive ? 'true' : 'false' }};
+        const subscriptionStatus = '{{ $subscriptionStatus ?? '' }}';
+
+        // Add warning styles to user profile when subscription issues exist
+        if (subscriptionStatus === 'expiring_soon') {
+            const userProfile = document.querySelector(
+                '.user-profile-section .nav-link',
+            );
+            if (userProfile) {
+                userProfile.style.borderLeft = '3px solid #ffc107';
+            }
+        } else if (subscriptionStatus === 'expired') {
+            const userProfile = document.querySelector(
+                '.user-profile-section .nav-link',
+            );
+            if (userProfile) {
+                userProfile.style.borderLeft = '3px solid #dc3545';
+            }
+        }
+    }
+
+    // Add CSS keyframes for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse-warning {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .subscription-expired .menu-link {
+            background: rgba(220, 53, 69, 0.1) !important;
+            border-left: 3px solid #dc3545;
+        }
+
+        .subscription-expiring .menu-link {
+            background: rgba(255, 193, 7, 0.1) !important;
+            border-left: 3px solid #ffc107;
+        }
+
+        /* Enhanced hover animations */
+        .layout-menu {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .layout-menu .menu-link {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .layout-menu:not(.collapsed) .menu-link:hover {
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Smooth text reveal animation */
+        .layout-menu.collapsed .app-brand-text,
+        .layout-menu.collapsed .menu-header-text,
+        .layout-menu.collapsed .menu-link > div:not(.menu-icon) {
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .layout-menu:not(.collapsed) .app-brand-text,
+        .layout-menu:not(.collapsed) .menu-header-text,
+        .layout-menu:not(.collapsed) .menu-link > div:not(.menu-icon) {
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+        }
+
+        /* Icon animations */
+        .menu-icon {
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .layout-menu:hover .menu-icon {
+            transform: scale(1.05);
+        }
+
+        /* Submenu slide animation */
+        .menu-sub {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-item.open .menu-sub {
+            max-height: 500px;
+            opacity: 1;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+        /* Hover effects for disabled items */
+        .menu-item.disabled:hover {
+            transform: translateX(2px);
+            transition: transform 0.2s ease;
+        }
+
+        /* Badge animations */
+        .badge {
+            animation: badge-pulse 2s infinite;
+        }
+
+        @keyframes badge-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* User profile hover enhancement */
+        .user-profile-section .nav-link {
+            transition: all 0.3s ease;
+        }
+
+        .user-profile-section .nav-link:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Loading animation for subscription checks */
+        .subscription-loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscription-loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: loading-sweep 1.5s infinite;
+        }
+
+        @keyframes loading-sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Additional utility functions for Sarpas
+    function showSubscriptionNotification() {
+        const subscriptionModal = new bootstrap.Modal(
+            document.getElementById('subscriptionExpiredModal'), {
+                backdrop: 'static',
+                keyboard: false,
+            },
+        );
+        subscriptionModal.show();
+    }
+
+    // Export functions for external use
+    window.showSubscriptionNotification = showSubscriptionNotification;
+
+    // Initialize subscription status monitoring for Sarpas
+    document.addEventListener('DOMContentLoaded', function() {
+        const subscriptionStatus = '{{ $subscriptionStatus ?? '' }}';
+        const daysLeft = {{ session('subscription_days_left', 0) }};
+
+        // Show expiration warning for Sarpas users
+        if (subscriptionStatus === 'expiring_soon' && daysLeft <= 5) {
+            setTimeout(function() {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Subscription Expiring Soon!',
+                        html: `
+                            <div class="text-center">
+                                <i class="bx bx-time bx-lg text-warning mb-3"></i>
+                                <p>The dapur subscription expires in <strong>${daysLeft}</strong> day${daysLeft !== 1 ? 's' : ''}.</p>
+                                <p class="text-muted">Please inform the Kepala Dapur to renew before expiration.</p>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#ffc107',
+                    });
+                }
+            }, 3000); // Show after 3 seconds
+        }
+    });
+</script>

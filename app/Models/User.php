@@ -122,6 +122,18 @@ class User extends Authenticatable
         );
     }
 
+    public function sarpas()
+    {
+        return $this->hasOneThrough(
+            Sarpas::class,
+            UserRole::class,
+            'id_user',
+            'id_user_role',
+            'id_user',
+            'id_user_role'
+        );
+    }
+
     public function accessibleDapur()
     {
         return $this->hasManyThrough(
@@ -248,6 +260,26 @@ class User extends Authenticatable
         return $this->akuntan && $this->akuntan->jabatan === 'Penanggung jawab';
     }
 
+    public function isSarpas(?int $dapurId = null): bool
+    {
+        if (!$this->userRole || $this->userRole->role_type !== 'sarpas') {
+            return false;
+        }
+        if ($dapurId) {
+            return $this->userRole->id_dapur === $dapurId;
+        }
+        return true;
+    }
+
+    public function isKepalaSarpas(?int $dapurId = null): bool
+    {
+        if (!$this->isSarpas($dapurId)) {
+            return false;
+        }
+        
+        return $this->sarpas && $this->sarpas->jabatan === 'Penanggung jawab';
+    }
+
     public function isMitraInDapur(int $dapurId): bool
     {
         if (!$this->isMitra()) {
@@ -278,7 +310,7 @@ class User extends Authenticatable
 
             return $this->whereHas('userRole', function ($query) use ($dapur) {
                 $query->where('id_dapur', $dapur->id_dapur)
-                    ->whereIn('role_type', ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan']);
+                    ->whereIn('role_type', ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan', 'sarpas']);
             })->where($field ?? $this->getRouteKeyName(), $value)->first();
         }
 

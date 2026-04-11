@@ -17,7 +17,7 @@ class CheckRole
 
         $user = auth()->user();
 
-        $validRoles = ['super_admin', 'kepala_dapur', 'admin_gudang', 'ahli_gizi', 'penerima_mbg', 'produksi', 'distributor', 'mitra', 'akuntan'];
+        $validRoles = ['super_admin', 'kepala_dapur', 'admin_gudang', 'ahli_gizi', 'penerima_mbg', 'produksi', 'distributor', 'mitra', 'akuntan', 'sarpas'];
         if (!in_array($role, $validRoles)) {
             throw new \InvalidArgumentException("Invalid role: {$role}");
         }
@@ -45,6 +45,7 @@ class CheckRole
             'distributor' => $user->isDistributor(),
             'mitra' => $user->isMitra(),
             'akuntan' => $user->isAkuntan(),
+            'sarpas' => $user->isSarpas(),
             default => false
         };
     }

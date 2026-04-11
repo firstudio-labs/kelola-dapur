@@ -68,4 +68,9 @@ class UserRole extends Model
     {
         return $this->hasOne(Akuntan::class, 'id_user_role');
     }
+
+    public function sarpas()
+    {
+        return $this->hasOne(Sarpas::class, 'id_user_role');
+    }
 }

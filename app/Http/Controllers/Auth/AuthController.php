@@ -750,6 +750,13 @@ class AuthController extends Controller
                         ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
                 }
                 return redirect()->route('akuntan.dashboard');
+            case 'sarpas':
+                if ($user->userRole->dapur && $user->userRole->dapur->status !== 'active') {
+                    Auth::logout();
+                    return redirect()->route('login')
+                        ->with('error', 'Dapur Anda sedang tidak aktif. Silakan hubungi Kepala Dapur anda.');
+                }
+                return redirect()->route('sarpas.dashboard', ['dapur' => $user->userRole->id_dapur]);
             case 'penerima_mbg':
                 return redirect()->route('penerima-mbg.dashboard');
             case 'mitra':

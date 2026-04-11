@@ -429,8 +429,74 @@
                             </div>
                         </div>
 
+                        <div class="col-12" id="sarpas_section"
+                            style="display: {{ old('role_type') === 'sarpas' ? 'block' : 'none' }};">
+                            <hr class="my-3">
+                            <h5 class="card-title mb-3">Informasi Spesifik Sarpas</h5>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="nik_sarpas" class="form-label">NIK Sarpas</label>
+                                    <input type="text" name="nik_sarpas" id="nik_sarpas" class="form-control"
+                                        placeholder="NIK" value="{{ old('nik_sarpas') }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="nama_lengkap_sarpas" class="form-label">Nama Lengkap Sarpas</label>
+                                    <input type="text" name="nama_lengkap" id="nama_lengkap_sarpas" class="form-control"
+                                        value="{{ old('nama_lengkap') }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="kontak_wa_sarpas" class="form-label">Kontak/WA</label>
+                                    <input type="text" name="kontak_wa" id="kontak_wa_sarpas" class="form-control"
+                                        value="{{ old('kontak_wa') }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="jabatan_sarpas" class="form-label">Jabatan</label>
+                                    <select name="jabatan" id="jabatan_sarpas" class="form-select">
+                                        <option value="Penanggung jawab"
+                                            {{ old('jabatan') == 'Penanggung jawab' ? 'selected' : '' }}>Penanggung jawab
+                                        </option>
+                                        <option value="Anggota" {{ old('jabatan') == 'Anggota' ? 'selected' : '' }}>
+                                            Anggota</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="pendidikan_sarpas" class="form-label">Pendidikan</label>
+                                    <select name="pendidikan" id="pendidikan_sarpas" class="form-select">
+                                        <option value="SD" {{ old('pendidikan') == 'SD' ? 'selected' : '' }}>SD
+                                        </option>
+                                        <option value="SMP" {{ old('pendidikan') == 'SMP' ? 'selected' : '' }}>SMP
+                                        </option>
+                                        <option value="SMA" {{ old('pendidikan') == 'SMA' ? 'selected' : '' }}>SMA
+                                        </option>
+                                        <option value="D1" {{ old('pendidikan') == 'D1' ? 'selected' : '' }}>D1
+                                        </option>
+                                        <option value="D2" {{ old('pendidikan') == 'D2' ? 'selected' : '' }}>D2
+                                        </option>
+                                        <option value="D3" {{ old('pendidikan') == 'D3' ? 'selected' : '' }}>D3
+                                        </option>
+                                        <option value="Sarjana" {{ old('pendidikan') == 'Sarjana' ? 'selected' : '' }}>
+                                            Sarjana</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="jenis_kelamin_sarpas" class="form-label">Jenis Kelamin</label>
+                                    <select name="jenis_kelamin" id="jenis_kelamin_sarpas" class="form-select">
+                                        <option value="Pria" {{ old('jenis_kelamin') == 'Pria' ? 'selected' : '' }}>Pria
+                                        </option>
+                                        <option value="Wanita" {{ old('jenis_kelamin') == 'Wanita' ? 'selected' : '' }}>
+                                            Wanita</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="foto_diri_sarpas" class="form-label">Foto Diri</label>
+                                    <input type="file" name="foto_diri" id="foto_diri_sarpas"
+                                        class="form-control @error('foto_diri') is-invalid @enderror">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-12" id="address_section"
-                            style="display: {{ in_array(old('role_type'), ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan']) ? 'block' : 'none' }};">
+                            style="display: {{ in_array(old('role_type'), ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan', 'sarpas']) ? 'block' : 'none' }};">
                             <hr class="my-3">
                             <h5 class="card-title mb-3">Informasi Alamat</h5>
                             <div class="row g-4">
@@ -543,6 +609,7 @@
                 const produksiSection = document.getElementById('produksi_section');
                 const distributorSection = document.getElementById('distributor_section');
                 const akuntanSection = document.getElementById('akuntan_section');
+                const sarpasSection = document.getElementById('sarpas_section');
                 const addressSection = document.getElementById('address_section');
 
                 function toggleSections() {
@@ -554,6 +621,7 @@
                     produksiSection.style.display = 'none';
                     distributorSection.style.display = 'none';
                     akuntanSection.style.display = 'none';
+                    sarpasSection.style.display = 'none';
                     addressSection.style.display = 'none';
 
                     // Disable all inputs in sections to avoid submitting unused fields
@@ -562,6 +630,7 @@
                     produksiSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
                     distributorSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
                     akuntanSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+                    sarpasSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
                     addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
 
                     if (role === 'admin_gudang') {
@@ -589,6 +658,11 @@
                     } else if (role === 'akuntan') {
                         akuntanSection.style.display = 'block';
                         akuntanSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+                        addressSection.style.display = 'block';
+                        addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+                    } else if (role === 'sarpas') {
+                        sarpasSection.style.display = 'block';
+                        sarpasSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
                         addressSection.style.display = 'block';
                         addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
                     }

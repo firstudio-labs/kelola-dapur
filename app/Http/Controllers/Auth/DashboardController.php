@@ -76,7 +76,8 @@ class DashboardController extends Controller
             $user->isAdminGudang($dapur->id_dapur) ||
             $user->isAhliGizi($dapur->id_dapur) ||
             $user->isProduksi($dapur->id_dapur) ||
-            $user->isAkuntan($dapur->id_dapur);
+            $user->isAkuntan($dapur->id_dapur) ||
+            $user->isSarpas($dapur->id_dapur);
     }
 
     private function redirectToRoleDashboard(User $user, Dapur $dapur)
@@ -94,6 +95,8 @@ class DashboardController extends Controller
                 return redirect()->route('produksi.dashboard');
             case 'akuntan':
                 return redirect()->route('akuntan.dashboard');
+            case 'sarpas':
+                return redirect()->route('sarpas.dashboard', ['dapur' => $dapur->id_dapur]);
             case 'penerima_mbg':
                 return redirect()->route('penerima-mbg.dashboard');
             default:

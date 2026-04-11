@@ -358,27 +358,27 @@
                     </div>
 
                     <div class="col-12" id="address_section"
-                        style="display: {{ in_array(old('role_type', $user->userRole->role_type), ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan']) ? 'block' : 'none' }};">
+                        style="display: {{ in_array(old('role_type', $user->userRole->role_type), ['admin_gudang', 'ahli_gizi', 'produksi', 'distributor', 'akuntan', 'sarpas']) ? 'block' : 'none' }};">
                         <hr class="my-3">
                         <h5 class="card-title mb-3">Informasi Alamat</h5>
                         <div class="row g-4">
                             <input type="hidden" name="province_code" id="province_code"
-                                value="{{ old('province_code', $adminGudang->province_code ?? ($ahliGizi->province_code ?? ($produksi->province_code ?? ($distributor->province_code ?? ($akuntan->province_code ?? ''))))) }}">
+                                value="{{ old('province_code', $adminGudang->province_code ?? ($ahliGizi->province_code ?? ($produksi->province_code ?? ($distributor->province_code ?? ($akuntan->province_code ?? ($sarpas->province_code ?? '')))))) }}">
                             <input type="hidden" name="regency_code" id="regency_code"
-                                value="{{ old('regency_code', $adminGudang->regency_code ?? ($ahliGizi->regency_code ?? ($produksi->regency_code ?? ($distributor->regency_code ?? ($akuntan->regency_code ?? ''))))) }}">
+                                value="{{ old('regency_code', $adminGudang->regency_code ?? ($ahliGizi->regency_code ?? ($produksi->regency_code ?? ($distributor->regency_code ?? ($akuntan->regency_code ?? ($sarpas->regency_code ?? '')))))) }}">
                             <input type="hidden" name="district_code" id="district_code"
-                                value="{{ old('district_code', $adminGudang->district_code ?? ($ahliGizi->district_code ?? ($produksi->district_code ?? ($distributor->district_code ?? ($akuntan->district_code ?? ''))))) }}">
+                                value="{{ old('district_code', $adminGudang->district_code ?? ($ahliGizi->district_code ?? ($produksi->district_code ?? ($distributor->district_code ?? ($akuntan->district_code ?? ($sarpas->district_code ?? '')))))) }}">
                             <input type="hidden" name="village_code" id="village_code"
-                                value="{{ old('village_code', $adminGudang->village_code ?? ($ahliGizi->village_code ?? ($produksi->village_code ?? ($distributor->village_code ?? ($akuntan->village_code ?? ''))))) }}">
+                                value="{{ old('village_code', $adminGudang->village_code ?? ($ahliGizi->village_code ?? ($produksi->village_code ?? ($distributor->village_code ?? ($akuntan->village_code ?? ($sarpas->village_code ?? '')))))) }}">
 
                             <input type="hidden" name="province_name" id="provinsi_name"
-                                value="{{ old('province_name', $adminGudang->province_name ?? ($ahliGizi->province_name ?? ($produksi->province_name ?? ($distributor->province_name ?? ($akuntan->province_name ?? ''))))) }}">
+                                value="{{ old('province_name', $adminGudang->province_name ?? ($ahliGizi->province_name ?? ($produksi->province_name ?? ($distributor->province_name ?? ($akuntan->province_name ?? ($sarpas->province_name ?? '')))))) }}">
                             <input type="hidden" name="regency_name" id="kabupaten_name"
-                                value="{{ old('regency_name', $adminGudang->regency_name ?? ($ahliGizi->regency_name ?? ($produksi->regency_name ?? ($distributor->regency_name ?? ($akuntan->regency_name ?? ''))))) }}">
+                                value="{{ old('regency_name', $adminGudang->regency_name ?? ($ahliGizi->regency_name ?? ($produksi->regency_name ?? ($distributor->regency_name ?? ($akuntan->regency_name ?? ($sarpas->regency_name ?? '')))))) }}">
                             <input type="hidden" name="district_name" id="kecamatan_name"
-                                value="{{ old('district_name', $adminGudang->district_name ?? ($ahliGizi->district_name ?? ($produksi->district_name ?? ($distributor->district_name ?? ($akuntan->district_name ?? ''))))) }}">
+                                value="{{ old('district_name', $adminGudang->district_name ?? ($ahliGizi->district_name ?? ($produksi->district_name ?? ($distributor->district_name ?? ($akuntan->district_name ?? ($sarpas->district_name ?? '')))))) }}">
                             <input type="hidden" name="village_name" id="kelurahan_name"
-                                value="{{ old('village_name', $adminGudang->village_name ?? ($ahliGizi->village_name ?? ($produksi->village_name ?? ($distributor->village_name ?? ($akuntan->village_name ?? ''))))) }}">
+                                value="{{ old('village_name', $adminGudang->village_name ?? ($ahliGizi->village_name ?? ($produksi->village_name ?? ($distributor->village_name ?? ($akuntan->village_name ?? ($sarpas->village_name ?? '')))))) }}">
 
                             <div class="col-md-6 border-end pe-3">
                                 <div class="mb-3">
@@ -413,7 +413,7 @@
                             <div class="col-md-6 ps-3">
                                 <label for="alamat_detail" class="form-label">Alamat Lengkap (Keterangan)</label>
                                 <textarea name="alamat_detail" id="alamat_detail" class="form-control @error('alamat_detail') is-invalid @enderror"
-                                    rows="6" placeholder="Nama jalan, gedung, no rumah, RT/RW, patokan">{{ old('alamat_detail', $adminGudang->alamat_detail ?? ($ahliGizi->alamat_detail ?? ($produksi->alamat_detail ?? ($distributor->alamat_detail ?? ($akuntan->alamat_detail ?? ''))))) }}</textarea>
+                                    rows="6" placeholder="Nama jalan, gedung, no rumah, RT/RW, patokan">{{ old('alamat_detail', $adminGudang->alamat_detail ?? ($ahliGizi->alamat_detail ?? ($produksi->alamat_detail ?? ($distributor->alamat_detail ?? ($akuntan->alamat_detail ?? ($sarpas->alamat_detail ?? '')))))) }}</textarea>
                                 @error('alamat_detail')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -790,6 +790,128 @@
                         </div>
                     </div>
 
+                    <div class="col-12" id="sarpas_section"
+                        style="display: {{ old('role_type', $user->userRole->role_type) === 'sarpas' ? 'block' : 'none' }};">
+                        <hr class="my-3">
+                        <h5 class="card-title mb-3">Informasi Spesifik Sarpas</h5>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label for="nik_sarpas" class="form-label">NIK Sarpas</label>
+                                <input type="text" name="nik_sarpas" id="nik_sarpas"
+                                    class="form-control @error('nik_sarpas') is-invalid @enderror"
+                                    placeholder="Contoh: 3171234567890001"
+                                    value="{{ old('nik_sarpas', $sarpas->nik_sarpas ?? '') }}">
+                                @error('nik_sarpas')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="nama_lengkap_sarpas" class="form-label">Nama Lengkap Sarpas</label>
+                                <input type="text" name="nama_lengkap" id="nama_lengkap_sarpas"
+                                    class="form-control @error('nama_lengkap') is-invalid @enderror"
+                                    placeholder="Nama lengkap sesuai KTP"
+                                    value="{{ old('nama_lengkap', $sarpas->nama_lengkap ?? '') }}">
+                                @error('nama_lengkap')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="jabatan_sarpas" class="form-label">Jabatan</label>
+                                <select name="jabatan" id="jabatan_sarpas"
+                                    class="form-select @error('jabatan') is-invalid @enderror">
+                                    <option value="">Pilih Jabatan</option>
+                                    <option value="Penanggung jawab"
+                                        {{ old('jabatan', $sarpas->jabatan ?? '') === 'Penanggung jawab' ? 'selected' : '' }}>
+                                        Penanggung jawab</option>
+                                    <option value="Anggota"
+                                        {{ old('jabatan', $sarpas->jabatan ?? '') === 'Anggota' ? 'selected' : '' }}>
+                                        Anggota</option>
+                                </select>
+                                @error('jabatan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="kontak_wa_sarpas" class="form-label">Nomor WhatsApp / Telepon</label>
+                                <input type="text" name="kontak_wa" id="kontak_wa_sarpas"
+                                    class="form-control @error('kontak_wa') is-invalid @enderror"
+                                    placeholder="Contoh: 08123456789"
+                                    value="{{ old('kontak_wa', $sarpas->kontak_wa ?? '') }}">
+                                @error('kontak_wa')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="jenis_kelamin_sarpas" class="form-label">Jenis Kelamin</label>
+                                <select name="jenis_kelamin" id="jenis_kelamin_sarpas"
+                                    class="form-select @error('jenis_kelamin') is-invalid @enderror">
+                                    <option value="">Pilih Jenis Kelamin</option>
+                                    <option value="Pria"
+                                        {{ old('jenis_kelamin', $sarpas->jenis_kelamin ?? '') === 'Pria' ? 'selected' : '' }}>
+                                        Pria</option>
+                                    <option value="Wanita"
+                                        {{ old('jenis_kelamin', $sarpas->jenis_kelamin ?? '') === 'Wanita' ? 'selected' : '' }}>
+                                        Wanita</option>
+                                </select>
+                                @error('jenis_kelamin')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="pendidikan_sarpas" class="form-label">Pendidikan Terakhir</label>
+                                <select name="pendidikan" id="pendidikan_sarpas"
+                                    class="form-select @error('pendidikan') is-invalid @enderror">
+                                    <option value="">Pilih Pendidikan</option>
+                                    <option value="SD"
+                                        {{ old('pendidikan', $sarpas->pendidikan ?? '') === 'SD' ? 'selected' : '' }}>
+                                        SD</option>
+                                    <option value="SMP"
+                                        {{ old('pendidikan', $sarpas->pendidikan ?? '') === 'SMP' ? 'selected' : '' }}>
+                                        SMP</option>
+                                    <option value="SMA"
+                                        {{ old('pendidikan', $sarpas->pendidikan ?? '') === 'SMA' ? 'selected' : '' }}>
+                                        SMA</option>
+                                    <option value="D1"
+                                        {{ old('pendidikan', $sarpas->pendidikan ?? '') === 'D1' ? 'selected' : '' }}>
+                                        D1</option>
+                                    <option value="D2"
+                                        {{ old('pendidikan', $sarpas->pendidikan ?? '') === 'D2' ? 'selected' : '' }}>
+                                        D2</option>
+                                    <option value="D3"
+                                        {{ old('pendidikan', $sarpas->pendidikan ?? '') === 'D3' ? 'selected' : '' }}>
+                                        D3</option>
+                                    <option value="Sarjana"
+                                        {{ old('pendidikan', $sarpas->pendidikan ?? '') === 'Sarjana' ? 'selected' : '' }}>
+                                        Sarjana (S1/S2/S3)</option>
+                                </select>
+                                @error('pendidikan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="foto_diri_sarpas" class="form-label">Foto Diri</label>
+                                <input type="file" name="foto_diri" id="foto_diri_sarpas" accept="image/*"
+                                    class="form-control @error('foto_diri') is-invalid @enderror">
+                                @error('foto_diri')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+
+                                <div class="mt-3">
+                                    <img id="image_preview_sarpas"
+                                        src="{{ ($sarpas ?? false) && $sarpas->foto_diri ? Storage::url($sarpas->foto_diri) : '#' }}"
+                                        alt="Preview Foto Diri" class="img-fluid rounded border"
+                                        style="max-height: 200px; object-fit: cover; {{ ($sarpas ?? false) && $sarpas->foto_diri ? 'display: block;' : 'display: none;' }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-12 mt-4">
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('kepala-dapur.users.index', ['dapur' => $dapur]) }}"
@@ -844,6 +966,7 @@
             const produksiSection = document.getElementById('produksi_section');
             const distributorSection = document.getElementById('distributor_section');
             const akuntanSection = document.getElementById('akuntan_section');
+            const sarpasSection = document.getElementById('sarpas_section');
             const addressSection = document.getElementById('address_section');
 
             function toggleSections() {
@@ -855,6 +978,7 @@
                 produksiSection.style.display = 'none';
                 distributorSection.style.display = 'none';
                 akuntanSection.style.display = 'none';
+                sarpasSection.style.display = 'none';
                 addressSection.style.display = 'none';
 
                 // Disable all inputs in sections to avoid submitting unused fields with duplicate names
@@ -863,6 +987,7 @@
                 produksiSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
                 distributorSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
                 akuntanSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+                sarpasSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
                 addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
 
                 if (role === 'admin_gudang') {
@@ -892,6 +1017,11 @@
                     akuntanSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
                     addressSection.style.display = 'block';
                     addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+                } else if (role === 'sarpas') {
+                    sarpasSection.style.display = 'block';
+                    sarpasSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+                    addressSection.style.display = 'block';
+                    addressSection.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
                 }
             }
 
@@ -913,6 +1043,9 @@
 
             const fotoInputAkuntan = document.getElementById('foto_diri_akuntan');
             const imagePreviewAkuntan = document.getElementById('image_preview_akuntan');
+
+            const fotoInputSarpas = document.getElementById('foto_diri_sarpas');
+            const imagePreviewSarpas = document.getElementById('image_preview_sarpas');
 
             function handleImagePreview(input, preview, defaultUrl) {
                 if (input) {
@@ -951,6 +1084,9 @@
                 );
             handleImagePreview(fotoInputAkuntan, imagePreviewAkuntan,
                 "{{ ($akuntan ?? false) && $akuntan->foto_diri ? Storage::url($akuntan->foto_diri) : '#' }}"
+                );
+            handleImagePreview(fotoInputSarpas, imagePreviewSarpas,
+                "{{ ($sarpas ?? false) && $sarpas->foto_diri ? Storage::url($sarpas->foto_diri) : '#' }}"
                 );
 
             // Initialize Select2

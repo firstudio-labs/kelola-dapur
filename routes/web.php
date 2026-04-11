@@ -835,3 +835,20 @@ Route::middleware(['auth', 'role:distributor', 'check.subscription'])
                 Route::patch('/{order}/detail/{detail}/update-status', [DistributorOrderController::class, 'updateDetailStatus'])->name('updateDetailStatus');
             });
     });
+
+// ============================
+// Sarpas Area
+// ============================
+Route::middleware(['auth', 'role:sarpas', 'check.subscription'])
+    ->prefix('sarpas')
+    ->name('sarpas.')
+    ->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Sarpas\DashboardController::class, 'index'])->name('dashboard');
+
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/edit', [\App\Http\Controllers\Sarpas\ProfileController::class, 'edit'])->name('edit');
+            Route::put('/', [\App\Http\Controllers\Sarpas\ProfileController::class, 'update'])->name('update');
+            Route::get('/security', [\App\Http\Controllers\Sarpas\ProfileController::class, 'editSecurity'])->name('security.edit');
+            Route::put('/security', [\App\Http\Controllers\Sarpas\ProfileController::class, 'updatePassword'])->name('security.update');
+        });
+    });
