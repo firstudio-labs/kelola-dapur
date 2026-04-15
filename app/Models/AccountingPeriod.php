@@ -49,8 +49,61 @@ class AccountingPeriod extends Model
         return $query->where('id_dapur', $dapurId);
     }
 
+    public function scopeLatestClosed($query, $dapurId)
+    {
+        return $query->where('id_dapur', $dapurId)
+                     ->where('status', 'closed')
+                     ->orderByDesc('end_date');
+    }
+
     public function isOpen(): bool
     {
         return $this->status === 'open';
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->status === 'closed';
+    }
+
+    /**
+     * Get the most recent closed period before this one for the same dapur.
+     */
+    public function getPreviousPeriod(): ?self
+    {
+        return static::where('id_dapur', $this->id_dapur)
+                     ->where('status', 'closed')
+                     ->where('end_date', '<', $this->start_date)
+                     ->orderByDesc('end_date')
+                     ->first();
+    }
+
+    /**
+     * Compute closing balance for each cash account in this period and persist it.
+     * closing_balance = opening_balance + total_debit - total_credit
+     *
+     * Returns array of [cash_account_id => closing_balance]
+     */
+    public function computeAndSaveClosingBalances(): array
+    {
+        $results = [];
+
+        $balances = $this->balances()->get();
+
+        foreach ($balances as $balance) {
+            $totalDebit  = $this->transactions()
+                                ->where('cash_account_id', $balance->cash_account_id)
+                                ->sum('debit');
+            $totalCredit = $this->transactions()
+                                ->where('cash_account_id', $balance->cash_account_id)
+                                ->sum('credit');
+
+            $closing = (float) $balance->opening_balance + (float) $totalDebit - (float) $totalCredit;
+
+            $balance->update(['closing_balance' => $closing]);
+            $results[$balance->cash_account_id] = $closing;
+        }
+
+        return $results;
     }
 }

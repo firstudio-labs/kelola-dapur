@@ -115,44 +115,116 @@
                         <div class="card-header border-bottom mb-3">
                             <h5 class="mb-0">Daftar Periode Akuntansi</h5>
                         </div>
-                        
+
                         <div class="card-body">
+
+                            {{-- Banner: ada periode open --}}
+                            @if(!$canCreateNewPeriod && $openPeriod)
+                            <div class="alert alert-warning border-warning mb-4">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="bx bx-info-circle fs-5 mt-1 text-warning"></i>
+                                    <div>
+                                        <div class="fw-semibold">Periode Aktif Sedang Berjalan</div>
+                                        <div class="small">Periode <strong>"{{ $openPeriod->name }}"</strong> masih berstatus <span class="badge bg-label-success">Buka Transaksi</span>. Tutup periode ini terlebih dahulu untuk dapat membuat periode akuntansi baru.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- Form Tambah Periode (hanya muncul jika tidak ada periode open) --}}
+                            @if($canCreateNewPeriod)
                             <div class="mb-4">
                                 <div class="p-3 border rounded bg-light">
-                                    <h6 class="fw-bold mb-3 text-primary"><i class="bx bx-calendar-plus me-1"></i> Form Tambah Periode</h6>
+                                    <h6 class="fw-bold mb-3 text-primary"><i class="bx bx-calendar-plus me-1"></i> Form Tambah Periode Baru</h6>
+
+                                    @if($lastClosedPeriod)
+                                    <div class="alert alert-info py-2 px-3 mb-3 small">
+                                        <i class="bx bx-transfer me-1"></i>
+                                        Saldo awal otomatis diisi dari <strong>saldo akhir periode "{{ $lastClosedPeriod->name }}"</strong>. Anda dapat mengubah nilai ini jika diperlukan.
+                                    </div>
+                                    @endif
+
                                     <form action="{{ route('akuntan.pengaturan.periode.store') }}" method="POST">
                                         @csrf
                                         <div class="row g-3">
                                             <div class="col-12 col-md-4">
                                                 <label class="form-label fw-semibold">Nama Periode <span class="text-danger">*</span></label>
-                                                <input type="text" name="name" class="form-control form-control-sm" required placeholder="Contoh: Triwulan I 2024">
+                                                <input type="text" name="name" class="form-control form-control-sm" required placeholder="Contoh: Triwulan I 2025" value="{{ old('name') }}">
                                             </div>
                                             <div class="col-6 col-md-2">
                                                 <label class="form-label fw-semibold">Tahun <span class="text-danger">*</span></label>
-                                                <input type="number" name="year" class="form-control form-control-sm" required value="{{ date('Y') }}" min="2020">
+                                                <input type="number" name="year" class="form-control form-control-sm" required value="{{ old('year', date('Y')) }}" min="2020">
                                             </div>
                                             <div class="col-6 col-md-2">
                                                 <label class="form-label fw-semibold">Mulai <span class="text-danger">*</span></label>
-                                                <input type="date" name="start_date" class="form-control form-control-sm" required>
+                                                <input type="date" name="start_date" class="form-control form-control-sm" required
+                                                    value="{{ old('start_date', $lastClosedPeriod ? $lastClosedPeriod->end_date->addDay()->format('Y-m-d') : '') }}">
                                             </div>
                                             <div class="col-6 col-md-2">
                                                 <label class="form-label fw-semibold">Selesai <span class="text-danger">*</span></label>
-                                                <input type="date" name="end_date" class="form-control form-control-sm" required>
+                                                <input type="date" name="end_date" class="form-control form-control-sm" required value="{{ old('end_date') }}">
                                             </div>
+
                                             <div class="col-12">
-                                                <label class="form-label fw-semibold mb-2">Saldo Awal per Akun Kas (Rp) <span class="text-danger">*</span></label>
+                                                <label class="form-label fw-semibold mb-2">
+                                                    Saldo Awal per Akun Kas
+                                                    @if($lastClosedPeriod)
+                                                        <span class="text-muted fw-normal small ms-1">— dari penutupan periode sebelumnya, dapat diubah</span>
+                                                    @else
+                                                        <span class="text-danger">*</span>
+                                                    @endif
+                                                </label>
                                                 <div class="row g-2">
                                                     @foreach($cashAccounts as $ca)
-                                                    <div class="col-md-3">
-                                                        <div class="input-group input-group-sm">
-                                                            <span class="input-group-text bg-light border-end-0"><i class="bx {{ $ca->type === 'tunai' ? 'bx-money' : 'bx-credit-card' }} small"></i></span>
-                                                            <input type="number" name="opening_balances[{{ $ca->id }}]" class="form-control form-control-sm border-start-0" required value="0" min="0" placeholder="{{ $ca->name }}">
+                                                    @php
+                                                        $suggested = $suggestedOpeningBalances[$ca->id] ?? 0;
+                                                        $inputVal  = old("opening_balances.{$ca->id}", $suggested);
+                                                    @endphp
+                                                    <div class="col-md-4">
+                                                        <div class="card border shadow-none">
+                                                            <div class="card-body py-2 px-3">
+                                                                <div class="d-flex align-items-center mb-1 gap-2">
+                                                                    <i class="bx {{ $ca->type === 'tunai' ? 'bx-money text-success' : 'bx-credit-card text-info' }}"></i>
+                                                                    <span class="fw-semibold small text-truncate" title="{{ $ca->name }}">{{ $ca->name }}</span>
+                                                                    <span class="badge bg-label-{{ $ca->type === 'tunai' ? 'success' : 'info' }} ms-auto">{{ $ca->type_label }}</span>
+                                                                </div>
+                                                                @if($lastClosedPeriod)
+                                                                <div class="text-muted small mb-1">
+                                                                    Saldo akhir periode lalu: <strong>Rp {{ number_format($suggested, 0, ',', '.') }}</strong>
+                                                                </div>
+                                                                @endif
+                                                                <div class="input-group input-group-sm">
+                                                                    <span class="input-group-text">Rp</span>
+                                                                    <input type="number" name="opening_balances[{{ $ca->id }}]"
+                                                                           class="form-control form-control-sm opening-balance-input-create"
+                                                                           value="{{ (int) $inputVal }}" min="{{ (int)$suggested }}" step="1"
+                                                                           onfocus="if(this.value == '0') this.value='';"
+                                                                           onblur="if(this.value == '') { this.value='0'; calculateTotalOpening(); }"
+                                                                           oninvalid="this.setCustomValidity('Saldo tidak boleh kurang dari saldo akhir sebelumnya (Rp {{ number_format($suggested, 0, ',', '.') }})')"
+                                                                           oninput="this.setCustomValidity(''); calculateTotalOpening()">
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div class="form-text mt-0 ms-1 small text-truncate" title="{{ $ca->name }}">{{ $ca->name }}</div>
                                                     </div>
                                                     @endforeach
+                                                    @if($cashAccounts->isEmpty())
+                                                    <div class="col-12 text-muted small">
+                                                        <i class="bx bx-info-circle me-1"></i> Belum ada akun kas. Tambahkan akun kas di tab <strong>Akun Kas</strong> terlebih dahulu.
+                                                    </div>
+                                                    @endif
                                                 </div>
+                                                
+                                                @if($cashAccounts->isNotEmpty())
+                                                <div class="mt-3 p-2 bg-white border rounded d-flex justify-content-between align-items-center">
+                                                    <div class="d-flex flex-column">
+                                                        <strong class="text-secondary small">Total Saldo Awal (Estimasi)</strong>
+                                                        <small class="text-muted" style="font-size: 0.7rem;">Akumulasi dari input per akun kas di atas</small>
+                                                    </div>
+                                                    <strong class="text-primary" id="total_opening_display_create">Rp 0</strong>
+                                                </div>
+                                                @endif
                                             </div>
+
                                             <div class="col-12 text-end">
                                                 <button type="submit" class="btn btn-primary btn-sm"><i class="bx bx-save me-1"></i> Simpan Periode</button>
                                             </div>
@@ -160,108 +232,97 @@
                                     </form>
                                 </div>
                             </div>
+                            @endif
 
+                            {{-- Tabel Daftar Periode --}}
                             <div class="table-responsive">
-                                <table class="table table-hover border">
+                                <table class="table table-hover border align-middle small">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Nama Periode</th>
                                             <th>Tahun</th>
                                             <th>Rentang Waktu</th>
+                                            <th>Total Saldo Awal</th>
+                                            <th>Saldo per Akun Kas</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($periods as $p)
+                                        @php
+                                            $pBalances = $p->balances->keyBy('cash_account_id');
+                                            $totalOpening = $pBalances->sum('opening_balance');
+                                        @endphp
                                         <tr>
                                             <td class="fw-semibold">{{ $p->name }}</td>
                                             <td>{{ $p->year }}</td>
-                                            <td><span class="text-muted"><i class="bx bx-calendar-event me-1"></i>{{ $p->start_date->format('d M Y') }} – {{ $p->end_date->format('d M Y') }}</span></td>
+                                            <td><span class="text-muted small"><i class="bx bx-calendar-event me-1"></i>{{ $p->start_date->format('d M Y') }} – {{ $p->end_date->format('d M Y') }}</span></td>
+                                            <td><strong class="text-primary">Rp {{ number_format($totalOpening, 0, ',', '.') }}</strong></td>
+                                            <td>
+                                                @if($p->status === 'closed')
+                                                    @foreach($cashAccounts as $ca)
+                                                    @php $bal = $pBalances->get($ca->id); @endphp
+                                                    <div class="small mb-1 border-bottom pb-1">
+                                                        <span class="text-dark fw-semibold">{{ $ca->name }}</span><br>
+                                                        <span class="text-muted" style="font-size: 0.75rem;">Awal: Rp {{ number_format($bal?->opening_balance ?? 0, 0, ',', '.') }}</span><br>
+                                                        <span class="text-muted" style="font-size: 0.75rem;">Akhir: </span><strong>Rp {{ number_format($bal?->closing_balance ?? 0, 0, ',', '.') }}</strong>
+                                                    </div>
+                                                    @endforeach
+                                                @else
+                                                    @foreach($cashAccounts as $ca)
+                                                    @php
+                                                        $bal     = $pBalances->get($ca->id);
+                                                        $opening = (float)($bal?->opening_balance ?? 0);
+                                                        $debit   = $p->transactions()->where('cash_account_id', $ca->id)->sum('debit');
+                                                        $credit  = $p->transactions()->where('cash_account_id', $ca->id)->sum('credit');
+                                                        $running = $opening + $debit - $credit;
+                                                    @endphp
+                                                    <div class="small mb-1 border-bottom pb-1">
+                                                        <span class="text-dark fw-semibold">{{ $ca->name }}</span><br>
+                                                        <span class="text-muted" style="font-size: 0.75rem;">Awal: Rp {{ number_format($opening, 0, ',', '.') }}</span><br>
+                                                        <span class="text-muted" style="font-size: 0.75rem;">Berjalan: </span><strong class="text-success">Rp {{ number_format($running, 0, ',', '.') }}</strong>
+                                                    </div>
+                                                    @endforeach
+                                                @endif
+                                            </td>
                                             <td class="text-center">
                                                 <span class="badge {{ $p->status === 'open' ? 'bg-label-success' : 'bg-label-secondary' }}">
                                                     {{ $p->status === 'open' ? 'Buka Transaksi' : 'Ditutup' }}
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                <button class="btn btn-sm btn-icon btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPeriodeModal{{ $p->id }}" title="Edit">
-                                                    <i class="bx bx-edit-alt"></i>
-                                                </button>
                                                 @if($p->status === 'open')
                                                 <form action="{{ route('akuntan.pengaturan.periode.close', $p->id) }}" method="POST" class="d-inline ms-1">
                                                     @csrf @method('PATCH')
-                                                    <button class="btn btn-sm btn-icon btn-outline-warning" onclick="return confirm('Tutup periode ini? Anda tidak bisa lagi menambah transaksi pada periode yang ditutup.')" title="Tutup Periode"><i class="bx bx-lock"></i></button>
+                                                    <button class="btn btn-sm btn-icon btn-outline-warning"
+                                                        onclick="return confirm('Tutup periode ini?\n\nSistem akan menghitung dan menyimpan saldo akhir setiap akun kas secara otomatis.\nSetelah ditutup, tidak bisa menambah transaksi baru pada periode ini.')"
+                                                        title="Tutup Periode & Simpan Saldo Akhir">
+                                                        <i class="bx bx-lock"></i>
+                                                    </button>
                                                 </form>
                                                 @else
                                                 <form action="{{ route('akuntan.pengaturan.periode.open', $p->id) }}" method="POST" class="d-inline ms-1">
                                                     @csrf @method('PATCH')
-                                                    <button class="btn btn-sm btn-icon btn-outline-success" onclick="return confirm('Buka kembali periode ini?')" title="Buka Periode"><i class="bx bx-lock-open"></i></button>
+                                                    <button class="btn btn-sm btn-icon btn-outline-success"
+                                                        onclick="return confirm('Buka kembali periode ini?\n\nSaldo akhir akan di-reset.\nPastikan tidak ada periode penerus yang sudah berjalan.')"
+                                                        title="Buka Kembali Periode">
+                                                        <i class="bx bx-lock-open"></i>
+                                                    </button>
                                                 </form>
                                                 @endif
                                                 <form action="{{ route('akuntan.pengaturan.periode.destroy', $p->id) }}" method="POST" class="d-inline ms-1">
                                                     @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-icon btn-outline-danger" onclick="return confirm('Yakin ingin menghapus periode ini? Tindakan ini akan menghapus semua laporan terkait periode ini secara permanen.')" title="Hapus"><i class="bx bx-trash"></i></button>
+                                                    <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                        onclick="return confirm('Yakin hapus periode ini?\nSemua data laporan terkait akan terhapus permanen.')"
+                                                        title="Hapus">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
                                                 </form>
-
-                                                {{-- Modal Edit Periode --}}
-                                                <div class="modal fade" id="editPeriodeModal{{ $p->id }}" tabindex="-1" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered">
-                                                        <div class="modal-content text-start">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title">Edit Periode Akuntansi</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <form action="{{ route('akuntan.pengaturan.periode.update', $p->id) }}" method="POST">
-                                                                @csrf @method('PUT')
-                                                                <div class="modal-body">
-                                                                    <div class="row g-3">
-                                                                        <div class="col-12">
-                                                                            <label class="form-label fw-semibold">Nama Periode</label>
-                                                                            <input type="text" name="name" class="form-control" value="{{ $p->name }}" required>
-                                                                        </div>
-                                                                        <div class="col-12 col-md-4">
-                                                                            <label class="form-label fw-semibold">Tahun</label>
-                                                                            <input type="number" name="year" class="form-control" value="{{ $p->year }}" required min="2020">
-                                                                        </div>
-                                                                        <div class="col-6 col-md-4">
-                                                                            <label class="form-label fw-semibold">Mulai</label>
-                                                                            <input type="date" name="start_date" class="form-control" value="{{ $p->start_date->format('Y-m-d') }}" required>
-                                                                        </div>
-                                                                        <div class="col-6 col-md-4">
-                                                                            <label class="form-label fw-semibold">Selesai</label>
-                                                                            <input type="date" name="end_date" class="form-control" value="{{ $p->end_date->format('Y-m-d') }}" required>
-                                                                        </div>
-                                                                        <div class="col-12">
-                                                                            <label class="form-label fw-semibold mb-2">Saldo Awal per Akun Kas (Rp)</label>
-                                                                            <div class="row g-2">
-                                                                                @foreach($cashAccounts as $ca)
-                                                                                @php 
-                                                                                    $bal = $p->balances->where('cash_account_id', $ca->id)->first();
-                                                                                @endphp
-                                                                                <div class="col-md-6">
-                                                                                    <div class="input-group input-group-sm">
-                                                                                        <span class="input-group-text bg-light border-end-0"><i class="bx {{ $ca->type === 'tunai' ? 'bx-money' : 'bx-credit-card' }} small"></i></span>
-                                                                                        <input type="number" name="opening_balances[{{ $ca->id }}]" class="form-control border-start-0" value="{{ (int)($bal->opening_balance ?? 0) }}" required min="0">
-                                                                                    </div>
-                                                                                    <div class="form-text mt-1 small">{{ $ca->name }}</div>
-                                                                                </div>
-                                                                                @endforeach
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Tutup</button>
-                                                                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </td>
                                         </tr>
                                         @empty
-                                        <tr><td colspan="5" class="text-center py-4 text-muted"><i class="bx bx-info-circle mb-1 fs-4 d-block"></i>Belum ada periode akuntansi terdaftar.</td></tr>
+                                        <tr><td colspan="6" class="text-center py-4 text-muted"><i class="bx bx-info-circle mb-1 fs-4 d-block"></i>Belum ada periode akuntansi terdaftar.</td></tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -543,6 +604,10 @@
 <script>
     // To preserve active tab on page reload / redirect
     document.addEventListener("DOMContentLoaded", function () {
+        // Calculate initial total
+        if(typeof calculateTotalOpening === 'function') {
+            calculateTotalOpening();
+        }
         // 1. Get from localStorage or URL Hash
         let savedTab = localStorage.getItem('akuntan_pengaturan_tab');
         let hash = window.location.hash;
@@ -566,6 +631,17 @@
             });
         });
     });
+</script>
+<script>
+    function calculateTotalOpening() {
+        let inputs = document.querySelectorAll('.opening-balance-input-create');
+        let total = 0;
+        inputs.forEach(inp => total += parseInt(inp.value) || 0);
+        let display = document.getElementById('total_opening_display_create');
+        if(display) {
+            display.innerText = 'Rp ' + total.toLocaleString('id-ID');
+        }
+    }
 </script>
 @endpush
 @endsection
