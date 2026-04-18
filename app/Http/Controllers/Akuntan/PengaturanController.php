@@ -23,6 +23,7 @@ class PengaturanController extends Controller
     public function index()
     {
         $dapurId = $this->getDapurId();
+        $dapur        = Auth::user()->userRole->dapur;
         $setting      = AccountingSetting::firstOrCreate(['id_dapur' => $dapurId]);
         $periods      = AccountingPeriod::forDapur($dapurId)->orderByDesc('end_date')->get();
         $categories   = AccountingCategory::forDapur($dapurId)->orderBy('group')->orderBy('name')->get();
@@ -45,7 +46,7 @@ class PengaturanController extends Controller
         }
 
         return view('akuntan.pengaturan.index', compact(
-            'setting', 'periods', 'categories', 'cashAccounts',
+            'dapur', 'setting', 'periods', 'categories', 'cashAccounts',
             'canCreateNewPeriod', 'lastClosedPeriod', 'suggestedOpeningBalances', 'openPeriod'
         ));
     }

@@ -61,20 +61,35 @@
                     <div class="card mb-4">
                         <h5 class="card-header border-bottom mb-3">Informasi Identitas Lembaga</h5>
                         <div class="card-body">
+                            @php
+                                $dapurAddress = collect([
+                                    $dapur->alamat,
+                                    $dapur->village_name ? "Ds/Kel. " . $dapur->village_name : null,
+                                    $dapur->district_name ? "Kec. " . $dapur->district_name : null,
+                                    $dapur->regency_name,
+                                    $dapur->province_name ? "Prov. " . $dapur->province_name : null
+                                ])->filter()->implode(', ');
+                            @endphp
+                            <div class="alert alert-info d-flex mb-4">
+                                <i class="bx bx-info-circle me-2 mt-1"></i>
+                                <span>Informasi <strong>Nama Lembaga</strong> dan <strong>Alamat</strong> disinkronisasi dari profil Dapur Utama. Lengkapi informasi pendukung lainnya di bawah.</span>
+                            </div>
                             <form action="{{ route('akuntan.pengaturan.settings.update') }}" method="POST">
                                 @csrf @method('PUT')
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
-                                        <label class="form-label fw-semibold">Nama Lembaga</label>
-                                        <input type="text" name="institution_name" class="form-control" value="{{ old('institution_name', $setting->institution_name) }}" placeholder="Contoh: SDIT Al-Ihsan">
+                                        <label class="form-label fw-semibold">Nama Lembaga <span class="badge bg-label-primary px-2 py-1 ms-1" style="font-size:0.65rem;">Data Terpusat</span></label>
+                                        <input type="text" class="form-control bg-lighter text-muted cursor-not-allowed" value="{{ $dapur->nama_dapur }}" readonly>
+                                        <input type="hidden" name="institution_name" value="{{ $dapur->nama_dapur }}">
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <label class="form-label fw-semibold">Nama Yayasan / Mitra</label>
                                         <input type="text" name="foundation_name" class="form-control" value="{{ old('foundation_name', $setting->foundation_name) }}" placeholder="Contoh: Yayasan Al-Ihsan">
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label fw-semibold">Alamat Lengkap</label>
-                                        <textarea name="address" class="form-control" rows="2" placeholder="Alamat lengkap lembaga...">{{ old('address', $setting->address) }}</textarea>
+                                        <label class="form-label fw-semibold">Alamat Lengkap <span class="badge bg-label-primary px-2 py-1 ms-1" style="font-size:0.65rem;">Data Terpusat</span></label>
+                                        <textarea class="form-control bg-lighter text-muted cursor-not-allowed" rows="2" readonly>{{ $dapurAddress }}</textarea>
+                                        <input type="hidden" name="address" value="{{ $dapurAddress }}">
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <label class="form-label fw-semibold">Nama Kepala Lembaga</label>
