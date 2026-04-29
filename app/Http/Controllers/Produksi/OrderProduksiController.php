@@ -76,12 +76,19 @@ class OrderProduksiController extends Controller
         $stockCheck = $transaksi->checkStockWithReservations();
         $shortages = $stockCheck["shortages"];
 
+        $stockItems = \App\Models\StockItem::where('id_dapur', $produksi->id_dapur)->get()->keyBy('id_template_item');
+
         $stockData = [];
         foreach ($stockCheck["ingredients_summary"] as $item) {
-            $stockData[$item["id_template_item"]] = [
+            $idTemplate = $item["id_template_item"];
+            $stockItem = $stockItems->get($idTemplate);
+
+            $stockData[$idTemplate] = [
                 "stock_aktual" => $item["available"],
                 "stock_tersedia" => $item["effective_available"],
                 "sufficient" => $item["sufficient"],
+                "konversi_nilai" => $stockItem ? $stockItem->konversi_nilai : null,
+                "konversi_satuan" => $stockItem ? $stockItem->konversi_satuan : null,
             ];
         }
 
@@ -134,6 +141,11 @@ class OrderProduksiController extends Controller
         if ($newRank < $currentRank) {
             return redirect()->back()
                 ->with('error', 'Status tidak bisa dikembalikan ke tahap sebelumnya.');
+        }
+
+        if ($newRank > $currentRank + 1) {
+            return redirect()->back()
+                ->with('error', 'Status harus diubah secara berurutan (contoh: Belum Dibuat harus ke Sedang Dibuat terlebih dahulu).');
         }
 
         if ($request->status === 'selesai' && !$request->hasFile('dokumentasi')) {

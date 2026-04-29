@@ -402,12 +402,12 @@
                 @method('PATCH')
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select" id="modalStatus" required>
-                            <option value="belum_dibuat">Belum Dibuat</option>
-                            <option value="sedang_dibuat">Sedang Dibuat</option>
-                            <option value="selesai">Selesai</option>
-                        </select>
+                        <label class="form-label fw-semibold">Langkah Berikutnya:</label>
+                        <div id="statusInfo" class="alert alert-info py-2 px-3 mb-0 d-flex align-items-center">
+                            <i class="bx bx-info-circle me-2"></i>
+                            <span id="statusText"></span>
+                        </div>
+                        <input type="hidden" name="status" id="modalStatus">
                     </div>
                     
                     <div class="mb-3 d-none" id="dokumentasiWrapper">
@@ -537,22 +537,40 @@
             updateStatusModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
                 const orderId = button.getAttribute('data-id');
-                const status = button.getAttribute('data-status');
+                const currentStatus = button.getAttribute('data-status');
                 const catatan = button.getAttribute('data-catatan');
+                
+                const statusText = document.getElementById('statusText');
+                const statusInput = document.getElementById('modalStatus');
+                const statusInfo = document.getElementById('statusInfo');
 
-                modalStatus.value = status;
+                let nextStatus = '';
+                let nextStatusLabel = '';
+                let alertClass = 'alert-info';
+
+                if (currentStatus === 'belum_dibuat') {
+                    nextStatus = 'sedang_dibuat';
+                    nextStatusLabel = 'Ubah status menjadi <strong>Sedang Dibuat</strong> (Stok akan otomatis dikurangi)';
+                    alertClass = 'alert-warning';
+                } else if (currentStatus === 'sedang_dibuat') {
+                    nextStatus = 'selesai';
+                    nextStatusLabel = 'Ubah status menjadi <strong>Selesai</strong> (Pastikan dokumentasi sudah lengkap)';
+                    alertClass = 'alert-success';
+                }
+
+                statusInput.value = nextStatus;
+                statusText.innerHTML = nextStatusLabel;
+                statusInfo.className = `alert ${alertClass} py-2 px-3 mb-0 d-flex align-items-center`;
+
                 document.getElementById('modalCatatan').value = (catatan && catatan !== 'null') ? catatan : '';
                 
-                toggleDokumentasi(status);
+                toggleDokumentasi(nextStatus);
 
                 const baseUrl = '{{ route("produksi.order.update-status", ":id") }}';
                 document.getElementById('updateStatusForm').action = baseUrl.replace(':id', orderId);
             });
 
-            modalStatus.addEventListener('change', function() {
-                toggleDokumentasi(this.value);
-            });
-
+            // No longer needed as it's not a select, but we keep the function for toggleDokumentasi
             function toggleDokumentasi(status) {
                 if (status === 'selesai') {
                     dokumentasiWrapper.classList.remove('d-none');

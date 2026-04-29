@@ -3,8 +3,8 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     @php
-        $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->sum('jumlah_porsi') ?? 0;
-        $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->sum('jumlah_porsi') ?? 0;
+        $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()->jumlah_porsi ?? 0;
+        $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()->jumlah_porsi ?? 0;
         $totalKeseluruhan = $totalPorsiBesar + $totalPorsiKecil;
 
         $mapStatusProduksi = [
@@ -36,15 +36,15 @@
                         </div>
                         <div class="d-flex justify-content-center gap-4 text-center">
                             <div>
-                                <h4 class="mb-0 fw-bold text-primary">{{ $totalKeseluruhan }}</h4>
+                                <h4 class="mb-0 fw-bold text-primary">{{ number_format($totalKeseluruhan, 0, ',', '.') }}</h4>
                                 <small class="text-muted" style="font-size: 11px;">Total Porsi</small>
                             </div>
                             <div>
-                                <h4 class="mb-0 fw-bold text-success">{{ $totalPorsiBesar }}</h4>
+                                <h4 class="mb-0 fw-bold text-success">{{ number_format($totalPorsiBesar, 0, ',', '.') }}</h4>
                                 <small class="text-muted" style="font-size: 11px;">Besar</small>
                             </div>
                             <div>
-                                <h4 class="mb-0 fw-bold text-warning">{{ $totalPorsiKecil }}</h4>
+                                <h4 class="mb-0 fw-bold text-warning">{{ number_format($totalPorsiKecil, 0, ',', '.') }}</h4>
                                 <small class="text-muted" style="font-size: 11px;">Kecil</small>
                             </div>
                         </div>
@@ -156,16 +156,50 @@
                                         $stockTersedia = (float)$stockInfo['stock_tersedia'];
                                         
                                         $isSufficient = $stockTersedia >= $totalButuh;
+
+                                        // Helper to format numbers cleanly
+                                        $formatVal = function($val) {
+                                            if (floor($val) == $val) return number_format($val, 0, ',', '.');
+                                            return rtrim(rtrim(number_format($val, 3, ',', '.'), '0'), ',');
+                                        };
                                     @endphp
                                     <tr>
                                         <td class="ps-3 py-2">
                                             <span class="fw-bold text-dark small">{{ $namaBahan }}</span>
                                         </td>
                                         <td class="py-2 text-center small">
-                                            {{ number_format($totalButuh, 2) }} <small class="text-muted">{{ $satuan }}</small>
+                                            @if(isset($stockInfo['konversi_nilai']) && $stockInfo['konversi_nilai'] > 0)
+                                                @php
+                                                    $butuhKonversi = $totalButuh / $stockInfo['konversi_nilai'];
+                                                @endphp
+                                                <div class="fw-bold">
+                                                    {{ $formatVal($butuhKonversi) }} {{ $stockInfo['konversi_satuan'] }}
+                                                </div>
+                                                <div class="text-muted fw-normal" style="font-size: 10px;">
+                                                    ({{ $formatVal($totalButuh) }} {{ $satuan }})
+                                                </div>
+                                            @else
+                                                <div>
+                                                    {{ $formatVal($totalButuh) }} <small class="text-muted">{{ $satuan }}</small>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="py-2 text-center small {{ $isSufficient ? 'text-success' : 'text-danger' }}">
-                                            {{ number_format($stockTersedia, 2) }}
+                                            @if(isset($stockInfo['konversi_nilai']) && $stockInfo['konversi_nilai'] > 0)
+                                                @php
+                                                    $nilaiKonversi = $stockTersedia / $stockInfo['konversi_nilai'];
+                                                @endphp
+                                                <div class="fw-bold">
+                                                    {{ $formatVal($nilaiKonversi) }} {{ $stockInfo['konversi_satuan'] }}
+                                                </div>
+                                                <div class="text-muted fw-normal" style="font-size: 10px;">
+                                                    ({{ $formatVal($stockTersedia) }} {{ $satuan }})
+                                                </div>
+                                            @else
+                                                <div>
+                                                    {{ $formatVal($stockTersedia) }} <small class="text-muted">{{ $satuan }}</small>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="pe-3 py-2 text-end">
                                             @if($isSufficient)
@@ -178,6 +212,77 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card h-100 shadow-none border">
+                <div class="card-header border-bottom py-3">
+                    <h6 class="mb-0 fw-bold text-primary">
+                        <i class="bx bx-list-ul me-1"></i> Kebutuhan Bahan per Menu
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row g-4">
+                        @foreach($transaksi->detailTransaksiDapur as $detail)
+                            <div class="col-md-6 col-lg-4">
+                                <div class="border rounded p-3 h-100">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="avatar avatar-sm me-2">
+                                            @if($detail->menuMakanan->gambar_url)
+                                                <img src="{{ $detail->menuMakanan->gambar_url }}" class="rounded" style="object-fit: cover;">
+                                            @else
+                                                <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-dish"></i></span>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}</h6>
+                                            <span class="badge {{ $detail->tipe_porsi == 'besar' ? 'bg-label-success' : 'bg-label-warning' }}" style="font-size: 0.6rem;">
+                                                {{ ucfirst($detail->tipe_porsi) }} - {{ $detail->jumlah_porsi }} Porsi
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-borderless mb-0">
+                                            <tbody>
+                                                @foreach($detail->menuMakanan->bahanMenu as $bahanMenu)
+                                                    @php
+                                                        $idTemplate = $bahanMenu->id_template_item;
+                                                        $namaBahan = $bahanMenu->templateItem->nama_bahan;
+                                                        $satuan = $bahanMenu->templateItem->satuan;
+                                                        $kebutuhanPerPorsi = $bahanMenu->jumlah_per_porsi;
+                                                        $totalButuhMenu = $kebutuhanPerPorsi * $detail->jumlah_porsi;
+                                                        
+                                                        $stockInfo = $stockData[$idTemplate] ?? null;
+                                                    @endphp
+                                                    <tr>
+                                                        <td class="ps-0 py-1" style="font-size: 0.75rem;">
+                                                            <span class="text-dark">{{ $namaBahan }}</span>
+                                                        </td>
+                                                        <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
+                                                            @if(isset($stockInfo['konversi_nilai']) && $stockInfo['konversi_nilai'] > 0)
+                                                                @php
+                                                                    $butuhKonversiMenu = $totalButuhMenu / $stockInfo['konversi_nilai'];
+                                                                @endphp
+                                                                <span class="fw-bold">{{ $formatVal($butuhKonversiMenu) }} {{ $stockInfo['konversi_satuan'] }}</span>
+                                                                <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ $formatVal($totalButuhMenu) }} {{ $satuan }})</div>
+                                                            @else
+                                                                <span class="fw-bold">{{ $formatVal($totalButuhMenu) }}</span> <span class="text-muted">{{ $satuan }}</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -301,12 +406,12 @@
                 @method('PATCH')
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
-                        <select name="status" class="form-select" id="modalStatus" required>
-                            <option value="belum_dibuat">⏱ Belum Dibuat</option>
-                            <option value="sedang_dibuat">⚡ Sedang Dibuat</option>
-                            <option value="selesai">✅ Selesai</option>
-                        </select>
+                        <label class="form-label fw-semibold">Langkah Berikutnya:</label>
+                        <div id="statusInfo" class="alert alert-info py-2 px-3 mb-0 d-flex align-items-center">
+                            <i class="bx bx-info-circle me-2"></i>
+                            <span id="statusText"></span>
+                        </div>
+                        <input type="hidden" name="status" id="modalStatus">
                     </div>
                     
                     <div class="mb-3 d-none" id="dokumentasiWrapper">
@@ -341,22 +446,40 @@
             updateStatusModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
                 const orderId = button.getAttribute('data-id');
-                const status = button.getAttribute('data-status');
+                const currentStatus = button.getAttribute('data-status');
                 const catatan = button.getAttribute('data-catatan');
 
-                modalStatus.value = status;
+                const statusText = document.getElementById('statusText');
+                const statusInput = document.getElementById('modalStatus');
+                const statusInfo = document.getElementById('statusInfo');
+
+                let nextStatus = '';
+                let nextStatusLabel = '';
+                let alertClass = 'alert-info';
+
+                if (currentStatus === 'belum_dibuat') {
+                    nextStatus = 'sedang_dibuat';
+                    nextStatusLabel = 'Ubah status menjadi <strong>Sedang Dibuat</strong> (Stok akan otomatis dikurangi)';
+                    alertClass = 'alert-warning';
+                } else if (currentStatus === 'sedang_dibuat') {
+                    nextStatus = 'selesai';
+                    nextStatusLabel = 'Ubah status menjadi <strong>Selesai</strong> (Pastikan dokumentasi sudah lengkap)';
+                    alertClass = 'alert-success';
+                }
+
+                statusInput.value = nextStatus;
+                statusText.innerHTML = nextStatusLabel;
+                statusInfo.className = `alert ${alertClass} py-2 px-3 mb-0 d-flex align-items-center`;
+
                 document.getElementById('modalCatatan').value = (catatan && catatan !== 'null') ? catatan : '';
                 
-                toggleDokumentasi(status);
+                toggleDokumentasi(nextStatus);
 
                 const baseUrl = '{{ route("produksi.order.update-status", ":id") }}';
                 document.getElementById('updateStatusForm').action = baseUrl.replace(':id', orderId);
             });
 
-            modalStatus.addEventListener('change', function() {
-                toggleDokumentasi(this.value);
-            });
-
+            // No longer needed as it's not a select, but we keep the function for toggleDokumentasi
             function toggleDokumentasi(status) {
                 if (status === 'selesai') {
                     dokumentasiWrapper.classList.remove('d-none');
