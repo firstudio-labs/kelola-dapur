@@ -136,7 +136,7 @@ class OrderDistribusiController extends Controller
             if ($request->filled('porsi_besar') || $request->filled('porsi_kecil')) {
                 $detail->porsi_besar = $request->porsi_besar ?? 0;
                 $detail->porsi_kecil = $request->porsi_kecil ?? 0;
-                $detail->jumlah_diterima = $detail->porsi_besar + $detail->porsi_kecil;
+                $detail->jumlah_diterima = $detail->porsi_besar;
             }
             $detail->save();
 

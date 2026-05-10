@@ -33,16 +33,27 @@ class LaporanAduanController extends Controller
             $dapurIds = array_intersect($dapurIds, [$selectedDapurId]);
         }
 
-        $aduans = OrderDistribusiDetail::whereHas('orderDistribusi.orderProduksi.transaksiDapur', function ($q) use ($dapurIds) {
-                $q->whereIn('id_dapur', $dapurIds);
+        $aduans = \App\Models\OrderProduksi::whereIn('id_dapur', $dapurIds)
+            ->where(function($q) {
+                $q->whereNotNull('ulasan')
+                  ->orWhereHas('distribusiOrder', function($dq) {
+                      $dq->whereNotNull('ulasan')
+                        ->orWhereHas('details', function($dtq) {
+                            $dtq->whereNotNull('kritik');
+                        });
+                  });
             })
-            ->whereNotNull('ulasan')
-            ->where('ulasan', '!=', '')
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($sq) use ($search) {
                     $sq->where('ulasan', 'like', '%' . $search . '%')
-                      ->orWhereHas('penerimaMbg.userRole.user', function ($uq) use ($search) {
-                          $uq->where('nama', 'like', '%' . $search . '%');
+                      ->orWhereHas('distribusiOrder', function($dq) use ($search) {
+                          $dq->where('ulasan', 'like', '%' . $search . '%')
+                            ->orWhereHas('details', function($dtq) use ($search) {
+                                $dtq->where('kritik', 'like', '%' . $search . '%')
+                                    ->orWhereHas('penerimaMbg.userRole.user', function($uq) use ($search) {
+                                        $uq->where('nama', 'like', '%' . $search . '%');
+                                    });
+                            });
                       });
                 });
             })
@@ -53,13 +64,36 @@ class LaporanAduanController extends Controller
                 $q->whereDate('updated_at', '<=', $dateTo);
             })
             ->with([
-                'penerimaMbg.userRole.user',
-                'orderDistribusi.orderProduksi.transaksiDapur.dapur',
-                'orderDistribusi.orderProduksi.transaksiDapur.approvalTransaksi'
+                'transaksiDapur.dapur',
+                'transaksiDapur.approvalTransaksi',
+                'distribusiOrder.details.penerimaMbg.userRole.user'
             ])
             ->orderBy('updated_at', 'desc')
             ->paginate(15);
 
-        return view('mitra.laporan-aduan.index', compact('aduans', 'dapurApproved', 'selectedDapurId', 'search', 'dateFrom', 'dateTo'));
+        $dapurIdsInAduan = $aduans->pluck('id_dapur')->unique()->toArray();
+        
+        $productionHeads = \App\Models\Produksi::whereIn('id_dapur', $dapurIdsInAduan)
+            ->orderByRaw("CASE WHEN jabatan = 'Penanggung jawab' THEN 0 ELSE 1 END")
+            ->get()
+            ->groupBy('id_dapur')
+            ->map(fn($group) => $group->first());
+            
+        $distributionHeads = \App\Models\Distributor::whereIn('id_dapur', $dapurIdsInAduan)
+            ->orderByRaw("CASE WHEN jabatan = 'Penanggung jawab' THEN 0 ELSE 1 END")
+            ->get()
+            ->groupBy('id_dapur')
+            ->map(fn($group) => $group->first());
+
+        return view('mitra.laporan-aduan.index', compact(
+            'aduans', 
+            'dapurApproved', 
+            'selectedDapurId', 
+            'search', 
+            'dateFrom', 
+            'dateTo',
+            'productionHeads',
+            'distributionHeads'
+        ));
     }
 }

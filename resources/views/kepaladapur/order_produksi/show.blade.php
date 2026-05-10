@@ -88,8 +88,8 @@
                         </div>
                         <div class="col-md-6">
                             @php
-                                $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->sum('jumlah_porsi') ?? 0;
-                                $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->sum('jumlah_porsi') ?? 0;
+                                $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()->jumlah_porsi ?? 0;
+                                $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()->jumlah_porsi ?? 0;
                                 $totalKeseluruhan = $totalPorsiBesar + $totalPorsiKecil;
                             @endphp
                             <table class="table table-borderless mb-0">

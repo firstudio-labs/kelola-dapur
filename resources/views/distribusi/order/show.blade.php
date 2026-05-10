@@ -15,19 +15,19 @@
     @php
         $porsiBesarTotal    = $order->details->sum('porsi_besar');
         $porsiKecilTotal    = $order->details->sum('porsi_kecil');
-        $qtyTotalPorsi      = $porsiBesarTotal + $porsiKecilTotal;
+        $qtyTotalPorsi      = $porsiBesarTotal;
 
         $porsiBesarSelesai  = $order->details->where('status','sudah_dikirim')->sum('porsi_besar');
         $porsiKecilSelesai  = $order->details->where('status','sudah_dikirim')->sum('porsi_kecil');
-        $qtySelesaiPorsi    = $porsiBesarSelesai + $porsiKecilSelesai;
+        $qtySelesaiPorsi    = $porsiBesarSelesai;
         
         $porsiBesarSedang   = $order->details->where('status','sedang_dikirim')->sum('porsi_besar');
         $porsiKecilSedang   = $order->details->where('status','sedang_dikirim')->sum('porsi_kecil');
-        $qtySedangPorsi     = $porsiBesarSedang + $porsiKecilSedang;
+        $qtySedangPorsi     = $porsiBesarSedang;
 
         $porsiBesarBelum    = $order->details->where('status','belum_dikirim')->sum('porsi_besar');
         $porsiKecilBelum    = $order->details->where('status','belum_dikirim')->sum('porsi_kecil');
-        $qtyBelumPorsi      = $porsiBesarBelum + $porsiKecilBelum;
+        $qtyBelumPorsi      = $porsiBesarBelum;
 
         $jumlahPenerima     = $order->details->count();
         $penerimaSelesai    = $order->details->where('status','sudah_dikirim')->count();
@@ -271,13 +271,36 @@
 
                     <hr class="my-3">
                     <h6 class="text-muted small mb-2">Menu yang Dikirim:</h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        @foreach($transaksi->detailTransaksiDapur as $det)
-                            <span class="badge {{ $det->tipe_porsi === 'besar' ? 'bg-label-success' : 'bg-label-warning' }}">
-                                {{ $det->menuMakanan->nama_menu }} ({{ $det->jumlah_porsi }} porsi)
-                            </span>
-                        @endforeach
-                    </div>
+                    @php
+                        $porsiBesarMenus = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar');
+                        $porsiKecilMenus = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil');
+                    @endphp
+
+                    @if($porsiBesarMenus->count() > 0)
+                        <div class="mb-3">
+                            <small class="fw-bold text-success d-block mb-1">Porsi Besar {{ $porsiBesarTotal }} Porsi :</small>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach($porsiBesarMenus as $det)
+                                    <span class="badge bg-label-success">
+                                        {{ $det->menuMakanan->nama_menu }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($porsiKecilMenus->count() > 0)
+                        <div>
+                            <small class="fw-bold text-warning d-block mb-1">Porsi Kecil {{ $porsiKecilTotal }} Porsi :</small>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach($porsiKecilMenus as $det)
+                                    <span class="badge bg-label-warning">
+                                        {{ $det->menuMakanan->nama_menu }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -341,7 +364,7 @@
                                             <div class="mt-3 pt-3 border-top">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <small class="fw-semibold text-muted">Detail Porsi:</small>
-                                                    <span class="fw-bold text-dark">{{ $detail->jumlah_diterima }} Porsi</span>
+                                                    <span class="fw-bold text-dark">{{ $detail->porsi_besar }} Porsi</span>
                                                 </div>
                                                 <div class="row g-2">
                                                     <div class="col-6">
@@ -416,6 +439,50 @@
             </div>
         </div>
     </div>
+
+    @if ($order->status === 'sudah_dikirim')
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border shadow-none">
+                    <div class="card-header border-bottom py-2">
+                        <small class="text-muted fw-bold"><i class="bx bx-message-square-detail me-1"></i>ULASAN DISTRIBUSI</small>
+                    </div>
+                    <div class="card-body p-3">
+                        @if ($order->ulasan)
+                            <div class="row g-3">
+                                <div class="col-md-{{ $order->ulasan_foto ? '8' : '12' }}">
+                                    <div class="p-3 bg-lighter rounded border" style="min-height: 80px;">
+                                        <p class="mb-0 text-dark small fst-italic">"{{ $order->ulasan }}"</p>
+                                    </div>
+                                </div>
+                                @if ($order->ulasan_foto)
+                                    <div class="col-md-4">
+                                        <a href="{{ asset('storage/' . $order->ulasan_foto) }}" target="_blank" class="shadow-sm d-block">
+                                            <img src="{{ asset('storage/' . $order->ulasan_foto) }}" alt="Foto Ulasan" class="rounded border w-100" style="height: 120px; object-fit: cover;">
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <form action="{{ route('distributor.order.ulasan', $order->id_distribusi) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Bagaimana proses distribusi ini berjalan?</label>
+                                    <textarea name="ulasan" class="form-control" rows="3" placeholder="Tuliskan ulasan atau kendala yang dihadapi saat pengiriman..." required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Upload Foto Pendukung (Opsional)</label>
+                                    <input type="file" name="ulasan_foto" class="form-control form-control-sm" accept="image/*">
+                                    <small class="text-muted d-block mt-1" style="font-size: 0.65rem;">Maksimal ukuran 5MB. Foto akan otomatis dikompres.</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="bx bx-send me-1"></i> Kirim Ulasan</button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <div class="row mb-5 mb-md-2">
         <div class="col-12">
@@ -534,7 +601,7 @@
                 document.getElementById('detailPorsiKecil').value = pKecil;
                 document.getElementById('detailPorsiKecil').setAttribute('max', maxP);
                 document.getElementById('detailMaxPorsi').textContent = maxP;
-                document.getElementById('detailTotalPorsi').textContent = pBesar + pKecil;
+                document.getElementById('detailTotalPorsi').textContent = pBesar;
                 document.getElementById('detailCatatan').value = (catatan && catatan !== 'null') ? catatan : '';
                 document.getElementById('detailNamaPenerima').textContent = nama ? 'Untuk: ' + nama : '';
                 toggleDetailDok(status);
@@ -565,7 +632,7 @@
                 const valB = parseInt(inpBesar.value) || 0;
                 const valK = parseInt(inpKecil.value) || 0;
                 const max = parseInt(maxText.textContent) || 0;
-                const total = valB + valK;
+                const total = valB;
                 
                 totalText.textContent = total;
 

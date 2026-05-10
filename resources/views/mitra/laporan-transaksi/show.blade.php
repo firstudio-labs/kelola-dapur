@@ -48,7 +48,7 @@
                                         Tanggal Transaksi
                                     </label>
                                     <div class="fw-medium">
-                                        {{ $approval->transaksiDapur->tanggal_transaksi->format('d F Y, H:i') }}
+                                        {{ $approval->transaksiDapur->tanggal_transaksi->format('d F Y') }}, {{ $approval->transaksiDapur->created_at->format('H:i') }}
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -631,527 +631,900 @@
         </div>
     </div>
 
-    <!-- Modal Detail Penerimaan -->
-    <div class="modal fade" id="modalDetailPenerimaan" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header py-3">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar-sm me-2">
-                            <span class="avatar-initial rounded bg-label-success text-success"><i
-                                    class="bx bx-check-double"></i></span>
-                        </div>
-                        <h5 class="modal-title fw-bold mb-0">Detail Konfirmasi Penerima MBG</h5>
-                    </div>
-                </div>
-                <div class="modal-body p-4">
-                    @if (isset($orderDist) && $orderDist)
-                        <div class="table-responsive border rounded">
-                            <table class="table table-sm table-hover mb-0">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th class="py-2 px-3">Penerima</th>
-                                        <th class="py-2 text-center">Status</th>
-                                        <th class="py-2 text-center">Dikirim (B/K)</th>
-                                        <th class="py-2 text-center">Diterima (B/K)</th>
-                                        <th class="py-2 px-3">Catatan / Ulasan</th>
-                                        <th class="py-2 text-center">Waktu Konfirmasi</th>
-                                        <th class="py-2 text-center">Foto Bukti</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($orderDist->details as $pDetail)
-                                        <tr>
-                                            <td class="py-3 px-3">
-                                                <div class="fw-medium text-dark">
-                                                    {{ $pDetail->penerimaMbg->userRole->user->nama ?? 'Unknown' }}</div>
-                                                <small class="text-muted d-block" style="font-size: 0.75rem;">PJ:
-                                                    {{ $pDetail->penerimaMbg->penanggung_jawab ?? '-' }}</small>
-                                            </td>
-                                            <td class="py-3 text-center">
-                                                @if ($pDetail->status_penerimaan === 'diterima')
-                                                    <span class="badge bg-label-success small px-2">Diterima</span>
-                                                @elseif ($pDetail->status_penerimaan === 'ditolak')
-                                                    <span class="badge bg-label-danger small px-2">Ditolak</span>
-                                                @else
-                                                    <span class="badge bg-label-secondary small px-2">Menunggu</span>
-                                                @endif
-                                            </td>
-                                            <td class="py-3 text-center">
-                                                <span
-                                                    class="fw-bold text-dark">{{ $pDetail->porsi_besar + $pDetail->porsi_kecil }}</span>
-                                                <div class="text-muted small" style="font-size: 0.7rem;">
-                                                    {{ $pDetail->porsi_besar }}B / {{ $pDetail->porsi_kecil }}K</div>
-                                            </td>
-                                            <td class="py-3 text-center">
-                                                @if ($pDetail->status_penerimaan !== 'menunggu')
-                                                    <span
-                                                        class="fw-bold text-primary">{{ ($pDetail->porsi_besar_diterima ?? 0) + ($pDetail->porsi_kecil_diterima ?? 0) }}</span>
-                                                    <div class="text-primary small" style="font-size: 0.7rem;">
-                                                        {{ $pDetail->porsi_besar_diterima ?? 0 }}B /
-                                                        {{ $pDetail->porsi_kecil_diterima ?? 0 }}K</div>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td class="py-3 px-3">
-                                                <small class="text-muted fst-italic">{{ $pDetail->ulasan ?: '-' }}</small>
-                                            </td>
-                                            <td class="py-3 text-center">
-                                                @if ($pDetail->status_penerimaan !== 'menunggu')
-                                                    <small
-                                                        class="text-dark d-block mb-1">{{ $pDetail->updated_at->format('d M Y') }}</small>
-                                                    <small
-                                                        class="text-muted">{{ $pDetail->updated_at->format('H:i') }}</small>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td class="py-3 text-center">
-                                                @if ($pDetail->penerimaanFoto && $pDetail->penerimaanFoto->count() > 0)
-                                                    <div
-                                                        class="d-flex align-items-center justify-content-center gap-1 flex-wrap">
-                                                        @foreach ($pDetail->penerimaanFoto as $foto)
-                                                            <a href="{{ Storage::url($foto->path_foto) }}"
-                                                                target="_blank"
-                                                                class="d-inline-flex border rounded p-1 bg-white shadow-sm">
-                                                                <img src="{{ Storage::url($foto->path_foto) }}"
-                                                                    alt="Foto" class="rounded"
-                                                                    style="width: 40px; height: 40px; object-fit: cover;">
-                                                            </a>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted small">-</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="text-center py-5">
-                            <i class="bx bx-error display-1 text-warning mb-2"></i>
-                            <h5 class="fw-bold">Data Konfirmasi Tidak Ditemukan</h5>
-                            <p class="text-muted mb-0">Oops! Terjadi kesalahan saat memuat rincian konfirmasi.</p>
-                        </div>
-                    @endif
-                </div>
-                <div class="modal-footer border-top py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup
-                        Detail</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Detail Distribusi -->
-    <div class="modal fade" id="modalDetailDistribusi" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header py-3">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar-sm me-2">
-                            <span class="avatar-initial rounded bg-label-warning text-warning"><i
-                                    class="bx bx-car"></i></span>
-                        </div>
-                        <h5 class="modal-title fw-bold mb-0">Detail Proses Distribusi</h5>
-                    </div>
-                </div>
-                <div class="modal-body p-4">
-                    @if (isset($orderDist) && $orderDist)
-                        <div class="d-flex justify-content-between align-items-start mb-4">
-                            <div>
-                                <small class="text-uppercase text-muted fw-bold d-block mb-1"
-                                    style="font-size: 0.7rem; letter-spacing: 1px;">Status Distribusi Keseluruhan</small>
-                                @php
-                                    $mapStatusDistModal = [
-                                        'belum_dikirim' => [
-                                            'badge' => 'bg-label-secondary',
-                                            'icon' => 'bx-time',
-                                            'text' => 'Belum Dikirim',
-                                        ],
-                                        'sedang_dikirim' => [
-                                            'badge' => 'bg-label-warning',
-                                            'icon' => 'bx-loader-circle',
-                                            'text' => 'Sedang Dikirim',
-                                        ],
-                                        'sudah_dikirim' => [
-                                            'badge' => 'bg-label-success',
-                                            'icon' => 'bx-check-double',
-                                            'text' => 'Sudah Dikirim',
-                                        ],
-                                    ];
-                                    $dD =
-                                        $mapStatusDistModal[$orderDist->status] ?? $mapStatusDistModal['belum_dikirim'];
-                                @endphp
-                                <span class="badge {{ $dD['badge'] }} px-3 py-2 fs-6">
-                                    <i class="bx {{ $dD['icon'] }} me-1"></i> {{ $dD['text'] }}
-                                </span>
+        <!-- Modal Detail Penerimaan -->
+        <div class="modal fade" id="modalDetailPenerimaan" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-success text-success"><i
+                                        class="bx bx-check-double"></i></span>
                             </div>
-                            <div class="text-end">
-                                <small class="text-uppercase text-muted fw-bold d-block mb-1"
-                                    style="font-size: 0.7rem; letter-spacing: 1px;">Update Terakhir</small>
-                                <span class="fw-semibold text-dark"><i
-                                        class="bx bx-calendar-check me-1"></i>{{ $orderDist->updated_at->format('d M Y, H:i') }}</span>
-                            </div>
+                            <h5 class="modal-title fw-bold mb-0">Detail Konfirmasi Penerima MBG</h5>
                         </div>
-
-                        <div class="mb-0">
-                            <h6 class="fw-bold mb-3 d-flex align-items-center">
-                                <i class="bx bx-map-pin me-2 text-warning"></i>Rincian Pengiriman per Penerima
-                            </h6>
-                            <div class="table-responsive border rounded">
-                                <table class="table table-sm table-hover mb-0">
-                                    <thead class="bg-light">
-                                        <tr>
-                                            <th class="py-2 px-3">Penerima</th>
-                                            <th class="py-2 text-center">Status Driver</th>
-                                            <th class="py-2 text-center">Porsi (B/K)</th>
-                                            <th class="py-2 px-3">Catatan Driver</th>
-                                            <th class="py-2 text-center">Bukti</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if ($orderDist->details && $orderDist->details->count() > 0)
-                                            @foreach ($orderDist->details as $dDetail)
-                                                <tr>
-                                                    <td class="py-3 px-3">
-                                                        <div class="fw-medium text-dark">
-                                                            {{ $dDetail->penerimaMbg->userRole->user->nama ?? 'Unknown' }}
-                                                        </div>
-                                                        <small class="text-muted d-block" style="font-size: 0.75rem;">PJ:
-                                                            {{ $dDetail->penerimaMbg->penanggung_jawab ?? '-' }}</small>
-                                                    </td>
-                                                    <td class="py-3 text-center">
-                                                        @php
-                                                            $sD =
-                                                                $mapStatusDistModal[$dDetail->status] ??
-                                                                $mapStatusDistModal['belum_dikirim'];
-                                                        @endphp
-                                                        <span
-                                                            class="badge {{ $sD['badge'] }} small">{{ $sD['text'] }}</span>
-                                                    </td>
-                                                    <td class="py-3 text-center">
-                                                        <span
-                                                            class="fw-bold text-dark">{{ ($dDetail->porsi_besar ?? 0) + ($dDetail->porsi_kecil ?? 0) }}</span>
-                                                        <div class="text-muted small" style="font-size: 0.7rem;">
-                                                            {{ $dDetail->porsi_besar ?? 0 }}B /
-                                                            {{ $dDetail->porsi_kecil ?? 0 }}K</div>
-                                                    </td>
-                                                    <td class="py-3 px-3">
-                                                        <small
-                                                            class="text-muted fst-italic">{{ $dDetail->catatan ?: '-' }}</small>
-                                                    </td>
-                                                    <td class="py-3 text-center">
-                                                        @if ($dDetail->dokumentasi && $dDetail->dokumentasi->count() > 0)
-                                                            <a href="{{ $dDetail->dokumentasi->first()->url }}"
-                                                                target="_blank"
-                                                                class="d-inline-flex border rounded p-1 bg-white shadow-sm">
-                                                                <img src="{{ $dDetail->dokumentasi->first()->url }}"
-                                                                    class="rounded"
-                                                                    style="width: 45px; height: 45px; object-fit: cover;"
-                                                                    alt="Bukti">
-                                                            </a>
-                                                        @else
-                                                            <span class="text-muted small">-</span>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        @else
-                                            <tr>
-                                                <td colspan="5" class="text-center py-4 text-muted border-0">
-                                                    <i class="bx bx-info-circle fs-4 d-block mb-2"></i>
-                                                    Belum ada data rincian pengiriman
-                                                </td>
-                                            </tr>
-                                        @endif
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    @else
-                        <div class="text-center py-5">
-                            <i class="bx bx-error display-1 text-warning mb-3"></i>
-                            <h5 class="fw-bold">Data Distribusi Tidak Ditemukan</h5>
-                            <p class="text-muted">Oops! Terjadi kesalahan saat memuat detail distribusi. Silakan hubungi
-                                admin.</p>
-                        </div>
-                    @endif
-                </div>
-                <div class="modal-footer border-top py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup
-                        Detail</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Detail Produksi -->
-    <div class="modal fade" id="modalDetailProduksi" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header py-3">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar-sm me-2">
-                            <span class="avatar-initial rounded bg-label-primary text-primary"><i
-                                    class="bx bx-cog"></i></span>
-                        </div>
-                        <h5 class="modal-title fw-bold mb-0">Detail Proses Produksi</h5>
                     </div>
-                </div>
-                <div class="modal-body p-4">
-                    @if (isset($orderProd) && $orderProd)
-                        <div class="row g-4">
-                            <div class="col-md-7 border-end">
-                                <div class="d-flex justify-content-between align-items-start mb-4">
-                                    <div>
-                                        <small class="text-uppercase text-muted fw-bold d-block mb-1"
-                                            style="font-size: 0.7rem; letter-spacing: 1px;">Status Produksi</small>
+                    <div class="modal-body p-4">
+                        @if (isset($orderDist) && $orderDist)
+                            <div class="row g-4">
+                                <div class="col-md-7 border-end">
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <div>
+                                            <small class="text-uppercase text-muted fw-bold d-block mb-1"
+                                                style="font-size: 0.7rem; letter-spacing: 1px;">Status Konfirmasi</small>
+                                            <span class="badge bg-label-success px-3 py-2 fs-6">
+                                                <i class="bx bx-check-double me-1"></i> Selesai Dikonfirmasi
+                                            </span>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-uppercase text-muted fw-bold d-block mb-1"
+                                                style="font-size: 0.7rem; letter-spacing: 1px;">Update Terakhir</small>
+                                            <span class="fw-semibold text-dark"><i
+                                                    class="bx bx-calendar-check me-1"></i>{{ $orderDist->updated_at->format('d M Y, H:i') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                            <i class="bx bx-restaurant me-2 text-success"></i>Daftar Menu Diterima
+                                        </h6>
                                         @php
-                                            $mapStatusProdModal = [
-                                                'stok_kurang' => [
-                                                    'badge' => 'bg-label-danger',
-                                                    'icon' => 'bx-error-circle',
-                                                    'text' => 'Stok Kurang',
-                                                ],
-                                                'belum_dibuat' => [
-                                                    'badge' => 'bg-label-secondary',
-                                                    'icon' => 'bx-time',
-                                                    'text' => 'Belum Dibuat',
-                                                ],
-                                                'sedang_dibuat' => [
-                                                    'badge' => 'bg-label-warning',
-                                                    'icon' => 'bx-loader-circle',
-                                                    'text' => 'Sedang Dibuat',
-                                                ],
-                                                'selesai' => [
-                                                    'badge' => 'bg-label-success',
-                                                    'icon' => 'bx-check-circle',
-                                                    'text' => 'Selesai',
-                                                ],
-                                            ];
-                                            $pD =
-                                                $mapStatusProdModal[$orderProd->status] ??
-                                                $mapStatusProdModal['belum_dibuat'];
+                                            $porsiBesarMenus = $approval->transaksiDapur->detailTransaksiDapur->where(
+                                                'tipe_porsi',
+                                                'besar',
+                                            );
+                                            $porsiKecilMenus = $approval->transaksiDapur->detailTransaksiDapur->where(
+                                                'tipe_porsi',
+                                                'kecil',
+                                            );
+                                            $totalPorsiBesar = $approval->transaksiDapur->getTotalPorsiBesar();
+                                            $totalPorsiKecil = $approval->transaksiDapur->getTotalPorsiKecil();
                                         @endphp
-                                        <span class="badge {{ $pD['badge'] }} px-3 py-2 fs-6">
-                                            <i class="bx {{ $pD['icon'] }} me-1"></i> {{ $pD['text'] }}
-                                        </span>
-                                    </div>
-                                    <div class="text-end">
-                                        <small class="text-uppercase text-muted fw-bold d-block mb-1"
-                                            style="font-size: 0.7rem; letter-spacing: 1px;">Update Terakhir</small>
-                                        <span class="fw-semibold text-dark"><i
-                                                class="bx bx-calendar-check me-1"></i>{{ $orderProd->updated_at->format('d M Y, H:i') }}</span>
-                                    </div>
-                                </div>
 
-                                <div class="mb-4">
-                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
-                                        <i class="bx bx-restaurant me-2 text-primary"></i>Daftar Menu Diproduksi
-                                    </h6>
-                                    <div class="table-responsive border rounded">
-                                        <table class="table table-sm table-hover mb-0">
-                                            <thead class="bg-light">
-                                                <tr>
-                                                    <th class="py-2">Menu</th>
-                                                    <th class="py-2 text-center">Tipe Porsi</th>
-                                                    <th class="py-2 text-end">Jumlah</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @if (isset($approval->transaksiDapur) && $approval->transaksiDapur->detailTransaksiDapur->count() > 0)
-                                                    @foreach ($approval->transaksiDapur->detailTransaksiDapur as $det)
+                                        @if ($porsiBesarMenus->count() > 0)
+                                            <div class="mb-3">
+                                                <div
+                                                    class="p-2 bg-label-primary rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold small text-uppercase">Porsi Besar :
+                                                        {{ $totalPorsiBesar }} Porsi</span>
+                                                </div>
+                                                <div class="table-responsive border rounded-bottom">
+                                                    <table class="table table-sm table-hover mb-0">
+                                                        <tbody>
+                                                            @foreach ($porsiBesarMenus as $det)
+                                                                <tr>
+                                                                    <td class="py-2 px-3 fw-medium text-dark">
+                                                                        {{ $det->menuMakanan->nama_menu }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($porsiKecilMenus->count() > 0)
+                                            <div class="mb-3">
+                                                <div
+                                                    class="p-2 bg-label-warning rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold small text-uppercase">Porsi Kecil :
+                                                        {{ $totalPorsiKecil }} Porsi</span>
+                                                </div>
+                                                <div class="table-responsive border rounded-bottom">
+                                                    <table class="table table-sm table-hover mb-0">
+                                                        <tbody>
+                                                            @foreach ($porsiKecilMenus as $det)
+                                                                <tr>
+                                                                    <td class="py-2 px-3 fw-medium text-dark">
+                                                                        {{ $det->menuMakanan->nama_menu }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                            <i class="bx bx-check-shield me-2 text-success"></i>Status Konfirmasi per
+                                            Penerima
+                                        </h6>
+                                        <div class="table-responsive border rounded">
+                                            <table class="table table-sm table-hover mb-0">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th class="py-2 px-3">Penerima</th>
+                                                        <th class="py-2 text-center">Status</th>
+                                                        <th class="py-2 text-center">Diterima (B/K)</th>
+                                                        <th class="py-2 px-3">Ulasan</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($orderDist->details as $pDetail)
                                                         <tr>
-                                                            <td class="py-2 fw-medium">{{ $det->menuMakanan->nama_menu }}
+                                                            <td class="py-2 px-3">
+                                                                <div class="fw-medium text-dark small">
+                                                                    {{ $pDetail->penerimaMbg->userRole->user->nama ?? 'Unknown' }}
+                                                                </div>
                                                             </td>
-                                                            <td class="py-2 text-center small">
-                                                                <span
-                                                                    class="badge {{ $det->tipe_porsi === 'besar' ? 'bg-label-primary' : 'bg-label-warning' }}">
-                                                                    {{ ucfirst($det->tipe_porsi) }}
-                                                                </span>
+                                                            <td class="py-2 text-center">
+                                                                @if ($pDetail->status_penerimaan === 'diterima')
+                                                                    <span class="badge bg-label-success small"
+                                                                        style="font-size: 0.6rem;">Diterima</span>
+                                                                @elseif ($pDetail->status_penerimaan === 'ditolak')
+                                                                    <span class="badge bg-label-danger small"
+                                                                        style="font-size: 0.6rem;">Ditolak</span>
+                                                                @else
+                                                                    <span class="badge bg-label-secondary small"
+                                                                        style="font-size: 0.6rem;">Menunggu</span>
+                                                                @endif
                                                             </td>
-                                                            <td class="py-2 text-end fw-semibold text-primary">
-                                                                {{ $det->jumlah_porsi }} Porsi
+                                                            <td class="py-2 text-center">
+                                                                @if ($pDetail->status_penerimaan !== 'menunggu')
+                                                                    <div class="text-primary" style="font-size: 0.6rem;">
+                                                                        {{ $pDetail->porsi_besar_diterima ?? 0 }}B /
+                                                                        {{ $pDetail->porsi_kecil_diterima ?? 0 }}K</div>
+                                                                @else
+                                                                    <span class="text-muted small">-</span>
+                                                                @endif
+                                                            </td>
+                                                            <td class="py-2 px-3">
+                                                                <small class="text-muted fst-italic d-block mb-1"
+                                                                    style="font-size: 0.65rem;">{{ Str::limit($pDetail->ulasan, 30) ?: '-' }}</small>
                                                             </td>
                                                         </tr>
                                                     @endforeach
-                                                @else
-                                                    <tr>
-                                                        <td colspan="3" class="text-center py-3 text-muted">Data menu
-                                                            tidak tersedia</td>
-                                                    </tr>
-                                                @endif
-                                            </tbody>
-                                            @if (isset($approval->transaksiDapur))
-                                                <tfoot class="bg-lighter">
-                                                    <tr>
-                                                        <td colspan="2" class="fw-bold text-end">Total Porsi:</td>
-                                                        <td class="text-end fw-bold text-primary">
-                                                            {{ $approval->transaksiDapur->detailTransaksiDapur->sum('jumlah_porsi') }}
-                                                        </td>
-                                                    </tr>
-                                                </tfoot>
-                                            @endif
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div class="mb-0">
-                                    <h6 class="fw-bold mb-2 d-flex align-items-center">
-                                        <i class="bx bx-note me-2 text-primary"></i>Catatan Produksi
-                                    </h6>
-                                    <div class="p-3 bg-lighter rounded border" style="min-height: 80px;">
-                                        <p class="mb-0 text-dark small fst-italic">
-                                            {{ $orderProd->catatan ?: 'Tidak ada catatan dari staf produksi.' }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-5">
-                                <h6 class="fw-bold mb-3 d-flex align-items-center">
-                                    <i class="bx bx-image-alt me-2 text-primary"></i>Dokumentasi Produksi
-                                </h6>
-                                <div class="row g-2">
-                                    @forelse($orderProd->dokumentasi as $dok)
-                                        <div class="col-6">
-                                            <a href="{{ $dok->url }}" target="_blank" class="d-block card-hover">
-                                                <div class="position-relative">
-                                                    <img src="{{ $dok->url }}"
-                                                        class="img-fluid rounded border shadow-sm"
-                                                        style="width: 100%; height: 140px; object-fit: cover;"
-                                                        alt="Dokumentasi">
-                                                    <div class="position-absolute top-0 end-0 p-1">
-                                                        <span class="badge bg-dark bg-opacity-50"><i
-                                                                class="bx bx-zoom-in"></i></span>
-                                                    </div>
-                                                </div>
-                                            </a>
+                                                </tbody>
+                                            </table>
                                         </div>
-                                    @empty
-                                        <div class="col-12">
-                                            <div class="text-center py-5 border rounded bg-lighter">
-                                                <i class="bx bx-no-entry display-4 text-muted mb-2"></i>
-                                                <p class="text-muted mb-0 small">Belum ada foto dokumentasi</p>
+                                    </div>
+
+                                    {{-- Kritik Highlight --}}
+                                    @php 
+                                        $detailsWithKritik = $orderDist->details->whereNotNull('kritik');
+                                    @endphp
+                                    @if($detailsWithKritik->count() > 0)
+                                        <div class="mt-4">
+                                            <h6 class="fw-bold mb-3 d-flex align-items-center text-danger">
+                                                <i class="bx bx-message-error me-2"></i>Kritik & Masukan dari Penerima
+                                            </h6>
+                                            <div class="list-group list-group-flush border rounded overflow-hidden shadow-sm">
+                                                @foreach($detailsWithKritik as $dk)
+                                                    <div class="list-group-item bg-label-danger p-3 border-start border-danger border-3 mb-1">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <span class="fw-bold text-dark small">{{ $dk->penerimaMbg->userRole->user->nama }}</span>
+                                                            <small class="text-muted" style="font-size: 0.6rem;">{{ $dk->updated_at->diffForHumans() }}</small>
+                                                        </div>
+                                                        <p class="mb-0 text-dark small fst-italic" style="line-height: 1.4;">"{{ $dk->kritik }}"</p>
+                                                    </div>
+                                                @endforeach
                                             </div>
                                         </div>
-                                    @endforelse
+                                    @endif
                                 </div>
-                                @if ($orderProd->dokumentasi && $orderProd->dokumentasi->count() > 0)
-                                    <div class="mt-3">
-                                        <p class="text-muted small">
-                                            <i class="bx bx-info-circle me-1"></i>Klik gambar untuk melihat dalam ukuran
-                                            penuh.
-                                        </p>
+
+                                <div class="col-md-5">
+                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                        <i class="bx bx-camera me-2 text-success"></i>Bukti Foto Penerimaan
+                                    </h6>
+                                    <div class="row g-2">
+                                        @php $hasAnyPhoto = false; @endphp
+                                        @foreach ($orderDist->details as $pDetail)
+                                            @if ($pDetail->penerimaanFoto && $pDetail->penerimaanFoto->count() > 0)
+                                                @php $hasAnyPhoto = true; @endphp
+                                                @foreach ($pDetail->penerimaanFoto as $foto)
+                                                    <div class="col-6">
+                                                        <a href="{{ Storage::url($foto->path_foto) }}" target="_blank"
+                                                            class="d-block card-hover position-relative">
+                                                            <img src="{{ Storage::url($foto->path_foto) }}"
+                                                                class="img-fluid rounded border shadow-sm"
+                                                                style="width: 100%; height: 140px; object-fit: cover;"
+                                                                alt="Bukti">
+                                                            <div class="position-absolute top-0 end-0 p-1">
+                                                                <span class="badge bg-dark bg-opacity-50"><i
+                                                                        class="bx bx-zoom-in"></i></span>
+                                                            </div>
+                                                            <div
+                                                                class="position-absolute bottom-0 start-0 w-100 p-1 bg-dark bg-opacity-50">
+                                                                <small class="text-white"
+                                                                    style="font-size: 0.6rem;">{{ $pDetail->penerimaMbg->userRole->user->nama }}</small>
+                                                            </div>
+                                                        </a>
+                                                    </div>
+                                                @endforeach
+                                            @endif
+                                        @endforeach
+                                        @if (!$hasAnyPhoto)
+                                            <div class="col-12">
+                                                <div class="text-center py-5 border rounded bg-lighter">
+                                                    <i class="bx bx-no-entry display-4 text-muted mb-2"></i>
+                                                    <p class="text-muted mb-0 small">Belum ada foto bukti penerimaan</p>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
-                                @endif
+                                    @if ($hasAnyPhoto)
+                                        <div class="mt-3">
+                                            <p class="text-muted small">
+                                                <i class="bx bx-info-circle me-1"></i>Klik gambar untuk melihat dalam
+                                                ukuran penuh.
+                                            </p>
+                                        </div>
+                                    @endif
+
+                                    {{-- Dokumentasi Kritik --}}
+                                    @php $hasAnyKritikPhoto = false; @endphp
+                                    @foreach ($orderDist->details as $pDetail)
+                                        @if ($pDetail->kritik_foto)
+                                            @php $hasAnyKritikPhoto = true; @endphp
+                                        @endif
+                                    @endforeach
+
+                                    @if ($hasAnyKritikPhoto)
+                                        <div class="mt-4">
+                                            <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                                <i class="bx bx-image-alt me-2 text-warning"></i>Dokumentasi Kritik
+                                            </h6>
+                                            <div class="row g-2">
+                                                @foreach ($orderDist->details as $pDetail)
+                                                    @if ($pDetail->kritik_foto)
+                                                        <div class="col-6">
+                                                            <a href="{{ asset('storage/' . $pDetail->kritik_foto) }}" target="_blank"
+                                                                class="d-block card-hover position-relative">
+                                                                <img src="{{ asset('storage/' . $pDetail->kritik_foto) }}"
+                                                                    class="img-fluid rounded border shadow-sm"
+                                                                    style="width: 100%; height: 140px; object-fit: cover;"
+                                                                    alt="Foto Kritik">
+                                                                <div class="position-absolute top-0 end-0 p-1">
+                                                                    <span class="badge bg-dark bg-opacity-50"><i
+                                                                            class="bx bx-zoom-in"></i></span>
+                                                                </div>
+                                                                <div
+                                                                    class="position-absolute bottom-0 start-0 w-100 p-1 bg-dark bg-opacity-50">
+                                                                    <small class="text-white"
+                                                                        style="font-size: 0.6rem;">{{ $pDetail->penerimaMbg->userRole->user->nama }}</small>
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
-                    @else
-                        <div class="text-center py-5">
-                            <i class="bx bx-error display-1 text-warning mb-3"></i>
-                            <h5 class="fw-bold">Data Produksi Tidak Ditemukan</h5>
-                            <p class="text-muted">Oops! Terjadi kesalahan saat memuat detail produksi. Silakan hubungi
-                                admin.</p>
-                        </div>
-                    @endif
-                </div>
-                <div class="modal-footer border-top py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup
-                        Detail</button>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="bx bx-error display-1 text-warning mb-2"></i>
+                                <h5 class="fw-bold">Data Konfirmasi Tidak Ditemukan</h5>
+                                <p class="text-muted mb-0">Oops! Terjadi kesalahan saat memuat rincian konfirmasi.</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top py-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup
+                            Detail</button>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="modalDetailDistribusi" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-warning text-warning"><i
+                                        class="bx bx-car"></i></span>
+                            </div>
+                            <h5 class="modal-title fw-bold mb-0">Detail Proses Distribusi</h5>
+                        </div>
+                    </div>
+                    <div class="modal-body p-4">
+                        @if (isset($orderDist) && $orderDist)
+                            <div class="row g-4">
+                                <div class="col-md-7 border-end">
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <div>
+                                            <small class="text-uppercase text-muted fw-bold d-block mb-1"
+                                                style="font-size: 0.7rem; letter-spacing: 1px;">Status Distribusi
+                                                Keseluruhan</small>
+                                            @php
+                                                $mapStatusDistModal = [
+                                                    'belum_dikirim' => [
+                                                        'badge' => 'bg-label-secondary',
+                                                        'icon' => 'bx-time',
+                                                        'text' => 'Belum Dikirim',
+                                                    ],
+                                                    'sedang_dikirim' => [
+                                                        'badge' => 'bg-label-warning',
+                                                        'icon' => 'bx-loader-circle',
+                                                        'text' => 'Sedang Dikirim',
+                                                    ],
+                                                    'sudah_dikirim' => [
+                                                        'badge' => 'bg-label-success',
+                                                        'icon' => 'bx-check-double',
+                                                        'text' => 'Sudah Dikirim',
+                                                    ],
+                                                ];
+                                                $dD =
+                                                    $mapStatusDistModal[$orderDist->status] ??
+                                                    $mapStatusDistModal['belum_dikirim'];
+                                            @endphp
+                                            <span class="badge {{ $dD['badge'] }} px-3 py-2 fs-6">
+                                                <i class="bx {{ $dD['icon'] }} me-1"></i> {{ $dD['text'] }}
+                                            </span>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-uppercase text-muted fw-bold d-block mb-1"
+                                                style="font-size: 0.7rem; letter-spacing: 1px;">Update Terakhir</small>
+                                            <span class="fw-semibold text-dark"><i
+                                                    class="bx bx-calendar-check me-1"></i>{{ $orderDist->updated_at->format('d M Y, H:i') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                            <i class="bx bx-restaurant me-2 text-warning"></i>Daftar Menu Dikirim
+                                        </h6>
+                                        @php
+                                            $porsiBesarMenus = $approval->transaksiDapur->detailTransaksiDapur->where(
+                                                'tipe_porsi',
+                                                'besar',
+                                            );
+                                            $porsiKecilMenus = $approval->transaksiDapur->detailTransaksiDapur->where(
+                                                'tipe_porsi',
+                                                'kecil',
+                                            );
+                                            $totalPorsiBesar = $approval->transaksiDapur->getTotalPorsiBesar();
+                                            $totalPorsiKecil = $approval->transaksiDapur->getTotalPorsiKecil();
+                                        @endphp
+
+                                        @if ($porsiBesarMenus->count() > 0)
+                                            <div class="mb-3">
+                                                <div
+                                                    class="p-2 bg-label-primary rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold small text-uppercase">Porsi Besar :
+                                                        {{ $totalPorsiBesar }} Porsi</span>
+                                                </div>
+                                                <div class="table-responsive border rounded-bottom">
+                                                    <table class="table table-sm table-hover mb-0">
+                                                        <tbody>
+                                                            @foreach ($porsiBesarMenus as $det)
+                                                                <tr>
+                                                                    <td class="py-2 px-3 fw-medium text-dark">
+                                                                        {{ $det->menuMakanan->nama_menu }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($porsiKecilMenus->count() > 0)
+                                            <div class="mb-3">
+                                                <div
+                                                    class="p-2 bg-label-warning rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold small text-uppercase">Porsi Kecil :
+                                                        {{ $totalPorsiKecil }} Porsi</span>
+                                                </div>
+                                                <div class="table-responsive border rounded-bottom">
+                                                    <table class="table table-sm table-hover mb-0">
+                                                        <tbody>
+                                                            @foreach ($porsiKecilMenus as $det)
+                                                                <tr>
+                                                                    <td class="py-2 px-3 fw-medium text-dark">
+                                                                        {{ $det->menuMakanan->nama_menu }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                            <i class="bx bx-map-pin me-2 text-warning"></i>Rincian Pengiriman per Penerima
+                                        </h6>
+                                        <div class="table-responsive border rounded">
+                                            <table class="table table-sm table-hover mb-0">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th class="py-2 px-3">Penerima</th>
+                                                        <th class="py-2 text-center">Status</th>
+                                                        <th class="py-2 text-center">Porsi (B/K)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if ($orderDist->details && $orderDist->details->count() > 0)
+                                                        @foreach ($orderDist->details as $dDetail)
+                                                            <tr>
+                                                                <td class="py-2 px-3">
+                                                                    <div class="fw-medium text-dark small">
+                                                                        {{ $dDetail->penerimaMbg->userRole->user->nama ?? 'Unknown' }}
+                                                                    </div>
+                                                                </td>
+                                                                <td class="py-2 text-center">
+                                                                    @php $sD = $mapStatusDistModal[$dDetail->status] ?? $mapStatusDistModal['belum_dikirim']; @endphp
+                                                                    <span class="badge {{ $sD['badge'] }} small"
+                                                                        style="font-size: 0.65rem;">{{ $sD['text'] }}</span>
+                                                                </td>
+                                                                <td class="py-2 text-center">
+
+                                                                    <div class="text-muted" style="font-size: 0.6rem;">
+                                                                        {{ $dDetail->porsi_besar ?? 0 }}B /
+                                                                        {{ $dDetail->porsi_kecil ?? 0 }}K</div>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-0">
+                                        <h6 class="fw-bold mb-2 d-flex align-items-center">
+                                            <i class="bx bx-note me-2 text-warning"></i>Catatan Distribusi
+                                        </h6>
+                                        <div class="p-3 bg-lighter rounded border" style="min-height: 80px;">
+                                            <p class="mb-0 text-dark small fst-italic">
+                                                {{ $orderDist->catatan ?: 'Tidak ada catatan dari distributor.' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    @if($orderDist->ulasan)
+                                        <div class="mb-0 mt-4">
+                                            <h6 class="fw-bold mb-2 d-flex align-items-center">
+                                                <i class="bx bx-message-square-detail me-2 text-success"></i>Ulasan Distribusi
+                                            </h6>
+                                            <div class="p-3 bg-lighter rounded border" style="min-height: 80px;">
+                                                <p class="mb-0 text-dark small fst-italic">
+                                                    "{{ $orderDist->ulasan }}"
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-5">
+                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                        <i class="bx bx-image-alt me-2 text-warning"></i>Dokumentasi Distribusi
+                                    </h6>
+                                    <div class="row g-2">
+                                        @php $hasAnyDistDok = false; @endphp
+                                        @forelse($orderDist->dokumentasi as $dok)
+                                            @php $hasAnyDistDok = true; @endphp
+                                            <div class="col-6">
+                                                <a href="{{ $dok->url }}" target="_blank"
+                                                    class="d-block card-hover">
+                                                    <div class="position-relative">
+                                                        <img src="{{ $dok->url }}"
+                                                            class="img-fluid rounded border shadow-sm"
+                                                            style="width: 100%; height: 140px; object-fit: cover;"
+                                                            alt="Dokumentasi">
+                                                        <div class="position-absolute top-0 end-0 p-1">
+                                                            <span class="badge bg-dark bg-opacity-50"><i
+                                                                    class="bx bx-zoom-in"></i></span>
+                                                        </div>
+                                                        <div
+                                                            class="position-absolute bottom-0 start-0 w-100 p-1 bg-dark bg-opacity-50">
+                                                            <small class="text-white"
+                                                                style="font-size: 0.6rem;">{{ $headDistributor ? ($headDistributor->nama_lengkap ?? $headDistributor->userRole->user->nama) : $orderDist->dapur->nama_dapur }}</small>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        @empty
+                                            @foreach ($orderDist->details as $dDetail)
+                                                @foreach ($dDetail->dokumentasi as $dok)
+                                                    @php $hasAnyDistDok = true; @endphp
+                                                    <div class="col-6">
+                                                        <a href="{{ $dok->url }}" target="_blank"
+                                                            class="d-block card-hover">
+                                                            <div class="position-relative">
+                                                                <img src="{{ $dok->url }}"
+                                                                    class="img-fluid rounded border shadow-sm"
+                                                                    style="width: 100%; height: 140px; object-fit: cover;"
+                                                                    alt="Dokumentasi">
+                                                                <div class="position-absolute top-0 end-0 p-1">
+                                                                    <span class="badge bg-dark bg-opacity-50"><i
+                                                                            class="bx bx-zoom-in"></i></span>
+                                                                </div>
+                                                                <div
+                                                                    class="position-absolute bottom-0 start-0 w-100 p-1 bg-dark bg-opacity-50">
+                                                                    <small class="text-white"
+                                                                        style="font-size: 0.6rem;">{{ $headDistributor ? ($headDistributor->nama_lengkap ?? $headDistributor->userRole->user->nama) : $orderDist->dapur->nama_dapur }}</small>
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </div>
+                                                @endforeach
+                                            @endforeach
+                                        @endforelse
+                                        @if (!$hasAnyDistDok)
+                                            <div class="col-12">
+                                                <div class="text-center py-5 border rounded bg-lighter">
+                                                    <i class="bx bx-no-entry display-4 text-muted mb-2"></i>
+                                                    <p class="text-muted mb-0 small">Belum ada foto dokumentasi</p>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    @if ($hasAnyDistDok)
+                                        <div class="mt-3">
+                                            <p class="text-muted small">
+                                                <i class="bx bx-info-circle me-1"></i>Klik gambar untuk melihat dalam
+                                                ukuran penuh.
+                                            </p>
+                                        </div>
+                                    @endif
+
+                                    @if($orderDist->ulasan_foto)
+                                        <div class="mt-4">
+                                            <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                                <i class="bx bx-image me-2 text-success"></i>Dokumentasi Ulasan
+                                            </h6>
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <a href="{{ asset('storage/' . $orderDist->ulasan_foto) }}" target="_blank" class="d-block card-hover">
+                                                        <div class="position-relative">
+                                                            <img src="{{ asset('storage/' . $orderDist->ulasan_foto) }}" class="img-fluid rounded border shadow-sm" style="width: 100%; height: 140px; object-fit: cover;" alt="Foto Ulasan">
+                                                            <div class="position-absolute top-0 end-0 p-1">
+                                                                <span class="badge bg-dark bg-opacity-50"><i class="bx bx-zoom-in"></i></span>
+                                                            </div>
+                                                            <div class="position-absolute bottom-0 start-0 w-100 p-1 bg-dark bg-opacity-50">
+                                                                <small class="text-white" style="font-size: 0.6rem;">{{ $headDistributor ? ($headDistributor->nama_lengkap ?? $headDistributor->userRole->user->nama) : $orderDist->dapur->nama_dapur }}</small>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="bx bx-error display-1 text-warning mb-3"></i>
+                                <h5 class="fw-bold">Data Distribusi Tidak Ditemukan</h5>
+                                <p class="text-muted">Oops! Terjadi kesalahan saat memuat detail distribusi. Silakan
+                                    hubungi admin.</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top py-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup
+                            Detail</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Detail Produksi -->
+        <div class="modal fade" id="modalDetailProduksi" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-primary text-primary"><i
+                                        class="bx bx-cog"></i></span>
+                            </div>
+                            <h5 class="modal-title fw-bold mb-0">Detail Proses Produksi</h5>
+                        </div>
+                    </div>
+                    <div class="modal-body p-4">
+                        @if (isset($orderProd) && $orderProd)
+                            <div class="row g-4">
+                                <div class="col-md-7 border-end">
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <div>
+                                            <small class="text-uppercase text-muted fw-bold d-block mb-1"
+                                                style="font-size: 0.7rem; letter-spacing: 1px;">Status Produksi</small>
+                                            @php
+                                                $mapStatusProdModal = [
+                                                    'stok_kurang' => [
+                                                        'badge' => 'bg-label-danger',
+                                                        'icon' => 'bx-error-circle',
+                                                        'text' => 'Stok Kurang',
+                                                    ],
+                                                    'belum_dibuat' => [
+                                                        'badge' => 'bg-label-secondary',
+                                                        'icon' => 'bx-time',
+                                                        'text' => 'Belum Dibuat',
+                                                    ],
+                                                    'sedang_dibuat' => [
+                                                        'badge' => 'bg-label-warning',
+                                                        'icon' => 'bx-loader-circle',
+                                                        'text' => 'Sedang Dibuat',
+                                                    ],
+                                                    'selesai' => [
+                                                        'badge' => 'bg-label-success',
+                                                        'icon' => 'bx-check-circle',
+                                                        'text' => 'Selesai',
+                                                    ],
+                                                ];
+                                                $pD =
+                                                    $mapStatusProdModal[$orderProd->status] ??
+                                                    $mapStatusProdModal['belum_dibuat'];
+                                            @endphp
+                                            <span class="badge {{ $pD['badge'] }} px-3 py-2 fs-6">
+                                                <i class="bx {{ $pD['icon'] }} me-1"></i> {{ $pD['text'] }}
+                                            </span>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-uppercase text-muted fw-bold d-block mb-1"
+                                                style="font-size: 0.7rem; letter-spacing: 1px;">Update Terakhir</small>
+                                            <span class="fw-semibold text-dark"><i
+                                                    class="bx bx-calendar-check me-1"></i>{{ $orderProd->updated_at->format('d M Y, H:i') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                            <i class="bx bx-restaurant me-2 text-primary"></i>Daftar Menu Diproduksi
+                                        </h6>
+                                        @php
+                                            $porsiBesarMenus = $approval->transaksiDapur->detailTransaksiDapur->where(
+                                                'tipe_porsi',
+                                                'besar',
+                                            );
+                                            $porsiKecilMenus = $approval->transaksiDapur->detailTransaksiDapur->where(
+                                                'tipe_porsi',
+                                                'kecil',
+                                            );
+                                            $totalPorsiBesar = $approval->transaksiDapur->getTotalPorsiBesar();
+                                            $totalPorsiKecil = $approval->transaksiDapur->getTotalPorsiKecil();
+                                        @endphp
+
+                                        @if ($porsiBesarMenus->count() > 0)
+                                            <div class="mb-3">
+                                                <div
+                                                    class="p-2 bg-label-primary rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold small text-uppercase">Porsi Besar :
+                                                        {{ $totalPorsiBesar }} Porsi</span>
+                                                </div>
+                                                <div class="table-responsive border rounded-bottom">
+                                                    <table class="table table-sm table-hover mb-0">
+                                                        <tbody>
+                                                            @foreach ($porsiBesarMenus as $det)
+                                                                <tr>
+                                                                    <td class="py-2 px-3 fw-medium text-dark">
+                                                                        {{ $det->menuMakanan->nama_menu }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($porsiKecilMenus->count() > 0)
+                                            <div class="mb-3">
+                                                <div
+                                                    class="p-2 bg-label-warning rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold small text-uppercase">Porsi Kecil :
+                                                        {{ $totalPorsiKecil }} Porsi</span>
+                                                </div>
+                                                <div class="table-responsive border rounded-bottom">
+                                                    <table class="table table-sm table-hover mb-0">
+                                                        <tbody>
+                                                            @foreach ($porsiKecilMenus as $det)
+                                                                <tr>
+                                                                    <td class="py-2 px-3 fw-medium text-dark">
+                                                                        {{ $det->menuMakanan->nama_menu }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        @endif
+
+
+                                    </div>
+
+                                    <div class="mb-0">
+                                        <h6 class="fw-bold mb-2 d-flex align-items-center">
+                                            <i class="bx bx-note me-2 text-primary"></i>Catatan Produksi
+                                        </h6>
+                                        <div class="p-3 bg-lighter rounded border" style="min-height: 80px;">
+                                            <p class="mb-0 text-dark small fst-italic">
+                                                {{ $orderProd->catatan ?: 'Tidak ada catatan dari staf produksi.' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    @if($orderProd->ulasan)
+                                        <div class="mb-0 mt-4">
+                                            <h6 class="fw-bold mb-2 d-flex align-items-center">
+                                                <i class="bx bx-message-square-detail me-2 text-success"></i>Ulasan Produksi
+                                            </h6>
+                                            <div class="p-3 bg-lighter rounded border" style="min-height: 80px;">
+                                                <p class="mb-0 text-dark small fst-italic">
+                                                    "{{ $orderProd->ulasan }}"
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-5">
+                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                        <i class="bx bx-image-alt me-2 text-primary"></i>Dokumentasi Produksi
+                                    </h6>
+                                    <div class="row g-2">
+                                        @forelse($orderProd->dokumentasi as $dok)
+                                            <div class="col-6">
+                                                <a href="{{ $dok->url }}" target="_blank"
+                                                    class="d-block card-hover">
+                                                    <div class="position-relative">
+                                                        <img src="{{ $dok->url }}"
+                                                            class="img-fluid rounded border shadow-sm"
+                                                            style="width: 100%; height: 140px; object-fit: cover;"
+                                                            alt="Dokumentasi">
+                                                        <div class="position-absolute top-0 end-0 p-1">
+                                                            <span class="badge bg-dark bg-opacity-50"><i
+                                                                    class="bx bx-zoom-in"></i></span>
+                                                        </div>
+                                                        <div
+                                                            class="position-absolute bottom-0 start-0 w-100 p-1 bg-dark bg-opacity-50">
+                                                            <small class="text-white"
+                                                                style="font-size: 0.6rem;">{{ $headProduksi ? ($headProduksi->nama_lengkap ?? $headProduksi->userRole->user->nama) : $orderProd->dapur->nama_dapur }}</small>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        @empty
+                                            <div class="col-12">
+                                                <div class="text-center py-5 border rounded bg-lighter">
+                                                    <i class="bx bx-no-entry display-4 text-muted mb-2"></i>
+                                                    <p class="text-muted mb-0 small">Belum ada foto dokumentasi</p>
+                                                </div>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                    @if ($orderProd->dokumentasi && $orderProd->dokumentasi->count() > 0)
+                                        <div class="mt-3">
+                                            <p class="text-muted small">
+                                                <i class="bx bx-info-circle me-1"></i>Klik gambar untuk melihat dalam
+                                                ukuran penuh.
+                                            </p>
+                                        </div>
+                                    @endif
+
+                                    @if($orderProd->ulasan_foto)
+                                        <div class="mt-4">
+                                            <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                                <i class="bx bx-image me-2 text-success"></i>Dokumentasi Ulasan
+                                            </h6>
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <a href="{{ asset('storage/' . $orderProd->ulasan_foto) }}" target="_blank" class="d-block card-hover">
+                                                        <div class="position-relative">
+                                                            <img src="{{ asset('storage/' . $orderProd->ulasan_foto) }}" class="img-fluid rounded border shadow-sm" style="width: 100%; height: 140px; object-fit: cover;" alt="Foto Ulasan">
+                                                            <div class="position-absolute top-0 end-0 p-1">
+                                                                <span class="badge bg-dark bg-opacity-50"><i class="bx bx-zoom-in"></i></span>
+                                                            </div>
+                                                            <div class="position-absolute bottom-0 start-0 w-100 p-1 bg-dark bg-opacity-50">
+                                                                <small class="text-white" style="font-size: 0.6rem;">{{ $headProduksi ? ($headProduksi->nama_lengkap ?? $headProduksi->userRole->user->nama) : $orderProd->dapur->nama_dapur }}</small>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="bx bx-error display-1 text-warning mb-3"></i>
+                                <h5 class="fw-bold">Data Produksi Tidak Ditemukan</h5>
+                                <p class="text-muted">Oops! Terjadi kesalahan saat memuat detail produksi. Silakan hubungi
+                                    admin.</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top py-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup
+                            Detail</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .avatar-initial {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .avatar-sm .avatar-initial {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .table-danger-subtle {
+                background-color: rgba(220, 53, 69, 0.1) !important;
+            }
+
+            .timeline {
+                position: relative;
+                padding-left: 1.5rem;
+            }
+
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 0.5rem;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: #e3e3e3;
+            }
+
+            .timeline-item {
+                position: relative;
+                margin-bottom: 1.5rem;
+            }
+
+            .timeline-indicator {
+                position: absolute;
+                left: -2rem;
+                top: 0.25rem;
+                width: 2rem;
+                height: 2rem;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+                z-index: 1;
+            }
+
+            .timeline-indicator-success {
+                background: #28a745;
+                color: white;
+            }
+
+            .timeline-indicator-warning {
+                background: #ffc107;
+                color: #212529;
+            }
+
+            .timeline-indicator-danger {
+                background: #dc3545;
+                color: white;
+            }
+
+            .timeline-content {
+                padding-left: 1rem;
+            }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const alerts = document.querySelectorAll('.alert-dismissible');
+                alerts.forEach((alert) => {
+                    setTimeout(() => {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }, 5000);
+                });
+            });
+        </script>
     </div>
-
-
-    <style>
-        .avatar-initial {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .avatar-sm .avatar-initial {
-            width: 32px;
-            height: 32px;
-            font-size: 12px;
-        }
-
-        .table td {
-            vertical-align: middle;
-        }
-
-        .table-warning-subtle {
-            background-color: rgba(255, 243, 205, 0.3) !important;
-        }
-
-        .table-danger-subtle {
-            background-color: rgba(220, 53, 69, 0.1) !important;
-        }
-
-        .timeline {
-            position: relative;
-            padding-left: 1.5rem;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0.5rem;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #e3e3e3;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .timeline-indicator {
-            position: absolute;
-            left: -2rem;
-            top: 0.25rem;
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            z-index: 1;
-        }
-
-        .timeline-indicator-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .timeline-indicator-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .timeline-indicator-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .timeline-indicator-primary {
-            background: #007bff;
-            color: white;
-        }
-
-        .timeline-content {
-            padding-left: 1rem;
-        }
-    </style>
 @endsection

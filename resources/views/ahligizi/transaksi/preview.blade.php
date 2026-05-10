@@ -80,7 +80,7 @@
                                 @php
                                     $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()?->jumlah_porsi ?? 0;
                                     $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()?->jumlah_porsi ?? 0;
-                                    $totalKeseluruhan = $totalPorsiBesar + $totalPorsiKecil;
+                                    $totalKeseluruhan = $totalPorsiBesar;
                                 @endphp
 
                                 <table class="table table-borderless mb-0">
@@ -138,143 +138,7 @@
                 </div>
             </div>
         </div>
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bx bx-bowl-hot me-2"></i>
-                            Detail Menu
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @php
-                            $porsiBesar = $transaksi->detailTransaksiDapur->where("tipe_porsi", "besar");
-                            $porsiKecil = $transaksi->detailTransaksiDapur->where("tipe_porsi", "kecil");
-                        @endphp
-                        @if ($porsiBesar->count() > 0)
-                            <h6 class="text-success mb-3">Menu Porsi Besar</h6>
-                            <div class="row mb-4">
-                                @foreach ($porsiBesar as $detail)
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card border border-success">
-                                            <div class="card-body p-3">
-                                                <div
-                                                    class="d-flex align-items-start"
-                                                >
-                                                    @if ($detail->menuMakanan->gambar_url)
-                                                        <img
-                                                            src="{{ $detail->menuMakanan->gambar_url }}"
-                                                            alt="{{ $detail->menuMakanan->nama_menu }}"
-                                                            class="rounded me-3"
-                                                            style="
-                                                                width: 60px;
-                                                                height: 60px;
-                                                                object-fit: cover;
-                                                            "
-                                                        />
-                                                    @else
-                                                        <div
-                                                            class="avatar avatar-lg me-3"
-                                                        >
-                                                            <span
-                                                                class="avatar-initial rounded bg-label-success"
-                                                            >
-                                                                <i
-                                                                    class="bx bx-bowl-hot"
-                                                                ></i>
-                                                            </span>
-                                                        </div>
-                                                    @endif
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-1">
-                                                            {{ $detail->menuMakanan->nama_menu }}
-                                                        </h6>
-                                                        <p
-                                                            class="text-muted small mb-2"
-                                                        >
-                                                            {{ $detail->menuMakanan->kategori }}
-                                                        </p>
-                                                        <span
-                                                            class="badge bg-success"
-                                                        >
-                                                            {{ $detail->jumlah_porsi }}
-                                                            Porsi
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                        @if ($porsiKecil->count() > 0)
-                            <h6 class="text-warning mb-3">Menu Porsi Kecil</h6>
-                            <div class="row mb-4">
-                                @foreach ($porsiKecil as $detail)
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card border border-warning">
-                                            <div class="card-body p-3">
-                                                <div
-                                                    class="d-flex align-items-start"
-                                                >
-                                                    @if ($detail->menuMakanan->gambar_url)
-                                                        <img
-                                                            src="{{ $detail->menuMakanan->gambar_url }}"
-                                                            alt="{{ $detail->menuMakanan->nama_menu }}"
-                                                            class="rounded me-3"
-                                                            style="
-                                                                width: 60px;
-                                                                height: 60px;
-                                                                object-fit: cover;
-                                                            "
-                                                        />
-                                                    @else
-                                                        <div
-                                                            class="avatar avatar-lg me-3"
-                                                        >
-                                                            <span
-                                                                class="avatar-initial rounded bg-label-warning"
-                                                            >
-                                                                <i
-                                                                    class="bx bx-bowl-hot"
-                                                                ></i>
-                                                            </span>
-                                                        </div>
-                                                    @endif
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-1">
-                                                            {{ $detail->menuMakanan->nama_menu }}
-                                                        </h6>
-                                                        <p
-                                                            class="text-muted small mb-2"
-                                                        >
-                                                            {{ $detail->menuMakanan->kategori }}
-                                                        </p>
-                                                        <span
-                                                            class="badge bg-warning"
-                                                        >
-                                                            {{ $detail->jumlah_porsi }}
-                                                            Porsi
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="alert alert-info">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Tidak ada menu porsi kecil yang dipilih
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <div class="row g-4 mb-4">
             <div class="col-12">
@@ -286,61 +150,132 @@
                     </div>
                     <div class="card-body p-3">
                         <div class="row g-4">
-                            @foreach($transaksi->detailTransaksiDapur as $detail)
-                                <div class="col-md-6 col-lg-4">
-                                    <div class="border rounded p-3 h-100">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="avatar avatar-sm me-2">
-                                                @if($detail->menuMakanan->gambar_url)
-                                                    <img src="{{ $detail->menuMakanan->gambar_url }}" class="rounded" style="object-fit: cover;">
-                                                @else
-                                                    <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-dish"></i></span>
-                                                @endif
+                            @php
+                                $porsiBesarDetails = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar');
+                                $porsiKecilDetails = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil');
+                            @endphp
+
+                            @if($porsiBesarDetails->count() > 0)
+                                <div class="col-12">
+                                    <h6 class="text-success mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Besar : {{ $totalPorsiBesar }} Porsi</h6>
+                                </div>
+                                @foreach($porsiBesarDetails as $detail)
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="border rounded p-3 h-100 bg-light-success">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="avatar avatar-sm me-2">
+                                                    @if($detail->menuMakanan->gambar_url)
+                                                        <img src="{{ $detail->menuMakanan->gambar_url }}" class="rounded" style="object-fit: cover;">
+                                                    @else
+                                                        <span class="avatar-initial rounded bg-label-success"><i class="bx bx-dish"></i></span>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}</h6>
+                                                    <span class="badge bg-label-success" style="font-size: 0.6rem;">
+                                                        Besar - {{ $detail->jumlah_porsi }} Porsi
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}</h6>
-                                                <span class="badge {{ $detail->tipe_porsi == 'besar' ? 'bg-label-success' : 'bg-label-warning' }}" style="font-size: 0.6rem;">
-                                                    {{ ucfirst($detail->tipe_porsi) }} - {{ $detail->jumlah_porsi }} Porsi
-                                                </span>
+                                            
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-borderless mb-0">
+                                                    <tbody>
+                                                        @foreach($detail->menuMakanan->bahanMenu as $bahanMenu)
+                                                            @php
+                                                                $idTemplate = $bahanMenu->id_template_item;
+                                                                $namaBahan = $bahanMenu->templateItem->nama_bahan;
+                                                                $satuan = $bahanMenu->templateItem->satuan;
+                                                                $kebutuhanPerPorsi = $bahanMenu->jumlah_per_porsi;
+                                                                $totalButuhMenu = $kebutuhanPerPorsi * $detail->jumlah_porsi;
+                                                                
+                                                                $stockItem = isset($stockItems) ? $stockItems->get($idTemplate) : null;
+                                                            @endphp
+                                                            <tr>
+                                                                <td class="ps-0 py-1" style="font-size: 0.75rem;">
+                                                                    <span class="text-dark">{{ $namaBahan }}</span>
+                                                                </td>
+                                                                <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
+                                                                    @if($stockItem && $stockItem->konversi_nilai > 0)
+                                                                        @php
+                                                                            $butuhKonversiMenu = $totalButuhMenu / $stockItem->konversi_nilai;
+                                                                        @endphp
+                                                                        <span class="fw-bold">{{ (float)number_format($butuhKonversiMenu, 2, '.', '') }} {{ $stockItem->konversi_satuan }}</span>
+                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ (float)number_format($totalButuhMenu, 2, '.', '') }} {{ $satuan }})</div>
+                                                                    @else
+                                                                        <span class="fw-bold">{{ (float)number_format($totalButuhMenu, 2, '.', '') }}</span> <span class="text-muted">{{ $satuan }}</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                        </div>
-                                        
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-borderless mb-0">
-                                                <tbody>
-                                                    @foreach($detail->menuMakanan->bahanMenu as $bahanMenu)
-                                                        @php
-                                                            $idTemplate = $bahanMenu->id_template_item;
-                                                            $namaBahan = $bahanMenu->templateItem->nama_bahan;
-                                                            $satuan = $bahanMenu->templateItem->satuan;
-                                                            $kebutuhanPerPorsi = $bahanMenu->jumlah_per_porsi;
-                                                            $totalButuhMenu = $kebutuhanPerPorsi * $detail->jumlah_porsi;
-                                                            
-                                                            $stockItem = isset($stockItems) ? $stockItems->get($idTemplate) : null;
-                                                        @endphp
-                                                        <tr>
-                                                            <td class="ps-0 py-1" style="font-size: 0.75rem;">
-                                                                <span class="text-dark">{{ $namaBahan }}</span>
-                                                            </td>
-                                                            <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
-                                                                @if($stockItem && $stockItem->konversi_nilai > 0)
-                                                                    @php
-                                                                        $butuhKonversiMenu = $totalButuhMenu / $stockItem->konversi_nilai;
-                                                                    @endphp
-                                                                    <span class="fw-bold">{{ number_format($butuhKonversiMenu, 2) }} {{ $stockItem->konversi_satuan }}</span>
-                                                                    <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ number_format($totalButuhMenu, 2) }} {{ $satuan }})</div>
-                                                                @else
-                                                                    <span class="fw-bold">{{ number_format($totalButuhMenu, 2) }}</span> <span class="text-muted">{{ $satuan }}</span>
-                                                                @endif
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
                                         </div>
                                     </div>
+                                @endforeach
+                            @endif
+
+                            @if($porsiKecilDetails->count() > 0)
+                                <div class="col-12 mt-4">
+                                    <h6 class="text-warning mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Kecil : {{ $totalPorsiKecil }} Porsi</h6>
                                 </div>
-                            @endforeach
+                                @foreach($porsiKecilDetails as $detail)
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="border rounded p-3 h-100 bg-light-warning">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="avatar avatar-sm me-2">
+                                                    @if($detail->menuMakanan->gambar_url)
+                                                        <img src="{{ $detail->menuMakanan->gambar_url }}" class="rounded" style="object-fit: cover;">
+                                                    @else
+                                                        <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-dish"></i></span>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}</h6>
+                                                    <span class="badge bg-label-warning" style="font-size: 0.6rem;">
+                                                        Kecil - {{ $detail->jumlah_porsi }} Porsi
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-borderless mb-0">
+                                                    <tbody>
+                                                        @foreach($detail->menuMakanan->bahanMenu as $bahanMenu)
+                                                            @php
+                                                                $idTemplate = $bahanMenu->id_template_item;
+                                                                $namaBahan = $bahanMenu->templateItem->nama_bahan;
+                                                                $satuan = $bahanMenu->templateItem->satuan;
+                                                                $kebutuhanPerPorsi = $bahanMenu->jumlah_per_porsi;
+                                                                $totalButuhMenu = $kebutuhanPerPorsi * $detail->jumlah_porsi;
+                                                                
+                                                                $stockItem = isset($stockItems) ? $stockItems->get($idTemplate) : null;
+                                                            @endphp
+                                                            <tr>
+                                                                <td class="ps-0 py-1" style="font-size: 0.75rem;">
+                                                                    <span class="text-dark">{{ $namaBahan }}</span>
+                                                                </td>
+                                                                <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
+                                                                    @if($stockItem && $stockItem->konversi_nilai > 0)
+                                                                        @php
+                                                                            $butuhKonversiMenu = $totalButuhMenu / $stockItem->konversi_nilai;
+                                                                        @endphp
+                                                                        <span class="fw-bold">{{ (float)number_format($butuhKonversiMenu, 2, '.', '') }} {{ $stockItem->konversi_satuan }}</span>
+                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ (float)number_format($totalButuhMenu, 2, '.', '') }} {{ $satuan }})</div>
+                                                                    @else
+                                                                        <span class="fw-bold">{{ (float)number_format($totalButuhMenu, 2, '.', '') }}</span> <span class="text-muted">{{ $satuan }}</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -419,7 +354,7 @@
                                                     </td>
                                                     <td>
                                                         <span class="total-kebutuhan-besar-display-{{ $idTemplate }}">
-                                                            {{ number_format($bahan["total_kebutuhan"], 2) }}
+                                                            {{ (float)number_format($bahan["total_kebutuhan"], 2, '.', '') }}
                                                             {{ $bahan["satuan"] }}
                                                         </span>
                                                     </td>
@@ -496,7 +431,7 @@
                                                     </td>
                                                     <td>
                                                         <span class="total-kebutuhan-kecil-display-{{ $idTemplate }}">
-                                                            {{ number_format($bahan["total_kebutuhan"], 2) }}
+                                                            {{ (float)number_format($bahan["total_kebutuhan"], 2, '.', '') }}
                                                             {{ $bahan["satuan"] }}
                                                         </span>
                                                     </td>
@@ -604,7 +539,7 @@
                                                     <span
                                                         class="fw-semibold text-primary total-kebutuhan-total-display-{{ $idTemplate }}"
                                                     >
-                                                        {{ number_format($bahan["total_kebutuhan"], 2) }}
+                                                        {{ (float)number_format($bahan["total_kebutuhan"], 2, '.', '') }}
                                                         {{ $bahan["satuan"] }}
                                                     </span>
                                                 </td>
@@ -812,15 +747,15 @@
                                                     {{ $laporan->templateItem->nama_bahan }}
                                                 </td>
                                                 <td>
-                                                    {{ number_format($laporan->jumlah_dibutuhkan, 2) }}
+                                                    {{ (float)number_format($laporan->jumlah_dibutuhkan, 2, '.', '') }}
                                                     {{ $laporan->satuan }}
                                                 </td>
                                                 <td>
-                                                    {{ number_format($laporan->jumlah_tersedia, 2) }}
+                                                    {{ (float)number_format($laporan->jumlah_tersedia, 2, '.', '') }}
                                                     {{ $laporan->satuan }}
                                                 </td>
                                                 <td class="text-danger">
-                                                    {{ number_format($laporan->jumlah_kurang, 2) }}
+                                                    {{ (float)number_format($laporan->jumlah_kurang, 2, '.', '') }}
                                                     {{ $laporan->satuan }}
                                                 </td>
                                                 <td>
@@ -1038,20 +973,20 @@
 
                 const kebutuhanDisplayEl = document.querySelector('.total-kebutuhan-total-display-' + templateId);
                 if (kebutuhanDisplayEl) {
-                    kebutuhanDisplayEl.innerHTML = `${displayKebutuhan.toFixed(2)} ${displaySatuan}`;
+                    kebutuhanDisplayEl.innerHTML = `${parseFloat(displayKebutuhan.toFixed(2))} ${displaySatuan}`;
                 }
 
                 const availableEl = document.querySelector('.stock-available-total-' + templateId);
                 if (availableEl) {
                     availableEl.innerHTML = `
-                        <span class="fw-semibold">${displayStock.toFixed(2)} ${displaySatuan}</span>
+                        <span class="fw-semibold">${parseFloat(displayStock.toFixed(2))} ${displaySatuan}</span>
                     `;
                 }
 
                 const comparisonEl = document.querySelector('.stock-comparison-total-' + templateId);
                 if (comparisonEl) {
                     comparisonEl.innerHTML = `
-                        <span class="fw-semibold">${displayKebutuhan.toFixed(2)} : ${displayStock.toFixed(2)}</span>
+                        <span class="fw-semibold">${parseFloat(displayKebutuhan.toFixed(2))} : ${parseFloat(displayStock.toFixed(2))}</span>
                         <small class="text-muted d-block">Kebutuhan : Stok Gudang</small>
                     `;
                 }
@@ -1061,7 +996,7 @@
                     const estimateClass = displayEstimasi < 0 ? 'text-danger' : (displayEstimasi == 0 ? 'text-warning' : 'text-success');
                     estimateEl.innerHTML = `
                         <span class="${estimateClass}">
-                            ${displayEstimasi.toFixed(2)} ${displaySatuan}
+                            ${parseFloat(displayEstimasi.toFixed(2))} ${displaySatuan}
                         </span>
                     `;
                 }
@@ -1102,20 +1037,20 @@
 
                 const kebutuhanDisplayEl = document.querySelector('.total-kebutuhan-' + typePrefix + 'display-' + templateId);
                 if (kebutuhanDisplayEl) {
-                    kebutuhanDisplayEl.innerHTML = `${displayKebutuhan.toFixed(2)} ${displaySatuan}`;
+                    kebutuhanDisplayEl.innerHTML = `${parseFloat(displayKebutuhan.toFixed(2))} ${displaySatuan}`;
                 }
 
                 const availableEl = document.querySelector('.stock-available-' + typePrefix + templateId);
                 if (availableEl) {
                     availableEl.innerHTML = `
-                        <span class="fw-semibold">${displayStock.toFixed(2)} ${displaySatuan}</span>
+                        <span class="fw-semibold">${parseFloat(displayStock.toFixed(2))} ${displaySatuan}</span>
                     `;
                 }
 
                 const comparisonEl = document.querySelector('.stock-comparison-' + typePrefix + templateId);
                 if (comparisonEl) {
                     comparisonEl.innerHTML = `
-                        <span class="fw-semibold">${displayKebutuhan.toFixed(2)} : ${displayStock.toFixed(2)}</span>
+                        <span class="fw-semibold">${parseFloat(displayKebutuhan.toFixed(2))} : ${parseFloat(displayStock.toFixed(2))}</span>
                         <small class="text-muted d-block">Kebutuhan : Stok</small>
                     `;
                 }
@@ -1125,7 +1060,7 @@
                     const estimateClass = displayEstimasi < 0 ? 'text-danger' : (displayEstimasi == 0 ? 'text-warning' : 'text-success');
                     estimateEl.innerHTML = `
                         <span class="${estimateClass}">
-                            ${displayEstimasi.toFixed(2)} ${displaySatuan}
+                            ${parseFloat(displayEstimasi.toFixed(2))} ${displaySatuan}
                         </span>
                     `;
                 }
@@ -1153,9 +1088,9 @@
                     listHtml += `
                         <li>
                             <strong>${shortage.nama_bahan}</strong>: 
-                            Butuh ${(shortage.kebutuhan / (shortage.konversi_nilai || 1)).toFixed(2)} ${shortage.konversi_satuan || shortage.satuan}, 
-                            tersedia ${(shortage.stock_tersedia / (shortage.konversi_nilai || 1)).toFixed(2)} ${shortage.konversi_satuan || shortage.satuan}
-                            <span class="text-danger">(kurang ${(shortage.kekurangan / (shortage.konversi_nilai || 1)).toFixed(2)} ${shortage.konversi_satuan || shortage.satuan})</span>
+                            Butuh ${parseFloat((shortage.kebutuhan / (shortage.konversi_nilai || 1)).toFixed(2))} ${shortage.konversi_satuan || shortage.satuan}, 
+                            tersedia ${parseFloat((shortage.stock_tersedia / (shortage.konversi_nilai || 1)).toFixed(2))} ${shortage.konversi_satuan || shortage.satuan}
+                            <span class="text-danger">(kurang ${parseFloat((shortage.kekurangan / (shortage.konversi_nilai || 1)).toFixed(2))} ${shortage.konversi_satuan || shortage.satuan})</span>
                         </li>
                     `;
                 });

@@ -16,7 +16,13 @@ class DapurPrasarana extends Model
         'id_dapur',
         'id_item',
         'is_available',
+        'keterangan',
     ];
+
+    public function fotos()
+    {
+        return $this->hasMany(DapurPrasaranaFoto::class, 'id_dapur_prasarana', 'id_dapur_prasarana');
+    }
 
     public function dapur()
     {

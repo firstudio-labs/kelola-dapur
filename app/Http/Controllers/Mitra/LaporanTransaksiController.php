@@ -46,7 +46,39 @@ class LaporanTransaksiController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $status = $request->status;
+            if ($status === 'with_ulasan') {
+                $query->whereHas('transaksiDapur.orderProduksi', function ($q) {
+                    $q->whereNotNull('ulasan')->orWhereHas('distribusiOrder', function ($dq) {
+                        $dq->whereNotNull('ulasan');
+                    });
+                });
+            } elseif ($status === 'with_kritik') {
+                $query->whereHas('transaksiDapur.orderProduksi.distribusiOrder.details', function ($q) {
+                    $q->whereNotNull('kritik');
+                });
+            } elseif ($status === 'with_sisa_dist') {
+                $query->whereHas('transaksiDapur.orderProduksi.distribusiOrder', function ($q) {
+                    $q->where('status', \App\Models\OrderDistribusi::STATUS_SUDAH_DIKIRIM)
+                        ->where(function ($sq) {
+                            $sq->whereRaw('(SELECT SUM(porsi_besar) FROM order_distribusi_details WHERE order_distribusi_details.id_distribusi = order_distribusi.id_distribusi AND status = "sudah_dikirim") < (SELECT MAX(jumlah_porsi) FROM detail_transaksi_dapur WHERE detail_transaksi_dapur.id_transaksi = order_distribusi.id_order AND tipe_porsi = "besar")')
+                                ->orWhereRaw('(SELECT SUM(porsi_kecil) FROM order_distribusi_details WHERE order_distribusi_details.id_distribusi = order_distribusi.id_distribusi AND status = "sudah_dikirim") < (SELECT MAX(jumlah_porsi) FROM detail_transaksi_dapur WHERE detail_transaksi_dapur.id_transaksi = order_distribusi.id_order AND tipe_porsi = "kecil")');
+                        });
+                });
+            } elseif ($status === 'with_sisa_recv') {
+                $query->whereHas('transaksiDapur.orderProduksi.distribusiOrder', function ($q) {
+                    $q->where('status', \App\Models\OrderDistribusi::STATUS_SUDAH_DIKIRIM)
+                        ->whereHas('details', function ($dq) {
+                            $dq->where('status_penerimaan', '!=', \App\Models\OrderDistribusiDetail::STATUS_PENERIMAAN_MENUNGGU)
+                                ->where(function ($sq) {
+                                    $sq->whereRaw('porsi_besar > porsi_besar_diterima')
+                                        ->orWhereRaw('porsi_kecil > porsi_kecil_diterima');
+                                });
+                        });
+                });
+            } else {
+                $query->where('status', $status);
+            }
         }
         
         if ($request->filled('dapur')) {
@@ -130,15 +162,67 @@ class LaporanTransaksiController extends Controller
         $dapur = $approval->transaksiDapur->dapur;
         $stockCheck = $approval->transaksiDapur->checkAllStockAvailability();
         
-        // Don't ensure snapshots for Mitra, just view them if they exist
         $stockCheck = $this->enhanceStockCheckWithSnapshots($approval, $dapur, $stockCheck);
         $menuDetails = $this->getMenuDetails($approval->transaksiDapur);
+
+        $summarySisa = [
+            'planned_besar' => $approval->transaksiDapur->getTotalPorsiBesar(),
+            'planned_kecil' => $approval->transaksiDapur->getTotalPorsiKecil(),
+            'sent_besar' => 0,
+            'sent_kecil' => 0,
+            'received_besar' => 0,
+            'received_kecil' => 0,
+            'remaining_dist_besar' => 0,
+            'remaining_dist_kecil' => 0,
+            'remaining_recv_besar' => 0,
+            'remaining_recv_kecil' => 0,
+            'has_data' => false
+        ];
+
+        if ($approval->transaksiDapur->orderProduksi && $approval->transaksiDapur->orderProduksi->distribusiOrder) {
+            $distOrder = $approval->transaksiDapur->orderProduksi->distribusiOrder;
+            $summarySisa['has_data'] = true;
+            
+            $summarySisa['sent_besar'] = $distOrder->details->where('status', 'sudah_dikirim')->sum('porsi_besar');
+            $summarySisa['sent_kecil'] = $distOrder->details->where('status', 'sudah_dikirim')->sum('porsi_kecil');
+            
+            $confirmedDetails = $distOrder->details->where('status_penerimaan', '!=', \App\Models\OrderDistribusiDetail::STATUS_PENERIMAAN_MENUNGGU);
+            
+            $summarySisa['received_besar'] = $confirmedDetails->sum('porsi_besar_diterima');
+            $summarySisa['received_kecil'] = $confirmedDetails->sum('porsi_kecil_diterima');
+            
+            $sentToConfirmedBesar = $confirmedDetails->sum('porsi_besar');
+            $sentToConfirmedKecil = $confirmedDetails->sum('porsi_kecil');
+            
+            $summarySisa['remaining_dist_besar'] = max(0, $summarySisa['planned_besar'] - $summarySisa['sent_besar']);
+            $summarySisa['remaining_dist_kecil'] = max(0, $summarySisa['planned_kecil'] - $summarySisa['sent_kecil']);
+            
+            $summarySisa['remaining_recv_besar'] = max(0, $sentToConfirmedBesar - $summarySisa['received_besar']);
+            $summarySisa['remaining_recv_kecil'] = max(0, $sentToConfirmedKecil - $summarySisa['remaining_recv_kecil']);
+        }
+
+        $headDistributor = null;
+        $headProduksi = null;
+        if ($approval->transaksiDapur->orderProduksi) {
+            $headProduksi = \App\Models\Produksi::where('id_dapur', $dapur->id_dapur)
+                ->where('jabatan', 'Penanggung jawab')
+                ->first() ?? \App\Models\Produksi::where('id_dapur', $dapur->id_dapur)->first();
+
+            if ($approval->transaksiDapur->orderProduksi->distribusiOrder) {
+                $headDistributor = \App\Models\Distributor::where('id_dapur', $dapur->id_dapur)
+                    ->where('jabatan', 'Penanggung jawab')
+                    ->first() ?? \App\Models\Distributor::where('id_dapur', $dapur->id_dapur)->first();
+            }
+        }
 
         return view('mitra.laporan-transaksi.show', compact(
             'approval',
             'dapur',
             'stockCheck',
-            'menuDetails'
+            'menuDetails',
+            'summarySisa',
+            'headDistributor',
+            'headProduksi'
         ));
     }
 

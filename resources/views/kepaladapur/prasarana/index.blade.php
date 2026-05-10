@@ -1,5 +1,13 @@
 @extends('template_kepala_dapur.layout')
 
+@push('styles')
+    <style>
+        .swal2-container {
+            z-index: 9999 !important;
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="card mb-4">
@@ -80,20 +88,34 @@
                                     </div>
                                     <div class="card-body p-3">
                                         @foreach($kategori->items as $item)
+                                            @php
+                                                $dp = $dapur->prasarana->where('id_item', $item->id_item)->first();
+                                                $isChecked = in_array($item->id_item, $checkedPrasarana);
+                                            @endphp
                                             <div class="form-check mb-2 d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <input class="form-check-input" type="checkbox" 
+                                                <div class="d-flex align-items-center">
+                                                    <input class="form-check-input me-2" type="checkbox" 
                                                         name="prasarana[]" 
                                                         value="{{ $item->id_item }}" 
                                                         id="item_{{ $item->id_item }}"
-                                                        {{ in_array($item->id_item, $checkedPrasarana) ? 'checked' : '' }}>
+                                                        {{ $isChecked ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="item_{{ $item->id_item }}">
                                                         {{ $item->nama_item }}
                                                     </label>
+                                                    @if($dp)
+                                                        @php
+                                                            $hasData = !empty($dp->keterangan) || $dp->fotos->count() > 0;
+                                                        @endphp
+                                                        <button type="button" class="btn btn-sm btn-icon {{ $hasData ? 'text-primary' : 'text-secondary' }} ms-2"
+                                                            onclick="openDetailModal({{ $dp->id_dapur_prasarana }}, '{{ addslashes($item->nama_item) }}', `{{ $dp->keterangan }}`, {{ json_encode($dp->fotos) }})"
+                                                            title="{{ $hasData ? 'Edit Detail' : 'Tambah Detail' }}">
+                                                            <i class="bx {{ $hasData ? 'bx-pencil' : 'bx-plus' }}" style="font-size: 16px;"></i>
+                                                        </button>
+                                                    @endif
                                                 </div>
                                                 @if(!$item->is_default)
                                                     <button type="button" class="btn btn-sm btn-icon text-danger p-0 delete-item-btn" 
-                                                        onclick="confirmDelete('item', {{ $item->id_item }}, '{{ $item->nama_item }}')"
+                                                        onclick="confirmDelete('item', {{ $item->id_item }}, '{{ addslashes($item->nama_item) }}')"
                                                         title="Hapus Item">
                                                         <i class="bx bx-trash" style="font-size: 14px;"></i>
                                                     </button>
@@ -121,7 +143,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Kelompok Prasarana Baru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('kepala-dapur.prasarana.kategori.store', $dapur->id_dapur) }}" method="POST">
                     @csrf
@@ -147,7 +168,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Item Prasarana Baru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('kepala-dapur.prasarana.item.store', $dapur->id_dapur) }}" method="POST">
                     @csrf
@@ -182,6 +202,49 @@
         @method('DELETE')
     </form>
 
+    <!-- Modal Detail Prasarana -->
+    <div class="modal fade" id="detailPrasaranaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title">
+                        <i class="bx bx-info-circle me-2"></i> Detail <span id="detail_item_name" class="fw-bold"></span>
+                    </h5>
+                </div>
+                <form id="detailPrasaranaForm" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body pb-0">
+                        <div class="mb-4">
+                            <label for="keterangan" class="form-label fw-semibold">Informasi Keterangan</label>
+                            <textarea id="keterangan" name="keterangan" class="form-control" rows="3" placeholder="Masukkan detail informasi tambahan terkait item prasarana ini..."></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="fotos" class="form-label fw-semibold">Tambah Dokumentasi Foto</label>
+                            <input class="form-control" type="file" id="fotos" name="fotos[]" multiple accept="image/jpeg,image/png,image/jpg,image/webp">
+                            <small class="text-muted">Maksimal 5 foto. Format yang didukung: jpg, png, webp. Ukuran maks 5MB per file.</small>
+                        </div>
+                        <div id="existing_fotos_container" class="mb-4" style="display: none;">
+                            <label class="form-label fw-semibold d-block mb-3 border-top pt-3">Foto Tersimpan</label>
+                            <div class="d-flex flex-wrap gap-3" id="existing_fotos_list">
+                                <!-- Fotos will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top pt-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <form id="deleteFotoForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -209,6 +272,59 @@
                 });
             }
         });
+
+        window.openDetailModal = function(idDp, itemName, keterangan, fotos) {
+            document.getElementById('detail_item_name').innerText = itemName;
+            document.getElementById('keterangan').value = keterangan || '';
+            document.getElementById('detailPrasaranaForm').action = `{{ route('kepala-dapur.prasarana.detail.update', ['dapur' => $dapur->id_dapur, 'dapurPrasarana' => ':id']) }}`.replace(':id', idDp);
+            
+            // Reset deleted photo inputs
+            const oldDeletedInputs = document.querySelectorAll('.deleted-photo-input');
+            oldDeletedInputs.forEach(el => el.remove());
+
+            const existingFotosContainer = document.getElementById('existing_fotos_container');
+            const existingFotosList = document.getElementById('existing_fotos_list');
+            existingFotosList.innerHTML = '';
+            
+            if (fotos && fotos.length > 0) {
+                existingFotosContainer.style.display = 'block';
+                fotos.forEach(foto => {
+                    existingFotosList.innerHTML += `
+                        <div class="position-relative photo-item" id="photo_item_${foto.id_foto}" style="width: 120px; height: 120px;">
+                            <a href="/${foto.foto_url}" target="_blank">
+                                <img src="/${foto.foto_url}" class="rounded shadow-sm w-100 h-100" style="object-fit: cover; border: 1px solid #e1e3ea;">
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 p-1 rounded-circle shadow" 
+                                style="line-height: 1; width: 24px; height: 24px;" 
+                                onclick="markPhotoForDeletion(${foto.id_foto})" title="Hapus Foto">
+                                <i class="bx bx-trash" style="font-size: 12px; margin-left: -2px;"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+            } else {
+                existingFotosContainer.style.display = 'none';
+            }
+            
+            new bootstrap.Modal(document.getElementById('detailPrasaranaModal')).show();
+        };
+
+        window.markPhotoForDeletion = function(photoId) {
+            // Sembunyikan dari UI
+            const item = document.getElementById(`photo_item_${photoId}`);
+            if (item) {
+                item.style.display = 'none';
+            }
+            
+            // Tambahkan input hidden ke form
+            const form = document.getElementById('detailPrasaranaForm');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'deleted_photo_ids[]';
+            input.value = photoId;
+            input.className = 'deleted-photo-input';
+            form.appendChild(input);
+        };
 
         window.confirmDelete = function(type, id, name) {
             let title = '';

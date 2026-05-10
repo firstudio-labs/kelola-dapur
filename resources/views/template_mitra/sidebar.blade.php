@@ -113,6 +113,13 @@
                 </a>
             </li>
 
+            <li class="menu-item {{ request()->routeIs('mitra.dokumentasi.*') ? 'active' : '' }}">
+                <a href="{{ route('mitra.dokumentasi.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-camera"></i>
+                    <div data-i18n="Dokumentasi">Dokumentasi</div>
+                </a>
+            </li>
+
         </ul>
     </div>
 </aside>

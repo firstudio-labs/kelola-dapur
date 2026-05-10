@@ -145,7 +145,7 @@
                             $menus     = $transaksi?->detailTransaksiDapur ?? collect();
                             $porsiBesar = $item->porsi_besar ?? 0;
                             $porsiKecil = $item->porsi_kecil ?? 0;
-                            $totalPorsi = $porsiBesar + $porsiKecil;
+                            $totalPorsi = $porsiBesar;
                         @endphp
                         <tr>
                             <td class="text-center">{{ ($kiriman->currentPage() - 1) * $kiriman->perPage() + $loop->iteration }}</td>

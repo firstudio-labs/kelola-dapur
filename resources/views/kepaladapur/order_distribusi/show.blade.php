@@ -15,19 +15,19 @@
         @php
             $porsiBesarTotal = $order->details->sum('porsi_besar');
             $porsiKecilTotal = $order->details->sum('porsi_kecil');
-            $qtyTotalPorsi = $porsiBesarTotal + $porsiKecilTotal;
+            $qtyTotalPorsi = $porsiBesarTotal;
 
             $porsiBesarSelesai = $order->details->where('status', 'sudah_dikirim')->sum('porsi_besar');
             $porsiKecilSelesai = $order->details->where('status', 'sudah_dikirim')->sum('porsi_kecil');
-            $qtySelesaiPorsi = $porsiBesarSelesai + $porsiKecilSelesai;
+            $qtySelesaiPorsi = $porsiBesarSelesai;
 
             $porsiBesarSedang = $order->details->where('status', 'sedang_dikirim')->sum('porsi_besar');
             $porsiKecilSedang = $order->details->where('status', 'sedang_dikirim')->sum('porsi_kecil');
-            $qtySedangPorsi = $porsiBesarSedang + $porsiKecilSedang;
+            $qtySedangPorsi = $porsiBesarSedang;
 
             $porsiBesarBelum = $order->details->where('status', 'belum_dikirim')->sum('porsi_besar');
             $porsiKecilBelum = $order->details->where('status', 'belum_dikirim')->sum('porsi_kecil');
-            $qtyBelumPorsi = $porsiBesarBelum + $porsiKecilBelum;
+            $qtyBelumPorsi = $porsiBesarBelum;
 
             $jumlahPenerima = $order->details->count();
             $penerimaSelesai = $order->details->where('status', 'sudah_dikirim')->count();
@@ -407,7 +407,7 @@
                                                 <div class="mt-3 pt-3 border-top">
                                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                                         <small class="fw-semibold text-muted">Detail Porsi:</small>
-                                                        <span class="fw-bold text-dark">{{ $detail->jumlah_diterima }}
+                                                        <span class="fw-bold text-dark">{{ $detail->porsi_besar }}
                                                             Porsi</span>
                                                     </div>
                                                     <div class="row g-2">
@@ -684,7 +684,7 @@
                                                     <tr>
                                                         <td colspan="3" class="fw-bold text-end">Total Porsi:</td>
                                                         <td class="text-end fw-bold text-primary">
-                                                            {{ $transaksi->detailTransaksiDapur->sum('jumlah_porsi') }}
+                                                            {{ ($transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()->jumlah_porsi ?? 0) + ($transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()->jumlah_porsi ?? 0) }}
                                                         </td>
                                                     </tr>
                                                 </tfoot>
@@ -808,7 +808,7 @@
                         document.getElementById('detailPorsiKecil').value = pKecil;
                         document.getElementById('detailPorsiKecil').setAttribute('max', maxP);
                         document.getElementById('detailMaxPorsi').textContent = maxP;
-                        document.getElementById('detailTotalPorsi').textContent = pBesar + pKecil;
+                        document.getElementById('detailTotalPorsi').textContent = pBesar;
                         document.getElementById('detailCatatan').value = (catatan && catatan !== 'null') ?
                             catatan : '';
                         document.getElementById('detailNamaPenerima').textContent = nama ? 'Untuk: ' + nama :
@@ -840,8 +840,8 @@
                         const valB = parseInt(inpBesar.value) || 0;
                         const valK = parseInt(inpKecil.value) || 0;
                         const max = parseInt(maxText.textContent) || 0;
-                        const total = valB + valK;
-
+                        const total = valB;
+                        
                         totalText.textContent = total;
 
                         if (valB > max || valK > max) {
@@ -1027,7 +1027,7 @@
                                                         </td>
                                                         <td class="py-3 text-center">
                                                             <span
-                                                                class="fw-bold text-dark">{{ ($dDetail->porsi_besar ?? 0) + ($dDetail->porsi_kecil ?? 0) }}</span>
+                                                                class="fw-bold text-dark">{{ $dDetail->porsi_besar ?? 0 }}</span>
                                                             <div class="text-muted small" style="font-size: 0.7rem;">
                                                                 {{ $dDetail->porsi_besar ?? 0 }}B /
                                                                 {{ $dDetail->porsi_kecil ?? 0 }}K</div>

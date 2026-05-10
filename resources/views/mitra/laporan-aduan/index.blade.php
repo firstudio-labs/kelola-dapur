@@ -14,9 +14,9 @@
                             <i class="bx bx-chevron-right me-2"></i>
                             <span class="text-dark">Laporan Aduan</span>
                         </nav>
-                        <h4 class="mb-1">Laporan Aduan Penerima MBG</h4>
+                        <h4 class="mb-1">Laporan Aduan & Ulasan</h4>
                         <p class="mb-0 text-muted">
-                            Daftar ulasan dan catatan dari Penerima MBG terkait dapur yang bermitra dengan Anda
+                            Daftar ulasan dari Produksi, Distribusi, dan Kritik dari Penerima MBG
                         </p>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label for="search-input" class="form-label">Cari Ulasan / Penerima</label>
+                        <label for="search-input" class="form-label">Cari Ulasan / Kritik</label>
                         <input type="text" name="search" id="search-input" class="form-control" placeholder="Cari..." value="{{ request('search') }}">
                     </div>
 
@@ -88,22 +88,21 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>No</th>
-                                    <th>Tanggal Ulasan</th>
-                                    <th>Penerima MBG</th>
-                                    <th>Dapur</th>
-                                    <th>ID Transaksi</th>
-                                    <th>Ulasan / Catatan</th>
-                                    <th>Aksi</th>
+                                    <th width="50">No</th>
+                                    <th width="150">Tanggal</th>
+                                    <th width="200">Dapur / Transaksi</th>
+                                    <th>Ulasan Produksi</th>
+                                    <th>Ulasan Distribusi</th>
+                                    <th>Kritik Penerima</th>
+                                    <th width="80">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($aduans as $index => $aduan)
+                                @foreach ($aduans as $index => $orderProd)
                                     @php
-                                        $OrderDist = $aduan->orderDistribusi;
-                                        $OrderProd = $OrderDist ? $OrderDist->orderProduksi : null;
-                                        $Transaksi = $OrderProd ? $OrderProd->transaksiDapur : null;
-                                        $approval  = $Transaksi ? $Transaksi->approvalTransaksi : null;
+                                        $transaksi = $orderProd->transaksiDapur;
+                                        $orderDist = $orderProd->distribusiOrder;
+                                        $approval  = $transaksi ? $transaksi->approvalTransaksi : null;
                                     @endphp
                                     <tr>
                                         <td>
@@ -111,51 +110,62 @@
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <span class="fw-medium">
-                                                    {{ $aduan->updated_at->format('d M Y') }}
+                                                <span class="text-dark">
+                                                    {{ $orderProd->updated_at->format('d M Y') }}
                                                 </span>
                                                 <small class="text-muted">
-                                                    {{ $aduan->updated_at->format('H:i') }}
+                                                    {{ $orderProd->updated_at->format('H:i') }}
                                                 </small>
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <div>
-                                                    <h6 class="mb-0">
-                                                        {{ $aduan->penerimaMbg->userRole->user->nama ?? 'Unknown' }}
-                                                    </h6>
-                                                    <small class="text-muted">
-                                                        PJ: {{ $aduan->penerimaMbg->penanggung_jawab ?? '-' }}
-                                                    </small>
-                                                </div>
+                                            <div class="text-dark">
+                                                {{ $transaksi->dapur->nama_dapur ?? '-' }}
                                             </div>
+                                            <div class="text-primary small">
+                                                {{ $transaksi->id_transaksi ?? '-' }}
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ $transaksi->tanggal_transaksi ? $transaksi->tanggal_transaksi->format('d/m/Y') : '' }}
+                                            </small>
                                         </td>
                                         <td>
-                                            <span class="fw-medium text-dark">
-                                                {{ $Transaksi->dapur->nama_dapur ?? '-' }}
-                                            </span>
+                                            @if($orderProd->ulasan)
+                                                @php $prodHead = $productionHeads->get($orderProd->id_dapur); @endphp
+                                                <div class="small text-primary">{{ $prodHead ? ($prodHead->nama_lengkap ?: $prodHead->userRole->user->nama) : 'Tim Produksi' }}</div>
+                                                <div class="text-wrap fst-italic text-muted small" title="{{ $orderProd->ulasan }}">
+                                                    "{{ Str::limit($orderProd->ulasan, 80) }}"
+                                                </div>
+                                            @else
+                                                <span class="text-light">-</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <div>
-                                                    <h6 class="mb-0 text-primary">
-                                                        {{ $Transaksi->id_transaksi ?? '-' }}
-                                                    </h6>
-                                                    <small class="text-muted">
-                                                        {{ $Transaksi->tanggal_transaksi ? $Transaksi->tanggal_transaksi->format('d/m/Y') : '' }}
-                                                    </small>
+                                            @if($orderDist && $orderDist->ulasan)
+                                                @php $distHead = $distributionHeads->get($orderProd->id_dapur); @endphp
+                                                <div class="small text-warning">{{ $distHead ? ($distHead->nama_lengkap ?: $distHead->userRole->user->nama) : 'Tim Distribusi' }}</div>
+                                                <div class="text-wrap fst-italic text-muted small" title="{{ $orderDist->ulasan }}">
+                                                    "{{ Str::limit($orderDist->ulasan, 80) }}"
                                                 </div>
-                                            </div>
+                                            @else
+                                                <span class="text-light">-</span>
+                                            @endif
                                         </td>
-                                        <td style="white-space: normal; min-width: 250px;">
-                                            <div class="text-wrap fst-italic text-muted">
-                                                "{{ Str::limit($aduan->ulasan, 150) }}"
-                                            </div>
-                                            @if ($aduan->status_penerimaan === 'ditolak')
-                                                <span class="badge bg-label-danger mt-1 small">Ditolak</span>
-                                            @elseif ($aduan->status_penerimaan === 'diterima')
-                                                <span class="badge bg-label-success mt-1 small">Diterima</span>
+                                        <td>
+                                            @if($orderDist)
+                                                @php $critiques = $orderDist->details->whereNotNull('kritik'); @endphp
+                                                @forelse($critiques as $critique)
+                                                    <div class="mb-2 pb-2 {{ !$loop->last ? 'border-bottom border-light' : '' }}">
+                                                        <div class="small text-danger">{{ $critique->penerimaMbg->userRole->user->nama }}</div>
+                                                        <div class="text-wrap fst-italic text-muted small" title="{{ $critique->kritik }}">
+                                                            "{{ Str::limit($critique->kritik, 80) }}"
+                                                        </div>
+                                                    </div>
+                                                @empty
+                                                    <span class="text-light">-</span>
+                                                @endforelse
+                                            @else
+                                                <span class="text-light">-</span>
                                             @endif
                                         </td>
                                         <td>
@@ -186,9 +196,9 @@
                 @else
                     <div class="text-center py-6">
                         <i class="bx bx-message-error bx-lg text-muted mb-3"></i>
-                        <h5 class="mb-1">Tidak ada aduan</h5>
+                        <h5 class="mb-1">Tidak ada aduan atau ulasan</h5>
                         <p class="text-muted mb-3">
-                            Belum ada ulasan atau aduan dari Penerima MBG untuk dapur Anda.
+                            Belum ada ulasan dari Produksi, Distribusi, maupun Kritik dari Penerima MBG untuk dapur Anda.
                         </p>
                         @if (request()->hasAny(['dapur', 'search', 'date_from', 'date_to']))
                             <a href="{{ route('mitra.laporan-aduan.index') }}" class="btn btn-outline-primary">

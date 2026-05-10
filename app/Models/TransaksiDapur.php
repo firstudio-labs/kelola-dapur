@@ -552,10 +552,10 @@ class TransaksiDapur extends Model
 
     public function calculateTotalPorsi(): int
     {
-        $total            = $this->detailTransaksiDapur()->sum('jumlah_porsi');
+        $total            = $this->detailTransaksiDapur()->where('tipe_porsi', 'besar')->value('jumlah_porsi') ?? 0;
         $this->total_porsi = $total;
         $this->save();
-        return $total;
+        return (int) $total;
     }
 
     public function canBeProcessed(): bool

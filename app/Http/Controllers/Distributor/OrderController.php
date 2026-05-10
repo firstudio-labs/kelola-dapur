@@ -143,7 +143,7 @@ class OrderController extends Controller
             if ($request->filled('porsi_besar') || $request->filled('porsi_kecil')) {
                 $detail->porsi_besar = $request->porsi_besar ?? 0;
                 $detail->porsi_kecil = $request->porsi_kecil ?? 0;
-                $detail->jumlah_diterima = $detail->porsi_besar + $detail->porsi_kecil;
+                $detail->jumlah_diterima = $detail->porsi_besar;
             }
             $detail->save();
 
@@ -223,6 +223,57 @@ class OrderController extends Controller
             DB::rollBack();
             Log::error('Failed to update order distribusi status', ['id' => $order->id_distribusi, 'error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
+        }
+    }
+
+    public function submitUlasan(Request $request, OrderDistribusi $order)
+    {
+        $distributor = $this->getDistributor();
+        if (!$distributor || $order->id_dapur !== $distributor->id_dapur) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($order->status !== OrderDistribusi::STATUS_SUDAH_DIKIRIM) {
+            return redirect()->back()->with('error', 'Ulasan hanya dapat dikirim setelah distribusi selesai.');
+        }
+
+        $request->validate([
+            'ulasan' => 'required|string|max:1000',
+            'ulasan_foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $order->ulasan = $request->ulasan;
+
+            if ($request->hasFile('ulasan_foto')) {
+                $file = $request->file('ulasan_foto');
+                $filename = 'ulasan_dist_' . time() . '_' . uniqid() . '.webp';
+                $path = 'distribusi/ulasan/' . $filename;
+
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                $image = $manager->read($file);
+                
+                $image->scaleDown(width: 1200);
+                $encoded = $image->toWebp(quality: 75);
+
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $encoded);
+
+                $order->ulasan_foto = $path;
+            }
+
+            $order->save();
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Ulasan distribusi berhasil disimpan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to submit order distribusi ulasan', [
+                'id_distribusi' => $order->id_distribusi,
+                'error'         => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Gagal menyimpan ulasan: ' . $e->getMessage());
         }
     }
 }

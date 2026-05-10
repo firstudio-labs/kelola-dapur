@@ -22,6 +22,8 @@ class OrderDistribusiDetail extends Model
         'catatan',
         'status_penerimaan',
         'ulasan',
+        'kritik',
+        'kritik_foto',
         'porsi_besar_diterima',
         'porsi_kecil_diterima',
     ];

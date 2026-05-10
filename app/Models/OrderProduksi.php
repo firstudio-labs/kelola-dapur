@@ -17,6 +17,8 @@ class OrderProduksi extends Model
         'id_dapur',
         'status',
         'catatan',
+        'ulasan',
+        'ulasan_foto',
     ];
 
     protected $casts = [

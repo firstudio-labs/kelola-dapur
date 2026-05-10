@@ -194,8 +194,14 @@ class OrderProduksiController extends Controller
                         ->where('status_approval', 'approved')
                         ->get();
 
+                    $transaksiDapur = $order->transaksiDapur;
+                    $hasBesar = $transaksiDapur->detailTransaksiDapur()->where('tipe_porsi', 'besar')->exists();
+                    $hasKecil = $transaksiDapur->detailTransaksiDapur()->where('tipe_porsi', 'kecil')->exists();
+
                     foreach ($penerimaMbgList as $penerima) {
                         $pPorsi = $penerima->jumlah_porsi;
+                        $porsiBesarDist = $hasBesar ? $pPorsi : 0;
+                        $porsiKecilDist = $hasKecil ? $pPorsi : 0;
 
                         \App\Models\OrderDistribusiDetail::firstOrCreate(
                             [
@@ -203,9 +209,9 @@ class OrderProduksiController extends Controller
                                 'id_penerima'   => $penerima->id_penerima,
                             ],
                             [
-                                'porsi_besar'     => $pPorsi,
-                                'porsi_kecil'     => $pPorsi,
-                                'jumlah_diterima' => $pPorsi * 2,
+                                'porsi_besar'     => $porsiBesarDist,
+                                'porsi_kecil'     => $porsiKecilDist,
+                                'jumlah_diterima' => $porsiBesarDist,
                                 'status'          => \App\Models\OrderDistribusiDetail::STATUS_BELUM_DIKIRIM,
                             ]
                         );
@@ -225,6 +231,63 @@ class OrderProduksiController extends Controller
             ]);
             return redirect()->back()
                 ->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
+        }
+    }
+
+    public function submitUlasan(Request $request, OrderProduksi $order)
+    {
+        $user = Auth::user();
+
+        $produksi = Produksi::whereHas('userRole', function ($q) use ($user) {
+            $q->where('id_user', $user->id_user);
+        })->first();
+
+        if (!$produksi || $order->id_dapur !== $produksi->id_dapur) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($order->status !== 'selesai') {
+            return redirect()->back()->with('error', 'Ulasan hanya dapat dikirim setelah produksi selesai.');
+        }
+
+        $request->validate([
+            'ulasan' => 'required|string|max:1000',
+            'ulasan_foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max before compression
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $order->ulasan = $request->ulasan;
+
+            if ($request->hasFile('ulasan_foto')) {
+                $file = $request->file('ulasan_foto');
+                $filename = 'ulasan_' . time() . '_' . uniqid() . '.webp';
+                $path = 'produksi/ulasan/' . $filename;
+
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                $image = $manager->read($file);
+                
+                // Resize if too large, then encode to webp
+                $image->scaleDown(width: 1200);
+                $encoded = $image->toWebp(quality: 75);
+
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $encoded);
+
+                $order->ulasan_foto = $path;
+            }
+
+            $order->save();
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Ulasan produksi berhasil disimpan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to submit order produksi ulasan', [
+                'id_order' => $order->id_order,
+                'error'    => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Gagal menyimpan ulasan: ' . $e->getMessage());
         }
     }
 }

@@ -6,13 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Dapur;
 use App\Models\KategoriPrasarana;
 use App\Models\ItemPrasarana;
+use App\Models\DapurPrasarana;
+use App\Models\DapurPrasaranaFoto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PrasaranaController extends Controller
 {
     public function index(Dapur $dapur)
     {
-        $dapur->load('prasarana');
+        $dapur->load('prasarana.fotos', 'prasarana.item');
 
         $kategoriPrasarana = KategoriPrasarana::with('items')->where('is_active', true)->get();
 
@@ -28,20 +34,119 @@ class PrasaranaController extends Controller
             'prasarana.*.exists' => 'Item prasarana tidak valid',
         ]);
 
-        $dapur->prasarana()->delete();
+        $submittedItems = $request->input('prasarana', []);
+        
+        $existingItems = $dapur->prasarana()->pluck('id_item')->toArray();
 
-        if ($request->has('prasarana') && is_array($request->prasarana)) {
-            foreach ($request->prasarana as $itemId) {
-                \App\Models\DapurPrasarana::create([
-                    'id_dapur' => $dapur->id_dapur,
-                    'id_item' => $itemId,
-                    'is_available' => true
-                ]);
+        $itemsToDelete = array_diff($existingItems, $submittedItems);
+        if (!empty($itemsToDelete)) {
+            // Delete prasarana (photos will cascade delete if setup in DB, but let's delete files too just in case or let command handle it. cascade deletes photos from DB, but not files. We should probably delete files.)
+            $prasaranasToDelete = $dapur->prasarana()->whereIn('id_item', $itemsToDelete)->get();
+            foreach ($prasaranasToDelete as $dp) {
+                foreach ($dp->fotos as $foto) {
+                    $path = str_replace('storage/', '', $foto->foto_url);
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+                $dp->delete();
             }
+        }
+
+        $itemsToAdd = array_diff($submittedItems, $existingItems);
+        foreach ($itemsToAdd as $itemId) {
+            \App\Models\DapurPrasarana::create([
+                'id_dapur' => $dapur->id_dapur,
+                'id_item' => $itemId,
+                'is_available' => true
+            ]);
         }
 
         return redirect()->route('kepala-dapur.prasarana.index', $dapur)
             ->with('success', 'Kelengkapan Prasarana berhasil diperbarui');
+    }
+
+    public function updateDetail(Request $request, Dapur $dapur, DapurPrasarana $dapurPrasarana)
+    {
+        if ($dapurPrasarana->id_dapur !== $dapur->id_dapur) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'keterangan' => 'nullable|string',
+            'fotos' => 'nullable|array|max:5', // limit 5 files per upload batch
+            'fotos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120', // max 5MB before compression
+            'deleted_photo_ids' => 'nullable|array',
+            'deleted_photo_ids.*' => 'exists:dapur_prasarana_foto,id_foto',
+        ]);
+
+        $dapurPrasarana->update([
+            'keterangan' => $request->keterangan,
+        ]);
+
+        // Process lazy deletions
+        if ($request->has('deleted_photo_ids')) {
+            $photosToDelete = DapurPrasaranaFoto::whereIn('id_foto', $request->deleted_photo_ids)
+                ->where('id_dapur_prasarana', $dapurPrasarana->id_dapur_prasarana)
+                ->get();
+            
+            foreach ($photosToDelete as $photo) {
+                $path = str_replace('storage/', '', $photo->foto_url);
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+                $photo->delete();
+            }
+        }
+
+        if ($request->hasFile('fotos')) {
+            $manager = new ImageManager(new Driver());
+            $uploadPath = 'prasarana/' . date('Y/m');
+            
+            if (!Storage::disk('public')->exists($uploadPath)) {
+                Storage::disk('public')->makeDirectory($uploadPath);
+            }
+
+            foreach ($request->file('fotos') as $foto) {
+                try {
+                    $filename = Str::random(40) . '.webp';
+                    
+                    $image = $manager->read($foto->getRealPath());
+                    $image->scaleDown(width: 1200, height: 1200);
+                    $encoded = $image->toWebp(80);
+                    
+                    Storage::disk('public')->put($uploadPath . '/' . $filename, (string) $encoded);
+                    
+                    DapurPrasaranaFoto::create([
+                        'id_dapur_prasarana' => $dapurPrasarana->id_dapur_prasarana,
+                        'foto_url' => 'storage/' . $uploadPath . '/' . $filename,
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Error uploading prasarana foto: ' . $e->getMessage());
+                }
+            }
+        }
+
+        return redirect()->route('kepala-dapur.prasarana.index', $dapur)
+            ->with('success', 'Detail prasarana berhasil diperbarui.');
+    }
+
+    public function deleteFoto(Dapur $dapur, DapurPrasaranaFoto $foto)
+    {
+        $dapurPrasarana = $foto->dapurPrasarana;
+        if (!$dapurPrasarana || $dapurPrasarana->id_dapur !== $dapur->id_dapur) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $path = str_replace('storage/', '', $foto->foto_url);
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+
+        $foto->delete();
+
+        return redirect()->route('kepala-dapur.prasarana.index', $dapur)
+            ->with('success', 'Foto berhasil dihapus.');
     }
 
     public function storeKategori(Request $request, Dapur $dapur)

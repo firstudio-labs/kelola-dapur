@@ -420,6 +420,8 @@ Route::middleware(['auth', 'dapur.access:kepala_dapur', 'check.subscription'])
         // Prasarana Management
         Route::get('/prasarana', [PrasaranaController::class, 'index'])->name('prasarana.index');
         Route::put('/prasarana', [PrasaranaController::class, 'update'])->name('prasarana.update');
+        Route::put('/prasarana/{dapurPrasarana}/detail', [PrasaranaController::class, 'updateDetail'])->name('prasarana.detail.update');
+        Route::delete('/prasarana/foto/{foto}', [PrasaranaController::class, 'deleteFoto'])->name('prasarana.foto.destroy');
         Route::post('/prasarana/kategori', [PrasaranaController::class, 'storeKategori'])->name('prasarana.kategori.store');
         Route::post('/prasarana/item', [PrasaranaController::class, 'storeItem'])->name('prasarana.item.store');
         Route::delete('/prasarana/kategori/{id_kategori}', [PrasaranaController::class, 'destroyKategori'])->name('prasarana.kategori.destroy');
@@ -675,6 +677,9 @@ Route::middleware(['auth', 'role:mitra'])
 
         // Laporan Aduan
         Route::get('/laporan-aduan', [\App\Http\Controllers\Mitra\LaporanAduanController::class, 'index'])->name('laporan-aduan.index');
+
+        // Dokumentasi
+        Route::resource('dokumentasi', \App\Http\Controllers\Mitra\DokumentasiController::class)->except(['create', 'show', 'edit']);
     });
 
 // ============================
@@ -700,6 +705,7 @@ Route::middleware(['auth', 'role:penerima_mbg'])
             Route::get('/', [PenerimaMbgOrderController::class, 'index'])->name('index');
             Route::get('/{detail}', [PenerimaMbgOrderController::class, 'show'])->name('show');
             Route::post('/{detail}/konfirmasi', [PenerimaMbgOrderController::class, 'store'])->name('store');
+            Route::post('/{detail}/kritik', [PenerimaMbgOrderController::class, 'submitKritik'])->name('submit-kritik');
         });
     });
 
@@ -733,6 +739,10 @@ Route::middleware(['auth', 'role:produksi', 'check.subscription'])
                     ProduksiOrderProduksiController::class,
                     "updateStatus",
                 ])->name("update-status");
+                Route::post("/{order}/ulasan", [
+                    ProduksiOrderProduksiController::class,
+                    "submitUlasan",
+                ])->name("ulasan");
             });
     });
 
@@ -833,6 +843,7 @@ Route::middleware(['auth', 'role:distributor', 'check.subscription'])
                 Route::get('/{order}', [DistributorOrderController::class, 'show'])->name('show');
                 Route::patch('/{order}/update-status', [DistributorOrderController::class, 'updateStatus'])->name('update-status');
                 Route::patch('/{order}/detail/{detail}/update-status', [DistributorOrderController::class, 'updateDetailStatus'])->name('updateDetailStatus');
+                Route::post('/{order}/ulasan', [DistributorOrderController::class, 'submitUlasan'])->name('ulasan');
             });
     });
 

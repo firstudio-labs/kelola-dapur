@@ -189,4 +189,56 @@ class OrderController extends Controller
                 ->with('error', 'Gagal menyimpan konfirmasi: ' . $e->getMessage());
         }
     }
+
+    public function submitKritik(Request $request, OrderDistribusiDetail $detail)
+    {
+        $penerima = $this->getPenerimaOrFail();
+
+        if ($detail->id_penerima !== $penerima->id_penerima) {
+            abort(403, 'Unauthorized');
+        }
+
+        if (!in_array($detail->status_penerimaan, [OrderDistribusiDetail::STATUS_PENERIMAAN_DITERIMA, OrderDistribusiDetail::STATUS_PENERIMAAN_DITOLAK])) {
+            return redirect()->back()->with('error', 'Kritik hanya dapat dikirim setelah melakukan konfirmasi penerimaan.');
+        }
+
+        $request->validate([
+            'kritik' => 'required|string|max:1000',
+            'kritik_foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $detail->kritik = $request->kritik;
+
+            if ($request->hasFile('kritik_foto')) {
+                $file = $request->file('kritik_foto');
+                $filename = 'kritik_' . time() . '_' . uniqid() . '.webp';
+                $path = 'penerima_mbg/kritik/' . $filename;
+
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                $image = $manager->read($file);
+                
+                $image->scaleDown(width: 1200);
+                $encoded = $image->toWebp(quality: 75);
+
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $encoded);
+
+                $detail->kritik_foto = $path;
+            }
+
+            $detail->save();
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Kritik berhasil disimpan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to submit kritik', [
+                'id_detail' => $detail->id_detail,
+                'error'     => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Gagal menyimpan kritik: ' . $e->getMessage());
+        }
+    }
 }

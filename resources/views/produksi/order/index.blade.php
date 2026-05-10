@@ -151,7 +151,9 @@
                             @foreach($orders as $order)
                                 @php
                                     $transaksi  = $order->transaksiDapur;
-                                    $totalPorsi     = $transaksi->detailTransaksiDapur->sum('jumlah_porsi');
+                                    $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()->jumlah_porsi ?? 0;
+                                    $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()->jumlah_porsi ?? 0;
+                                    $totalPorsi = $totalPorsiBesar + $totalPorsiKecil;
                                     $menuList       = $transaksi->detailTransaksiDapur->map(fn($d) => $d->menuMakanan->nama_menu ?? '-')->unique()->implode(', ');
                                     $isStokKurang   = $order->status === 'stok_kurang';
                                     
@@ -279,7 +281,9 @@
                     @foreach ($orders as $order)
                         @php
                             $transaksi = $order->transaksiDapur;
-                            $totalPorsi = $transaksi->detailTransaksiDapur->sum('jumlah_porsi');
+                            $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()->jumlah_porsi ?? 0;
+                            $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()->jumlah_porsi ?? 0;
+                            $totalPorsi = $totalPorsiBesar + $totalPorsiKecil;
                             $menuList = $transaksi->detailTransaksiDapur->map(fn($d) => $d->menuMakanan->nama_menu ?? '-')->unique()->implode(', ');
                             $isStokKurang = $order->status === 'stok_kurang';
                             

@@ -17,6 +17,8 @@ class OrderDistribusi extends Model
         'id_dapur',
         'status',
         'catatan',
+        'ulasan',
+        'ulasan_foto',
     ];
 
     const STATUS_BELUM_DIKIRIM  = 'belum_dikirim';

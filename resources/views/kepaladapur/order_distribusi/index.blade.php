@@ -151,7 +151,9 @@
                                     $produksiOrder = $order->orderProduksi;
                                     $transaksi = $produksiOrder->transaksiDapur;
                                     $menus = $transaksi->detailTransaksiDapur->map(fn($d) => $d->menuMakanan->nama_menu)->unique()->join(', ');
-                                    $totalPorsi = $transaksi->detailTransaksiDapur->sum('jumlah_porsi');
+                                    $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()->jumlah_porsi ?? 0;
+                                    $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()->jumlah_porsi ?? 0;
+                                    $totalPorsi = $totalPorsiBesar;
                                     $badgeClass = match($order->status) {
                                         'sudah_dikirim'  => 'bg-label-success',
                                         'sedang_dikirim' => 'bg-label-warning',
@@ -224,7 +226,9 @@
                         @php
                             $produksiOrder = $order->orderProduksi;
                             $transaksi = $produksiOrder->transaksiDapur;
-                            $totalPorsi = $transaksi->detailTransaksiDapur->sum('jumlah_porsi');
+                            $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()->jumlah_porsi ?? 0;
+                            $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()->jumlah_porsi ?? 0;
+                            $totalPorsi = $totalPorsiBesar;
                             $badgeClass = match($order->status) {
                                 'sudah_dikirim'  => 'bg-label-success',
                                 'sedang_dikirim' => 'bg-label-warning',
