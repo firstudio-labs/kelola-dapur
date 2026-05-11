@@ -141,9 +141,13 @@ class OrderDistribusiController extends Controller
             $detail->save();
 
             if ($request->hasFile('dokumentasi')) {
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
                 foreach ($request->file('dokumentasi') as $file) {
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('distribusi/detail-dokumentasi', $filename, 'public');
+                    $filename = time() . '_' . uniqid() . '.webp';
+                    $path = 'distribusi/detail-dokumentasi/' . $filename;
+                    $img = $manager->read($file->getRealPath());
+                    if ($img->width() > 1920) $img->scaleDown(width: 1920);
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $img->toWebp(80));
                     OrderDistribusiDetailDokumentasi::create([
                         'id_detail'   => $detail->id_detail,
                         'path_gambar' => $path,
@@ -200,9 +204,13 @@ class OrderDistribusiController extends Controller
             $order->save();
 
             if ($request->status === 'sudah_dikirim' && $request->hasFile('dokumentasi')) {
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
                 foreach ($request->file('dokumentasi') as $file) {
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('distribusi/dokumentasi', $filename, 'public');
+                    $filename = time() . '_' . uniqid() . '.webp';
+                    $path = 'distribusi/dokumentasi/' . $filename;
+                    $img = $manager->read($file->getRealPath());
+                    if ($img->width() > 1920) $img->scaleDown(width: 1920);
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $img->toWebp(80));
                     OrderDistribusiDokumentasi::create([
                         'id_distribusi' => $order->id_distribusi,
                         'path_gambar'   => $path,

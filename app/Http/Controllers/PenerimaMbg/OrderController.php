@@ -165,9 +165,13 @@ class OrderController extends Controller
                 : $detail->porsi_kecil;
             $detail->save();
 
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             foreach ($request->file('foto') as $file) {
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('penerimaan/foto', $filename, 'public');
+                $filename = time() . '_' . uniqid() . '.webp';
+                $path = 'penerimaan/foto/' . $filename;
+                $img = $manager->read($file->getRealPath());
+                if ($img->width() > 1920) $img->scaleDown(width: 1920);
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $img->toWebp(80));
                 OrderDistribusiDetailPenerimaanFoto::create([
                     'id_detail' => $detail->id_detail,
                     'path_foto' => $path,

@@ -171,9 +171,13 @@ class OrderProduksiController extends Controller
             $order->save();
 
             if ($request->status === 'selesai' && $request->hasFile('dokumentasi')) {
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
                 foreach ($request->file('dokumentasi') as $file) {
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('produksi/dokumentasi', $filename, 'public');
+                    $filename = time() . '_' . uniqid() . '.webp';
+                    $path = 'produksi/dokumentasi/' . $filename;
+                    $img = $manager->read($file->getRealPath());
+                    if ($img->width() > 1920) $img->scaleDown(width: 1920);
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $img->toWebp(80));
 
                     OrderProduksiDokumentasi::create([
                         'id_order' => $order->id_order,
