@@ -55,14 +55,10 @@ class OrderController extends Controller
 
         // Date Filter
         if ($request->filled('date_from')) {
-            $query->whereHas('orderDistribusi.orderProduksi.transaksiDapur', function($q) use ($request) {
-                $q->where('tanggal_transaksi', '>=', $request->date_from);
-            });
+            $query->whereDate('tanggal_dikirim', '>=', $request->date_from);
         }
         if ($request->filled('date_to')) {
-            $query->whereHas('orderDistribusi.orderProduksi.transaksiDapur', function($q) use ($request) {
-                $q->where('tanggal_transaksi', '<=', $request->date_to);
-            });
+            $query->whereDate('tanggal_dikirim', '<=', $request->date_to);
         }
 
         // Stats (calculate before searching to keep them consistent, or after if you want them to reflect search)

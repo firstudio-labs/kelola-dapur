@@ -72,11 +72,11 @@
                                     <td>{{ $dapur?->nama_dapur ?? '—' }}</td>
                                 </tr>
                                 <tr>
-                                    <th class="text-muted ps-0">Tanggal Transaksi</th>
+                                    <th class="text-muted ps-0">Tanggal Kirim</th>
                                     <td>
-                                        {{ $transaksi?->tanggal_transaksi
-                                            ? \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->translatedFormat('l, d F Y')
-                                            : '—' }}
+                                        {{ $detail->tanggal_dikirim
+                                            ? $detail->tanggal_dikirim->translatedFormat('l, d F Y H:i')
+                                            : ($transaksi?->tanggal_transaksi ? \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->translatedFormat('l, d F Y') : '—') }}
                                     </td>
                                 </tr>
                                 <tr>

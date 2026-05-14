@@ -26,6 +26,11 @@ class OrderDistribusiDetail extends Model
         'kritik_foto',
         'porsi_besar_diterima',
         'porsi_kecil_diterima',
+        'tanggal_dikirim',
+    ];
+
+    protected $casts = [
+        'tanggal_dikirim' => 'datetime',
     ];
 
     const STATUS_BELUM_DIKIRIM  = 'belum_dikirim';

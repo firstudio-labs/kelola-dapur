@@ -138,6 +138,9 @@ class OrderController extends Controller
             }
 
             $detail->status  = $request->status;
+            if ($request->status === OrderDistribusiDetail::STATUS_SUDAH_DIKIRIM && !$detail->tanggal_dikirim) {
+                $detail->tanggal_dikirim = now();
+            }
             $detail->catatan = $request->catatan;
             
             if ($request->filled('porsi_besar') || $request->filled('porsi_kecil')) {
@@ -207,6 +210,9 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             $order->status  = $request->status;
+            if ($request->status === OrderDistribusi::STATUS_SUDAH_DIKIRIM && !$order->tanggal_dikirim) {
+                $order->tanggal_dikirim = now();
+            }
             $order->catatan = $request->catatan;
             $order->save();
 

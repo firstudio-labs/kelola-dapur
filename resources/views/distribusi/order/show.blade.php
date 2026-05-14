@@ -420,7 +420,10 @@
                                                 </button>
                                             @else
                                                 <div class="text-center mt-2 pt-2 border-top border-dashed border-light">
-                                                    <span class="text-success small fw-semibold"><i class="bx bx-check-circle me-1"></i>Pengiriman Selesai</span>
+                                                    <span class="text-success small fw-semibold">
+                                                        <i class="bx bx-check-circle me-1"></i>Selesai: 
+                                                        {{ $detail->tanggal_dikirim ? $detail->tanggal_dikirim->format('d M Y H:i') : '—' }}
+                                                    </span>
                                                 </div>
                                             @endif
                                         </div>
@@ -502,7 +505,6 @@
                     <h5 class="modal-title"><i class="bx bx-user-check me-2 text-primary"></i>Update Pengiriman</h5>
                     <small class="text-muted" id="detailNamaPenerima"></small>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="updateDetailForm" method="POST" action="" enctype="multipart/form-data">
                 @csrf
@@ -518,27 +520,24 @@
                     </div>
                     <div class="row g-3 mb-1">
                         <div class="col-6">
-                            <label class="form-label fw-semibold text-primary">Porsi Besar</label>
+                            <label class="form-label fw-semibold text-primary d-flex justify-content-between">
+                                <span>Porsi Besar</span>
+                                <small class="text-muted fw-normal">Max: <span class="detailMaxPorsiText">0</span></small>
+                            </label>
                             <div class="input-group">
                                 <input type="number" name="porsi_besar" class="form-control portion-input" id="detailPorsiBesar" min="0">
                             </div>
                         </div>
                         <div class="col-6">
-                            <label class="form-label fw-semibold text-success">Porsi Kecil</label>
+                            <label class="form-label fw-semibold text-success d-flex justify-content-between">
+                                <span>Porsi Kecil</span>
+                                <small class="text-muted fw-normal">Max: <span class="detailMaxPorsiText">0</span></small>
+                            </label>
                             <div class="input-group">
                                 <input type="number" name="porsi_kecil" class="form-control portion-input" id="detailPorsiKecil" min="0">
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="p-2 bg-lighter rounded border" id="porsiDisplayWrapper">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="small fw-bold">Total Diinput:</span>
-                                    <div>
-                                        <span class="fs-5 fw-bold text-dark" id="detailTotalPorsi">0</span>
-                                        <span class="text-muted small">/ <span id="detailMaxPorsi">0</span></span>
-                                    </div>
-                                </div>
-                            </div>
                             <div id="portionErrorMessage" class="text-danger small mt-1 d-none">
                                 <i class="bx bx-error-circle me-1"></i> Jumlah tidak boleh melebihi batas maksimal!
                             </div>
@@ -600,15 +599,13 @@
                 document.getElementById('detailPorsiBesar').setAttribute('max', maxP);
                 document.getElementById('detailPorsiKecil').value = pKecil;
                 document.getElementById('detailPorsiKecil').setAttribute('max', maxP);
-                document.getElementById('detailMaxPorsi').textContent = maxP;
-                document.getElementById('detailTotalPorsi').textContent = pBesar;
+                document.querySelectorAll('.detailMaxPorsiText').forEach(el => el.textContent = maxP);
                 document.getElementById('detailCatatan').value = (catatan && catatan !== 'null') ? catatan : '';
                 document.getElementById('detailNamaPenerima').textContent = nama ? 'Untuk: ' + nama : '';
                 toggleDetailDok(status);
 
                 // Reset error state
                 document.getElementById('portionErrorMessage').classList.add('d-none');
-                document.getElementById('porsiDisplayWrapper').classList.remove('border-danger', 'bg-label-danger');
                 document.querySelector('#updateDetailForm button[type="submit"]').disabled = false;
 
                 document.getElementById('updateDetailForm').action =
@@ -622,27 +619,23 @@
             // Validation & Auto-calculate total in modal
             const inpBesar = document.getElementById('detailPorsiBesar');
             const inpKecil = document.getElementById('detailPorsiKecil');
-            const totalText = document.getElementById('detailTotalPorsi');
-            const maxText = document.getElementById('detailMaxPorsi');
             const submitBtn = document.querySelector('#updateDetailForm button[type="submit"]');
             const errBox = document.getElementById('portionErrorMessage');
-            const wrapBox = document.getElementById('porsiDisplayWrapper');
-
+            
             function validatePortions() {
                 const valB = parseInt(inpBesar.value) || 0;
                 const valK = parseInt(inpKecil.value) || 0;
-                const max = parseInt(maxText.textContent) || 0;
-                const total = valB;
-                
-                totalText.textContent = total;
+                const max = parseInt(document.querySelector('.detailMaxPorsiText').textContent) || 0;
 
                 if (valB > max || valK > max) {
                     errBox.classList.remove('d-none');
-                    wrapBox.classList.add('border-danger', 'bg-label-danger');
+                    inpBesar.classList.add('is-invalid');
+                    inpKecil.classList.add('is-invalid');
                     submitBtn.disabled = true;
                 } else {
                     errBox.classList.add('d-none');
-                    wrapBox.classList.remove('border-danger', 'bg-label-danger');
+                    inpBesar.classList.remove('is-invalid');
+                    inpKecil.classList.remove('is-invalid');
                     submitBtn.disabled = false;
                 }
             }

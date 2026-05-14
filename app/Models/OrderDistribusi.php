@@ -19,6 +19,11 @@ class OrderDistribusi extends Model
         'catatan',
         'ulasan',
         'ulasan_foto',
+        'tanggal_dikirim',
+    ];
+
+    protected $casts = [
+        'tanggal_dikirim' => 'datetime',
     ];
 
     const STATUS_BELUM_DIKIRIM  = 'belum_dikirim';
@@ -72,6 +77,11 @@ class OrderDistribusi extends Model
 
         $this->status = $allDone ? self::STATUS_SUDAH_DIKIRIM
             : ($anyStarted ? self::STATUS_SEDANG_DIKIRIM : self::STATUS_BELUM_DIKIRIM);
+
+        if ($this->status === self::STATUS_SUDAH_DIKIRIM && !$this->tanggal_dikirim) {
+            $this->tanggal_dikirim = now();
+        }
+
         $this->save();
     }
 }

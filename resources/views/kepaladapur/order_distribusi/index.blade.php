@@ -140,6 +140,7 @@
                                 <th>Status Transaksi</th>
                                 <th>Status Produksi</th>
                                 <th>Status Distribusi</th>
+                                <th>Waktu Dikirim</th>
                                 <th>Catatan</th>
                                 <th>Dibuat</th>
                                 <th>Aksi</th>
@@ -201,6 +202,11 @@
                                     </td>
                                     <td>
                                         <span class="badge {{ $badgeClass }}">{{ $order->status_label }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ $order->tanggal_dikirim ? $order->tanggal_dikirim->format('d M Y H:i') : '—' }}
+                                        </small>
                                     </td>
                                     <td>
                                         <small class="text-muted">{{ $order->catatan ?? '-' }}</small>

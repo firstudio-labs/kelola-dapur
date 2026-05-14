@@ -226,7 +226,7 @@
                         </h5>
                         @if (!$stockCheck['can_produce'])
                             <span class="badge bg-danger">
-                                Stock Tidak Mencukupi
+                                Laporan Kekurangan Stok
                             </span>
                         @else
                             <span class="badge bg-success">
@@ -239,8 +239,7 @@
                             <div class="alert alert-danger mb-4">
                                 <i class="bx bx-error-circle me-2"></i>
                                 <strong>Peringatan:</strong>
-                                Beberapa bahan tidak tersedia dalam jumlah yang
-                                cukup untuk produksi ini.
+                                Kekurangan stok di bawah merupakan laporan kekurangan stok pada saat pertama kali diajukan.
                             </div>
                         @endif
 

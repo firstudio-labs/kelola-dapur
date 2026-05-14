@@ -161,7 +161,7 @@
                             <td><small class="fw-semibold">{{ $dapur?->nama_dapur ?? '—' }}</small></td>
                             <td>
                                 <small class="text-muted">
-                                    {{ $transaksi?->tanggal_transaksi ? \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->translatedFormat('d M Y') : '—' }}
+                                    {{ $item->tanggal_dikirim ? $item->tanggal_dikirim->translatedFormat('d M Y H:i') : ($transaksi?->tanggal_transaksi ? \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->translatedFormat('d M Y') : '—') }}
                                 </small>
                             </td>
                             <td class="text-center">
