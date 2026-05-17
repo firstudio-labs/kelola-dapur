@@ -416,10 +416,18 @@
                                             @php
                                                 $statusClass = $transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty() ? 'bg-label-warning' : 'bg-label-success';
                                                 $statusText = $transaksiItem->laporanKekuranganStock->where('status', 'pending')->isNotEmpty() ? 'Menunggu' : 'Diselesaikan';
+                                                $isPurchased = $transaksiItem->laporanKekuranganStock->contains(function ($shortage) {
+                                                    return $shortage->isPurchasedByAkuntan();
+                                                });
                                             @endphp
                                             <span class="badge {{ $statusClass }}">
                                                 {{ $statusText }}
                                             </span>
+                                            @if($isPurchased)
+                                                <small class="text-muted d-block mt-1">
+                                                    <i class="bx bx-wallet-alt text-primary me-1"></i>Akuntan
+                                                </small>
+                                            @endif
                                             @if ($transaksiItem->laporanKekuranganStock->where('status', 'resolved')->isNotEmpty())
                                                 <small class="text-muted d-block">
                                                     {{ $transaksiItem->laporanKekuranganStock->where('status', 'resolved')->first()->updated_at->format('d/m/Y H:i') }}

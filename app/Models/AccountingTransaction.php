@@ -58,4 +58,9 @@ class AccountingTransaction extends Model
     {
         return $query->orderBy('date')->orderBy('id');
     }
+
+    public function shortages()
+    {
+        return $this->hasMany(AccountingTransactionShortage::class, 'accounting_transaction_id');
+    }
 }

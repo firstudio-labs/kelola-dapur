@@ -774,6 +774,7 @@ Route::middleware(['auth', 'role:akuntan', 'check.subscription'])
             Route::put('/{transaksi}', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'update'])->name('update');
             Route::delete('/{transaksi}', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'destroy'])->name('destroy');
             Route::get('/get/balance-preview', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'getBalance'])->name('getBalance');
+            Route::get('/get/pending-shortages', [\App\Http\Controllers\Akuntan\TransaksiController::class, 'getPendingShortages'])->name('getPendingShortages');
         });
 
         // Buku Kas Umum

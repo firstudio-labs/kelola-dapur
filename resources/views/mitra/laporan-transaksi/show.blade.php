@@ -16,7 +16,7 @@
                             <i class="bx bx-chevron-right me-2"></i>
                             <a href="{{ route('mitra.laporan-transaksi.index') }}"
                                 class="text-muted me-2">
-                                Persetujuan Transaksi
+                                Laporan Transaksi
                             </a>
                             <i class="bx bx-chevron-right me-2"></i>
                             <span class="text-dark">Detail Transaksi</span>
@@ -224,224 +224,6 @@
                                     </div>
                                 </div>
                             @endif
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bx bx-package me-2"></i>
-                            Ketersediaan Stock
-                            @if ($stockCheck['has_snapshots'])
-                                <small class="text-muted">
-                                    (berdasarkan snapshot saat approval)
-                                </small>
-                            @endif
-                        </h5>
-                        @if (!$stockCheck['can_produce'])
-                            <span class="badge bg-danger">
-                                Laporan Kekurangan Stok
-                            </span>
-                        @else
-                            <span class="badge bg-success">
-                                Stock Mencukupi
-                            </span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        @if (!$stockCheck['can_produce'])
-                            <div class="alert alert-danger mb-4">
-                                <i class="bx bx-error-circle me-2"></i>
-                                <strong>Peringatan:</strong>
-                                Kekurangan stok di bawah merupakan laporan kekurangan stok pada saat pertama kali diajukan.
-                            </div>
-                        @endif
-
-                        @if ($stockCheck['has_snapshots'])
-                            <div class="alert alert-info mb-4">
-                                <i class="bx bx-camera me-2"></i>
-                                <strong>Info:</strong>
-                                Data stock yang ditampilkan adalah snapshot saat
-                                approval transaksi dibuat pada
-                                {{ $approval->created_at->format('d M Y, H:i') }}.
-                            </div>
-                        @endif
-
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Bahan</th>
-                                        <th>Diperlukan</th>
-                                        <th>Snapshot Stock</th>
-                                        @if ($stockCheck['has_snapshots'] && isset($stockCheck['ingredients_summary'][0]['current_available']))
-                                            <th>Stock Saat Ini</th>
-                                        @endif
-
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($stockCheck['ingredients_summary'] as $ingredient)
-                                        @php
-                                            $neededAmount = $ingredient['needed'];
-                                            $isSufficient = $ingredient['sufficient'];
-                                            $isBahanBasah = isset($ingredient['is_bahan_basah'])
-                                                ? $ingredient['is_bahan_basah']
-                                                : false;
-                                        @endphp
-
-                                        <tr class="{{ !$isSufficient ? 'table-danger-subtle' : '' }}">
-                                            <td>
-                                                <div class="fw-medium">
-                                                    {{ $ingredient['nama_bahan'] }}
-                                                </div>
-                                                <small class="text-muted">
-                                                    {{ $ingredient['satuan'] }}
-                                                    @if ($isBahanBasah)
-                                                        <span class="text-info">
-                                                            (Bahan Basah +7%)
-                                                        </span>
-                                                    @endif
-                                                </small>
-                                            </td>
-                                            <td>
-                                                {{ (float) number_format($neededAmount, 3) }}
-                                            </td>
-                                            <td>
-                                                {{ (float) number_format($ingredient['available'], 3) }}
-
-                                            </td>
-                                            @if ($stockCheck['has_snapshots'] && isset($ingredient['current_available']))
-                                                <td>
-                                                    {{ (float) number_format($ingredient['current_available'], 3) }}
-                                                </td>
-                                            @endif
-
-                                            <td>
-                                                @if ($isSufficient)
-                                                    <span class="badge bg-success">
-                                                        Cukup
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-danger">
-                                                        Kurang
-                                                        {{ (float) number_format($neededAmount - $ingredient['available'], 3) }}
-                                                    </span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bx bx-pie-chart-alt me-2"></i>
-                            Ringkasan
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-primary">
-                                    <i class="bx bx-food-menu"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">
-                                    Total Menu
-                                </small>
-                                <h6 class="mb-0">
-                                    {{ $approval->transaksiDapur->detailTransaksiDapur->count() }}
-                                </h6>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-success">
-                                    <i class="bx bx-user-plus"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">
-                                    Porsi Besar
-                                </small>
-                                <h6 class="mb-0">
-                                    {{ $approval->transaksiDapur->getTotalPorsiBesar() }}
-                                </h6>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-info">
-                                    <i class="bx bx-user"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">
-                                    Porsi Kecil
-                                </small>
-                                <h6 class="mb-0">
-                                    {{ $approval->transaksiDapur->getTotalPorsiKecil() }}
-                                </h6>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-warning">
-                                    <i class="bx bx-package"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">
-                                    Total Bahan
-                                </small>
-                                <h6 class="mb-0">
-                                    {{ count($stockCheck['ingredients_summary']) }}
-                                </h6>
-                            </div>
-                        </div>
-
-                        <hr class="my-3">
-
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-danger">
-                                    <i class="bx bx-minus-circle"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">
-                                    Sisa Distribusi
-                                </small>
-                                <h6 class="mb-0">
-                                    B: {{ (float) $summarySisa['remaining_dist_besar'] }} | K: {{ (float) $summarySisa['remaining_dist_kecil'] }}
-                                </h6>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-secondary">
-                                    <i class="bx bx-error-circle"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">
-                                    Sisa Penerimaan
-                                </small>
-                                <h6 class="mb-0">
-                                    B: {{ (float) $summarySisa['remaining_recv_besar'] }} | K: {{ (float) $summarySisa['remaining_recv_kecil'] }}
-                                </h6>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -693,6 +475,226 @@
                         </div>
                     </div>
                 @endif
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bx bx-pie-chart-alt me-2"></i>
+                            Ringkasan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-primary">
+                                    <i class="bx bx-food-menu"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">
+                                    Total Menu
+                                </small>
+                                <h6 class="mb-0">
+                                    {{ $approval->transaksiDapur->detailTransaksiDapur->count() }}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-success">
+                                    <i class="bx bx-user-plus"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">
+                                    Porsi Besar
+                                </small>
+                                <h6 class="mb-0">
+                                    {{ $approval->transaksiDapur->getTotalPorsiBesar() }}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-info">
+                                    <i class="bx bx-user"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">
+                                    Porsi Kecil
+                                </small>
+                                <h6 class="mb-0">
+                                    {{ $approval->transaksiDapur->getTotalPorsiKecil() }}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-warning">
+                                    <i class="bx bx-package"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">
+                                    Total Bahan
+                                </small>
+                                <h6 class="mb-0">
+                                    {{ count($stockCheck['ingredients_summary']) }}
+                                </h6>
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-danger">
+                                    <i class="bx bx-minus-circle"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">
+                                    Sisa Distribusi
+                                </small>
+                                <h6 class="mb-0">
+                                    B: {{ (float) $summarySisa['remaining_dist_besar'] }} | K: {{ (float) $summarySisa['remaining_dist_kecil'] }}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-secondary">
+                                    <i class="bx bx-error-circle"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">
+                                    Sisa Penerimaan
+                                </small>
+                                <h6 class="mb-0">
+                                    B: {{ (float) $summarySisa['remaining_recv_besar'] }} | K: {{ (float) $summarySisa['remaining_recv_kecil'] }}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bx bx-package me-2"></i>
+                            Ketersediaan Stock
+                            @if ($stockCheck['has_snapshots'])
+                                <small class="text-muted">
+                                    (berdasarkan snapshot saat approval)
+                                </small>
+                            @endif
+                        </h5>
+                        @if (!$stockCheck['can_produce'])
+                            <span class="badge bg-danger">
+                                Laporan Kekurangan Stok
+                            </span>
+                        @else
+                            <span class="badge bg-success">
+                                Stock Mencukupi
+                            </span>
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        @if (!$stockCheck['can_produce'])
+                            <div class="alert alert-danger mb-4">
+                                <i class="bx bx-error-circle me-2"></i>
+                                <strong>Peringatan:</strong>
+                                Kekurangan stok di bawah merupakan laporan kekurangan stok pada saat pertama kali diajukan.
+                            </div>
+                        @endif
+
+                        @if ($stockCheck['has_snapshots'])
+                            <div class="alert alert-info mb-4">
+                                <i class="bx bx-camera me-2"></i>
+                                <strong>Info:</strong>
+                                Data stock yang ditampilkan adalah snapshot saat
+                                approval transaksi dibuat pada
+                                {{ $approval->created_at->format('d M Y, H:i') }}.
+                            </div>
+                        @endif
+
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Bahan</th>
+                                        <th>Diperlukan</th>
+                                        <th>Snapshot Stock</th>
+                                        @if ($stockCheck['has_snapshots'] && isset($stockCheck['ingredients_summary'][0]['current_available']))
+                                            <th>Stock Saat Ini</th>
+                                        @endif
+
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($stockCheck['ingredients_summary'] as $ingredient)
+                                        @php
+                                            $neededAmount = $ingredient['needed'];
+                                            $isSufficient = $ingredient['sufficient'];
+                                            $isBahanBasah = isset($ingredient['is_bahan_basah'])
+                                                ? $ingredient['is_bahan_basah']
+                                                : false;
+                                        @endphp
+
+                                        <tr class="{{ !$isSufficient ? 'table-danger-subtle' : '' }}">
+                                            <td>
+                                                <div class="fw-medium">
+                                                    {{ $ingredient['nama_bahan'] }}
+                                                </div>
+                                                <small class="text-muted">
+                                                    {{ $ingredient['satuan'] }}
+                                                    @if ($isBahanBasah)
+                                                        <span class="text-info">
+                                                            (Bahan Basah +7%)
+                                                        </span>
+                                                    @endif
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {{ (float) number_format($neededAmount, 3) }}
+                                            </td>
+                                            <td>
+                                                {{ (float) number_format($ingredient['available'], 3) }}
+
+                                            </td>
+                                            @if ($stockCheck['has_snapshots'] && isset($ingredient['current_available']))
+                                                <td>
+                                                    {{ (float) number_format($ingredient['current_available'], 3) }}
+                                                </td>
+                                            @endif
+
+                                            <td>
+                                                @if ($isSufficient)
+                                                    <span class="badge bg-success">
+                                                        Cukup
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-danger">
+                                                        Kurang
+                                                        {{ (float) number_format($neededAmount - $ingredient['available'], 3) }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal Detail Penerimaan -->
         <div class="modal fade" id="modalDetailPenerimaan" tabindex="-1" aria-hidden="true">

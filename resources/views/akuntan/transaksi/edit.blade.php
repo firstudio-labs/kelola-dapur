@@ -63,6 +63,7 @@
                                     @foreach($cats as $c)
                                         <option value="{{ $c->id }}" 
                                             data-type="{{ $c->type }}"
+                                            data-is-pembelian="{{ str_contains(strtolower($c->name), 'pembelian bahan baku') ? '1' : '0' }}"
                                             {{ old('category_id', $transaksi->category_id) == $c->id ? 'selected' : '' }}>
                                             {{ $c->name }} — ({{ $c->type === 'income' ? 'Penerimaan' : 'Pengeluaran' }})
                                         </option>
@@ -84,6 +85,49 @@
                             @endforeach
                         </select>
                     </div>
+                    @php
+                        $isPembelianCategory = $transaksi->category && str_contains(strtolower($transaksi->category->name), 'pembelian bahan baku');
+                    @endphp
+                    @if($isPembelianCategory && $transaksi->shortages->count() > 0)
+                    <div class="col-12" id="shortage-display">
+                        <hr class="mb-3">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Detail Pembelian Kekurangan Stok</label>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th>Bahan Baku</th>
+                                        <th>Kekurangan</th>
+                                        <th>Jml Dibeli</th>
+                                        <th>Nominal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($transaksi->shortages as $sh)
+                                    <tr>
+                                        <td>{{ $sh->laporanKekurangan->templateItem->nama_bahan ?? '-' }}</td>
+                                        <td class="text-center">{{ $sh->laporanKekurangan->jumlah_kurang ?? '-' }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                        <td class="text-center">{{ $sh->qty_dibeli }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                        <td class="text-end">Rp {{ number_format($sh->nominal, 0, ',', '.') }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="3" class="text-end">Total Nominal</th>
+                                        <th class="text-end">Rp {{ number_format($transaksi->shortages->sum('nominal'), 0, ',', '.') }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="alert alert-info py-2 small">
+                            <i class="bx bx-info-circle me-1"></i> Detail pembelian kekurangan stok tidak dapat diubah. Untuk perubahan, hapus transaksi ini dan buat ulang.
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="col-12">
                         <hr>
                         {{-- Preview Saldo --}}
@@ -116,14 +160,14 @@
                         <label class="form-label fw-semibold">Debit (Pemasukan) <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
-                            <input type="number" name="debit" id="debit-field" class="form-control" value="{{ old('debit', $transaksi->debit) }}" min="0" step="1">
+                            <input type="number" name="debit" id="debit-field" class="form-control" value="{{ old('debit', $transaksi->debit) }}" min="0" step="1"{{ $isPembelianCategory ? ' readonly' : '' }}>
                         </div>
                     </div>
                     <div class="col-12 col-md-6" id="credit-container">
                         <label class="form-label fw-semibold">Kredit (Pengeluaran) <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
-                            <input type="number" name="credit" id="credit-field" class="form-control" value="{{ old('credit', $transaksi->credit) }}" min="0" step="1">
+                            <input type="number" name="credit" id="credit-field" class="form-control" value="{{ old('credit', $transaksi->credit) }}" min="0" step="1"{{ $isPembelianCategory ? ' readonly' : '' }}>
                         </div>
                     </div>
                     <div class="col-12 d-flex gap-2">

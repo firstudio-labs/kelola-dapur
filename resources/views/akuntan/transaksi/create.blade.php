@@ -33,6 +33,7 @@
             <div class="card-body">
                 <form action="{{ route('akuntan.transaksi.store') }}" method="POST" id="trx-form">
                     @csrf
+                    <input type="hidden" name="shortages_json" id="shortages_json" value="[]">
 
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
@@ -67,6 +68,7 @@
                                     <optgroup label="{{ $groupName }}">
                                         @foreach ($cats as $c)
                                             <option value="{{ $c->id }}" data-type="{{ $c->type }}"
+                                                data-is-pembelian="{{ str_contains(strtolower($c->name), 'pembelian bahan baku') ? '1' : '0' }}"
                                                 {{ old('category_id') == $c->id ? 'selected' : '' }}>
                                                 {{ $c->name }} —
                                                 ({{ $c->type === 'income' ? 'Penerimaan' : 'Pengeluaran' }})
@@ -123,6 +125,38 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12" id="shortage-container" style="display: none;">
+                            <hr class="mb-3">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">Detail Kekurangan Stok</label>
+                                <div class="text-muted small">Pilih transaksi yang memiliki kekurangan stok untuk dicatat pembeliannya.</div>
+                            </div>
+                            <div class="mb-3">
+                                <select id="shortage-transaksi-select" name="shortage_transaksi_id" class="form-select">
+                                    <option value="">-- Pilih Transaksi Dapur --</option>
+                                </select>
+                            </div>
+                            <div class="table-responsive" id="shortage-table-container" style="display: none;">
+                                <table class="table table-bordered table-sm align-middle">
+                                    <thead class="table-light text-center">
+                                        <tr>
+                                            <th>Bahan Baku</th>
+                                            <th>Kekurangan</th>
+                                            <th style="width: 150px;">Jml Dibeli</th>
+                                            <th style="width: 200px;">Nominal (Rp)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="shortage-table-body">
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <th colspan="3" class="text-end align-middle">Total Nominal</th>
+                                            <th id="shortage-total-nominal" class="text-end fw-bold">Rp 0</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
                         <div class="col-12 col-md-6" id="debit-container">
                             <label class="form-label fw-semibold">Debit (Pemasukan) <span
                                     class="text-danger">*</span></label>
@@ -150,10 +184,34 @@
                 </form>
             </div>
         </div>
+
+        <!-- Warning Modal -->
+        <div class="modal fade" id="validationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-body text-center pt-4">
+                        <div class="mb-3 text-warning">
+                            <i class="bx bx-error-circle" style="font-size: 3.5rem;"></i>
+                        </div>
+                        <h5 class="modal-title mb-2 fw-semibold" id="validationModalTitle">Perhatian</h5>
+                        <p class="text-muted small mb-0" id="validationModalMessage">Pesan peringatan akan muncul di sini.</p>
+                    </div>
+                    <div class="modal-footer border-0 justify-content-center pt-0 pb-4">
+                        <button type="button" class="btn btn-primary btn-sm px-4" data-bs-dismiss="modal">Mengerti</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         let currentBalance = 0;
+
+        function showWarningModal(message) {
+            document.getElementById('validationModalMessage').textContent = message;
+            const modal = new bootstrap.Modal(document.getElementById('validationModal'));
+            modal.show();
+        }
 
         async function updateBalancePreview() {
             const periodId = document.getElementById('period_select').value;
@@ -204,20 +262,43 @@
 
         document.getElementById('category_select').addEventListener('change', function() {
             const opt = this.options[this.selectedIndex];
-            const type = opt.dataset.type;
+            const type = opt ? opt.dataset.type : '';
+            const isPembelian = opt && opt.dataset.isPembelian === '1';
             const debitCont = document.getElementById('debit-container');
             const creditCont = document.getElementById('credit-container');
             const debitFld = document.getElementById('debit-field');
             const creditFld = document.getElementById('credit-field');
+            const shortageCont = document.getElementById('shortage-container');
+            const periodId = document.getElementById('period_select').value;
+
+            if (isPembelian) {
+                if (!periodId) {
+                    showWarningModal('Silakan pilih Periode terlebih dahulu sebelum memilih Kategori Pembelian Bahan Baku.');
+                    this.value = '';
+                    shortageCont.style.display = 'none';
+                    return;
+                }
+                shortageCont.style.display = 'block';
+                loadPendingShortages();
+                debitFld.readOnly = true;
+                creditFld.readOnly = true;
+            } else {
+                shortageCont.style.display = 'none';
+                debitFld.readOnly = false;
+                creditFld.readOnly = false;
+                document.getElementById('shortage-table-body').innerHTML = '';
+                document.getElementById('shortage-table-container').style.display = 'none';
+                document.getElementById('shortage-transaksi-select').innerHTML = '<option value="">-- Pilih Transaksi Dapur --</option>';
+            }
 
             if (type === 'income') {
                 debitCont.style.display = 'block';
                 creditCont.style.display = 'none';
-                creditFld.value = 0;
+                if (!isPembelian) creditFld.value = 0;
             } else if (type === 'expense') {
                 debitCont.style.display = 'none';
                 creditCont.style.display = 'block';
-                debitFld.value = 0;
+                if (!isPembelian) debitFld.value = 0;
             } else {
                 debitCont.style.display = 'block';
                 creditCont.style.display = 'block';
@@ -225,9 +306,104 @@
             calculateAfter();
         });
 
+        async function loadPendingShortages() {
+            try {
+                const periodId = document.getElementById('period_select').value;
+                const response = await fetch(`{{ route('akuntan.transaksi.getPendingShortages') }}?period_id=${periodId}`);
+                const data = await response.json();
+                const select = document.getElementById('shortage-transaksi-select');
+                select.innerHTML = '<option value="">-- Pilih Transaksi Dapur --</option>';
+                data.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.id_transaksi;
+                    opt.textContent = item.label;
+                    select.appendChild(opt);
+                });
+            } catch (error) {
+                console.error('Error loading shortages:', error);
+            }
+        }
+
+        document.getElementById('shortage-transaksi-select').addEventListener('change', async function() {
+            const transaksiId = this.value;
+            const tableCont = document.getElementById('shortage-table-container');
+            const tbody = document.getElementById('shortage-table-body');
+            
+            if (!transaksiId) {
+                tableCont.style.display = 'none';
+                tbody.innerHTML = '';
+                calculateShortageTotal();
+                return;
+            }
+
+            try {
+                const response = await fetch(`{{ route('akuntan.transaksi.getPendingShortages') }}?transaksi_id=${transaksiId}`);
+                const data = await response.json();
+                
+                tbody.innerHTML = '';
+                data.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.laporanId = item.id_laporan;
+                    tr.dataset.satuan = item.satuan;
+                    tr.innerHTML = `
+                        <td>
+                            ${item.nama_bahan}
+                        </td>
+                        <td class="text-center">${item.jumlah_kurang} ${item.satuan}</td>
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <input type="number" class="form-control shortage-qty" data-idx="${index}" value="${item.jumlah_kurang}" step="0.001" min="0">
+                                <span class="input-group-text">${item.satuan}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" class="form-control shortage-nominal" data-idx="${index}" value="0" step="1" min="0">
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                tableCont.style.display = 'block';
+                
+                // Add event listeners to new inputs
+                document.querySelectorAll('.shortage-nominal').forEach(input => {
+                    input.addEventListener('input', calculateShortageTotal);
+                });
+                calculateShortageTotal();
+                
+            } catch (error) {
+                console.error('Error loading shortage details:', error);
+            }
+        });
+
+        function calculateShortageTotal() {
+            let total = 0;
+            document.querySelectorAll('.shortage-nominal').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            document.getElementById('shortage-total-nominal').textContent = formatIDR(total);
+            
+            // Assign to Debit or Credit based on category type
+            const opt = document.getElementById('category_select').options[document.getElementById('category_select').selectedIndex];
+            const type = opt ? opt.dataset.type : '';
+            
+            if (type === 'income') {
+                document.getElementById('debit-field').value = total;
+                document.getElementById('credit-field').value = 0;
+            } else if (type === 'expense') {
+                document.getElementById('credit-field').value = total;
+                document.getElementById('debit-field').value = 0;
+            }
+            
+            calculateAfter();
+        }
+
         document.getElementById('period_select').addEventListener('change', function() {
             const opt = this.options[this.selectedIndex];
             const hint = document.getElementById('period-range-hint');
+            const periodId = this.value;
             if (opt && opt.dataset.start) {
                 const fmt = d => new Date(d).toLocaleDateString('id-ID', {
                     day: '2-digit',
@@ -241,6 +417,24 @@
                 hint.textContent = '';
             }
             updateBalancePreview();
+            
+            // Reload shortages if category is pembelian bahan baku
+            const catSelect = document.getElementById('category_select');
+            const catOpt = catSelect.options[catSelect.selectedIndex];
+            const isPembelian = catOpt && catOpt.dataset.isPembelian === '1';
+            
+            if (isPembelian) {
+                if (periodId) {
+                    loadPendingShortages();
+                    document.getElementById('shortage-table-container').style.display = 'none';
+                    document.getElementById('shortage-table-body').innerHTML = '';
+                    calculateShortageTotal();
+                } else {
+                    showWarningModal('Periode dikosongkan. Kategori Pembelian Bahan Baku direset.');
+                    catSelect.value = '';
+                    catSelect.dispatchEvent(new Event('change'));
+                }
+            }
         });
 
         document.querySelector('select[name="cash_account_id"]').addEventListener('change', updateBalancePreview);
@@ -251,6 +445,26 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('period_select').dispatchEvent(new Event('change'));
             document.getElementById('category_select').dispatchEvent(new Event('change'));
+        });
+        // Intercept form submit to collect shortage data as JSON
+        document.getElementById('trx-form').addEventListener('submit', function(e) {
+            const rows = document.querySelectorAll('#shortage-table-body tr');
+            if (rows.length > 0) {
+                const shortages = [];
+                rows.forEach(row => {
+                    const laporanId = row.dataset.laporanId;
+                    const qtyInput = row.querySelector('.shortage-qty');
+                    const nominalInput = row.querySelector('.shortage-nominal');
+                    if (laporanId && qtyInput && nominalInput) {
+                        shortages.push({
+                            laporan_id: laporanId,
+                            qty: qtyInput.value,
+                            nominal: nominalInput.value
+                        });
+                    }
+                });
+                document.getElementById('shortages_json').value = JSON.stringify(shortages);
+            }
         });
     </script>
 @endsection

@@ -90,4 +90,14 @@ class LaporanKekuranganStock extends Model
     {
         return number_format($this->jumlah_tersedia, 2) . ' ' . $this->satuan;
     }
+
+    public function accountingTransactionShortages()
+    {
+        return $this->hasMany(AccountingTransactionShortage::class, 'laporan_kekurangan_id', 'id_laporan');
+    }
+
+    public function isPurchasedByAkuntan(): bool
+    {
+        return $this->accountingTransactionShortages()->exists();
+    }
 }

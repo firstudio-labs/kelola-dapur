@@ -108,6 +108,8 @@ class LaporanKekuranganStockController extends Controller
         $transaksi->load([
             'detailTransaksiDapur.menuMakanan.bahanMenu.templateItem',
             'laporanKekuranganStock.templateItem',
+            'laporanKekuranganStock.accountingTransactionShortages.transaction.cashAccount',
+            'laporanKekuranganStock.accountingTransactionShortages.laporanKekurangan.templateItem',
             'createdBy'
         ]);
 

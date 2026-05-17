@@ -8,6 +8,9 @@ use App\Models\AccountingCategory;
 use App\Models\AccountingPeriod;
 use App\Models\AccountingTransaction;
 use App\Models\CashAccount;
+use App\Models\TransaksiDapur;
+use App\Models\AccountingTransactionShortage;
+use App\Models\LaporanKekuranganStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -132,7 +135,7 @@ class TransaksiController extends Controller
             ]);
         }
 
-        AccountingTransaction::create([
+        $transaction = AccountingTransaction::create([
             'period_id'       => $period->id,
             'date'            => $validated['date'],
             'month'           => $date->month,
@@ -145,6 +148,27 @@ class TransaksiController extends Controller
             'created_by'      => Auth::id(),
         ]);
 
+        if ($request->filled('shortages_json')) {
+            $shortagesData = json_decode($request->input('shortages_json'), true);
+            \Log::info('Shortages JSON received:', ['data' => $shortagesData]);
+            if (is_array($shortagesData) && count($shortagesData) > 0) {
+                foreach ($shortagesData as $shortage) {
+                    if (!empty($shortage['laporan_id']) && isset($shortage['qty']) && isset($shortage['nominal'])) {
+                        $transaction->shortages()->create([
+                            'laporan_kekurangan_id' => $shortage['laporan_id'],
+                            'qty_dibeli'            => $shortage['qty'],
+                            'nominal'               => $shortage['nominal'],
+                        ]);
+
+                        $laporan = LaporanKekuranganStock::find($shortage['laporan_id']);
+                        if ($laporan && $laporan->isPending()) {
+                            $laporan->resolve();
+                        }
+                    }
+                }
+            }
+        }
+
         return redirect()->route('akuntan.transaksi.index')
             ->with('success', 'Transaksi berhasil ditambahkan.');
     }
@@ -153,6 +177,11 @@ class TransaksiController extends Controller
     {
         $dapurId = $this->getDapurId();
         $this->authorizeTransaction($transaksi, $dapurId);
+
+        $transaksi->load([
+            'shortages.laporanKekurangan.templateItem',
+            'category',
+        ]);
 
         $periods      = AccountingPeriod::forDapur($dapurId)->where('status', 'open')->orderByDesc('year')->get();
         $categories   = AccountingCategory::forDapur($dapurId)->orderBy('name')->get();
@@ -276,5 +305,56 @@ class TransaksiController extends Controller
         if ($transaksi->period->id_dapur != $dapurId) {
             abort(403);
         }
+    }
+
+    public function getPendingShortages(Request $request)
+    {
+        $dapurId = $this->getDapurId();
+        $transaksiId = $request->get('transaksi_id');
+        $periodId = $request->get('period_id');
+        
+        $period = AccountingPeriod::find($periodId);
+        $startDate = $period ? $period->start_date : null;
+        $endDate = $period ? $period->end_date : null;
+
+        if ($transaksiId) {
+            $transaksi = TransaksiDapur::where('id_dapur', $dapurId)
+                ->with(['laporanKekuranganStock' => function ($q) {
+                    $q->doesntHave('accountingTransactionShortages')->with('templateItem');
+                }])
+                ->findOrFail($transaksiId);
+
+            $shortages = $transaksi->laporanKekuranganStock->map(function ($item) {
+                return [
+                    'id_laporan' => $item->id_laporan,
+                    'nama_bahan' => $item->templateItem->nama_bahan,
+                    'jumlah_kurang' => $item->jumlah_kurang,
+                    'satuan' => $item->satuan,
+                ];
+            });
+
+            return response()->json($shortages);
+        }
+
+        $query = TransaksiDapur::where('id_dapur', $dapurId)
+            ->whereHas('laporanKekuranganStock', function ($q) {
+                $q->doesntHave('accountingTransactionShortages');
+            });
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('tanggal_transaksi', [$startDate, $endDate]);
+        }
+
+        $transaksiList = $query->orderByDesc('tanggal_transaksi')
+            ->get();
+
+        $formattedList = $transaksiList->map(function ($t) {
+            return [
+                'id_transaksi' => $t->id_transaksi,
+                'label' => "ID #{$t->id_transaksi} - " . ($t->keterangan ? str($t->keterangan)->limit(30) : 'Transaksi Dapur') . " (" . $t->tanggal_transaksi->format('d M Y') . ")"
+            ];
+        });
+
+        return response()->json($formattedList);
     }
 }
