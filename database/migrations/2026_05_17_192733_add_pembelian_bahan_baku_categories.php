@@ -28,7 +28,7 @@ return new class extends Migration
             ];
             $categories[] = [
                 'id_dapur' => $dapur->id_dapur,
-                'name' => 'Retur/Pembelian Bahan Baku (Pemasukan)',
+                'name' => 'Pembelian Bahan Baku',
                 'type' => 'income',
                 'group' => 'dana_bahan_baku',
                 'is_tax' => false,
