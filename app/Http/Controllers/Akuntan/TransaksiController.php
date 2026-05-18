@@ -160,11 +160,6 @@ class TransaksiController extends Controller
                             'qty_dibeli'            => $shortage['qty'],
                             'nominal'               => $shortage['nominal'],
                         ]);
-
-                        $laporan = LaporanKekuranganStock::find($shortage['laporan_id']);
-                        if ($laporan && $laporan->isPending()) {
-                            $laporan->resolve();
-                        }
                     }
                 }
             }
