@@ -110,17 +110,18 @@
                                 <table class="table table-bordered table-sm align-middle">
                                     <thead class="table-light text-center">
                                         <tr>
-                                            <th>Bahan Baku</th>
-                                            <th>Kekurangan</th>
-                                            <th style="width: 200px;">Jml Dibeli</th>
-                                            <th style="width: 250px;">Nominal (Rp)</th>
+                                            <th style="width: 20%;">Bahan Baku</th>
+                                            <th style="width: 14%;">Kekurangan</th>
+                                            <th style="width: 22%;">Harga Satuan (Rp)</th>
+                                            <th style="width: 22%;">Jml Dibeli</th>
+                                            <th style="width: 22%;">Total (Rp)</th>
                                         </tr>
                                     </thead>
                                     <tbody id="shortage-table-body">
                                     </tbody>
                                     <tfoot class="table-light">
                                         <tr>
-                                            <th colspan="3" class="text-end align-middle">Total Nominal</th>
+                                            <th colspan="4" class="text-end align-middle">Total Nominal</th>
                                             <th id="shortage-total-nominal" class="text-end fw-bold">Rp 0</th>
                                         </tr>
                                     </tfoot>
@@ -415,6 +416,12 @@
                         <td class="text-center">${formatNumberIndonesian(item.jumlah_kurang)} ${item.satuan}</td>
                         <td>
                             <div class="input-group input-group-sm">
+                                <span class="input-group-text">Rp</span>
+                                <input type="text" class="form-control shortage-harga text-end" data-idx="${index}" value="0">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-group input-group-sm">
                                 <input type="text" class="form-control shortage-qty text-end" data-idx="${index}" value="${formatNumberIndonesian(item.jumlah_kurang)}">
                                 <span class="input-group-text">${item.satuan}</span>
                             </div>
@@ -422,7 +429,7 @@
                         <td>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">Rp</span>
-                                <input type="text" class="form-control shortage-nominal text-end" data-idx="${index}" value="0">
+                                <input type="text" class="form-control shortage-nominal text-end" data-idx="${index}" value="0" readonly style="background-color: #f3f4f6;">
                             </div>
                         </td>
                     `;
@@ -431,39 +438,70 @@
                 tableCont.style.display = 'block';
                 
                 // Add event listeners to new inputs
-                document.querySelectorAll('.shortage-qty').forEach(input => {
-                    input.addEventListener('input', function() {
-                        formatInputDecimal(this);
-                    });
-                    input.addEventListener('focus', function() {
-                        if (this.value === '0') {
-                            this.value = '';
-                        }
-                    });
-                    input.addEventListener('blur', function() {
-                        if (this.value === '') {
-                            this.value = '0';
-                        }
-                    });
-                });
+                document.querySelectorAll('.shortage-harga, .shortage-qty').forEach(input => {
+                    if (input.classList.contains('shortage-qty')) {
+                        input.addEventListener('keypress', function(e) {
+                            if (e.key === '.') {
+                                e.preventDefault();
+                                const start = this.selectionStart;
+                                const end = this.selectionEnd;
+                                const text = this.value;
+                                this.value = text.substring(0, start) + ',' + text.substring(end);
+                                this.selectionStart = this.selectionEnd = start + 1;
+                                this.dispatchEvent(new Event('input'));
+                            }
+                        });
+                    }
 
-                document.querySelectorAll('.shortage-nominal').forEach(input => {
                     input.addEventListener('input', function() {
-                        formatInputThousands(this);
+                        if (this.classList.contains('shortage-harga')) {
+                            formatInputThousands(this);
+                        } else {
+                            formatInputDecimal(this);
+                        }
+                        
+                        const tr = this.closest('tr');
+                        const hargaInput = tr.querySelector('.shortage-harga');
+                        const qtyInput = tr.querySelector('.shortage-qty');
+                        const nominalInput = tr.querySelector('.shortage-nominal');
+
+                        if (hargaInput && qtyInput && nominalInput) {
+                            const rawHarga = hargaInput.value.replace(/\./g, "");
+                            const harga = parseFloat(rawHarga) || 0;
+                            const qty = parseFormattedDecimal(qtyInput.value);
+                            const total = harga * qty;
+                            nominalInput.value = new Intl.NumberFormat('id-ID').format(Math.round(total));
+                        }
                         calculateShortageTotal();
                     });
+
                     input.addEventListener('focus', function() {
                         if (this.value === '0') {
                             this.value = '';
                         }
                     });
+
                     input.addEventListener('blur', function() {
                         if (this.value === '') {
                             this.value = '0';
+                            
+                            const tr = this.closest('tr');
+                            const hargaInput = tr.querySelector('.shortage-harga');
+                            const qtyInput = tr.querySelector('.shortage-qty');
+                            const nominalInput = tr.querySelector('.shortage-nominal');
+
+                            if (hargaInput && qtyInput && nominalInput) {
+                                const rawHarga = hargaInput.value.replace(/\./g, "");
+                                const harga = parseFloat(rawHarga) || 0;
+                                const qty = parseFormattedDecimal(qtyInput.value);
+                                const total = harga * qty;
+                                nominalInput.value = new Intl.NumberFormat('id-ID').format(Math.round(total));
+                            }
                             calculateShortageTotal();
                         }
                     });
                 });
+
                 calculateShortageTotal();
                 
             } catch (error) {
@@ -584,13 +622,16 @@
                 const shortages = [];
                 rows.forEach(row => {
                     const laporanId = row.dataset.laporanId;
+                    const hargaInput = row.querySelector('.shortage-harga');
                     const qtyInput = row.querySelector('.shortage-qty');
                     const nominalInput = row.querySelector('.shortage-nominal');
                     if (laporanId && qtyInput && nominalInput) {
+                        const rawHarga = hargaInput ? hargaInput.value.replace(/\./g, "") : 0;
                         const rawNominal = nominalInput.value.replace(/\./g, "");
                         const rawQty = parseFormattedDecimal(qtyInput.value);
                         shortages.push({
                             laporan_id: laporanId,
+                            harga_satuan: rawHarga,
                             qty: rawQty,
                             nominal: rawNominal
                         });

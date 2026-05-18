@@ -268,14 +268,21 @@ class PengaturanController extends Controller
         $dapurId = $this->getDapurId();
         if ($kategori->id_dapur && $kategori->id_dapur != $dapurId) abort(403);
 
-        $validated = $request->validate([
-            'name'   => 'required|string|max:100',
-            'type'   => 'required|in:income,expense',
-            'group'  => 'required|in:dana_bahan_baku,dana_operasional,dana_insentif_fasilitas,pungutan_ppn,pungutan_pph21,pungutan_pph22,pungutan_pph23,pungutan_pph4,biaya_bahan_baku,biaya_operasional,biaya_insentif_fasilitas',
-            'is_tax' => 'boolean',
-        ]);
-        $validated['is_tax'] = $request->boolean('is_tax');
-        $kategori->update($validated);
+        if ($kategori->is_protected) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:100',
+            ]);
+            $kategori->update($validated);
+        } else {
+            $validated = $request->validate([
+                'name'   => 'required|string|max:100',
+                'type'   => 'required|in:income,expense',
+                'group'  => 'required|in:dana_bahan_baku,dana_operasional,dana_insentif_fasilitas,pungutan_ppn,pungutan_pph21,pungutan_pph22,pungutan_pph23,pungutan_pph4,biaya_bahan_baku,biaya_operasional,biaya_insentif_fasilitas',
+                'is_tax' => 'boolean',
+            ]);
+            $validated['is_tax'] = $request->boolean('is_tax');
+            $kategori->update($validated);
+        }
         return back()->with('success', 'Kategori berhasil diperbarui.');
     }
 

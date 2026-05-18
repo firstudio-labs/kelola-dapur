@@ -462,14 +462,17 @@
                                                                         </div>
                                                                         <div class="col-12">
                                                                             <label class="form-label fw-semibold">Jenis Arus Kas</label>
-                                                                            <select name="type" class="form-select" required>
+                                                                            <select name="type" class="form-select" required {{ $c->is_protected ? 'disabled' : '' }}>
                                                                                 <option value="income" {{ $c->type == 'income' ? 'selected' : '' }}>Penerimaan (Masuk)</option>
                                                                                 <option value="expense" {{ $c->type == 'expense' ? 'selected' : '' }}>Pengeluaran (Keluar)</option>
                                                                             </select>
+                                                                            @if($c->is_protected)
+                                                                                <input type="hidden" name="type" value="{{ $c->type }}">
+                                                                            @endif
                                                                         </div>
                                                                         <div class="col-12">
                                                                             <label class="form-label fw-semibold">Kelompok Laporan</label>
-                                                                            <select name="group" class="form-select" required>
+                                                                            <select name="group" class="form-select" required {{ $c->is_protected ? 'disabled' : '' }}>
                                                                                 <option value="dana_bahan_baku" {{ $c->group == 'dana_bahan_baku' ? 'selected' : '' }}>Dana Bahan Baku</option>
                                                                                 <option value="dana_operasional" {{ $c->group == 'dana_operasional' ? 'selected' : '' }}>Dana Operasional</option>
                                                                                 <option value="dana_insentif_fasilitas" {{ $c->group == 'dana_insentif_fasilitas' ? 'selected' : '' }}>Dana Insentif Fasilitas</option>
@@ -482,13 +485,27 @@
                                                                                 <option value="biaya_operasional" {{ $c->group == 'biaya_operasional' ? 'selected' : '' }}>Biaya Operasional</option>
                                                                                 <option value="biaya_insentif_fasilitas" {{ $c->group == 'biaya_insentif_fasilitas' ? 'selected' : '' }}>Biaya Insentif Fasilitas</option>
                                                                             </select>
+                                                                            @if($c->is_protected)
+                                                                                <input type="hidden" name="group" value="{{ $c->group }}">
+                                                                            @endif
                                                                         </div>
                                                                         <div class="col-12">
                                                                             <div class="form-check">
-                                                                                <input type="checkbox" name="is_tax" class="form-check-input" id="is_tax_edit{{ $c->id }}" value="1" {{ $c->is_tax ? 'checked' : '' }}>
+                                                                                <input type="checkbox" name="is_tax" class="form-check-input" id="is_tax_edit{{ $c->id }}" value="1" {{ $c->is_tax ? 'checked' : '' }} {{ $c->is_protected ? 'disabled' : '' }}>
                                                                                 <label class="form-check-label fw-semibold" for="is_tax_edit{{ $c->id }}">Kategori Pajak?</label>
                                                                             </div>
+                                                                            @if($c->is_protected && $c->is_tax)
+                                                                                <input type="hidden" name="is_tax" value="1">
+                                                                            @endif
                                                                         </div>
+                                                                        @if($c->is_protected)
+                                                                            <div class="col-12">
+                                                                                <div class="alert alert-info py-2 px-3 mb-0 small">
+                                                                                    <i class="bx bx-info-circle me-1"></i>
+                                                                                    Kategori bawaan sistem. Hanya dapat mengubah Nama Kategori.
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-footer">

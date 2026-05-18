@@ -27,13 +27,16 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
-            <form action="{{ route('akuntan.transaksi.update', $transaksi->id) }}" method="POST">
+            <form action="{{ route('akuntan.transaksi.update', $transaksi->id) }}" method="POST" id="trx-form">
                 @csrf @method('PUT')
+                @php
+                    $isPembelianCategory = $transaksi->category && str_contains(strtolower($transaksi->category->name), 'pembelian bahan baku');
+                @endphp
 
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
                         <label class="form-label fw-semibold">Periode <span class="text-danger">*</span></label>
-                        <select name="period_id" class="form-select" required id="period_select">
+                        <select name="period_id" class="form-select" required id="period_select" {{ $isPembelianCategory ? 'disabled' : '' }}>
                             <option value="">-- Pilih Periode --</option>
                             @foreach($periods as $p)
                                 <option value="{{ $p->id }}"
@@ -44,6 +47,9 @@
                                 </option>
                             @endforeach
                         </select>
+                        @if($isPembelianCategory)
+                            <input type="hidden" name="period_id" value="{{ $transaksi->period_id }}">
+                        @endif
                         <small class="text-muted" id="period-range-hint"></small>
                     </div>
                     <div class="col-12 col-md-6">
@@ -56,7 +62,7 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label fw-semibold">Kategori <span class="text-danger">*</span></label>
-                        <select name="category_id" class="form-select" required id="category_select">
+                        <select name="category_id" class="form-select" required id="category_select" {{ $isPembelianCategory ? 'disabled' : '' }}>
                             <option value="">-- Pilih Kategori --</option>
                             @foreach($categories->groupBy('group_label') as $groupName => $cats)
                                 <optgroup label="{{ $groupName }}">
@@ -71,6 +77,9 @@
                                 </optgroup>
                             @endforeach
                         </select>
+                        @if($isPembelianCategory)
+                            <input type="hidden" name="category_id" value="{{ $transaksi->category_id }}">
+                        @endif
                     </div>
                     <div class="col-12">
                         <label class="form-label fw-semibold">Uraian <span class="text-danger">*</span></label>
@@ -85,9 +94,6 @@
                             @endforeach
                         </select>
                     </div>
-                    @php
-                        $isPembelianCategory = $transaksi->category && str_contains(strtolower($transaksi->category->name), 'pembelian bahan baku');
-                    @endphp
                     @if($isPembelianCategory && $transaksi->shortages->count() > 0)
                     <div class="col-12" id="shortage-display">
                         <hr class="mb-3">
@@ -98,25 +104,27 @@
                             <table class="table table-bordered table-sm align-middle">
                                 <thead class="table-light text-center">
                                     <tr>
-                                        <th>Bahan Baku</th>
-                                        <th>Kekurangan</th>
-                                        <th>Jml Dibeli</th>
-                                        <th>Nominal</th>
+                                        <th style="width: 20%;">Bahan Baku</th>
+                                        <th style="width: 14%;">Kekurangan</th>
+                                        <th style="width: 22%;">Harga Satuan</th>
+                                        <th style="width: 22%;">Jml Dibeli</th>
+                                        <th style="width: 22%;">Total (Rp)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($transaksi->shortages as $sh)
                                     <tr>
                                         <td>{{ $sh->laporanKekurangan->templateItem->nama_bahan ?? '-' }}</td>
-                                        <td class="text-center">{{ $sh->laporanKekurangan->jumlah_kurang ?? '-' }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
-                                        <td class="text-center">{{ $sh->qty_dibeli }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                        <td class="text-center">{{ rtrim(rtrim(number_format($sh->laporanKekurangan->jumlah_kurang ?? 0, 4, ',', '.'), '0'), ',') }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                        <td class="text-end">Rp {{ number_format($sh->harga_satuan, 0, ',', '.') }}</td>
+                                        <td class="text-center">{{ rtrim(rtrim(number_format($sh->qty_dibeli ?? 0, 4, ',', '.'), '0'), ',') }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
                                         <td class="text-end">Rp {{ number_format($sh->nominal, 0, ',', '.') }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot class="table-light">
                                     <tr>
-                                        <th colspan="3" class="text-end">Total Nominal</th>
+                                        <th colspan="4" class="text-end">Total Nominal</th>
                                         <th class="text-end">Rp {{ number_format($transaksi->shortages->sum('nominal'), 0, ',', '.') }}</th>
                                     </tr>
                                 </tfoot>
@@ -318,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Intercept form submit to remove dots
-document.querySelector('form').addEventListener('submit', function(e) {
+document.getElementById('trx-form').addEventListener('submit', function(e) {
     debitField.value = debitField.value.replace(/\./g, "");
     creditField.value = creditField.value.replace(/\./g, "");
 });

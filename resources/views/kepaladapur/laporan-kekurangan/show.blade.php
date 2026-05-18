@@ -256,12 +256,13 @@
                             
                             <div class="table-responsive">
                                 <table class="table table-bordered table-sm align-middle bg-white mb-0" style="font-size: 0.85rem;">
-                                    <thead class="table-light">
+                                    <thead class="table-light text-center">
                                         <tr>
-                                            <th>Bahan Baku</th>
-                                            <th class="text-center">Kekurangan</th>
-                                            <th class="text-center">Jumlah Dibeli</th>
-                                            <th class="text-end">Nominal Pembelian</th>
+                                            <th style="width: 20%;">Bahan Baku</th>
+                                            <th style="width: 14%;">Kekurangan</th>
+                                            <th style="width: 22%;">Harga Satuan</th>
+                                            <th style="width: 22%;">Jumlah Dibeli</th>
+                                            <th style="width: 22%;">Nominal Pembelian</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -269,6 +270,7 @@
                                             <tr>
                                                 <td>{{ $sh->laporanKekurangan->templateItem->nama_bahan ?? '-' }}</td>
                                                 <td class="text-center">{{ isset($sh->laporanKekurangan->jumlah_kurang) ? formatIndonesianNumber($sh->laporanKekurangan->jumlah_kurang) : '-' }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                                <td class="text-end">@rupiah($sh->harga_satuan)</td>
                                                 <td class="text-center">{{ formatIndonesianNumber($sh->qty_dibeli) }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
                                                 <td class="text-end fw-semibold">@rupiah($sh->nominal)</td>
                                             </tr>

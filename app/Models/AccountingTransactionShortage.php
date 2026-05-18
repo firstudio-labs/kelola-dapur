@@ -14,6 +14,7 @@ class AccountingTransactionShortage extends Model
     protected $fillable = [
         'accounting_transaction_id',
         'laporan_kekurangan_id',
+        'harga_satuan',
         'qty_dibeli',
         'nominal'
     ];

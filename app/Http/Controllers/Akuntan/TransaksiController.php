@@ -156,6 +156,7 @@ class TransaksiController extends Controller
                     if (!empty($shortage['laporan_id']) && isset($shortage['qty']) && isset($shortage['nominal'])) {
                         $transaction->shortages()->create([
                             'laporan_kekurangan_id' => $shortage['laporan_id'],
+                            'harga_satuan'          => $shortage['harga_satuan'] ?? 0,
                             'qty_dibeli'            => $shortage['qty'],
                             'nominal'               => $shortage['nominal'],
                         ]);
