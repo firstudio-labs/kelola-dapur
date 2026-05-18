@@ -62,24 +62,34 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label fw-semibold">Kategori <span class="text-danger">*</span></label>
-                        <select name="category_id" class="form-select" required id="category_select" {{ $isPembelianCategory ? 'disabled' : '' }}>
-                            <option value="">-- Pilih Kategori --</option>
-                            @foreach($categories->groupBy('group_label') as $groupName => $cats)
-                                <optgroup label="{{ $groupName }}">
-                                    @foreach($cats as $c)
+                        <select name="category_id" class="form-select" required id="category_select">
+                            @if($isPembelianCategory)
+                                @foreach($categories as $c)
+                                    @if(str_contains(strtolower($c->name), 'pembelian bahan baku'))
                                         <option value="{{ $c->id }}" 
                                             data-type="{{ $c->type }}"
-                                            data-is-pembelian="{{ str_contains(strtolower($c->name), 'pembelian bahan baku') ? '1' : '0' }}"
+                                            data-is-pembelian="1"
                                             {{ old('category_id', $transaksi->category_id) == $c->id ? 'selected' : '' }}>
                                             {{ $c->name }} — ({{ $c->type === 'income' ? 'Penerimaan' : 'Pengeluaran' }})
                                         </option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
+                                    @endif
+                                @endforeach
+                            @else
+                                <option value="">-- Pilih Kategori --</option>
+                                @foreach($categories->groupBy('group_label') as $groupName => $cats)
+                                    <optgroup label="{{ $groupName }}">
+                                        @foreach($cats as $c)
+                                            <option value="{{ $c->id }}" 
+                                                data-type="{{ $c->type }}"
+                                                data-is-pembelian="{{ str_contains(strtolower($c->name), 'pembelian bahan baku') ? '1' : '0' }}"
+                                                {{ old('category_id', $transaksi->category_id) == $c->id ? 'selected' : '' }}>
+                                                {{ $c->name }} — ({{ $c->type === 'income' ? 'Penerimaan' : 'Pengeluaran' }})
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            @endif
                         </select>
-                        @if($isPembelianCategory)
-                            <input type="hidden" name="category_id" value="{{ $transaksi->category_id }}">
-                        @endif
                     </div>
                     <div class="col-12">
                         <label class="form-label fw-semibold">Uraian <span class="text-danger">*</span></label>
@@ -247,9 +257,13 @@ function formatIDR(amount) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
 }
 
+const totalShortageAmount = {{ $transaksi->shortages->sum('nominal') }};
+
 document.getElementById('category_select').addEventListener('change', function() {
     const opt = this.options[this.selectedIndex];
+    if (!opt) return;
     const type = opt.dataset.type;
+    const isPembelian = opt.dataset.isPembelian === '1';
     const debitCont = document.getElementById('debit-container');
     const creditCont = document.getElementById('credit-container');
     const debitFld = document.getElementById('debit-field');
@@ -258,14 +272,32 @@ document.getElementById('category_select').addEventListener('change', function()
     if (type === 'income') {
         debitCont.style.display = 'block';
         creditCont.style.display = 'none';
-        creditFld.value = 0;
+        if (isPembelian) {
+            debitFld.value = new Intl.NumberFormat('id-ID').format(totalShortageAmount);
+            debitFld.readOnly = true;
+            creditFld.value = 0;
+            creditFld.readOnly = true;
+        } else {
+            creditFld.value = 0;
+            debitFld.readOnly = false;
+        }
     } else if (type === 'expense') {
         debitCont.style.display = 'none';
         creditCont.style.display = 'block';
-        debitFld.value = 0;
+        if (isPembelian) {
+            creditFld.value = new Intl.NumberFormat('id-ID').format(totalShortageAmount);
+            creditFld.readOnly = true;
+            debitFld.value = 0;
+            debitFld.readOnly = true;
+        } else {
+            debitFld.value = 0;
+            creditFld.readOnly = false;
+        }
     } else {
         debitCont.style.display = 'block';
         creditCont.style.display = 'block';
+        debitFld.readOnly = false;
+        creditFld.readOnly = false;
     }
     calculateAfter();
 });
