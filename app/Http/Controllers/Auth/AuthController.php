@@ -72,8 +72,8 @@ class AuthController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'nama'                  => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'username'              => 'required|string|max:255|unique:users,username|regex:/^[a-zA-Z0-9_]+$/',
+            'nama'                  => 'required|string|max:255',
+            'username'              => 'required|string|max:255|unique:users,username',
             'email'                 => 'required|email|max:255|unique:users,email',
             'password'              => [
                 'required', 'string', 'min:8', 'confirmed',
@@ -137,7 +137,6 @@ class AuthController extends Controller
                 'is_active' => true,
             ]);
 
-            // Mitra tidak terikat ke satu dapur di user_roles; id_dapur null
             $userRole = UserRole::create([
                 'id_user'   => $user->id_user,
                 'role_type' => 'mitra',
@@ -189,8 +188,8 @@ class AuthController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'nama'                 => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'username'             => 'required|string|max:255|unique:users,username|regex:/^[a-zA-Z0-9_]+$/',
+            'nama'                 => 'required|string|max:255',
+            'username'             => 'required|string|max:255|unique:users,username',
             'email'                => 'required|email|max:255|unique:users,email',
             'password'             => [
                 'required',
@@ -219,7 +218,6 @@ class AuthController extends Controller
             'terms'                => 'required|accepted',
         ], [
             'nama.required'             => 'Nama lengkap harus diisi',
-            'nama.regex'                => 'Nama hanya boleh mengandung huruf dan spasi',
             'username.required'         => 'Username harus diisi',
             'username.unique'           => 'Username sudah digunakan',
             'email.required'            => 'Email harus diisi',

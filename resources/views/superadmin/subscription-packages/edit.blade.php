@@ -233,7 +233,7 @@
                                     <span class="text-muted">Harga Dasar:</span>
                                     <strong class="package-price">
                                         Rp
-                                        {{ number_format($subscriptionPackage->harga, 0, ",", ".") }}
+                                        @formatNumber($subscriptionPackage->harga)
                                     </strong>
                                 </div>
                                 <div

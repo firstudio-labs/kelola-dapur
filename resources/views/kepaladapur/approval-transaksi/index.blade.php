@@ -89,7 +89,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $stats["total"] }}
+                                        @formatNumber($stats["total"])
                                     </h6>
                                 </div>
                             </div>
@@ -114,7 +114,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $stats["pending"] }}
+                                        @formatNumber($stats["pending"])
                                     </h6>
                                     @if ($stats["pending"] > 0)
                                         <span
@@ -146,7 +146,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $stats["approved"] }}
+                                        @formatNumber($stats["approved"])
                                     </h6>
                                 </div>
                             </div>
@@ -171,7 +171,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $stats["rejected"] }}
+                                        @formatNumber($stats["rejected"])
                                     </h6>
                                 </div>
                             </div>
@@ -431,11 +431,11 @@
                                             <span
                                                 class="fw-medium text-primary"
                                             >
-                                                {{ $approval->transaksiDapur->total_porsi }}
+                                                @formatNumber($approval->transaksiDapur->total_porsi)
                                             </span>
                                         </td>
                                         <td>
-                                            {{ $approval->transaksiDapur->detailTransaksiDapur->count() }}
+                                            @formatNumber($approval->transaksiDapur->detailTransaksiDapur->count())
                                         </td>
                                         <td>
                                             <div

@@ -192,13 +192,12 @@
                                                             *
                                                         </span>
                                                     </label>
-                                                    <input type="number"
-                                                        name="bahan_menu[{{ $index }}][jumlah_per_porsi]"
-                                                        step="0.0001" min="0.0001" required
-                                                        class="form-control jumlah-input @error("bahan_menu.$index.jumlah_per_porsi") is-invalid @enderror"
-                                                        placeholder="Contoh: 0.5"
-                                                        value="{{ old("bahan_menu.$index.jumlah_per_porsi", $bahan->jumlah_per_porsi) }}"
-                                                        data-original-value="{{ $bahan->jumlah_per_porsi }}" />
+                                                    <input type="text"
+                                                         name="bahan_menu[{{ $index }}][jumlah_per_porsi]" required
+                                                         class="form-control jumlah-input @error("bahan_menu.$index.jumlah_per_porsi") is-invalid @enderror"
+                                                         placeholder="Contoh: 0,5"
+                                                         value="{{ old("bahan_menu.$index.jumlah_per_porsi", $bahan->jumlah_per_porsi) }}"
+                                                         data-original-value="{{ $bahan->jumlah_per_porsi }}" />
                                                     @error("bahan_menu.$index.jumlah_per_porsi")
                                                         <div class="invalid-feedback">
                                                             {{ $message }}
@@ -418,6 +417,79 @@
             // Store Choices instances
             let choicesInstances = [];
 
+            const formatIndonesianNumberJS = (value) => {
+                if (value === null || value === undefined || value === '' || value === 0 || value === 0.0) return '0';
+                let num = parseFloat(value);
+                let numStr = parseFloat(num.toFixed(4)).toString();
+                let parts = numStr.split('.');
+                let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                if (parts[1]) {
+                    let decimals = parts[1].replace(/0+$/, '');
+                    if (decimals.length > 0) {
+                        return integerPart + ',' + decimals;
+                    }
+                }
+                return integerPart;
+            };
+
+            function parseFormattedDecimalJS(value) {
+                if (!value) return 0;
+                const cleaned = value.toString().replace(/\./g, "").replace(/,/g, ".");
+                return parseFloat(cleaned) || 0;
+            }
+
+            function bindQuantityEvents(input) {
+                if (input.value) {
+                    const val = parseFloat(input.value);
+                    if (!isNaN(val)) {
+                        input.value = formatIndonesianNumberJS(val);
+                    }
+                }
+
+                input.addEventListener('input', function() {
+                    let cursorPosition = this.selectionStart;
+                    let originalLength = this.value.length;
+                    let cleanVal = this.value.replace(/[^0-9,]/g, "");
+                    let parts = cleanVal.split(',');
+                    if (parts.length > 2) {
+                        cleanVal = parts[0] + ',' + parts.slice(1).join('');
+                        parts = cleanVal.split(',');
+                    }
+                    let integerPart = parts[0];
+                    let formattedInt = "";
+                    if (integerPart) {
+                        if (integerPart.length > 1 && integerPart.startsWith('0')) {
+                            integerPart = integerPart.replace(/^0+/, "");
+                            if (integerPart === "") integerPart = "0";
+                        }
+                        formattedInt = new Intl.NumberFormat('id-ID').format(parseInt(integerPart) || 0);
+                    } else {
+                        formattedInt = "0";
+                    }
+                    let result = formattedInt;
+                    if (parts.length > 1) {
+                        result += ',' + parts[1].substring(0, 4);
+                    }
+                    this.value = result;
+                    let newLength = this.value.length;
+                    this.setSelectionRange(cursorPosition + (newLength - originalLength), cursorPosition + (newLength - originalLength));
+                    
+                    updatePreview();
+                });
+
+                input.addEventListener('focus', function() {
+                    if (this.value === "0" || this.value === "0,0" || this.value === "0,00" || this.value === "0,000" || this.value === "0,0000") {
+                        this.value = "";
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    if (this.value === "" || this.value === null) {
+                        this.value = "0";
+                    }
+                });
+            }
+
             // Function to get display unit from original unit
             function getDisplayUnit(originalUnit, konversiSatuan = null) {
                 if (konversiSatuan) return konversiSatuan;
@@ -442,7 +514,6 @@
             function getAvailableOptions(currentSelectValue = null) {
                 const selectedIds = getSelectedTemplateIds();
                 return templateOptionsData.filter(item => {
-                    // Include if it's the current select's value OR if it's not selected elsewhere
                     return item.value == currentSelectValue || !selectedIds.includes(item.value);
                 });
             }
@@ -454,10 +525,8 @@
                     const choicesInstance = choicesInstances.find(item => item.element === select);
 
                     if (choicesInstance) {
-                        // Get available options
                         const availableOptions = getAvailableOptions(currentValue);
 
-                        // Clear and set new choices
                         choicesInstance.instance.clearChoices();
                         choicesInstance.instance.setChoices(
                             availableOptions.map(item => ({
@@ -479,15 +548,12 @@
             }
             // Function to populate select options
             function populateSelectOptions(selectElement, currentValue = null) {
-                // Clear existing options except the first placeholder
                 while (selectElement.children.length > 1) {
                     selectElement.removeChild(selectElement.lastChild);
                 }
 
-                // Get available options
                 const availableOptions = getAvailableOptions(currentValue);
 
-                // Add available template options
                 availableOptions.forEach((item) => {
                     const option = document.createElement('option');
                     option.value = item.value;
@@ -508,7 +574,6 @@
 
             // Function to initialize Choices.js
             function initializeChoices(selectElement) {
-                // Initialize Choices.js
                 const choices = new Choices(selectElement, {
                     searchEnabled: true,
                     placeholderValue: 'Pilih Bahan',
@@ -523,7 +588,6 @@
                     },
                 });
 
-                // Store instance for cleanup
                 choicesInstances.push({
                     element: selectElement,
                     instance: choices,
@@ -543,7 +607,7 @@
                     selectElement.options[selectElement.selectedIndex];
                 if (!selectedOption || !selectedOption.value) {
                     labelElement.textContent = 'Jumlah per Porsi *';
-                    inputElement.placeholder = 'Contoh: 0.5';
+                    inputElement.placeholder = 'Contoh: 0,5';
                     inputElement.dataset.originalUnit = '';
                     inputElement.dataset.displayUnit = '';
                     return;
@@ -577,30 +641,20 @@
                     if (!isNaN(originalValue)) {
                         if (konversiNilai && konversiSatuan) {
                             originalValue = originalValue / konversiNilai;
-                            inputElement.value =
-                                originalValue % 1 === 0 ?
-                                originalValue.toString() :
-                                originalValue
-                                .toString()
-                                .replace(/\.?0+$/, '');
+                            inputElement.value = formatIndonesianNumberJS(originalValue);
                         } else if (
                             originalSatuan.toLowerCase() === 'kg' &&
                             displayUnit === 'gram'
                         ) {
-                            inputElement.value = originalValue * 1000;
+                            inputElement.value = formatIndonesianNumberJS(originalValue * 1000);
                         } else if (
                             (originalSatuan.toLowerCase() === 'liter' ||
                                 originalSatuan.toLowerCase() === 'l') &&
                             displayUnit === 'ml'
                         ) {
-                            inputElement.value = originalValue * 1000;
+                            inputElement.value = formatIndonesianNumberJS(originalValue * 1000);
                         } else {
-                            inputElement.value =
-                                originalValue % 1 === 0 ?
-                                originalValue.toString() :
-                                originalValue
-                                .toString()
-                                .replace(/\.?0+$/, '');
+                            inputElement.value = formatIndonesianNumberJS(originalValue);
                         }
                     }
                 }
@@ -616,7 +670,7 @@
                     }
                 } else {
                     labelElement.textContent = 'Jumlah per Porsi *';
-                    inputElement.placeholder = 'Contoh: 0.5';
+                    inputElement.placeholder = 'Contoh: 0,5';
                 }
             }
 
@@ -633,14 +687,13 @@
                 const choices = initializeChoices(select);
 
                 updateInputUnit(select, input, label, true);
-                formatNumberInput(input);
+                bindQuantityEvents(input);
 
                 select.addEventListener('change', () => {
                     updateInputUnit(select, input, label);
-                    updateAllSelectOptions();
+                    updateAllSelectOptions(); 
                     updatePreview();
                 });
-                input.addEventListener('input', updatePreview);
                 if (checkbox) {
                     checkbox.addEventListener('change', updatePreview);
                 }
@@ -663,7 +716,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label jumlah-label">Jumlah per Porsi <span class="text-danger">*</span></label>
-                        <input type="number" name="bahan_menu[${bahanIndex}][jumlah_per_porsi]" step="0.0001" min="0.0001" required class="form-control jumlah-input" placeholder="Contoh: 0.5">
+                        <input type="text" name="bahan_menu[${bahanIndex}][jumlah_per_porsi]" required class="form-control jumlah-input" placeholder="Contoh: 0,5">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Bahan Basah</label>
@@ -691,13 +744,13 @@
 
                 populateSelectOptions(newSelect);
                 const newChoices = initializeChoices(newSelect);
+                bindQuantityEvents(newInput);
 
                 newSelect.addEventListener('change', () => {
                     updateInputUnit(newSelect, newInput, newLabel);
-                    updateAllSelectOptions();
+                    updateAllSelectOptions(); 
                     updatePreview();
                 });
-                newInput.addEventListener('input', updatePreview);
                 if (newCheckbox) {
                     newCheckbox.addEventListener('change', updatePreview);
                 }
@@ -741,7 +794,7 @@
                         const originalUnit = input.dataset.originalUnit;
                         const displayUnit = input.dataset.displayUnit;
                         const konversiNilai = parseFloat(input.dataset.konversiNilai);
-                        let value = parseFloat(input.value);
+                        let value = parseFormattedDecimalJS(input.value);
 
                         if (isNaN(value)) return;
 
@@ -760,6 +813,8 @@
                             ) {
                                 input.value = value / 1000;
                             }
+                        } else {
+                            input.value = value;
                         }
                     });
 
@@ -838,7 +893,7 @@
 
                 rows.forEach((row) => {
                     const select = row.querySelector('select');
-                    const input = row.querySelector('input[type="number"]');
+                    const input = row.querySelector('.jumlah-input');
                     const checkbox = row.querySelector('.bahan-basah-checkbox');
 
                     if (select.value && input.value) {
@@ -867,40 +922,16 @@
                             }
                         }
 
-                        let value = parseFloat(input.value);
-                        let formattedValue = value;
-                        let finalValue = value;
-
-                        // Calculate bahan basah if checked
-                        if (isBasah) {
-                            finalValue = value * 1.07;
-                        }
-
-                        // Format the numbers to remove trailing zeros
-                        if (formattedValue % 1 === 0) {
-                            formattedValue = formattedValue.toString();
-                        } else {
-                            formattedValue = formattedValue
-                                .toFixed(2)
-                                .replace(/\.?0+$/, '');
-                        }
-
-                        if (finalValue % 1 === 0) {
-                            finalValue = finalValue.toString();
-                        } else {
-                            finalValue = finalValue
-                                .toFixed(2)
-                                .replace(/\.?0+$/, '');
-                        }
+                        let value = parseFormattedDecimalJS(input.value);
+                        let formattedValue = formatIndonesianNumberJS(value);
+                        let finalValue = formatIndonesianNumberJS(isBasah ? value * 1.07 : value);
 
                         const li = document.createElement('li');
 
                         if (isBasah) {
-                            // Format untuk bahan basah: Nama - Berat Mentah unit Bahan Matang - Berat Matang unit per porsi **Bahan Basah +7%**
                             li.innerHTML =
                                 `${ingredientName} - ${formattedValue} ${displayUnit} Bahan Matang - ${finalValue} ${displayUnit} per porsi <span class="badge bg-label-info ms-2">Bahan Basah +7%</span>`;
                         } else {
-                            // Format untuk bahan biasa: Nama - Berat unit per porsi
                             li.innerHTML = `${ingredientName} - ${formattedValue} ${displayUnit} per porsi`;
                         }
 
@@ -908,25 +939,6 @@
                     }
                 });
             }
-
-            // Function to format number input (remove unnecessary decimals)
-            function formatNumberInput(input) {
-                let value = parseFloat(input.value);
-                if (!isNaN(value)) {
-                    if (value % 1 === 0) {
-                        input.value = value.toString();
-                    } else {
-                        input.value = value.toString().replace(/\.?0+$/, '');
-                    }
-                }
-            }
-
-            // Add input formatting for number inputs
-            document.addEventListener('input', function(e) {
-                if (e.target.classList.contains('jumlah-input')) {
-                    setTimeout(() => formatNumberInput(e.target), 500);
-                }
-            });
 
             // Initial preview update
             updatePreview();

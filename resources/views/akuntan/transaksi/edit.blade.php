@@ -160,14 +160,14 @@
                         <label class="form-label fw-semibold">Debit (Pemasukan) <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
-                            <input type="number" name="debit" id="debit-field" class="form-control" value="{{ old('debit', $transaksi->debit) }}" min="0" step="1"{{ $isPembelianCategory ? ' readonly' : '' }}>
+                            <input type="text" name="debit" id="debit-field" class="form-control text-end" value="{{ old('debit', number_format($transaksi->debit, 0, '', '')) }}"{{ $isPembelianCategory ? ' readonly' : '' }}>
                         </div>
                     </div>
                     <div class="col-12 col-md-6" id="credit-container">
                         <label class="form-label fw-semibold">Kredit (Pengeluaran) <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
-                            <input type="number" name="credit" id="credit-field" class="form-control" value="{{ old('credit', $transaksi->credit) }}" min="0" step="1"{{ $isPembelianCategory ? ' readonly' : '' }}>
+                            <input type="text" name="credit" id="credit-field" class="form-control text-end" value="{{ old('credit', number_format($transaksi->credit, 0, '', '')) }}"{{ $isPembelianCategory ? ' readonly' : '' }}>
                         </div>
                     </div>
                     <div class="col-12 d-flex gap-2">
@@ -208,9 +208,23 @@ async function updateBalancePreview() {
     }
 }
 
+function formatInputThousands(input) {
+    let val = input.value.replace(/\D/g, "");
+    if (val.length > 1) {
+        val = val.replace(/^0+/, "");
+    }
+    if (val) {
+        input.value = new Intl.NumberFormat('id-ID').format(parseInt(val));
+    } else {
+        input.value = "0";
+    }
+}
+
 function calculateAfter() {
-    const debit = parseFloat(document.getElementById('debit-field').value) || 0;
-    const credit = parseFloat(document.getElementById('credit-field').value) || 0;
+    const debitVal = document.getElementById('debit-field').value.replace(/\./g, "");
+    const creditVal = document.getElementById('credit-field').value.replace(/\./g, "");
+    const debit = parseFloat(debitVal) || 0;
+    const credit = parseFloat(creditVal) || 0;
     const effect = debit - credit;
     const after = currentBalance + effect;
 
@@ -263,13 +277,50 @@ document.getElementById('period_select').addEventListener('change', function() {
 });
 
 document.querySelector('select[name="cash_account_id"]').addEventListener('change', updateBalancePreview);
-document.getElementById('debit-field').addEventListener('input', calculateAfter);
-document.getElementById('credit-field').addEventListener('input', calculateAfter);
+
+const debitField = document.getElementById('debit-field');
+const creditField = document.getElementById('credit-field');
+
+debitField.addEventListener('input', function() {
+    formatInputThousands(this);
+    calculateAfter();
+});
+debitField.addEventListener('focus', function() {
+    if (this.value === '0') this.value = '';
+});
+debitField.addEventListener('blur', function() {
+    if (this.value === '') {
+        this.value = '0';
+        calculateAfter();
+    }
+});
+
+creditField.addEventListener('input', function() {
+    formatInputThousands(this);
+    calculateAfter();
+});
+creditField.addEventListener('focus', function() {
+    if (this.value === '0') this.value = '';
+});
+creditField.addEventListener('blur', function() {
+    if (this.value === '') {
+        this.value = '0';
+        calculateAfter();
+    }
+});
 
 // Trigger on load
 document.addEventListener('DOMContentLoaded', () => {
+    formatInputThousands(debitField);
+    formatInputThousands(creditField);
     document.getElementById('period_select').dispatchEvent(new Event('change'));
     document.getElementById('category_select').dispatchEvent(new Event('change'));
+});
+
+// Intercept form submit to remove dots
+document.querySelector('form').addEventListener('submit', function(e) {
+    debitField.value = debitField.value.replace(/\./g, "");
+    creditField.value = creditField.value.replace(/\./g, "");
 });
 </script>
 @endsection

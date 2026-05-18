@@ -88,7 +88,7 @@
                             <td>
                                 <small class="text-muted">{{ $p->village_name ? $p->village_name.', ' : '' }}{{ $p->district_name }}</small>
                             </td>
-                            <td><span class="badge bg-label-primary">{{ $p->jumlah_porsi }} Porsi</span></td>
+                            <td><span class="badge bg-label-primary">{{ formatIndonesianNumber($p->jumlah_porsi) }} Porsi</span></td>
                             <td>
                                 @php  $col = match($p->status_approval) { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' }; @endphp
                                 <span class="badge bg-label-{{ $col }}">{{ ucfirst($p->status_approval) }}</span>

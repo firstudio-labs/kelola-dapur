@@ -466,13 +466,11 @@
                                 </div>
                             </td>
                             <td style="text-align: right">
-                                Rp
-                                {{ number_format($dapur->id_dapur, 0, ",", ".") }}
+                                @rupiah($dapur->id_dapur)
                             </td>
                             <td style="text-align: center">1</td>
                             <td style="text-align: right">
-                                Rp
-                                {{ number_format($dapur->id_dapur, 0, ",", ".") }}
+                                @rupiah($dapur->id_dapur)
                             </td>
                         </tr>
                     </tbody>
@@ -497,8 +495,7 @@
                     <div class="summary-row">
                         <span>Biaya Admin</span>
                         <span>
-                            Rp
-                            {{ number_format($dapur->id_dapur, 0, ",", ".") }}
+                            @rupiah($dapur->id_dapur)
                         </span>
                     </div>
                     <div class="summary-row">

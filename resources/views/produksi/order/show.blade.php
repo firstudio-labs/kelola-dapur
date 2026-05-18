@@ -36,15 +36,15 @@
                         </div>
                         <div class="d-flex justify-content-center gap-4 text-center">
                             <div>
-                                <h4 class="mb-0 fw-bold text-primary">{{ number_format($totalKeseluruhan, 0, ',', '.') }}</h4>
+                                <h4 class="mb-0 fw-bold text-primary">@formatNumber($totalKeseluruhan)</h4>
                                 <small class="text-muted" style="font-size: 11px;">Total Porsi</small>
                             </div>
                             <div>
-                                <h4 class="mb-0 fw-bold text-success">{{ number_format($totalPorsiBesar, 0, ',', '.') }}</h4>
+                                <h4 class="mb-0 fw-bold text-success">@formatNumber($totalPorsiBesar)</h4>
                                 <small class="text-muted" style="font-size: 11px;">Besar</small>
                             </div>
                             <div>
-                                <h4 class="mb-0 fw-bold text-warning">{{ number_format($totalPorsiKecil, 0, ',', '.') }}</h4>
+                                <h4 class="mb-0 fw-bold text-warning">@formatNumber($totalPorsiKecil)</h4>
                                 <small class="text-muted" style="font-size: 11px;">Kecil</small>
                             </div>
                         </div>
@@ -81,7 +81,7 @@
                     @endphp
 
                     @if($porsiBesar->count() > 0)
-                        <small class="text-success fw-bold d-block mb-2">PORSI BESAR : {{ $totalPorsiBesar }} Porsi</small>
+                        <small class="text-success fw-bold d-block mb-2">PORSI BESAR : @formatNumber($totalPorsiBesar) Porsi</small>
                         <div class="list-group list-group-flush mb-3">
                             @foreach($porsiBesar as $detail)
                                 <div class="list-group-item px-0 py-2 border-0 d-flex align-items-center">
@@ -101,7 +101,7 @@
                     @endif
 
                     @if($porsiKecil->count() > 0)
-                        <small class="text-warning fw-bold d-block mb-2">PORSI KECIL : {{ $totalPorsiKecil }} Porsi</small>
+                        <small class="text-warning fw-bold d-block mb-2">PORSI KECIL : @formatNumber($totalPorsiKecil) Porsi</small>
                         <div class="list-group list-group-flush">
                             @foreach($porsiKecil as $detail)
                                 <div class="list-group-item px-0 py-2 border-0 d-flex align-items-center">
@@ -157,8 +157,7 @@
 
                                         // Helper to format numbers cleanly
                                         $formatVal = function($val) {
-                                            if (floor($val) == $val) return number_format($val, 0, ',', '.');
-                                            return rtrim(rtrim(number_format($val, 3, ',', '.'), '0'), ',');
+                                            return formatIndonesianNumber($val);
                                         };
                                     @endphp
                                     <tr>
@@ -233,7 +232,7 @@
 
                         @if($porsiBesarDetails->count() > 0)
                             <div class="col-12">
-                                <h6 class="text-success mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Besar : {{ $totalPorsiBesar }} Porsi</h6>
+                                <h6 class="text-success mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Besar : @formatNumber($totalPorsiBesar) Porsi</h6>
                             </div>
                             @foreach($porsiBesarDetails as $detail)
                                 <div class="col-md-6 col-lg-4">
@@ -294,7 +293,7 @@
 
                         @if($porsiKecilDetails->count() > 0)
                             <div class="col-12 mt-4">
-                                <h6 class="text-warning mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Kecil : {{ $totalPorsiKecil }} Porsi</h6>
+                                <h6 class="text-warning mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Kecil : @formatNumber($totalPorsiKecil) Porsi</h6>
                             </div>
                             @foreach($porsiKecilDetails as $detail)
                                 <div class="col-md-6 col-lg-4">

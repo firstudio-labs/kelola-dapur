@@ -283,6 +283,9 @@ class PengaturanController extends Controller
     {
         $dapurId = $this->getDapurId();
         if ($kategori->id_dapur && $kategori->id_dapur != $dapurId) abort(403);
+        if ($kategori->is_protected) {
+            return back()->withErrors(['error' => 'Kategori bawaan sistem tidak dapat dihapus.']);
+        }
         if ($kategori->transactions()->count() > 0) {
             return back()->withErrors(['error' => 'Kategori tidak dapat dihapus karena masih digunakan transaksi.']);
         }

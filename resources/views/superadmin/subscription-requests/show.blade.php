@@ -123,7 +123,7 @@
                                             </td>
                                             <td class="text-end">
                                                 Rp
-                                                {{ number_format($subscriptionRequest->package->harga, 0, ",", ".") }}
+                                                @formatNumber($subscriptionRequest->package->harga)
                                             </td>
                                         </tr>
                                         <tr>
@@ -132,7 +132,7 @@
                                             </td>
                                             <td class="text-end">
                                                 Rp
-                                                {{ number_format($subscriptionRequest->dapur->id_dapur, 0, ",", ".") }}
+                                                @formatNumber($subscriptionRequest->dapur->id_dapur)
                                             </td>
                                         </tr>
                                         <tr class="border-top">
@@ -140,7 +140,7 @@
                                             <td class="text-end">
                                                 <strong>
                                                     Rp
-                                                    {{ number_format($subscriptionRequest->harga_asli, 0, ",", ".") }}
+                                                    @formatNumber($subscriptionRequest->harga_asli)
                                                 </strong>
                                             </td>
                                         </tr>
@@ -153,7 +153,7 @@
                                                     class="text-end text-success"
                                                 >
                                                     -Rp
-                                                    {{ number_format($subscriptionRequest->diskon, 0, ",", ".") }}
+                                                    @formatNumber($subscriptionRequest->diskon)
                                                 </td>
                                             </tr>
                                         @endif
@@ -165,7 +165,7 @@
                                             <td class="text-end">
                                                 <strong>
                                                     Rp
-                                                    {{ number_format($subscriptionRequest->harga_final, 0, ",", ".") }}
+                                                    @formatNumber($subscriptionRequest->harga_final)
                                                 </strong>
                                             </td>
                                         </tr>
@@ -307,7 +307,7 @@
                                 </span>
                                 <span class="text-success">
                                     Rp
-                                    {{ number_format($subscriptionRequest->harga_final, 0, ",", ".") }}
+                                    @formatNumber($subscriptionRequest->harga_final)
                                 </span>
                             </li>
                         </ul>

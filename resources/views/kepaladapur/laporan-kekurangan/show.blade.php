@@ -118,7 +118,7 @@
                         </p>
                         <p>
                             <strong>Total Porsi:</strong>
-                            {{ $transaksi->total_porsi }}
+                            @formatNumber($transaksi->total_porsi)
                         </p>
                     </div>
                     <div class="col-md-6">
@@ -141,7 +141,7 @@
                         </p>
                         <p>
                             <strong>Jumlah Kekurangan Bahan:</strong>
-                            {{ $laporan->count() }}
+                            @formatNumber($laporan->count())
                         </p>
                     </div>
                 </div>
@@ -174,9 +174,9 @@
                                     <td>
                                         {{ $item->templateItem->nama_bahan }}
                                     </td>
-                                    <td>{{ $item->jumlah_dibutuhkan }}</td>
-                                    <td>{{ $item->jumlah_tersedia }}</td>
-                                    <td>{{ $item->jumlah_kurang }}</td>
+                                    <td>@formatNumber($item->jumlah_dibutuhkan)</td>
+                                    <td>@formatNumber($item->jumlah_tersedia)</td>
+                                    <td>@formatNumber($item->jumlah_kurang)</td>
                                     <td>{{ $item->satuan }}</td>
                                     <td>
                                         @if ($item->status === "pending")
@@ -246,7 +246,7 @@
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <span class="text-muted small d-block">Total Nominal Transaksi</span>
-                                    <span class="fw-bold text-danger">Rp {{ number_format($tx->credit, 0, ',', '.') }}</span>
+                                    <span class="fw-bold text-danger">@rupiah($tx->credit)</span>
                                 </div>
                                 <div class="col-12">
                                     <span class="text-muted small d-block">Uraian / Deskripsi</span>
@@ -268,9 +268,9 @@
                                         @foreach ($tx->shortages as $sh)
                                             <tr>
                                                 <td>{{ $sh->laporanKekurangan->templateItem->nama_bahan ?? '-' }}</td>
-                                                <td class="text-center">{{ $sh->laporanKekurangan->jumlah_kurang ?? '-' }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
-                                                <td class="text-center">{{ $sh->qty_dibeli }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
-                                                <td class="text-end fw-semibold">Rp {{ number_format($sh->nominal, 0, ',', '.') }}</td>
+                                                <td class="text-center">{{ isset($sh->laporanKekurangan->jumlah_kurang) ? formatIndonesianNumber($sh->laporanKekurangan->jumlah_kurang) : '-' }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                                <td class="text-center">{{ formatIndonesianNumber($sh->qty_dibeli) }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                                <td class="text-end fw-semibold">@rupiah($sh->nominal)</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

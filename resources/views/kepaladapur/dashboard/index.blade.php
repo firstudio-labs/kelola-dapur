@@ -186,13 +186,13 @@
                             <div>
                                 <h6 class="mb-2">Approval Tertunda</h6>
                                 <h3 class="mb-0 text-warning">
-                                    {{ number_format($statistics['pending_approvals'] + $statistics['pending_transaction_approvals']) }}
+                                    @formatNumber($statistics['pending_approvals'] + $statistics['pending_transaction_approvals'])
                                 </h3>
                                 <small class="text-muted">
                                     Stock:
-                                    {{ $statistics['pending_approvals'] }} |
+                                    @formatNumber($statistics['pending_approvals']) |
                                     Transaksi:
-                                    {{ $statistics['pending_transaction_approvals'] }}
+                                    @formatNumber($statistics['pending_transaction_approvals'])
                                 </small>
                             </div>
                             <div class="avatar flex-shrink-0">
@@ -212,12 +212,12 @@
                             <div>
                                 <h6 class="mb-2">Item Stock</h6>
                                 <h3 class="mb-0 text-primary">
-                                    {{ number_format($statistics['total_stock_items']) }}
+                                    @formatNumber($statistics['total_stock_items'])
                                 </h3>
                                 <small class="text-muted">
                                     @if ($statistics['low_stock_alerts'] > 0)
                                         <span class="text-danger">
-                                            {{ $statistics['low_stock_alerts'] }}
+                                            @formatNumber($statistics['low_stock_alerts'])
                                             rendah
                                         </span>
                                     @else
@@ -244,10 +244,10 @@
                             <div>
                                 <h6 class="mb-2">Transaksi Bulan Ini</h6>
                                 <h3 class="mb-0 text-success">
-                                    {{ number_format($statistics['monthly_transactions']) }}
+                                    @formatNumber($statistics['monthly_transactions'])
                                 </h3>
                                 <small class="text-muted">
-                                    {{ number_format($statistics['total_portions_month']) }}
+                                    @formatNumber($statistics['total_portions_month'])
                                     total porsi
                                 </small>
                             </div>
@@ -268,15 +268,15 @@
                             <div>
                                 <h6 class="mb-2">Anggota Tim</h6>
                                 <h3 class="mb-0 text-info">
-                                    {{ $statistics['team_members'] }}
+                                    @formatNumber($statistics['team_members'])
                                 </h3>
                                 <small class="text-muted">
                                     KD:
-                                    {{ $teamOverview['summary']['kepala_dapur_count'] }}
+                                    @formatNumber($teamOverview['summary']['kepala_dapur_count'])
                                     | AG:
-                                    {{ $teamOverview['summary']['admin_gudang_count'] }}
+                                    @formatNumber($teamOverview['summary']['admin_gudang_count'])
                                     | AhliGizi:
-                                    {{ $teamOverview['summary']['ahli_gizi_count'] }}
+                                    @formatNumber($teamOverview['summary']['ahli_gizi_count'])
                                 </small>
                             </div>
                             <div class="avatar flex-shrink-0">
@@ -301,7 +301,7 @@
                         </h5>
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-label-success">
-                                {{ $stockHealth['overview']['stock_health_percentage'] }}%
+                                @formatNumber($stockHealth['overview']['stock_health_percentage'])%
                                 Stock
                             </span>
                             <a href="{{ route('kepala-dapur.stock.index', $dapur) }}"
@@ -316,7 +316,7 @@
                             <div class="col-3">
                                 <div class="d-flex flex-column align-items-center">
                                     <h4 class="text-success mb-1">
-                                        {{ $stockHealth['overview']['available_items'] }}
+                                        @formatNumber($stockHealth['overview']['available_items'])
                                     </h4>
                                     <small class="text-muted">Tersedia</small>
                                 </div>
@@ -324,7 +324,7 @@
                             <div class="col-3">
                                 <div class="d-flex flex-column align-items-center">
                                     <h4 class="text-warning mb-1">
-                                        {{ $stockHealth['overview']['low_stock'] }}
+                                        @formatNumber($stockHealth['overview']['low_stock'])
                                     </h4>
                                     <small class="text-muted">Stock Rendah</small>
                                 </div>
@@ -332,7 +332,7 @@
                             <div class="col-3">
                                 <div class="d-flex flex-column align-items-center">
                                     <h4 class="text-danger mb-1">
-                                        {{ $stockHealth['overview']['critical_stock'] }}
+                                        @formatNumber($stockHealth['overview']['critical_stock'])
                                     </h4>
                                     <small class="text-muted">Kritis</small>
                                 </div>
@@ -340,7 +340,7 @@
                             <div class="col-3">
                                 <div class="d-flex flex-column align-items-center">
                                     <h4 class="text-dark mb-1">
-                                        {{ $stockHealth['overview']['out_of_stock'] }}
+                                        @formatNumber($stockHealth['overview']['out_of_stock'])
                                     </h4>
                                     <small class="text-muted">Habis</small>
                                 </div>
@@ -368,7 +368,7 @@
                                                     <td>
                                                         <span
                                                             class="text-{{ $item['status'] === 'critical' ? 'danger' : ($item['status'] === 'out_of_stock' ? 'dark' : 'warning') }}">
-                                                            {{ number_format($item['jumlah'], 2) }} {{ $item['satuan'] }}
+                                                            {{ formatIndonesianNumber($item['jumlah']) }} {{ $item['satuan'] }}
                                                         </span>
                                                     </td>
                                                     <td>

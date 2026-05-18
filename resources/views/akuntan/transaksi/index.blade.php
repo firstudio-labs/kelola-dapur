@@ -140,10 +140,10 @@
                                 <div class="text-muted" style="font-size: 0.75rem;">{{ $t->cashAccount ? $t->cashAccount->type_label : '-' }}</div>
                             </td>
                             <td class="text-end text-success fw-semibold">
-                                {{ $t->debit > 0 ? 'Rp '.number_format($t->debit, 0, ',', '.') : '-' }}
+                                {{ $t->debit > 0 ? 'Rp ' . formatIndonesianNumber($t->debit) : '-' }}
                             </td>
                             <td class="text-end text-danger fw-semibold">
-                                {{ $t->credit > 0 ? 'Rp '.number_format($t->credit, 0, ',', '.') : '-' }}
+                                {{ $t->credit > 0 ? 'Rp ' . formatIndonesianNumber($t->credit) : '-' }}
                             </td>
                             <td class="text-center">
                                 @if($t->period && $t->period->isOpen())

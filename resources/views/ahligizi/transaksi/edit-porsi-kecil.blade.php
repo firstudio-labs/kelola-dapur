@@ -1,6 +1,23 @@
 @extends("template_ahli_gizi.layout")
 
 @section("content")
+    @php
+        if (!function_exists('formatIndonesianNumber')) {
+            function formatIndonesianNumber($value) {
+                if ($value === null || $value === '' || $value === 0 || $value === 0.0) return '0';
+                $num = (float)$value;
+                $parts = explode('.', (string)$num);
+                $formattedInt = number_format((float)$parts[0], 0, '', '.');
+                if (isset($parts[1])) {
+                    $decimals = rtrim($parts[1], '0');
+                    if (strlen($decimals) > 0) {
+                        return $formattedInt . ',' . $decimals;
+                    }
+                }
+                return $formattedInt;
+            }
+        }
+    @endphp
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
             <div class="col-12">
@@ -66,7 +83,7 @@
                     <i class="bx bx-group me-2 fs-5"></i>
                     <div>
                         <strong>Total Porsi Penerima MBG:</strong>
-                        <span class="badge bg-warning text-dark ms-2">{{ $totalPorsiPenerima }} Porsi</span>
+                        <span class="badge bg-warning text-dark ms-2">{{ formatIndonesianNumber($totalPorsiPenerima) }} Porsi</span>
                         <small class="text-muted ms-2">(dari penerima MBG yang sudah disetujui di dapur ini)</small>
                         &mdash; Jumlah porsi menu baru akan otomatis diisi dengan nilai ini.
                     </div>
@@ -209,7 +226,7 @@
                                                                         $displayJumlah = $jumlah;
                                                                         $displayUnit = $satuanAsli;
                                                                     }
-                                                                    $formattedJumlah = rtrim(rtrim(number_format($displayJumlah, 4, '.', ''), '0'), '.');
+                                                                    $formattedJumlah = formatIndonesianNumber($displayJumlah);
 
                                                                     $jumlahPorsiShared = $detail->jumlah_porsi;
                                                                     if ($konversiNilai) {
@@ -225,7 +242,7 @@
                                                                         $totalDisplay = $jumlah * $jumlahPorsiShared;
                                                                         $totalUnit = $satuanAsli;
                                                                     }
-                                                                    $formattedTotal = rtrim(rtrim(number_format($totalDisplay, 4, '.', ''), '0'), '.');
+                                                                    $formattedTotal = formatIndonesianNumber($totalDisplay);
                                                                     $konversiNilaiAttr = $konversiNilai ?? 0;
                                                                     $konversiSatuanAttr = $konversiSatuan ?? '';
                                                                 @endphp
@@ -239,7 +256,7 @@
                                                                     <td>{{ $bahan->templateItem->nama_bahan ?? "Bahan Tidak Diketahui" }}</td>
                                                                     <td>
                                                                         @if ($bahan->is_bahan_basah)
-                                                                            @php $finalJ = $displayJumlah * 1.07; $formattedFinalJ = rtrim(rtrim(number_format($finalJ, 4, '.', ''), '0'), '.'); @endphp
+                                                                            @php $finalJ = $displayJumlah * 1.07; $formattedFinalJ = formatIndonesianNumber($finalJ); @endphp
                                                                             {{ $formattedJumlah }} {{ $displayUnit }} ({{ $formattedFinalJ }} {{ $displayUnit }} Bahan Basah)
                                                                         @else
                                                                             {{ $formattedJumlah }} {{ $displayUnit }}
@@ -247,7 +264,7 @@
                                                                     </td>
                                                                     <td class="total-kebutuhan">
                                                                         @if ($bahan->is_bahan_basah)
-                                                                            @php $finalT = $totalDisplay * 1.07; $formattedFinalT = rtrim(rtrim(number_format($finalT, 4, '.', ''), '0'), '.'); @endphp
+                                                                            @php $finalT = $totalDisplay * 1.07; $formattedFinalT = formatIndonesianNumber($finalT); @endphp
                                                                             {{ $formattedTotal }} {{ $totalUnit }} ({{ $formattedFinalT }} {{ $totalUnit }} Bahan Basah)
                                                                         @else
                                                                             {{ $formattedTotal }} {{ $totalUnit }}
@@ -510,7 +527,19 @@
                 totalUnit = satuanAsli;
             }
 
-            const fmt = (n) => parseFloat(n.toFixed(4)).toString();
+            const fmt = (value) => {
+                if (value === null || value === undefined || value === '' || value === 0 || value === 0.0) return '0';
+                let numStr = parseFloat(value.toFixed(4)).toString();
+                let parts = numStr.split('.');
+                let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                if (parts[1]) {
+                    let decimals = parts[1].replace(/0+$/, '');
+                    if (decimals.length > 0) {
+                        return integerPart + ',' + decimals;
+                    }
+                }
+                return integerPart;
+            };
 
             let perPorsiText = `${fmt(displayJumlah)} ${displayUnit}`;
             let totalText = `${fmt(totalDisplay)} ${totalUnit}`;

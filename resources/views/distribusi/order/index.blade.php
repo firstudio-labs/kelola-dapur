@@ -84,7 +84,7 @@
                             </span>
                             <div>
                                 <small class="text-muted">Total Order Pengiriman</small>
-                                <h6 class="mb-0">{{ $orders->total() }}</h6>
+                                <h6 class="mb-0">@formatNumber($orders->total())</h6>
                             </div>
                         </div>
                     </div>
@@ -95,7 +95,7 @@
                             </span>
                             <div>
                                 <small class="text-muted">Belum Dikirim</small>
-                                <h6 class="mb-0">{{ \App\Models\OrderDistribusi::where('status', 'belum_dikirim')->count() }}</h6>
+                                <h6 class="mb-0">@formatNumber(\App\Models\OrderDistribusi::where('status', 'belum_dikirim')->count())</h6>
                             </div>
                         </div>
                     </div>
@@ -106,7 +106,7 @@
                             </span>
                             <div>
                                 <small class="text-muted">Sedang Dikirim</small>
-                                <h6 class="mb-0">{{ \App\Models\OrderDistribusi::where('status', 'sedang_dikirim')->count() }}</h6>
+                                <h6 class="mb-0">@formatNumber(\App\Models\OrderDistribusi::where('status', 'sedang_dikirim')->count())</h6>
                             </div>
                         </div>
                     </div>
@@ -117,7 +117,7 @@
                             </span>
                             <div>
                                 <small class="text-muted">Sudah Dikirim</small>
-                                <h6 class="mb-0">{{ \App\Models\OrderDistribusi::where('status', 'sudah_dikirim')->count() }}</h6>
+                                <h6 class="mb-0">@formatNumber(\App\Models\OrderDistribusi::where('status', 'sudah_dikirim')->count())</h6>
                             </div>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <i class="bx bx-bowl-hot me-1"></i>
-                                            <span class="fw-semibold">{{ $totalPorsi }}</span>
+                                            <span class="fw-semibold">@formatNumber($totalPorsi)</span>
                                         </div>
                                     </td>
                                     <td>
@@ -266,7 +266,7 @@
                                         </div>
                                         <div>
                                             <small class="text-muted d-block">Total Porsi</small>
-                                            <span class="fw-semibold">{{ $totalPorsi }}</span>
+                                            <span class="fw-semibold">@formatNumber($totalPorsi)</span>
                                         </div>
                                     </div>
                                     <div class="text-end">

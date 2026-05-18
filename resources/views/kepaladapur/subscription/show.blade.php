@@ -119,8 +119,7 @@
                                                 Harga Dasar Paket
                                             </td>
                                             <td class="text-end">
-                                                Rp
-                                                {{ number_format($subscriptionRequest->package->harga, 0, ",", ".") }}
+                                                @rupiah($subscriptionRequest->package->harga)
                                             </td>
                                         </tr>
                                         <tr>
@@ -128,16 +127,14 @@
                                                 Tambahan ID Dapur
                                             </td>
                                             <td class="text-end">
-                                                Rp
-                                                {{ number_format($dapur->id_dapur, 0, ",", ".") }}
+                                                @rupiah($dapur->id_dapur)
                                             </td>
                                         </tr>
                                         <tr class="border-top">
                                             <td><strong>Harga Asli</strong></td>
                                             <td class="text-end">
                                                 <strong>
-                                                    Rp
-                                                    {{ number_format($subscriptionRequest->harga_asli, 0, ",", ".") }}
+                                                    @rupiah($subscriptionRequest->harga_asli)
                                                 </strong>
                                             </td>
                                         </tr>
@@ -149,8 +146,7 @@
                                                 <td
                                                     class="text-end text-success"
                                                 >
-                                                    -Rp
-                                                    {{ number_format($subscriptionRequest->diskon, 0, ",", ".") }}
+                                                    -@rupiah($subscriptionRequest->diskon)
                                                 </td>
                                             </tr>
                                         @endif
@@ -161,8 +157,7 @@
                                             </td>
                                             <td class="text-end">
                                                 <strong>
-                                                    Rp
-                                                    {{ number_format($subscriptionRequest->harga_final, 0, ",", ".") }}
+                                                    @rupiah($subscriptionRequest->harga_final)
                                                 </strong>
                                             </td>
                                         </tr>

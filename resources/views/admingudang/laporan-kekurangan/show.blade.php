@@ -97,7 +97,7 @@
                         </p>
                         <p>
                             <strong>Total Porsi:</strong>
-                            {{ $transaksi->total_porsi }}
+                            @formatNumber($transaksi->total_porsi)
                         </p>
                     </div>
                     <div class="col-md-6">
@@ -153,16 +153,16 @@
                                     <td>
                                         {{ $item->templateItem->nama_bahan }}
                                     </td>
-                                    <td>{{ rtrim(rtrim(number_format((float) $item->jumlah_dibutuhkan, 3, ',', '.'), '0'), ',') }}
+                                    <td>{{ formatIndonesianNumber($item->jumlah_dibutuhkan) }}
                                     </td>
-                                    <td>{{ rtrim(rtrim(number_format((float) $item->jumlah_tersedia, 3, ',', '.'), '0'), ',') }}
+                                    <td>{{ formatIndonesianNumber($item->jumlah_tersedia) }}
                                     </td>
-                                    <td>{{ rtrim(rtrim(number_format((float) $item->jumlah_kurang, 3, ',', '.'), '0'), ',') }}
+                                    <td>{{ formatIndonesianNumber($item->jumlah_kurang) }}
                                     </td>
                                     <td>{{ $item->satuan }}</td>
                                     <td>
                                         @if ($stockItem && $stockItem->konversi_nilai > 0)
-                                            {{ rtrim(rtrim(number_format((float) ($item->jumlah_kurang / $stockItem->konversi_nilai), 3, ',', '.'), '0'), ',') }}
+                                            {{ formatIndonesianNumber($item->jumlah_kurang / $stockItem->konversi_nilai) }}
                                             {{ $stockItem->konversi_satuan }}
                                         @else
                                             <span class="text-muted">-</span>

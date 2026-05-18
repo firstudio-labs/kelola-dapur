@@ -804,7 +804,7 @@
                                 class="mb-11 text-4xl font-semibold text-dark dark:text-white xl:text-[42px] xl:leading-[1.21]">
                                 <span class="text-xl font-medium">Rp</span>
                                 <span class="-ml-1 -tracking-[2px]">
-                                    {{ number_format($package->harga, 0, ',', '.') }}
+                                    @formatNumber($package->harga)
                                 </span>
                                 <span class="text-base font-normal text-body-color dark:text-dark-6">
                                     / {{ $package->durasi_hari }} Hari

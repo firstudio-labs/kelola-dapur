@@ -662,15 +662,15 @@
                                                 </small>
                                             </td>
                                             <td>
-                                                {{ (float) number_format($neededAmount, 3) }}
+                                                {{ formatIndonesianNumber($neededAmount) }}
                                             </td>
                                             <td>
-                                                {{ (float) number_format($ingredient['available'], 3) }}
+                                                {{ formatIndonesianNumber($ingredient['available']) }}
 
                                             </td>
                                             @if ($stockCheck['has_snapshots'] && isset($ingredient['current_available']))
                                                 <td>
-                                                    {{ (float) number_format($ingredient['current_available'], 3) }}
+                                                    {{ formatIndonesianNumber($ingredient['current_available']) }}
                                                 </td>
                                             @endif
 
@@ -682,7 +682,7 @@
                                                 @else
                                                     <span class="badge bg-danger">
                                                         Kurang
-                                                        {{ (float) number_format($neededAmount - $ingredient['available'], 3) }}
+                                                        {{ formatIndonesianNumber($neededAmount - $ingredient['available']) }}
                                                     </span>
                                                 @endif
                                             </td>

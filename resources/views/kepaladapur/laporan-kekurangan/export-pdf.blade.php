@@ -102,7 +102,7 @@
                     @php
                         $stockItem = \App\Models\StockItem::where('id_dapur', $transaksi->id_dapur)->where('id_template_item', $item->id_template_item)->first();
                         $formatNumber = function($val) {
-                            return rtrim(rtrim(number_format((float) $val, 3, ',', '.'), '0'), ',');
+                            return formatIndonesianNumber($val);
                         };
                     @endphp
                     <tr>

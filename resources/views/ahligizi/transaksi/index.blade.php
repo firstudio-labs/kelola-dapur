@@ -1,6 +1,23 @@
 @extends("template_ahli_gizi.layout")
 
 @section("content")
+    @php
+        if (!function_exists('formatIndonesianNumber')) {
+            function formatIndonesianNumber($value) {
+                if ($value === null || $value === '' || $value === 0 || $value === 0.0) return '0';
+                $num = (float)$value;
+                $parts = explode('.', (string)$num);
+                $formattedInt = number_format((float)$parts[0], 0, '', '.');
+                if (isset($parts[1])) {
+                    $decimals = rtrim($parts[1], '0');
+                    if (strlen($decimals) > 0) {
+                        return $formattedInt . ',' . $decimals;
+                    }
+                }
+                return $formattedInt;
+            }
+        }
+    @endphp
     <div class="container-xxl flex-grow-1 container-p-y">
         
         <div class="card mb-4">
@@ -170,7 +187,7 @@
                                         Total Paket
                                     </small>
                                     <h6 class="mb-0">
-                                        {{ $transaksi->total() }}
+                                        {{ formatIndonesianNumber($transaksi->total()) }}
                                     </h6>
                                 </div>
                             </div>
@@ -185,7 +202,7 @@
                                 <div>
                                     <small class="text-muted">Draft</small>
                                     <h6 class="mb-0">
-                                        {{ $transaksi->where("status", "draft")->count() }}
+                                        {{ formatIndonesianNumber($transaksi->where("status", "draft")->count()) }}
                                     </h6>
                                 </div>
                             </div>
@@ -202,7 +219,7 @@
                                         Menunggu Persetujuan
                                     </small>
                                     <h6 class="mb-0">
-                                        {{ $transaksi->where("status", "pending_approval")->count() }}
+                                        {{ formatIndonesianNumber($transaksi->where("status", "pending_approval")->count()) }}
                                     </h6>
                                 </div>
                             </div>
@@ -219,7 +236,7 @@
                                         Kekurangan Stock
                                     </small>
                                     <h6 class="mb-0">
-                                        {{ $transaksi->filter(function ($t) { return $t->laporanKekuranganStock->where('status', 'pending')->isNotEmpty();})->count() }}
+                                        {{ formatIndonesianNumber($transaksi->filter(function ($t) { return $t->laporanKekuranganStock->where('status', 'pending')->isNotEmpty();})->count()) }}
                                     </h6>
                                 </div>
                             </div>
@@ -283,7 +300,7 @@
                                                     class="bx bx-bowl-hot me-1"
                                                 ></i>
                                                 <span class="fw-semibold">
-                                                    {{ $item->total_porsi }}
+                                                    {{ formatIndonesianNumber($item->total_porsi) }}
                                                 </span>
                                             </div>
                                         </td>
@@ -302,7 +319,7 @@
                                                     <i
                                                         class="bx bx-error me-1"
                                                     ></i>
-                                                    {{ $pendingShortages->count() }}
+                                                    {{ formatIndonesianNumber($pendingShortages->count()) }}
                                                     Item
                                                 </span>
                                             @elseif ($hasResolvedShortage)

@@ -344,7 +344,7 @@
                                                     </h6>
                                                     <small class="text-muted">
                                                         Stok saat ini:
-                                                        {{ rtrim(rtrim(number_format($approval->stockItem->jumlah, 3, ".", ""), "0"), ".") }}
+                                                        {{ formatIndonesianNumber($approval->stockItem->jumlah) }}
                                                         {{ $approval->stockItem->satuan }}
                                                     </small>
                                                 </div>
@@ -354,7 +354,7 @@
                                             <span
                                                 class="fw-medium text-primary"
                                             >
-                                                +{{ rtrim(rtrim(number_format($approval->jumlah, 3, ".", ""), "0"), ".") }}
+                                                +{{ formatIndonesianNumber($approval->jumlah) }}
                                             </span>
                                             <small class="text-muted d-block">
                                                 {{ $approval->stockItem->satuan }}
@@ -435,7 +435,7 @@
                                                     data-bs-target="#approvalStockDetailModal"
                                                     data-approval-data="{{ json_encode([
                                                         'tanggal_permintaan' => $approval->created_at->format('d M Y H:i'),
-                                                        'jumlah_diminta' => rtrim(rtrim(number_format($approval->jumlah, 3), '0'), '.') . ' ' . ($approval->satuan ?? ($approval->stockItem->templateItem->satuan ?? '')),
+                                                        'jumlah_diminta' => formatIndonesianNumber($approval->jumlah) . ' ' . ($approval->satuan ?? ($approval->stockItem->templateItem->satuan ?? '')),
                                                         'status' => $approval->status,
                                                         'tanggal_diproses' => $approval->approved_at ? $approval->approved_at->format('d M Y H:i') : '-',
                                                         'nama_pemohon' => $approval->adminGudang->user->nama ?? 'Admin Gudang',
@@ -449,7 +449,7 @@
                                                         'keterangan' => $approval->keterangan,
                                                         'suppliers' => $approval->suppliers->map(fn($s) => [
                                                             'nama_supplier' => $s->supplier->nama_supplier ?? 'Unknown',
-                                                            'jumlah' => rtrim(rtrim(number_format($s->jumlah, 3), '0'), '.') . ' ' . ($approval->satuan ?? ($approval->stockItem->templateItem->satuan ?? '')),
+                                                            'jumlah' => formatIndonesianNumber($s->jumlah) . ' ' . ($approval->satuan ?? ($approval->stockItem->templateItem->satuan ?? '')),
                                                             'fotos' => $s->dokumentasi->map(fn($d) => asset('storage/' . $d->foto_path))->values()->toArray()
                                                         ])->values()->toArray()
                                                     ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"

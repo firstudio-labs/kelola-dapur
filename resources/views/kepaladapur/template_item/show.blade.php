@@ -148,12 +148,12 @@
                         <tbody>
                             @forelse ($templateItem->bahanMenu as $index => $bahan)
                                 <tr>
-                                    <td>{{ $index + 1 }}</td>
+                                    <td>@formatNumber($index + 1)</td>
                                     <td>
                                         {{ $bahan->menuMakanan->nama_menu }}
                                     </td>
                                     <td>
-                                        {{ $bahan->jumlah_per_porsi }}
+                                        @formatNumber($bahan->jumlah_per_porsi)
                                         {{ $templateItem->satuan }}
                                     </td>
                                     <td>
@@ -204,10 +204,10 @@
                         <tbody>
                             @forelse ($templateItem->stockItems as $index => $stock)
                                 <tr>
-                                    <td>{{ $index + 1 }}</td>
+                                    <td>@formatNumber($index + 1)</td>
                                     <td>{{ $stock->dapur->nama_dapur }}</td>
                                     <td>
-                                        {{ $stock->jumlah_stock }}
+                                        @formatNumber($stock->jumlah_stock)
                                         {{ $templateItem->satuan }}
                                     </td>
                                     <td>

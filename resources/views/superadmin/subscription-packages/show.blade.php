@@ -207,14 +207,14 @@
                                                 <td>
                                                     <strong>
                                                         Rp
-                                                        {{ number_format($request->harga_final, 0, ",", ".") }}
+                                                        @formatNumber($request->harga_final)
                                                     </strong>
                                                     @if ($request->diskon > 0)
                                                         <small
                                                             class="text-success d-block"
                                                         >
                                                             Diskon: -Rp
-                                                            {{ number_format($request->diskon, 0, ",", ".") }}
+                                                            @formatNumber($request->diskon)
                                                         </small>
                                                     @endif
                                                 </td>

@@ -23,6 +23,7 @@ return new class extends Migration
                 'type' => 'expense',
                 'group' => 'biaya_bahan_baku',
                 'is_tax' => false,
+                'is_protected' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -32,6 +33,7 @@ return new class extends Migration
                 'type' => 'income',
                 'group' => 'dana_bahan_baku',
                 'is_tax' => false,
+                'is_protected' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

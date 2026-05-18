@@ -95,6 +95,38 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="col-12" id="shortage-container" style="display: none;">
+                            <hr class="mb-3">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">Detail Kekurangan Stok</label>
+                                <div class="text-muted small">Pilih transaksi yang memiliki kekurangan stok untuk dicatat pembeliannya.</div>
+                            </div>
+                            <div class="mb-3">
+                                <select id="shortage-transaksi-select" name="shortage_transaksi_id" class="form-select">
+                                    <option value="">-- Pilih Transaksi Dapur --</option>
+                                </select>
+                            </div>
+                            <div class="table-responsive" id="shortage-table-container" style="display: none;">
+                                <table class="table table-bordered table-sm align-middle">
+                                    <thead class="table-light text-center">
+                                        <tr>
+                                            <th>Bahan Baku</th>
+                                            <th>Kekurangan</th>
+                                            <th style="width: 200px;">Jml Dibeli</th>
+                                            <th style="width: 250px;">Nominal (Rp)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="shortage-table-body">
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <th colspan="3" class="text-end align-middle">Total Nominal</th>
+                                            <th id="shortage-total-nominal" class="text-end fw-bold">Rp 0</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
                         <div class="col-12">
                             <hr>
                             {{-- Preview Saldo --}}
@@ -125,45 +157,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12" id="shortage-container" style="display: none;">
-                            <hr class="mb-3">
-                            <div class="mb-2">
-                                <label class="form-label fw-semibold">Detail Kekurangan Stok</label>
-                                <div class="text-muted small">Pilih transaksi yang memiliki kekurangan stok untuk dicatat pembeliannya.</div>
-                            </div>
-                            <div class="mb-3">
-                                <select id="shortage-transaksi-select" name="shortage_transaksi_id" class="form-select">
-                                    <option value="">-- Pilih Transaksi Dapur --</option>
-                                </select>
-                            </div>
-                            <div class="table-responsive" id="shortage-table-container" style="display: none;">
-                                <table class="table table-bordered table-sm align-middle">
-                                    <thead class="table-light text-center">
-                                        <tr>
-                                            <th>Bahan Baku</th>
-                                            <th>Kekurangan</th>
-                                            <th style="width: 150px;">Jml Dibeli</th>
-                                            <th style="width: 200px;">Nominal (Rp)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="shortage-table-body">
-                                    </tbody>
-                                    <tfoot class="table-light">
-                                        <tr>
-                                            <th colspan="3" class="text-end align-middle">Total Nominal</th>
-                                            <th id="shortage-total-nominal" class="text-end fw-bold">Rp 0</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        </div>
                         <div class="col-12 col-md-6" id="debit-container">
                             <label class="form-label fw-semibold">Debit (Pemasukan) <span
                                     class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
-                                <input type="number" name="debit" id="debit-field" class="form-control"
-                                    value="{{ old('debit', 0) }}" min="0" step="1">
+                                <input type="text" name="debit" id="debit-field" class="form-control text-end"
+                                    value="{{ old('debit', 0) }}">
                             </div>
                         </div>
                         <div class="col-12 col-md-6" id="credit-container">
@@ -171,8 +171,8 @@
                                     class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
-                                <input type="number" name="credit" id="credit-field" class="form-control"
-                                    value="{{ old('credit', 0) }}" min="0" step="1">
+                                <input type="text" name="credit" id="credit-field" class="form-control text-end"
+                                    value="{{ old('credit', 0) }}">
                             </div>
                         </div>
                         <div class="col-12 d-flex gap-2">
@@ -213,6 +213,67 @@
             modal.show();
         }
 
+        function formatNumberIndonesian(value) {
+            if (value === null || value === undefined || isNaN(value)) return '0';
+            const num = parseFloat(value);
+            const parts = num.toString().split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            if (parts[1]) {
+                let decimals = parts[1].replace(/0+$/, '');
+                if (decimals.length > 0) {
+                    return parts[0] + ',' + decimals;
+                }
+            }
+            return parts[0];
+        }
+
+        function formatInputThousands(input) {
+            let val = input.value.replace(/\D/g, "");
+            if (val.length > 1) {
+                val = val.replace(/^0+/, "");
+            }
+            if (val) {
+                input.value = new Intl.NumberFormat('id-ID').format(parseInt(val));
+            } else {
+                input.value = "0";
+            }
+        }
+
+        function formatInputDecimal(input) {
+            let cursorPosition = input.selectionStart;
+            let originalLength = input.value.length;
+            let cleanVal = input.value.replace(/[^0-9,]/g, "");
+            let parts = cleanVal.split(',');
+            if (parts.length > 2) {
+                cleanVal = parts[0] + ',' + parts.slice(1).join('');
+                parts = cleanVal.split(',');
+            }
+            let integerPart = parts[0];
+            let formattedInt = "";
+            if (integerPart) {
+                if (integerPart.length > 1 && integerPart.startsWith('0')) {
+                    integerPart = integerPart.replace(/^0+/, "");
+                    if (integerPart === "") integerPart = "0";
+                }
+                formattedInt = new Intl.NumberFormat('id-ID').format(parseInt(integerPart) || 0);
+            } else {
+                formattedInt = "0";
+            }
+            let result = formattedInt;
+            if (parts.length > 1) {
+                result += ',' + parts[1].substring(0, 3);
+            }
+            input.value = result;
+            let newLength = input.value.length;
+            input.setSelectionRange(cursorPosition + (newLength - originalLength), cursorPosition + (newLength - originalLength));
+        }
+
+        function parseFormattedDecimal(value) {
+            if (!value) return 0;
+            const cleaned = value.replace(/\./g, "").replace(/,/g, ".");
+            return parseFloat(cleaned) || 0;
+        }
+
         async function updateBalancePreview() {
             const periodId = document.getElementById('period_select').value;
             const cashAccountId = document.querySelector('select[name="cash_account_id"]').value;
@@ -240,8 +301,10 @@
         }
 
         function calculateAfter() {
-            const debit = parseFloat(document.getElementById('debit-field').value) || 0;
-            const credit = parseFloat(document.getElementById('credit-field').value) || 0;
+            const debitVal = document.getElementById('debit-field').value.replace(/\./g, "");
+            const creditVal = document.getElementById('credit-field').value.replace(/\./g, "");
+            const debit = parseFloat(debitVal) || 0;
+            const credit = parseFloat(creditVal) || 0;
             const effect = debit - credit;
             const after = currentBalance + effect;
 
@@ -349,17 +412,17 @@
                         <td>
                             ${item.nama_bahan}
                         </td>
-                        <td class="text-center">${item.jumlah_kurang} ${item.satuan}</td>
+                        <td class="text-center">${formatNumberIndonesian(item.jumlah_kurang)} ${item.satuan}</td>
                         <td>
                             <div class="input-group input-group-sm">
-                                <input type="number" class="form-control shortage-qty" data-idx="${index}" value="${item.jumlah_kurang}" step="0.001" min="0">
+                                <input type="text" class="form-control shortage-qty text-end" data-idx="${index}" value="${formatNumberIndonesian(item.jumlah_kurang)}">
                                 <span class="input-group-text">${item.satuan}</span>
                             </div>
                         </td>
                         <td>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">Rp</span>
-                                <input type="number" class="form-control shortage-nominal" data-idx="${index}" value="0" step="1" min="0">
+                                <input type="text" class="form-control shortage-nominal text-end" data-idx="${index}" value="0">
                             </div>
                         </td>
                     `;
@@ -368,8 +431,38 @@
                 tableCont.style.display = 'block';
                 
                 // Add event listeners to new inputs
+                document.querySelectorAll('.shortage-qty').forEach(input => {
+                    input.addEventListener('input', function() {
+                        formatInputDecimal(this);
+                    });
+                    input.addEventListener('focus', function() {
+                        if (this.value === '0') {
+                            this.value = '';
+                        }
+                    });
+                    input.addEventListener('blur', function() {
+                        if (this.value === '') {
+                            this.value = '0';
+                        }
+                    });
+                });
+
                 document.querySelectorAll('.shortage-nominal').forEach(input => {
-                    input.addEventListener('input', calculateShortageTotal);
+                    input.addEventListener('input', function() {
+                        formatInputThousands(this);
+                        calculateShortageTotal();
+                    });
+                    input.addEventListener('focus', function() {
+                        if (this.value === '0') {
+                            this.value = '';
+                        }
+                    });
+                    input.addEventListener('blur', function() {
+                        if (this.value === '') {
+                            this.value = '0';
+                            calculateShortageTotal();
+                        }
+                    });
                 });
                 calculateShortageTotal();
                 
@@ -381,7 +474,8 @@
         function calculateShortageTotal() {
             let total = 0;
             document.querySelectorAll('.shortage-nominal').forEach(input => {
-                total += parseFloat(input.value) || 0;
+                const rawVal = input.value.replace(/\./g, "");
+                total += parseFloat(rawVal) || 0;
             });
             document.getElementById('shortage-total-nominal').textContent = formatIDR(total);
             
@@ -389,11 +483,13 @@
             const opt = document.getElementById('category_select').options[document.getElementById('category_select').selectedIndex];
             const type = opt ? opt.dataset.type : '';
             
+            const formattedTotal = new Intl.NumberFormat('id-ID').format(total);
+            
             if (type === 'income') {
-                document.getElementById('debit-field').value = total;
+                document.getElementById('debit-field').value = formattedTotal;
                 document.getElementById('credit-field').value = 0;
             } else if (type === 'expense') {
-                document.getElementById('credit-field').value = total;
+                document.getElementById('credit-field').value = formattedTotal;
                 document.getElementById('debit-field').value = 0;
             }
             
@@ -438,8 +534,37 @@
         });
 
         document.querySelector('select[name="cash_account_id"]').addEventListener('change', updateBalancePreview);
-        document.getElementById('debit-field').addEventListener('input', calculateAfter);
-        document.getElementById('credit-field').addEventListener('input', calculateAfter);
+
+        const debitField = document.getElementById('debit-field');
+        const creditField = document.getElementById('credit-field');
+
+        debitField.addEventListener('input', function() {
+            formatInputThousands(this);
+            calculateAfter();
+        });
+        debitField.addEventListener('focus', function() {
+            if (this.value === '0') this.value = '';
+        });
+        debitField.addEventListener('blur', function() {
+            if (this.value === '') {
+                this.value = '0';
+                calculateAfter();
+            }
+        });
+
+        creditField.addEventListener('input', function() {
+            formatInputThousands(this);
+            calculateAfter();
+        });
+        creditField.addEventListener('focus', function() {
+            if (this.value === '0') this.value = '';
+        });
+        creditField.addEventListener('blur', function() {
+            if (this.value === '') {
+                this.value = '0';
+                calculateAfter();
+            }
+        });
 
         // Trigger on load
         document.addEventListener('DOMContentLoaded', () => {
@@ -448,6 +573,12 @@
         });
         // Intercept form submit to collect shortage data as JSON
         document.getElementById('trx-form').addEventListener('submit', function(e) {
+            // Remove dots from debit & credit fields so Laravel's validation accepts it as numeric
+            const dField = document.getElementById('debit-field');
+            const cField = document.getElementById('credit-field');
+            dField.value = dField.value.replace(/\./g, "");
+            cField.value = cField.value.replace(/\./g, "");
+
             const rows = document.querySelectorAll('#shortage-table-body tr');
             if (rows.length > 0) {
                 const shortages = [];
@@ -456,10 +587,12 @@
                     const qtyInput = row.querySelector('.shortage-qty');
                     const nominalInput = row.querySelector('.shortage-nominal');
                     if (laporanId && qtyInput && nominalInput) {
+                        const rawNominal = nominalInput.value.replace(/\./g, "");
+                        const rawQty = parseFormattedDecimal(qtyInput.value);
                         shortages.push({
                             laporan_id: laporanId,
-                            qty: qtyInput.value,
-                            nominal: nominalInput.value
+                            qty: rawQty,
+                            nominal: rawNominal
                         });
                     }
                 });

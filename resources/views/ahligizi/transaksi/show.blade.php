@@ -1,6 +1,23 @@
 @extends("template_ahli_gizi.layout")
 
 @section("content")
+    @php
+        if (!function_exists('formatIndonesianNumber')) {
+            function formatIndonesianNumber($value) {
+                if ($value === null || $value === '' || $value === 0 || $value === 0.0) return '0';
+                $num = (float)$value;
+                $parts = explode('.', (string)$num);
+                $formattedInt = number_format((float)$parts[0], 0, '', '.');
+                if (isset($parts[1])) {
+                    $decimals = rtrim($parts[1], '0');
+                    if (strlen($decimals) > 0) {
+                        return $formattedInt . ',' . $decimals;
+                    }
+                }
+                return $formattedInt;
+            }
+        }
+    @endphp
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <div class="container-xxl flex-grow-1 container-p-y">
         @if(session('success'))
@@ -146,7 +163,7 @@
                                             <span
                                                 class="badge bg-label-success"
                                             >
-                                                {{ $totalPorsiBesar }} Porsi
+                                                {{ formatIndonesianNumber($totalPorsiBesar) }} Porsi
                                             </span>
                                         </td>
                                     </tr>
@@ -158,7 +175,7 @@
                                             <span
                                                 class="badge bg-label-warning"
                                             >
-                                                {{ $totalPorsiKecil }} Porsi
+                                                {{ formatIndonesianNumber($totalPorsiKecil) }} Porsi
                                             </span>
                                         </td>
                                     </tr>
@@ -170,7 +187,7 @@
                                             <span
                                                 class="badge bg-label-primary"
                                             >
-                                                {{ $totalKeseluruhan }} Porsi
+                                                {{ formatIndonesianNumber($totalKeseluruhan) }} Porsi
                                             </span>
                                         </td>
                                     </tr>
@@ -246,16 +263,16 @@
                                             <tr>
                                                 <td>{{ $namaBahan }}</td>
                                                 <td>
-                                                    {{ (float)number_format($totalKebutuhanDisplay, 2, '.', '') }}
+                                                    {{ formatIndonesianNumber($totalKebutuhanDisplay) }}
                                                     {{ $satuanDisplay }}
                                                 </td>
                                                 <td>
-                                                    {{ (float)number_format($stockTersediaDisplay, 2, '.', '') }}
+                                                    {{ formatIndonesianNumber($stockTersediaDisplay) }}
                                                     {{ $satuanDisplay }}
                                                 </td>
                                                 <td>
                                                     <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
-                                                        {{ (float)number_format($estimasiStok, 2, '.', '') }}
+                                                        {{ formatIndonesianNumber($estimasiStok) }}
                                                         {{ $satuanDisplay }}
                                                     </span>
                                                 </td>
@@ -263,9 +280,9 @@
                                                     class="stock-comparison-total-{{ $idTemplate }}"
                                                 >
                                                     <span class="fw-semibold">
-                                                        {{ (float)number_format($totalKebutuhanDisplay, 2, '.', '') }}
+                                                        {{ formatIndonesianNumber($totalKebutuhanDisplay) }}
                                                         :
-                                                        {{ (float)number_format($stockTersediaDisplay, 2, '.', '') }}
+                                                        {{ formatIndonesianNumber($stockTersediaDisplay) }}
                                                     </span>
                                                     <small
                                                         class="text-muted d-block"
@@ -352,16 +369,16 @@
                                                 <tr>
                                                     <td>{{ $namaBahan }}</td>
                                                     <td>
-                                                        {{ number_format($totalKebutuhanDisplay, 2) }}
+                                                        {{ formatIndonesianNumber($totalKebutuhanDisplay) }}
                                                         {{ $satuanDisplay }}
                                                     </td>
                                                     <td>
-                                                        {{ number_format($stockTersediaDisplay, 2) }}
+                                                        {{ formatIndonesianNumber($stockTersediaDisplay) }}
                                                         {{ $satuanDisplay }}
                                                     </td>
                                                     <td>
                                                         <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
-                                                            {{ number_format($estimasiStok, 2) }}
+                                                            {{ formatIndonesianNumber($estimasiStok) }}
                                                             {{ $satuanDisplay }}
                                                         </span>
                                                     </td>
@@ -371,9 +388,9 @@
                                                         <span
                                                             class="fw-semibold"
                                                         >
-                                                            {{ number_format($totalKebutuhanDisplay, 2) }}
+                                                            {{ formatIndonesianNumber($totalKebutuhanDisplay) }}
                                                             :
-                                                            {{ number_format($stockTersediaDisplay, 2) }}
+                                                            {{ formatIndonesianNumber($stockTersediaDisplay) }}
                                                         </span>
                                                         <small
                                                             class="text-muted d-block"
@@ -445,16 +462,16 @@
                                                 <tr>
                                                     <td>{{ $namaBahan }}</td>
                                                     <td>
-                                                        {{ (float)number_format($totalKebutuhanDisplay, 2, '.', '') }}
+                                                        {{ formatIndonesianNumber($totalKebutuhanDisplay) }}
                                                         {{ $satuanDisplay }}
                                                     </td>
                                                     <td>
-                                                        {{ (float)number_format($stockTersediaDisplay, 2, '.', '') }}
+                                                        {{ formatIndonesianNumber($stockTersediaDisplay) }}
                                                         {{ $satuanDisplay }}
                                                     </td>
                                                     <td>
                                                         <span class="{{ $estimasiStok < 0 ? 'text-danger' : ($estimasiStok == 0 ? 'text-warning' : 'text-success') }}">
-                                                            {{ number_format($estimasiStok, 2) }}
+                                                            {{ formatIndonesianNumber($estimasiStok) }}
                                                             {{ $satuanDisplay }}
                                                         </span>
                                                     </td>
@@ -464,9 +481,9 @@
                                                         <span
                                                             class="fw-semibold"
                                                         >
-                                                            {{ (float)number_format($totalKebutuhanDisplay, 2, '.', '') }}
+                                                            {{ formatIndonesianNumber($totalKebutuhanDisplay) }}
                                                             :
-                                                            {{ (float)number_format($stockTersediaDisplay, 2, '.', '') }}
+                                                            {{ formatIndonesianNumber($stockTersediaDisplay) }}
                                                         </span>
                                                         <small
                                                             class="text-muted d-block"
@@ -516,7 +533,7 @@
 
                             @if($porsiBesarDetails->count() > 0)
                                 <div class="col-12">
-                                    <h6 class="text-success mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Besar : {{ $totalPorsiBesar }} Porsi</h6>
+                                    <h6 class="text-success mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Besar : {{ formatIndonesianNumber($totalPorsiBesar) }} Porsi</h6>
                                 </div>
                                 @foreach($porsiBesarDetails as $detail)
                                     <div class="col-md-6 col-lg-4">
@@ -532,7 +549,7 @@
                                                 <div>
                                                     <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}</h6>
                                                     <span class="badge bg-label-success" style="font-size: 0.6rem;">
-                                                        Besar - {{ $detail->jumlah_porsi }} Porsi
+                                                        Besar - {{ formatIndonesianNumber($detail->jumlah_porsi) }} Porsi
                                                     </span>
                                                 </div>
                                             </div>
@@ -557,15 +574,15 @@
                                                                 <td class="ps-0 py-1" style="font-size: 0.75rem;">
                                                                     <span class="text-dark">{{ $namaBahan }}</span>
                                                                 </td>
-                                                                <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
+                                                                 <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
                                                                     @if(isset($stockInfo['konversi_nilai']) && $stockInfo['konversi_nilai'] > 0)
                                                                         @php
                                                                             $butuhKonversiMenu = $totalButuhMenu / $stockInfo['konversi_nilai'];
                                                                         @endphp
-                                                                        <span class="fw-bold">{{ (float)number_format($butuhKonversiMenu, 2, '.', '') }} {{ $stockInfo['konversi_satuan'] }}</span>
-                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ (float)number_format($totalButuhMenu, 2, '.', '') }} {{ $satuan }})</div>
+                                                                        <span class="fw-bold">{{ formatIndonesianNumber($butuhKonversiMenu) }} {{ $stockInfo['konversi_satuan'] }}</span>
+                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ formatIndonesianNumber($totalButuhMenu) }} {{ $satuan }})</div>
                                                                     @else
-                                                                        <span class="fw-bold">{{ (float)number_format($totalButuhMenu, 2, '.', '') }}</span> <span class="text-muted">{{ $satuan }}</span>
+                                                                        <span class="fw-bold">{{ formatIndonesianNumber($totalButuhMenu) }}</span> <span class="text-muted">{{ $satuan }}</span>
                                                                     @endif
                                                                 </td>
                                                             </tr>
@@ -580,7 +597,7 @@
 
                             @if($porsiKecilDetails->count() > 0)
                                 <div class="col-12 mt-4">
-                                    <h6 class="text-warning mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Kecil : {{ $totalPorsiKecil }} Porsi</h6>
+                                    <h6 class="text-warning mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Kecil : {{ formatIndonesianNumber($totalPorsiKecil) }} Porsi</h6>
                                 </div>
                                 @foreach($porsiKecilDetails as $detail)
                                     <div class="col-md-6 col-lg-4">
@@ -596,7 +613,7 @@
                                                 <div>
                                                     <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}</h6>
                                                     <span class="badge bg-label-warning" style="font-size: 0.6rem;">
-                                                        Kecil - {{ $detail->jumlah_porsi }} Porsi
+                                                        Kecil - {{ formatIndonesianNumber($detail->jumlah_porsi) }} Porsi
                                                     </span>
                                                 </div>
                                             </div>
@@ -621,15 +638,15 @@
                                                                 <td class="ps-0 py-1" style="font-size: 0.75rem;">
                                                                     <span class="text-dark">{{ $namaBahan }}</span>
                                                                 </td>
-                                                                <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
+                                                                 <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
                                                                     @if(isset($stockInfo['konversi_nilai']) && $stockInfo['konversi_nilai'] > 0)
                                                                         @php
                                                                             $butuhKonversiMenu = $totalButuhMenu / $stockInfo['konversi_nilai'];
                                                                         @endphp
-                                                                        <span class="fw-bold">{{ (float)number_format($butuhKonversiMenu, 2, '.', '') }} {{ $stockInfo['konversi_satuan'] }}</span>
-                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ (float)number_format($totalButuhMenu, 2, '.', '') }} {{ $satuan }})</div>
+                                                                        <span class="fw-bold">{{ formatIndonesianNumber($butuhKonversiMenu) }} {{ $stockInfo['konversi_satuan'] }}</span>
+                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ formatIndonesianNumber($totalButuhMenu) }} {{ $satuan }})</div>
                                                                     @else
-                                                                        <span class="fw-bold">{{ (float)number_format($totalButuhMenu, 2, '.', '') }}</span> <span class="text-muted">{{ $satuan }}</span>
+                                                                        <span class="fw-bold">{{ formatIndonesianNumber($totalButuhMenu) }}</span> <span class="text-muted">{{ $satuan }}</span>
                                                                     @endif
                                                                 </td>
                                                             </tr>
@@ -676,15 +693,15 @@
                                                     {{ $laporan->templateItem->nama_bahan }}
                                                 </td>
                                                 <td>
-                                                    {{ (float)number_format($laporan->jumlah_dibutuhkan, 2, '.', '') }}
+                                                    {{ formatIndonesianNumber($laporan->jumlah_dibutuhkan) }}
                                                     {{ $laporan->satuan }}
                                                 </td>
                                                 <td>
-                                                    {{ (float)number_format($laporan->jumlah_tersedia, 2, '.', '') }}
+                                                    {{ formatIndonesianNumber($laporan->jumlah_tersedia) }}
                                                     {{ $laporan->satuan }}
                                                 </td>
                                                 <td class="text-danger">
-                                                    {{ (float)number_format($laporan->jumlah_kurang, 2, '.', '') }}
+                                                    {{ formatIndonesianNumber($laporan->jumlah_kurang) }}
                                                     {{ $laporan->satuan }}
                                                 </td>
                                                 <td>
@@ -744,13 +761,13 @@
                                         <li>
                                             <strong>{{ $namaBahan }}</strong>
                                             : Butuh
-                                            {{ (float)number_format($kebutuhan, 2, '.', '') }}
+                                            {{ formatIndonesianNumber($kebutuhan) }}
                                             {{ $satuan }}, tersedia
-                                            {{ (float)number_format($stockTersedia, 2, '.', '') }}
+                                            {{ formatIndonesianNumber($stockTersedia) }}
                                             {{ $satuan }}
                                             <span class="text-danger">
                                                 (kurang
-                                                {{ (float)number_format($kekurangan, 2, '.', '') }}
+                                                {{ formatIndonesianNumber($kekurangan) }}
                                                 {{ $satuan }})
                                             </span>
                                         </li>

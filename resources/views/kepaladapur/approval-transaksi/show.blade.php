@@ -84,7 +84,7 @@
                                         Total Porsi
                                     </label>
                                     <div class="fw-medium text-primary fs-5">
-                                        {{ $approval->transaksiDapur->total_porsi }}
+                                        {{ formatIndonesianNumber($approval->transaksiDapur->total_porsi) }}
                                         porsi
                                     </div>
                                 </div>
@@ -165,7 +165,7 @@
                                     <div
                                         class="p-2 bg-label-primary rounded mb-3 d-flex justify-content-between align-items-center">
                                         <span class="fw-bold small text-uppercase">Porsi Besar :</span>
-                                        <span class="badge bg-primary">{{ (float) $totalPorsiBesar }} Porsi</span>
+                                        <span class="badge bg-primary">{{ formatIndonesianNumber($totalPorsiBesar) }} Porsi</span>
                                     </div>
                                     <div class="list-group list-group-flush">
                                         @foreach ($porsiBesar as $detail)
@@ -190,7 +190,7 @@
                                     <div
                                         class="p-2 bg-label-warning rounded mb-3 d-flex justify-content-between align-items-center">
                                         <span class="fw-bold small text-uppercase">Porsi Kecil :</span>
-                                        <span class="badge bg-warning">{{ (float) $totalPorsiKecil }} Porsi</span>
+                                        <span class="badge bg-warning">{{ formatIndonesianNumber($totalPorsiKecil) }} Porsi</span>
                                     </div>
                                     <div class="list-group list-group-flush">
                                         @foreach ($porsiKecil as $detail)
@@ -498,7 +498,7 @@
                                     Porsi Besar
                                 </small>
                                 <h6 class="mb-0">
-                                    {{ $approval->transaksiDapur->getTotalPorsiBesar() }}
+                                    {{ formatIndonesianNumber($approval->transaksiDapur->getTotalPorsiBesar()) }}
                                 </h6>
                             </div>
                         </div>
@@ -513,7 +513,7 @@
                                     Porsi Kecil
                                 </small>
                                 <h6 class="mb-0">
-                                    {{ $approval->transaksiDapur->getTotalPorsiKecil() }}
+                                    {{ formatIndonesianNumber($approval->transaksiDapur->getTotalPorsiKecil()) }}
                                 </h6>
                             </div>
                         </div>
@@ -647,15 +647,15 @@
                                                 </small>
                                             </td>
                                             <td>
-                                                {{ (float) number_format($neededAmount, 3) }}
+                                                {{ formatIndonesianNumber($neededAmount) }}
                                             </td>
                                             <td>
-                                                {{ (float) number_format($ingredient['available'], 3) }}
+                                                {{ formatIndonesianNumber($ingredient['available']) }}
 
                                             </td>
                                             @if ($stockCheck['has_snapshots'] && isset($ingredient['current_available']))
                                                 <td>
-                                                    {{ (float) number_format($ingredient['current_available'], 3) }}
+                                                    {{ formatIndonesianNumber($ingredient['current_available']) }}
                                                 </td>
                                             @endif
 
@@ -667,7 +667,7 @@
                                                 @else
                                                     <span class="badge bg-danger">
                                                         Kurang
-                                                        {{ (float) number_format($neededAmount - $ingredient['available'], 3) }}
+                                                        {{ formatIndonesianNumber($neededAmount - $ingredient['available']) }}
                                                     </span>
                                                 @endif
                                             </td>
@@ -880,7 +880,7 @@
                                                 <div
                                                     class="p-2 bg-label-primary rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
                                                     <span class="fw-bold small text-uppercase">Porsi Besar :
-                                                        {{ $totalPorsiBesar }} Porsi</span>
+                                                        {{ formatIndonesianNumber($totalPorsiBesar) }} Porsi</span>
                                                 </div>
                                                 <div class="table-responsive border rounded-bottom">
                                                     <table class="table table-sm table-hover mb-0">
@@ -902,7 +902,7 @@
                                                 <div
                                                     class="p-2 bg-label-warning rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
                                                     <span class="fw-bold small text-uppercase">Porsi Kecil :
-                                                        {{ $totalPorsiKecil }} Porsi</span>
+                                                        {{ formatIndonesianNumber($totalPorsiKecil) }} Porsi</span>
                                                 </div>
                                                 <div class="table-responsive border rounded-bottom">
                                                     <table class="table table-sm table-hover mb-0">
@@ -958,8 +958,8 @@
                                                             <td class="py-2 text-center">
                                                                 @if ($pDetail->status_penerimaan !== 'menunggu')
                                                                     <div class="text-primary" style="font-size: 0.6rem;">
-                                                                        {{ $pDetail->porsi_besar_diterima ?? 0 }}B /
-                                                                        {{ $pDetail->porsi_kecil_diterima ?? 0 }}K</div>
+                                                                        {{ formatIndonesianNumber($pDetail->porsi_besar_diterima ?? 0) }}B /
+                                                                        {{ formatIndonesianNumber($pDetail->porsi_kecil_diterima ?? 0) }}K</div>
                                                                 @else
                                                                     <span class="text-muted small">-</span>
                                                                 @endif
@@ -1182,7 +1182,7 @@
                                                 <div
                                                     class="p-2 bg-label-primary rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
                                                     <span class="fw-bold small text-uppercase">Porsi Besar :
-                                                        {{ $totalPorsiBesar }} Porsi</span>
+                                                        {{ formatIndonesianNumber($totalPorsiBesar) }} Porsi</span>
                                                 </div>
                                                 <div class="table-responsive border rounded-bottom">
                                                     <table class="table table-sm table-hover mb-0">
@@ -1204,7 +1204,7 @@
                                                 <div
                                                     class="p-2 bg-label-warning rounded-top border border-bottom-0 d-flex justify-content-between align-items-center">
                                                     <span class="fw-bold small text-uppercase">Porsi Kecil :
-                                                        {{ $totalPorsiKecil }} Porsi</span>
+                                                        {{ formatIndonesianNumber($totalPorsiKecil) }} Porsi</span>
                                                 </div>
                                                 <div class="table-responsive border rounded-bottom">
                                                     <table class="table table-sm table-hover mb-0">

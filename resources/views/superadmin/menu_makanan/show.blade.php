@@ -187,9 +187,9 @@
                                                 <td>
                                                     @php
                                                         $jumlah = $bahan->jumlah_per_porsi ?? 0;
-                                                        $displayJumlah = rtrim(rtrim(number_format($jumlah, 4, '.', ''), '0'), '.');
+                                                        $displayJumlah = formatIndonesianNumber($jumlah);
                                                         $jumlahBasah = $bahan->is_bahan_basah ? ($jumlah * 1.07) : $jumlah;
-                                                        $displayJumlahBasah = rtrim(rtrim(number_format($jumlahBasah, 4, '.', ''), '0'), '.');
+                                                        $displayJumlahBasah = formatIndonesianNumber($jumlahBasah);
                                                     @endphp
                                                     @if ($bahan->is_bahan_basah)
                                                         {{ $displayJumlah }} (Matang) - {{ $displayJumlahBasah }} (Basah)

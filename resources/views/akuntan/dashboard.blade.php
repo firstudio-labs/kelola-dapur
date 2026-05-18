@@ -71,7 +71,7 @@
                 <div class="avatar mx-auto mb-2">
                     <span class="avatar-initial rounded-circle bg-label-info"><i class="bx bx-trending-up fs-4"></i></span>
                 </div>
-                <h5 class="fw-bold mb-0 text-dark">Rp {{ number_format($stats['opening_balance'], 0, ',', '.') }}</h5>
+                <h5 class="fw-bold mb-0 text-dark">@rupiah($stats['opening_balance'])</h5>
                 <small class="text-muted">Saldo Awal</small>
             </div>
         </div>
@@ -82,7 +82,7 @@
                 <div class="avatar mx-auto mb-2">
                     <span class="avatar-initial rounded-circle bg-label-success"><i class="bx bx-plus-circle fs-4"></i></span>
                 </div>
-                <h5 class="fw-bold mb-0 text-success">Rp {{ number_format($stats['total_debit'], 0, ',', '.') }}</h5>
+                <h5 class="fw-bold mb-0 text-success">@rupiah($stats['total_debit'])</h5>
                 <small class="text-muted">Total Pemasukan</small>
             </div>
         </div>
@@ -93,7 +93,7 @@
                 <div class="avatar mx-auto mb-2">
                     <span class="avatar-initial rounded-circle bg-label-danger"><i class="bx bx-minus-circle fs-4"></i></span>
                 </div>
-                <h5 class="fw-bold mb-0 text-danger">Rp {{ number_format($stats['total_credit'], 0, ',', '.') }}</h5>
+                <h5 class="fw-bold mb-0 text-danger">@rupiah($stats['total_credit'])</h5>
                 <small class="text-muted">Total Pengeluaran</small>
             </div>
         </div>
@@ -105,7 +105,7 @@
                     <span class="avatar-initial rounded-circle bg-label-primary"><i class="bx bx-wallet fs-4"></i></span>
                 </div>
                 <h5 class="fw-bold mb-0 {{ $stats['closing_balance'] >= 0 ? 'text-primary' : 'text-danger' }}">
-                    Rp {{ number_format($stats['closing_balance'], 0, ',', '.') }}
+                    @rupiah($stats['closing_balance'])
                 </h5>
                 <small class="text-muted">Saldo Akhir</small>
             </div>
@@ -117,7 +117,7 @@
                 <div class="avatar mx-auto mb-2">
                     <span class="avatar-initial rounded-circle bg-label-warning"><i class="bx bx-list-ul fs-4"></i></span>
                 </div>
-                <h3 class="fw-bold mb-0 text-dark">{{ number_format($stats['total_transaksi']) }}</h3>
+                <h3 class="fw-bold mb-0 text-dark">@formatNumber($stats['total_transaksi'])</h3>
                 <small class="text-muted">Jumlah Transaksi</small>
             </div>
         </div>
@@ -146,7 +146,7 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-baseline gap-1 mt-1">
-                    <h5 class="fw-bold mb-0 text-dark">Rp {{ number_format($cas['balance'], 0, ',', '.') }}</h5>
+                    <h5 class="fw-bold mb-0 text-dark">@rupiah($cas['balance'])</h5>
                 </div>
                 {{-- Dynamic Progress Bar --}}
                 @php 
@@ -160,7 +160,7 @@
                 </div>
                 <div class="d-flex justify-content-between mt-1">
                     <small class="text-muted" style="font-size: 0.65rem;">Kontribusi terhadap total</small>
-                    <small class="fw-semibold text-{{ $cas['type'] === 'tunai' ? 'success' : 'info' }}" style="font-size: 0.65rem;">{{ number_format($percent, 1) }}%</small>
+                    <small class="fw-semibold text-{{ $cas['type'] === 'tunai' ? 'success' : 'info' }}" style="font-size: 0.65rem;">@formatNumber($percent)%</small>
                 </div>
             </div>
         </div>

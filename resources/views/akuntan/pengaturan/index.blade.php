@@ -433,10 +433,16 @@
                                                 <button class="btn btn-sm btn-icon btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editKategoriModal{{ $c->id }}" title="Edit">
                                                     <i class="bx bx-edit-alt"></i>
                                                 </button>
-                                                <form action="{{ route('akuntan.pengaturan.kategori.destroy', $c->id) }}" method="POST" class="d-inline">
-                                                    @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-icon btn-outline-danger" onclick="return confirm('Hapus kategori ini secara permanen?')" title="Hapus"><i class="bx bx-trash"></i></button>
-                                                </form>
+                                                @if($c->is_protected)
+                                                    <button class="btn btn-sm btn-icon btn-outline-secondary" disabled title="Kategori Bawaan Sistem (Tidak Dapat Dihapus)">
+                                                        <i class="bx bx-trash text-muted"></i>
+                                                    </button>
+                                                @else
+                                                    <form action="{{ route('akuntan.pengaturan.kategori.destroy', $c->id) }}" method="POST" class="d-inline">
+                                                        @csrf @method('DELETE')
+                                                        <button class="btn btn-sm btn-icon btn-outline-danger" onclick="return confirm('Hapus kategori ini secara permanen?')" title="Hapus"><i class="bx bx-trash"></i></button>
+                                                    </form>
+                                                @endif
 
                                                 {{-- Modal Edit --}}
                                                 <div class="modal fade" id="editKategoriModal{{ $c->id }}" tabindex="-1" aria-hidden="true">

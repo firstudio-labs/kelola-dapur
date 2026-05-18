@@ -179,7 +179,7 @@
                                                             $jumlah = $jumlah * 1000;
                                                             $satuan = "ml";
                                                         }
-                                                        echo rtrim(rtrim(number_format($jumlah, 4, ".", ""), "0"), ".");
+                                                        echo formatIndonesianNumber($jumlah);
                                                     @endphp
                                                 </td>
                                                 <td>
@@ -280,7 +280,7 @@
                                             {{ $detail->transaksiDapur->tanggal_transaksi->format("d M Y") }}
                                         </td>
                                         <td>
-                                            {{ $detail->jumlah_porsi }} porsi
+                                            {{ formatIndonesianNumber($detail->jumlah_porsi) }} porsi
                                         </td>
                                         <td>
                                             {{ $detail->transaksiDapur->dapur->nama_dapur ?? "Dapur Tidak Diketahui" }}

@@ -82,7 +82,7 @@
                                                 <strong>{{ optional($riwayat->stockItem->templateItem)->nama_bahan ?? 'Bahan Tidak Diketahui' }}</strong>
                                             </td>
                                             <td>
-                                                <span class="badge bg-success">+{{ number_format($riwayat->jumlah, 2) }} {{ $riwayat->satuan }}</span>
+                                                <span class="badge bg-success">+{{ formatIndonesianNumber($riwayat->jumlah) }} {{ $riwayat->satuan }}</span>
                                             </td>
                                             <td>
                                                 <small>{{ optional($riwayat->adminGudang->user)->nama ?? 'Sistem' }}</small>

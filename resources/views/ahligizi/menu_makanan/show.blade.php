@@ -1,6 +1,23 @@
 @extends("template_ahli_gizi.layout")
 
 @section("content")
+    @php
+        if (!function_exists('formatIndonesianNumber')) {
+            function formatIndonesianNumber($value) {
+                if ($value === null || $value === '' || $value === 0 || $value === 0.0) return '0';
+                $num = (float)$value;
+                $parts = explode('.', (string)$num);
+                $formattedInt = number_format((float)$parts[0], 0, '', '.');
+                if (isset($parts[1])) {
+                    $decimals = rtrim($parts[1], '0');
+                    if (strlen($decimals) > 0) {
+                        return $formattedInt . ',' . $decimals;
+                    }
+                }
+                return $formattedInt;
+            }
+        }
+    @endphp
     <div class="container-xxl flex-grow-1 container-p-y">
         
         <div class="row">
@@ -135,7 +152,7 @@
                                             Total Bahan:
                                         </label>
                                         <p class="mb-0">
-                                            {{ $menuMakanan->bahanMenu->count() }}
+                                            {{ formatIndonesianNumber($menuMakanan->bahanMenu->count()) }}
                                             Bahan
                                         </p>
                                     </div>
@@ -201,11 +218,11 @@
                                                         }
                                                     }
 
-                                                    $formattedJumlah = rtrim(rtrim(number_format($jumlah, 4, ".", ""), "0"), ".");
+                                                    $formattedJumlah = formatIndonesianNumber($jumlah);
 
                                                     if ($bahan->is_bahan_basah) {
                                                         $finalJumlah = $jumlah * 1.07;
-                                                        $formattedFinalJumlah = rtrim(rtrim(number_format($finalJumlah, 4, ".", ""), "0"), ".");
+                                                        $formattedFinalJumlah = formatIndonesianNumber($finalJumlah);
                                                         echo $formattedJumlah . " " . $displayUnit . " Bahan Matang - " . $formattedFinalJumlah . " " . $displayUnit . " per porsi";
                                                     } else {
                                                         echo $formattedJumlah . " " . $displayUnit . " per porsi ";
@@ -299,7 +316,7 @@
                                             Bahan
                                         </p>
                                         <h6 class="mb-0">
-                                            {{ $menuMakanan->bahanMenu->count() }}
+                                            {{ formatIndonesianNumber($menuMakanan->bahanMenu->count()) }}
                                         </h6>
                                     </div>
                                 </div>
@@ -318,7 +335,7 @@
                                             Transaksi
                                         </p>
                                         <h6 class="mb-0">
-                                            {{ $menuMakanan->detailTransaksiDapur ? $menuMakanan->detailTransaksiDapur->count() : 0 }}
+                                            {{ formatIndonesianNumber($menuMakanan->detailTransaksiDapur ? $menuMakanan->detailTransaksiDapur->count() : 0) }}
                                         </h6>
                                     </div>
                                 </div>
@@ -352,7 +369,7 @@
                                             {{ $detail->transaksiDapur->tanggal_transaksi->format("d M Y") }}
                                         </td>
                                         <td>
-                                            {{ $detail->jumlah_porsi }} porsi
+                                            {{ formatIndonesianNumber($detail->jumlah_porsi) }} porsi
                                         </td>
                                         <td>
                                             {{ $detail->transaksiDapur->dapur->nama_dapur ?? "Dapur Tidak Diketahui" }}

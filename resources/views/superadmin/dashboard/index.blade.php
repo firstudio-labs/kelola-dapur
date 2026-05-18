@@ -28,7 +28,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-2">Jumlah Artikel</h6>
-                                <h4 class="mb-0">{{ number_format($artikel ?? 0) }}</h4>
+                                <h4 class="mb-0">@formatNumber($artikel ?? 0)</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-label-primary">
@@ -46,7 +46,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-2">Jumlah Layanan</h6>
-                                <h4 class="mb-0">{{ number_format($layanan ?? 0) }}</h4>
+                                <h4 class="mb-0">@formatNumber($layanan ?? 0)</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-label-primary">
@@ -64,7 +64,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-2">Jumlah Produk</h6>
-                                <h4 class="mb-0">{{ number_format($produk ?? 0) }}</h4>
+                                <h4 class="mb-0">@formatNumber($produk ?? 0)</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-label-primary">
@@ -82,7 +82,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-2">Jumlah Testimoni</h6>
-                                <h4 class="mb-0">{{ number_format($testimoni ?? 0) }}</h4>
+                                <h4 class="mb-0">@formatNumber($testimoni ?? 0)</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-label-primary">

@@ -247,8 +247,7 @@
                                         ID Dapur ({{ $dapur->id_dapur }}):
                                     </span>
                                     <span>
-                                        +Rp
-                                        {{ number_format($dapur->id_dapur, 0, ",", ".") }}
+                                        +@rupiah($dapur->id_dapur)
                                     </span>
                                 </div>
                                 <hr />

@@ -87,7 +87,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $stats['total'] }}
+                                        @formatNumber($stats['total'])
                                     </h6>
                                 </div>
                             </div>
@@ -112,7 +112,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $stats['pending'] }}
+                                        @formatNumber($stats['pending'])
                                     </h6>
                                     @if ($stats['pending'] > 0)
                                         <span
@@ -144,7 +144,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $stats['resolved'] }}
+                                        @formatNumber($stats['resolved'])
                                     </h6>
                                 </div>
                             </div>
@@ -169,7 +169,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $stats['total_kekurangan_bahan'] }}
+                                        @formatNumber($stats['total_kekurangan_bahan'])
                                     </h6>
                                 </div>
                             </div>
@@ -340,7 +340,6 @@
                                     @endif
                                     <th>No</th>
                                     <th>Tanggal Transaksi</th>
-                                    <th>Nama Paket</th>
                                     <th>Total Porsi</th>
                                     <th>Jumlah Kekurangan</th>
                                     <th>Dibuat Oleh</th>
@@ -374,29 +373,17 @@
                                                     {{ $transaksiItem->tanggal_transaksi->format('d M Y') }}
                                                 </span>
                                                 <small class="text-muted">
-                                                    {{ $transaksiItem->tanggal_transaksi->format('H:i') }}
+                                                    {{ $transaksiItem->created_at->format('H:i') }} | ID: {{ $transaksiItem->id_transaksi }}
                                                 </small>
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <div>
-                                                    <h6 class="mb-0">
-                                                        {{ $transaksiItem->nama_paket }}
-                                                    </h6>
-                                                    <small class="text-muted">
-                                                        ID: {{ $transaksiItem->id_transaksi }}
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
                                             <span class="fw-medium text-primary">
-                                                {{ $transaksiItem->total_porsi }}
+                                                @formatNumber($transaksiItem->total_porsi)
                                             </span>
                                         </td>
                                         <td>
-                                            {{ $transaksiItem->laporanKekuranganStock->count() }}
+                                            @formatNumber($transaksiItem->laporanKekuranganStock->count())
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">

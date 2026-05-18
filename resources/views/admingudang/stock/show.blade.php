@@ -139,7 +139,7 @@
                                     <input
                                         type="text"
                                         class="form-control"
-                                        value="{{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}"
+                                        value="{{ formatIndonesianNumber($stockItem->jumlah) }}"
                                         readonly
                                     />
                                 </div>
@@ -226,7 +226,7 @@
                                         <input
                                             type="text"
                                             class="form-control"
-                                            value="{{ rtrim(rtrim(number_format((float)$stockItem->konversi_nilai, 3), '0'), '.') }} {{ $stockItem->satuan }} = 1 {{ $stockItem->konversi_satuan }}"
+                                            value="{{ formatIndonesianNumber($stockItem->konversi_nilai) }} {{ $stockItem->satuan }} = 1 {{ $stockItem->konversi_satuan }}"
                                             readonly
                                         />
                                     </div>
@@ -272,7 +272,7 @@
                                             </span>
                                         </div>
                                         <h5 class="mb-1">
-                                            {{ $totalRequests }}
+                                            @formatNumber($totalRequests)
                                         </h5>
                                         <small class="text-muted">
                                             Total Permintaan
@@ -293,7 +293,7 @@
                                             </span>
                                         </div>
                                         <h5 class="mb-1">
-                                            {{ $approvedRequests }}
+                                            @formatNumber($approvedRequests)
                                         </h5>
                                         <small class="text-muted">
                                             Disetujui
@@ -312,7 +312,7 @@
                                             </span>
                                         </div>
                                         <h5 class="mb-1">
-                                            {{ $pendingRequests }}
+                                            @formatNumber($pendingRequests)
                                         </h5>
                                         <small class="text-muted">
                                             Menunggu
@@ -331,7 +331,7 @@
                                             </span>
                                         </div>
                                         <h5 class="mb-1">
-                                            {{ $rejectedRequests }}
+                                            @formatNumber($rejectedRequests)
                                         </h5>
                                         <small class="text-muted">
                                             Ditolak
@@ -396,7 +396,7 @@
                                 @foreach ($approvalHistory as $index => $history)
                                     <tr>
                                         <td>
-                                            {{ $approvalHistory->firstItem() + $index }}
+                                            @formatNumber($approvalHistory->firstItem() + $index)
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column">
@@ -410,7 +410,7 @@
                                         </td>
                                         <td>
                                             <span class="fw-medium">
-                                                {{ rtrim(rtrim(number_format($history->jumlah, 3), "0"), ".") }}
+                                                @formatNumber($history->jumlah)
                                             </span>
                                             <small class="text-muted">
                                                 {{ $stockItem->templateItem->satuan }}
@@ -488,7 +488,7 @@
                                                 data-bs-target="#approvalStockDetailModal"
                                                 data-approval-data="{{ json_encode([
                                                     'tanggal_permintaan' => $history->created_at->format('d M Y H:i'),
-                                                    'jumlah_diminta' => rtrim(rtrim(number_format($history->jumlah, 3), '0'), '.') . ' ' . ($history->satuan ?? ($stockItem->templateItem->satuan ?? '')),
+                                                    'jumlah_diminta' => formatIndonesianNumber($history->jumlah) . ' ' . ($history->satuan ?? ($stockItem->templateItem->satuan ?? '')),
                                                     'status' => $history->status,
                                                     'tanggal_diproses' => $history->approved_at ? $history->approved_at->format('d M Y H:i') : '-',
                                                     'nama_pemohon' => $history->adminGudang->user->nama ?? 'Admin Gudang',
@@ -502,9 +502,9 @@
                                                     'keterangan' => $history->keterangan,
                                                     'suppliers' => $history->suppliers->map(fn($s) => [
                                                         'nama_supplier' => $s->supplier->nama_supplier ?? 'Unknown',
-                                                        'jumlah' => rtrim(rtrim(number_format($s->jumlah, 3), '0'), '.') . ' ' . ($history->satuan ?? ($stockItem->templateItem->satuan ?? '')),
+                                                        'jumlah' => formatIndonesianNumber($s->jumlah) . ' ' . ($history->satuan ?? ($stockItem->templateItem->satuan ?? '')),
                                                         'fotos' => $s->dokumentasi->map(fn($d) => asset('storage/' . $d->foto_path))->values()->toArray()
-                                                    ])->values()->toArray()
+                                                     ])->values()->toArray()
                                                 ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                 onclick="showApprovalStockDetailModal(JSON.parse(this.getAttribute('data-approval-data')))"
                                                 title="Lihat Detail"

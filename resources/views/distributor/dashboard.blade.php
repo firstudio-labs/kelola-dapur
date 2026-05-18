@@ -30,7 +30,7 @@
                     <div class="avatar avatar-sm mx-auto mb-2">
                             <span class="avatar-initial rounded-circle bg-label-primary"><i class="bx bx-package"></i></span>
                     </div>
-                    <h4 class="mb-0">{{ $totalOrdersToday }}</h4>
+                    <h4 class="mb-0">@formatNumber($totalOrdersToday)</h4>
                     <small class="text-muted" style="font-size: 10px;">Total Order</small>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                     <div class="avatar avatar-sm mx-auto mb-2">
                         <span class="avatar-initial rounded-circle bg-label-success"><i class="bx bx-check-double"></i></span>
                     </div>
-                    <h4 class="mb-0 text-success">{{ $ordersCompletedToday }}</h4>
+                    <h4 class="mb-0 text-success">@formatNumber($ordersCompletedToday)</h4>
                     <small class="text-muted" style="font-size: 10px;">Selesai</small>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                     <div class="avatar avatar-sm mx-auto mb-2">
                         <span class="avatar-initial rounded-circle bg-label-warning"><i class="bx bx-time"></i></span>
                     </div>
-                    <h4 class="mb-0 text-warning">{{ $ordersPendingToday }}</h4>
+                    <h4 class="mb-0 text-warning">@formatNumber($ordersPendingToday)</h4>
                     <small class="text-muted" style="font-size: 10px;">Belum/Proses</small>
                 </div>
             </div>
@@ -124,7 +124,7 @@
     <div class="alert alert-warning mt-4 d-flex align-items-center" role="alert">
         <i class="bx bx-error-circle me-2 fs-4"></i>
         <div class="small">
-            Terdapat <strong>{{ $totalPendingAllTime - $ordersPendingToday }} order tertunda</strong> dari hari sebelumnya yang belum selesai dikirim. 
+            Terdapat <strong>@formatNumber($totalPendingAllTime - $ordersPendingToday) order tertunda</strong> dari hari sebelumnya yang belum selesai dikirim. 
             <a href="{{ route('distributor.order.index') }}" class="alert-link text-decoration-underline">Cek Daftar Order</a>.
         </div>
     </div>

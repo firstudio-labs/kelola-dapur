@@ -12,11 +12,12 @@ class AccountingCategory extends Model
     protected $table = 'accounting_categories';
 
     protected $fillable = [
-        'id_dapur', 'name', 'type', 'group', 'is_tax',
+        'id_dapur', 'name', 'type', 'group', 'is_tax', 'is_protected',
     ];
 
     protected $casts = [
         'is_tax' => 'boolean',
+        'is_protected' => 'boolean',
     ];
 
     public function dapur()

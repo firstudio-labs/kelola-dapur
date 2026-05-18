@@ -198,7 +198,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-2">Total Item Bahan</h6>
-                                <h4 class="mb-0">{{ number_format($totalStock ?? 0) }}</h4>
+                                <h4 class="mb-0">@formatNumber($totalStock ?? 0)</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-label-primary">
@@ -216,7 +216,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-2">Stok Menipis</h6>
-                                <h4 class="mb-0">{{ number_format($lowStockItems ?? 0) }}</h4>
+                                <h4 class="mb-0">@formatNumber($lowStockItems ?? 0)</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-label-{{ ($lowStockItems ?? 0) > 0 ? 'warning' : 'success' }}">
@@ -234,7 +234,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-2">Restok Pending</h6>
-                                <h4 class="mb-0">{{ number_format($pendingRequestsCount ?? 0) }}</h4>
+                                <h4 class="mb-0">@formatNumber($pendingRequestsCount ?? 0)</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-label-info">
@@ -252,7 +252,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-2">Kekurangan Stok</h6>
-                                <h4 class="mb-0">{{ number_format($pendingShortagesCount ?? 0) }}</h4>
+                                <h4 class="mb-0">@formatNumber($pendingShortagesCount ?? 0)</h4>
                             </div>
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-label-{{ ($pendingShortagesCount ?? 0) > 0 ? 'danger' : 'success' }}">

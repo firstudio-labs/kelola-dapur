@@ -76,13 +76,10 @@
                             </label>
                             <div class="input-group">
                                 <input
-                                    type="number"
+                                    type="text"
                                     name="jumlah"
                                     id="jumlah"
                                     class="form-control @error("jumlah") is-invalid @enderror"
-                                    step="0.001"
-                                    min="0.1"
-                                    max="2000000000"
                                     required
                                     placeholder="0"
                                     value="{{ old("jumlah") }}"
@@ -323,6 +320,77 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const formatIndonesianNumberJS = (value) => {
+            if (value === null || value === undefined || value === '' || value === 0 || value === 0.0) return '0';
+            let num = parseFloat(value);
+            let numStr = parseFloat(num.toFixed(4)).toString();
+            let parts = numStr.split('.');
+            let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            if (parts[1]) {
+                let decimals = parts[1].replace(/0+$/, '');
+                if (decimals.length > 0) {
+                    return integerPart + ',' + decimals;
+                }
+            }
+            return integerPart;
+        };
+
+        const parseFormattedDecimalJS = (value) => {
+            if (!value) return 0;
+            const cleaned = value.toString().replace(/\./g, "").replace(/,/g, ".");
+            return parseFloat(cleaned) || 0;
+        };
+
+        const bindQuantityEvents = (input) => {
+            if (input.value) {
+                const val = parseFloat(input.value);
+                if (!isNaN(val)) {
+                    input.value = formatIndonesianNumberJS(val);
+                }
+            }
+
+            input.addEventListener('input', function() {
+                let cursorPosition = this.selectionStart;
+                let originalLength = this.value.length;
+                let cleanVal = this.value.replace(/[^0-9,]/g, "");
+                let parts = cleanVal.split(',');
+                if (parts.length > 2) {
+                    cleanVal = parts[0] + ',' + parts.slice(1).join('');
+                    parts = cleanVal.split(',');
+                }
+                let integerPart = parts[0];
+                let formattedInt = "";
+                if (integerPart) {
+                    if (integerPart.length > 1 && integerPart.startsWith('0')) {
+                        integerPart = integerPart.replace(/^0+/, "");
+                        if (integerPart === "") integerPart = "0";
+                    }
+                    formattedInt = new Intl.NumberFormat('id-ID').format(parseInt(integerPart) || 0);
+                } else {
+                    formattedInt = "0";
+                }
+                let result = formattedInt;
+                if (parts.length > 1) {
+                    result += ',' + parts[1].substring(0, 4);
+                }
+                this.value = result;
+                let newLength = this.value.length;
+                this.setSelectionRange(cursorPosition + (newLength - originalLength), cursorPosition + (newLength - originalLength));
+            });
+
+            input.addEventListener('focus', function() {
+                if (this.value === "0" || this.value === "0,0" || this.value === "0,00" || this.value === "0,000" || this.value === "0,0000") {
+                    this.value = "";
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                if (this.value === "" || this.value === null) {
+                    this.value = "0";
+                }
+            });
+        };
+
         // Handle request stock modal
         const requestStockModal = document.getElementById('requestStockModal');
         const jumlahInput = document.getElementById('jumlah');
@@ -361,8 +429,10 @@
 
         // Update preview when amount changes
         if (jumlahInput && previewStock) {
+            bindQuantityEvents(jumlahInput);
+            
             window.updatePreview = function() {
-                let additionalAmount = parseFloat(jumlahInput.value) || 0;
+                let additionalAmount = parseFormattedDecimalJS(jumlahInput.value) || 0;
                 
                 // If input mode is konversi, we must convert it back to Original to add to currentStock!
                 if(window.currentInputMode === 'konversi' && window.activeKonversiNilai > 0) {
@@ -370,8 +440,7 @@
                 }
                 
                 const newStock = currentStock + additionalAmount;
-                const formattedNewStock = parseFloat(newStock.toFixed(3)).toString();
-                previewStock.textContent = formattedNewStock + ' ' + (satuan || '');
+                previewStock.textContent = formatIndonesianNumberJS(newStock) + ' ' + (satuan || '');
                 
                 // Recalculate supplier totals
                 if(typeof window.calculateSupplierTotals === 'function') {
@@ -391,12 +460,12 @@
             let total = 0;
             const supplierInputs = document.querySelectorAll('.supplier-jumlah-input');
             supplierInputs.forEach(input => {
-                total += parseFloat(input.value) || 0;
+                total += parseFormattedDecimalJS(input.value) || 0;
             });
 
-            if (totalSupplierUi) totalSupplierUi.textContent = parseFloat(total.toFixed(3)).toString();
+            if (totalSupplierUi) totalSupplierUi.textContent = formatIndonesianNumberJS(total);
 
-            const maxAllowed = parseFloat(jumlahInput ? jumlahInput.value : 0) || 0;
+            const maxAllowed = parseFormattedDecimalJS(jumlahInput ? jumlahInput.value : 0) || 0;
             if (total > maxAllowed && total > 0) {
                 if(totalSupplierUi) {
                     totalSupplierUi.classList.add('text-danger');
@@ -436,7 +505,7 @@
                 </td>
                 <td>
                     <div class="input-group input-group-sm">
-                        <input type="number" name="suppliers[${currentIndex}][jumlah]" class="form-control supplier-jumlah-input" step="0.001" min="0.1" required>
+                        <input type="text" name="suppliers[${currentIndex}][jumlah]" class="form-control supplier-jumlah-input" required>
                     </div>
                 </td>
                 <td>
@@ -471,7 +540,9 @@
                 window.calculateSupplierTotals();
             });
 
-            tr.querySelector('.supplier-jumlah-input').addEventListener('input', window.calculateSupplierTotals);
+            const supplierInput = tr.querySelector('.supplier-jumlah-input');
+            bindQuantityEvents(supplierInput);
+            supplierInput.addEventListener('input', window.calculateSupplierTotals);
         };
 
         // Preview image before upload
@@ -599,7 +670,7 @@
                     if(window.currentInputMode === 'konversi' && window.activeKonversiNilai > 0) {
                         amountToFill = amountToFill / window.activeKonversiNilai;
                     }
-                    jumlahInput.value = parseFloat(amountToFill.toFixed(3));
+                    jumlahInput.value = formatIndonesianNumberJS(amountToFill);
                 } else {
                     jumlahInput.value = '';
                 }
@@ -634,14 +705,14 @@
                 
                 // Scale existing values
                 if (jumlahInput && jumlahInput.value !== '') {
-                    let scaledVal = parseFloat(jumlahInput.value) * multiplier;
-                    jumlahInput.value = parseFloat(scaledVal.toFixed(3));
+                    let scaledVal = parseFormattedDecimalJS(jumlahInput.value) * multiplier;
+                    jumlahInput.value = formatIndonesianNumberJS(scaledVal);
                 }
                 const supplierInputs = document.querySelectorAll('.supplier-jumlah-input');
                 supplierInputs.forEach(input => {
                     if (input.value !== '') {
-                        let scaledVal = parseFloat(input.value) * multiplier;
-                        input.value = parseFloat(scaledVal.toFixed(3));
+                        let scaledVal = parseFormattedDecimalJS(input.value) * multiplier;
+                        input.value = formatIndonesianNumberJS(scaledVal);
                     }
                 });
                 

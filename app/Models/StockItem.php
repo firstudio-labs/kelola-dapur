@@ -130,7 +130,7 @@ class StockItem extends Model
     {
         if ($this->konversi_nilai && $this->konversi_nilai > 0 && $this->konversi_satuan) {
             $convertedValue = (float)($this->jumlah / $this->konversi_nilai);
-            return rtrim(rtrim(number_format($convertedValue, 3), '0'), '.') . ' ' . $this->konversi_satuan;
+            return formatIndonesianNumber($convertedValue) . ' ' . $this->konversi_satuan;
         }
         return null;
     }

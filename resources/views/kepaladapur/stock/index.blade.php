@@ -59,7 +59,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $totalItems }}
+                                        @formatNumber($totalItems)
                                     </h6>
                                 </div>
                             </div>
@@ -84,7 +84,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $normalStok }}
+                                        @formatNumber($normalStok)
                                     </h6>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        {{ $rendahStok }}
+                                        @formatNumber($rendahStok)
                                     </h6>
                                 </div>
                             </div>
@@ -133,7 +133,7 @@
                                     Stok Habis
                                 </small>
                                 <div class="d-flex align-items-center">
-                                    <h6 class="mb-0 me-1">{{ $habisStok }}</h6>
+                                    <h6 class="mb-0 me-1">@formatNumber($habisStok)</h6>
                                 </div>
                             </div>
                         </div>
@@ -299,7 +299,7 @@
                                 @foreach ($stockItems as $index => $stockItem)
                                     <tr>
                                         <td>
-                                            {{ $stockItems->firstItem() + $index }}
+                                            @formatNumber($stockItems->firstItem() + $index)
                                         </td>
                                         <td>
                                             <div
@@ -321,7 +321,7 @@
                                         </td>
                                         <td>
                                             <span class="fw-medium">
-                                                {{ rtrim(rtrim(number_format($stockItem->jumlah, 3), "0"), ".") }}
+                                                {{ formatIndonesianNumber($stockItem->jumlah) }}
                                             </span>
                                         </td>
                                         <td>
@@ -331,7 +331,7 @@
                                                 </span>
                                                 <br>
                                                 <small class="text-muted">
-                                                    {{ rtrim(rtrim(number_format((float)$stockItem->konversi_nilai, 3), '0'), '.') }} {{ $stockItem->satuan }} = 1 {{ $stockItem->konversi_satuan }}
+                                                    {{ formatIndonesianNumber($stockItem->konversi_nilai) }} {{ $stockItem->satuan }} = 1 {{ $stockItem->konversi_satuan }}
                                                 </small>
                                             @else
                                                 <span class="text-muted">-</span>

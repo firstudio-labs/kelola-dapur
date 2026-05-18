@@ -78,17 +78,17 @@ class LaporanKekuranganStock extends Model
 
     public function getFormattedJumlahKurang(): string
     {
-        return number_format($this->jumlah_kurang, 2) . ' ' . $this->satuan;
+        return formatIndonesianNumber($this->jumlah_kurang) . ' ' . $this->satuan;
     }
 
     public function getFormattedJumlahDibutuhkan(): string
     {
-        return number_format($this->jumlah_dibutuhkan, 2) . ' ' . $this->satuan;
+        return formatIndonesianNumber($this->jumlah_dibutuhkan) . ' ' . $this->satuan;
     }
 
     public function getFormattedJumlahTersedia(): string
     {
-        return number_format($this->jumlah_tersedia, 2) . ' ' . $this->satuan;
+        return formatIndonesianNumber($this->jumlah_tersedia) . ' ' . $this->satuan;
     }
 
     public function accountingTransactionShortages()

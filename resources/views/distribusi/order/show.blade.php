@@ -72,11 +72,11 @@
                         </div>
                         <div class="d-flex justify-content-center gap-4 text-center">
                             <div>
-                                <h4 class="mb-0 fw-bold text-primary">{{ $qtySelesaiPorsi }}<span class="fs-6 text-muted fw-normal">/{{ $qtyTotalPorsi }}</span></h4>
+                                <h4 class="mb-0 fw-bold text-primary">@formatNumber($qtySelesaiPorsi)<span class="fs-6 text-muted fw-normal">/@formatNumber($qtyTotalPorsi)</span></h4>
                                 <small class="text-muted" style="font-size: 11px;">Porsi Terkirim</small>
                             </div>
                             <div>
-                                <h4 class="mb-0 fw-bold text-info">{{ $penerimaSelesai }}<span class="fs-6 text-muted fw-normal">/{{ $jumlahPenerima }}</span></h4>
+                                <h4 class="mb-0 fw-bold text-info">@formatNumber($penerimaSelesai)<span class="fs-6 text-muted fw-normal">/@formatNumber($jumlahPenerima)</span></h4>
                                 <small class="text-muted" style="font-size: 11px;">Penerima</small>
                             </div>
                             <div>
@@ -98,7 +98,7 @@
             <div class="card h-100 border-0 shadow-sm text-center">
                 <div class="card-body p-3">
                     <div class="text-primary mb-1"><i class="bx bx-group fs-3"></i></div>
-                    <h4 class="mb-0 fw-bold">{{ $jumlahPenerima }}</h4>
+                    <h4 class="mb-0 fw-bold">@formatNumber($jumlahPenerima)</h4>
                     <small class="text-muted" style="font-size: 10px;">Total Penerima</small>
                 </div>
             </div>
@@ -107,7 +107,7 @@
             <div class="card h-100 border-0 shadow-sm text-center border-bottom border-success border-3">
                 <div class="card-body p-3">
                     <div class="text-success mb-1"><i class="bx bx-check-double fs-3"></i></div>
-                    <h4 class="mb-0 fw-bold text-success">{{ $qtySelesaiPorsi }}</h4>
+                    <h4 class="mb-0 fw-bold text-success">@formatNumber($qtySelesaiPorsi)</h4>
                     <small class="text-muted" style="font-size: 10px;">Porsi Selesai</small>
                 </div>
             </div>
@@ -116,7 +116,7 @@
             <div class="card h-100 border-0 shadow-sm text-center border-bottom border-warning border-3">
                 <div class="card-body p-3">
                     <div class="text-warning mb-1"><i class="bx bx-car fs-3"></i></div>
-                    <h4 class="mb-0 fw-bold text-warning">{{ $qtySedangPorsi }}</h4>
+                    <h4 class="mb-0 fw-bold text-warning">@formatNumber($qtySedangPorsi)</h4>
                     <small class="text-muted" style="font-size: 10px;">Porsi Dikirim</small>
                 </div>
             </div>
@@ -125,7 +125,7 @@
             <div class="card h-100 border-0 shadow-sm text-center border-bottom border-secondary border-3">
                 <div class="card-body p-3">
                     <div class="text-secondary mb-1"><i class="bx bx-time fs-3"></i></div>
-                    <h4 class="mb-0 fw-bold text-secondary">{{ $qtyBelumPorsi }}</h4>
+                    <h4 class="mb-0 fw-bold text-secondary">@formatNumber($qtyBelumPorsi)</h4>
                     <small class="text-muted" style="font-size: 10px;">Porsi Belum</small>
                 </div>
             </div>
@@ -155,15 +155,15 @@
                         </tr>
                         <tr>
                             <td class="text-muted">Porsi Besar</td>
-                            <td><span class="badge bg-label-success">{{ $porsiBesarSelesai }} / {{ $porsiBesarTotal }}</span></td>
+                            <td><span class="badge bg-label-success">@formatNumber($porsiBesarSelesai) / @formatNumber($porsiBesarTotal)</span></td>
                         </tr>
                         <tr>
                             <td class="text-muted">Porsi Kecil</td>
-                            <td><span class="badge bg-label-warning">{{ $porsiKecilSelesai }} / {{ $porsiKecilTotal }}</span></td>
+                            <td><span class="badge bg-label-warning">@formatNumber($porsiKecilSelesai) / @formatNumber($porsiKecilTotal)</span></td>
                         </tr>
                         <tr>
                             <td class="text-muted">Total Porsi</td>
-                            <td><span class="badge bg-label-primary">{{ $qtySelesaiPorsi }} / {{ $qtyTotalPorsi }} Terkirim</span></td>
+                            <td><span class="badge bg-label-primary">@formatNumber($qtySelesaiPorsi) / @formatNumber($qtyTotalPorsi) Terkirim</span></td>
                         </tr>
                         @if($transaksi->keterangan)
                         <tr>
@@ -258,7 +258,7 @@
                             <div class="flex-grow-1">
                                 <div class="d-flex align-items-center justify-content-between mb-1">
                                     <span class="fw-semibold">Progress Pengiriman ke Penerima</span>
-                                    <small class="fw-semibold text-primary">{{ $penerimaSelesai }}/{{ $jumlahPenerima }} penerima</small>
+                                    <small class="fw-semibold text-primary">@formatNumber($penerimaSelesai)/@formatNumber($jumlahPenerima) penerima</small>
                                 </div>
                                 <div class="progress mb-1" style="height:8px">
                                     <div class="progress-bar {{ $pctDelivered == 100 ? 'bg-success' : 'bg-primary' }}"
@@ -278,7 +278,7 @@
 
                     @if($porsiBesarMenus->count() > 0)
                         <div class="mb-3">
-                            <small class="fw-bold text-success d-block mb-1">Porsi Besar {{ $porsiBesarTotal }} Porsi :</small>
+                            <small class="fw-bold text-success d-block mb-1">Porsi Besar @formatNumber($porsiBesarTotal) Porsi :</small>
                             <div class="d-flex flex-wrap gap-2">
                                 @foreach($porsiBesarMenus as $det)
                                     <span class="badge bg-label-success">
@@ -291,7 +291,7 @@
 
                     @if($porsiKecilMenus->count() > 0)
                         <div>
-                            <small class="fw-bold text-warning d-block mb-1">Porsi Kecil {{ $porsiKecilTotal }} Porsi :</small>
+                            <small class="fw-bold text-warning d-block mb-1">Porsi Kecil @formatNumber($porsiKecilTotal) Porsi :</small>
                             <div class="d-flex flex-wrap gap-2">
                                 @foreach($porsiKecilMenus as $det)
                                     <span class="badge bg-label-warning">
@@ -317,13 +317,13 @@
                         <div class="d-flex flex-wrap align-items-center gap-1" id="recipientFilters">
                             <button type="button" class="btn btn-xs btn-primary filter-btn active" data-filter="all">Semua</button>
                             <button type="button" class="btn btn-xs btn-outline-success filter-btn" data-filter="sudah_dikirim">
-                                <i class="bx bx-check me-1"></i>{{ $penerimaSelesai }} Selesai
+                                <i class="bx bx-check me-1"></i>@formatNumber($penerimaSelesai) Selesai
                             </button>
                             <button type="button" class="btn btn-xs btn-outline-warning filter-btn" data-filter="sedang_dikirim">
-                                <i class="bx bx-car me-1"></i>{{ $penerimaSedang }} Dikirim
+                                <i class="bx bx-car me-1"></i>@formatNumber($penerimaSedang) Dikirim
                             </button>
                             <button type="button" class="btn btn-xs btn-outline-secondary filter-btn" data-filter="belum_dikirim">
-                                <i class="bx bx-time me-1"></i>{{ $penerimaBelum }} Belum
+                                <i class="bx bx-time me-1"></i>@formatNumber($penerimaBelum) Belum
                             </button>
                         </div>
                     </div>
@@ -364,19 +364,19 @@
                                             <div class="mt-3 pt-3 border-top">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <small class="fw-semibold text-muted">Detail Porsi:</small>
-                                                    <span class="fw-bold text-dark">{{ $detail->porsi_besar }} Porsi</span>
+                                                    <span class="fw-bold text-dark">@formatNumber($detail->porsi_besar + $detail->porsi_kecil) Porsi</span>
                                                 </div>
                                                 <div class="row g-2">
                                                     <div class="col-6">
                                                         <div class="p-1 bg-light rounded text-center border">
                                                             <div style="font-size: 10px;" class="text-muted">Besar</div>
-                                                            <div class="fw-bold small text-primary">{{ $detail->porsi_besar }}</div>
+                                                            <div class="fw-bold small text-primary">@formatNumber($detail->porsi_besar)</div>
                                                         </div>
                                                     </div>
                                                     <div class="col-6">
                                                         <div class="p-1 bg-light rounded text-center border">
                                                             <div style="font-size: 10px;" class="text-muted">Kecil</div>
-                                                            <div class="fw-bold small text-success">{{ $detail->porsi_kecil }}</div>
+                                                            <div class="fw-bold small text-success">@formatNumber($detail->porsi_kecil)</div>
                                                         </div>
                                                     </div>
                                                 </div>

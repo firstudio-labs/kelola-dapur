@@ -70,7 +70,7 @@
                                         class="badge bg-secondary">{{ strtoupper($penerima_mbg->id_type) }}</span>
                                     {{ $penerima_mbg->id_number }}</p>
                                 <p class="mb-1"><strong>Porsi MBG:</strong> <span
-                                        class="badge bg-label-primary fs-6">{{ $penerima_mbg->jumlah_porsi }} Porsi</span>
+                                        class="badge bg-label-primary fs-6">{{ formatIndonesianNumber($penerima_mbg->jumlah_porsi) }} Porsi</span>
                                 </p>
                             </div>
                             <div class="col-12">

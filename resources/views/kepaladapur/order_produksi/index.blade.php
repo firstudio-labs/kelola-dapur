@@ -80,7 +80,7 @@
                             </span>
                             <div>
                                 <small class="text-muted">Total Order</small>
-                                <h6 class="mb-0">{{ $orders->total() }}</h6>
+                                <h6 class="mb-0">@formatNumber($orders->total())</h6>
                             </div>
                         </div>
                     </div>
@@ -91,7 +91,7 @@
                             </span>
                             <div>
                                 <small class="text-muted">Belum Dibuat</small>
-                                <h6 class="mb-0">{{ $stats['belum_dibuat'] }}</h6>
+                                <h6 class="mb-0">@formatNumber($stats['belum_dibuat'])</h6>
                             </div>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
                             </span>
                             <div>
                                 <small class="text-muted">Sedang Dibuat</small>
-                                <h6 class="mb-0">{{ $stats['sedang_dibuat'] }}</h6>
+                                <h6 class="mb-0">@formatNumber($stats['sedang_dibuat'])</h6>
                             </div>
                         </div>
                     </div>
@@ -113,7 +113,7 @@
                             </span>
                             <div>
                                 <small class="text-muted">Selesai</small>
-                                <h6 class="mb-0">{{ $stats['selesai'] }}</h6>
+                                <h6 class="mb-0">@formatNumber($stats['selesai'])</h6>
                             </div>
                         </div>
                     </div>
@@ -171,7 +171,7 @@
                                     <td>
                                         <small class="text-muted">
                                             {{ $transaksi->tanggal_transaksi->format("d M Y") }}<br>
-                                            {{ $transaksi->tanggal_transaksi->format("H:i") }}
+                                            {{ $transaksi->created_at->format("H:i") }}
                                         </small>
                                     </td>
                                     <td>
@@ -182,7 +182,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <i class="bx bx-bowl-hot me-1 text-primary"></i>
-                                            <span class="fw-semibold">{{ $totalPorsi }} Porsi</span>
+                                            <span class="fw-semibold">@formatNumber($totalPorsi) Porsi</span>
                                         </div>
                                         <small class="text-muted d-block text-truncate" style="max-width: 150px;" title="{{ $menuList }}">{{ $menuList }}</small>
                                     </td>
@@ -195,7 +195,7 @@
                                         @if ($hasPendingShortage)
                                             <span class="badge bg-label-danger">
                                                 <i class="bx bx-error me-1"></i>
-                                                {{ $pendingShortages->count() }} Item
+                                                @formatNumber($pendingShortages->count()) Item
                                             </span>
                                         @elseif ($hasResolvedShortage)
                                             <span class="badge bg-label-success">

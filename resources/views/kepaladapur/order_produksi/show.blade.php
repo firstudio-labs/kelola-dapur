@@ -95,15 +95,15 @@
                             <table class="table table-borderless mb-0">
                                 <tr>
                                     <td class="fw-semibold" style="width: 40%">Total Porsi Besar:</td>
-                                    <td><span class="badge bg-label-success">{{ $totalPorsiBesar }} Porsi</span></td>
+                                    <td><span class="badge bg-label-success">{{ formatIndonesianNumber($totalPorsiBesar) }} Porsi</span></td>
                                 </tr>
                                 <tr>
                                     <td class="fw-semibold">Total Porsi Kecil:</td>
-                                    <td><span class="badge bg-label-warning">{{ $totalPorsiKecil }} Porsi</span></td>
+                                    <td><span class="badge bg-label-warning">{{ formatIndonesianNumber($totalPorsiKecil) }} Porsi</span></td>
                                 </tr>
                                 <tr>
                                     <td class="fw-semibold">Total Keseluruhan:</td>
-                                    <td><span class="badge bg-label-primary">{{ $totalKeseluruhan }} Porsi</span></td>
+                                    <td><span class="badge bg-label-primary">{{ formatIndonesianNumber($totalKeseluruhan) }} Porsi</span></td>
                                 </tr>
                             </table>
                         </div>
@@ -157,7 +157,7 @@
                                                 <div class="flex-grow-1">
                                                     <h6 class="mb-1">{{ $detail->menuMakanan->nama_menu }}</h6>
                                                     <p class="text-muted small mb-2">{{ $detail->menuMakanan->kategori }}</p>
-                                                    <span class="badge bg-success">{{ $detail->jumlah_porsi }} Porsi</span>
+                                                    <span class="badge bg-success">{{ formatIndonesianNumber($detail->jumlah_porsi) }} Porsi</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -190,7 +190,7 @@
                                                 <div class="flex-grow-1">
                                                     <h6 class="mb-1">{{ $detail->menuMakanan->nama_menu }}</h6>
                                                     <p class="text-muted small mb-2">{{ $detail->menuMakanan->kategori }}</p>
-                                                    <span class="badge bg-warning">{{ $detail->jumlah_porsi }} Porsi</span>
+                                                    <span class="badge bg-warning">{{ formatIndonesianNumber($detail->jumlah_porsi) }} Porsi</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -248,12 +248,12 @@
                                         @endphp
                                         <tr>
                                             <td>{{ $namaBahan }}</td>
-                                            <td><strong>{{ number_format($totalButuh, 2) }} {{ $satuan }}</strong></td>
-                                            <td>{{ number_format($stockAktual, 2) }} {{ $satuan }}</td>
-                                            <td>{{ number_format($stockTersedia, 2) }} {{ $satuan }}</td>
+                                            <td><strong>{{ formatIndonesianNumber($totalButuh) }} {{ $satuan }}</strong></td>
+                                            <td>{{ formatIndonesianNumber($stockAktual) }} {{ $satuan }}</td>
+                                            <td>{{ formatIndonesianNumber($stockTersedia) }} {{ $satuan }}</td>
                                             <td>
                                                 <span class="{{ $estimasiSisa < 0 ? 'text-danger' : 'text-success' }}">
-                                                    {{ number_format($estimasiSisa, 2) }} {{ $satuan }}
+                                                    {{ formatIndonesianNumber($estimasiSisa) }} {{ $satuan }}
                                                 </span>
                                             </td>
                                             <td>
@@ -311,12 +311,12 @@
                                         @endphp
                                         <tr>
                                             <td>{{ $namaBahan }}</td>
-                                            <td><strong>{{ number_format($kebutuhanBesar, 2) }} {{ $satuan }}</strong></td>
-                                            <td>{{ number_format($stockAktual, 2) }} {{ $satuan }}</td>
-                                            <td>{{ number_format($stockTersedia, 2) }} {{ $satuan }}</td>
+                                            <td><strong>{{ formatIndonesianNumber($kebutuhanBesar) }} {{ $satuan }}</strong></td>
+                                            <td>{{ formatIndonesianNumber($stockAktual) }} {{ $satuan }}</td>
+                                            <td>{{ formatIndonesianNumber($stockTersedia) }} {{ $satuan }}</td>
                                             <td>
                                                 <span class="{{ $estimasiSisa < 0 ? 'text-danger' : 'text-success' }}" title="Dihitung berdasarkan total kebutuhan keseluruhan">
-                                                    {{ number_format($estimasiSisa, 2) }} {{ $satuan }}
+                                                    {{ formatIndonesianNumber($estimasiSisa) }} {{ $satuan }}
                                                 </span>
                                             </td>
                                             <td>
@@ -372,12 +372,12 @@
                                         @endphp
                                         <tr>
                                             <td>{{ $namaBahan }}</td>
-                                            <td><strong>{{ number_format($kebutuhanKecil, 2) }} {{ $satuan }}</strong></td>
-                                            <td>{{ number_format($stockAktual, 2) }} {{ $satuan }}</td>
-                                            <td>{{ number_format($stockTersedia, 2) }} {{ $satuan }}</td>
+                                            <td><strong>{{ formatIndonesianNumber($kebutuhanKecil) }} {{ $satuan }}</strong></td>
+                                            <td>{{ formatIndonesianNumber($stockAktual) }} {{ $satuan }}</td>
+                                            <td>{{ formatIndonesianNumber($stockTersedia) }} {{ $satuan }}</td>
                                             <td>
                                                 <span class="{{ $estimasiSisa < 0 ? 'text-danger' : 'text-success' }}" title="Dihitung berdasarkan total kebutuhan keseluruhan">
-                                                    {{ number_format($estimasiSisa, 2) }} {{ $satuan }}
+                                                    {{ formatIndonesianNumber($estimasiSisa) }} {{ $satuan }}
                                                 </span>
                                             </td>
                                             <td>

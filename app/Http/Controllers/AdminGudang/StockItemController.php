@@ -169,6 +169,19 @@ class StockItemController extends Controller
             abort(404, 'Stock item not found for this kitchen.');
         }
 
+        $inputs = $request->all();
+        if (isset($inputs['jumlah'])) {
+            $inputs['jumlah'] = parseIndonesianNumber($inputs['jumlah']);
+        }
+        if (isset($inputs['suppliers']) && is_array($inputs['suppliers'])) {
+            foreach ($inputs['suppliers'] as $idx => $sup) {
+                if (isset($sup['jumlah'])) {
+                    $inputs['suppliers'][$idx]['jumlah'] = parseIndonesianNumber($sup['jumlah']);
+                }
+            }
+        }
+        $request->merge($inputs);
+
         $request->validate([
             'jumlah'              => 'required|numeric|min:0.001|max:2000000000',
             'input_mode'          => 'required|in:asli,konversi',
