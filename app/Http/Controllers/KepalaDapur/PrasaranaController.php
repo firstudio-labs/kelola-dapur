@@ -40,7 +40,6 @@ class PrasaranaController extends Controller
 
         $itemsToDelete = array_diff($existingItems, $submittedItems);
         if (!empty($itemsToDelete)) {
-            // Delete prasarana (photos will cascade delete if setup in DB, but let's delete files too just in case or let command handle it. cascade deletes photos from DB, but not files. We should probably delete files.)
             $prasaranasToDelete = $dapur->prasarana()->whereIn('id_item', $itemsToDelete)->get();
             foreach ($prasaranasToDelete as $dp) {
                 foreach ($dp->fotos as $foto) {
@@ -74,8 +73,8 @@ class PrasaranaController extends Controller
 
         $request->validate([
             'keterangan' => 'nullable|string',
-            'fotos' => 'nullable|array|max:5', // limit 5 files per upload batch
-            'fotos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120', // max 5MB before compression
+            'fotos' => 'nullable|array|max:5', 
+            'fotos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120', 
             'deleted_photo_ids' => 'nullable|array',
             'deleted_photo_ids.*' => 'exists:dapur_prasarana_foto,id_foto',
         ]);
@@ -84,7 +83,6 @@ class PrasaranaController extends Controller
             'keterangan' => $request->keterangan,
         ]);
 
-        // Process lazy deletions
         if ($request->has('deleted_photo_ids')) {
             $photosToDelete = DapurPrasaranaFoto::whereIn('id_foto', $request->deleted_photo_ids)
                 ->where('id_dapur_prasarana', $dapurPrasarana->id_dapur_prasarana)

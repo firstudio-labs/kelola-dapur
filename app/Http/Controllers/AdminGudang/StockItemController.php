@@ -272,15 +272,13 @@ class StockItemController extends Controller
                 'approved_at'         => now(),
             ];
 
-            // Create ONE Consolidated ApprovalStockItem
             $createdApproval = ApprovalStockItem::create(array_merge($baseApprovalData, [
                 'jumlah' => $masterJumlah,
-                'id_supplier' => null // We now use the suppliers() relationship
+                'id_supplier' => null
             ]));
 
             if (!empty($finalSuppliers)) {
                 foreach ($finalSuppliers as $idx => $sup) {
-                    // Create Detail Record for each supplier
                     $supplierItem = \App\Models\ApprovalStockItemSupplier::create([
                         'id_approval_stock_item' => $createdApproval->id_approval_stock_item,
                         'id_supplier' => $sup['id_supplier'],
@@ -303,7 +301,7 @@ class StockItemController extends Controller
                                     
                                     ApprovalStockItemDokumentasi::create([
                                         'id_approval_stock_item' => $createdApproval->id_approval_stock_item,
-                                        'id_approval_stock_item_supplier' => $supplierItem->id, // Link to supplier detail
+                                        'id_approval_stock_item_supplier' => $supplierItem->id,
                                         'foto_path' => $path . '/' . $filename,
                                     ]);
                                 }
@@ -325,9 +323,17 @@ class StockItemController extends Controller
 
             DB::commit();
 
-            $this->autoResolveKekuranganStock($dapur->id_dapur, $stockItem->id_template_item);
+            $this->autoResolveKekuranganStock(
+                $dapur->id_dapur,
+                $stockItem->id_template_item,
+                $request->keterangan
+            );
 
-            $this->checkAndActivatePendingTransactions($dapur->id_dapur);
+            $this->checkAndActivatePendingTransactions(
+                $dapur->id_dapur,
+                $stockItem->id_template_item,
+                $request->keterangan
+            );
 
             return back()->with('success', 'Permintaan penambahan stok berhasil disetujui dan stok telah ditambahkan.');
         } catch (\Exception $e) {
@@ -338,8 +344,22 @@ class StockItemController extends Controller
         }
     }
 
-    protected function checkAndActivatePendingTransactions(int $idDapur): void
+    protected function checkAndActivatePendingTransactions(int $idDapur, ?int $idTemplateItem = null, ?string $keterangan = null): void
     {
+        $resolvePendingLaporan = function ($transaksi) use ($idTemplateItem, $keterangan) {
+            $pendingQuery = $transaksi->laporanKekuranganStock()->where('status', 'pending');
+
+            if ($idTemplateItem && $keterangan !== null && trim($keterangan) !== '') {
+                (clone $pendingQuery)->where('id_template_item', $idTemplateItem)->update([
+                    'status' => 'resolved',
+                    'keterangan_resolve' => trim($keterangan),
+                ]);
+                (clone $pendingQuery)->where('id_template_item', '!=', $idTemplateItem)->update(['status' => 'resolved']);
+            } else {
+                $pendingQuery->update(['status' => 'resolved']);
+            }
+        };
+
         $pendingTransactions = TransaksiDapur::where('id_dapur', $idDapur)
             ->where('status', 'completed')
             ->whereDoesntHave('orderProduksi')
@@ -349,7 +369,7 @@ class StockItemController extends Controller
         foreach ($pendingTransactions as $transaksi) {
             $stockCheck = $transaksi->checkStockWithReservations();
             if ($stockCheck['can_produce']) {
-                $transaksi->laporanKekuranganStock()->where('status', 'pending')->update(['status' => 'resolved']);
+                $resolvePendingLaporan($transaksi);
                 $transaksi->sendToProduksi();
                 Log::info('Pending transaction activated after restock', ['id_transaksi' => $transaksi->id_transaksi]);
             }
@@ -364,7 +384,7 @@ class StockItemController extends Controller
             $transaksi  = $order->transaksiDapur;
             $stockCheck = $transaksi->checkStockWithReservations();
             if ($stockCheck['can_produce']) {
-                $transaksi->laporanKekuranganStock()->where('status', 'pending')->update(['status' => 'resolved']);
+                $resolvePendingLaporan($transaksi);
                 $order->status = \App\Models\OrderProduksi::STATUS_BELUM_DIBUAT;
                 $order->save();
                 Log::info('Stok kurang order upgraded to belum_dibuat after restock', ['id_order' => $order->id_order, 'id_transaksi' => $transaksi->id_transaksi]);
@@ -398,7 +418,7 @@ class StockItemController extends Controller
         }
     }
 
-    protected function autoResolveKekuranganStock(int $idDapur, int $idTemplateItem): void
+    protected function autoResolveKekuranganStock(int $idDapur, int $idTemplateItem, ?string $keterangan = null): void
     {
         $stockItem = StockItem::where('id_dapur', $idDapur)->where('id_template_item', $idTemplateItem)->first();
         if (!$stockItem) return;
@@ -425,13 +445,28 @@ class StockItemController extends Controller
             ->get();
 
         foreach ($pendingShortages as $shortage) {
-            $neededForTx = (float) $shortage->jumlah_dibutuhkan;
+            $neededForTx = (float) $shortage->jumlah_kurang;
 
             if ($usableStock >= $neededForTx) {
-                $shortage->update([
-                    'status' => 'resolved',
-                    'keterangan_resolve' => 'Otomatis diselesaikan oleh sistem karena penambahan stok fisik telah memenuhi kebutuhan laporan ini.'
-                ]);
+                $updateData = ['status' => 'resolved'];
+                if ($keterangan !== null && trim($keterangan) !== '') {
+                    $updateData['keterangan_resolve'] = trim($keterangan);
+                }
+                $shortage->update($updateData);
+
+                $isActiveProduction = false;
+                if ($shortage->id_handler) {
+                    $handlerBahan = \App\Models\ProduksiHandlerBahan::find($shortage->id_handler);
+                    if ($handlerBahan && $handlerBahan->orderProduksi) {
+                        if (in_array($handlerBahan->orderProduksi->status, ['sedang_dibuat', 'selesai'])) {
+                            $isActiveProduction = true;
+                        }
+                    }
+                }
+
+                if ($isActiveProduction) {
+                    $stockItem->reduceStock($neededForTx);
+                }
 
                 $usableStock -= $neededForTx;
             }

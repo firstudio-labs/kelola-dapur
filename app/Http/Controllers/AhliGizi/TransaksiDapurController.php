@@ -154,7 +154,16 @@ class TransaksiDapurController extends Controller
             ->where('status_approval', 'approved')
             ->sum('jumlah_porsi');
 
-        return view('ahligizi.transaksi.edit-porsi-besar', compact('transaksi', 'porsiBesar', 'menus', 'ahliGizi', 'totalPorsiPenerima'));
+        $detailPenerima = PenerimaMbg::where('id_dapur', $ahliGizi->id_dapur)
+            ->where('status_approval', 'approved')
+            ->with('userRole.user')
+            ->paginate(10);
+
+        $dapurs = Dapur::where('status', 'active')
+            ->orderBy('nama_dapur', 'asc')
+            ->get();
+
+        return view('ahligizi.transaksi.edit-porsi-besar', compact('transaksi', 'porsiBesar', 'menus', 'ahliGizi', 'totalPorsiPenerima', 'detailPenerima', 'dapurs'));
     }
 
     public function updatePorsiBesar(Request $request, TransaksiDapur $transaksi)
@@ -263,7 +272,16 @@ class TransaksiDapurController extends Controller
             ->where('status_approval', 'approved')
             ->sum('jumlah_porsi');
 
-        return view('ahligizi.transaksi.edit-porsi-kecil', compact('transaksi', 'porsiKecil', 'menus', 'ahliGizi', 'totalPorsiPenerima'));
+        $detailPenerima = PenerimaMbg::where('id_dapur', $ahliGizi->id_dapur)
+            ->where('status_approval', 'approved')
+            ->with('userRole.user')
+            ->paginate(10);
+
+        $dapurs = Dapur::where('status', 'active')
+            ->orderBy('nama_dapur', 'asc')
+            ->get();
+
+        return view('ahligizi.transaksi.edit-porsi-kecil', compact('transaksi', 'porsiKecil', 'menus', 'ahliGizi', 'totalPorsiPenerima', 'detailPenerima', 'dapurs'));
     }
 
     public function updatePorsiKecil(Request $request, TransaksiDapur $transaksi)

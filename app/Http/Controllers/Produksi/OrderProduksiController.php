@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\OrderProduksi;
 use App\Models\Produksi;
 use App\Models\OrderProduksiDokumentasi;
+use App\Models\ProduksiHandlerBahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,7 @@ class OrderProduksiController extends Controller
         $statusFilter = $request->get('status', 'all');
 
         $query = OrderProduksi::where('id_dapur', $produksi->id_dapur)
-            ->with(['transaksiDapur.createdBy', 'transaksiDapur.detailTransaksiDapur.menuMakanan', 'distribusiOrder'])
+            ->with(['transaksiDapur.createdBy', 'transaksiDapur.detailTransaksiDapur.menuMakanan', 'distribusiOrder.details'])
             ->orderBy('created_at', 'desc');
 
         if ($statusFilter !== 'all') {
@@ -84,6 +85,7 @@ class OrderProduksiController extends Controller
             $stockItem = $stockItems->get($idTemplate);
 
             $stockData[$idTemplate] = [
+                "id_stock_item" => $stockItem ? $stockItem->id_stock_item : null,
                 "stock_aktual" => $item["available"],
                 "stock_tersedia" => $item["effective_available"],
                 "sufficient" => $item["sufficient"],
@@ -91,6 +93,12 @@ class OrderProduksiController extends Controller
                 "konversi_satuan" => $stockItem ? $stockItem->konversi_satuan : null,
             ];
         }
+
+        $handlerBahanData = ProduksiHandlerBahan::where('id_order', $order->id_order)
+            ->with('laporanKekuranganStock')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy('id_template_item');
 
         return view(
             "produksi.order.show",
@@ -101,7 +109,8 @@ class OrderProduksiController extends Controller
                 "bahanBesar",
                 "bahanKecil",
                 "stockData",
-                "shortages"
+                "shortages",
+                "handlerBahanData"
             )
         );
     }
@@ -156,8 +165,7 @@ class OrderProduksiController extends Controller
         DB::beginTransaction();
         try {
             if ($request->status === 'sedang_dibuat' && $order->status === 'belum_dibuat') {
-                $transaksi   = $order->transaksiDapur;
-                $deductResult = $transaksi->deductStockForProduction();
+                $deductResult = $order->deductAdjustedStockForProduction();
 
                 if (!$deductResult['success']) {
                     DB::rollBack();
@@ -256,7 +264,7 @@ class OrderProduksiController extends Controller
 
         $request->validate([
             'ulasan' => 'required|string|max:1000',
-            'ulasan_foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max before compression
+            'ulasan_foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         try {
@@ -272,7 +280,6 @@ class OrderProduksiController extends Controller
                 $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
                 $image = $manager->read($file);
                 
-                // Resize if too large, then encode to webp
                 $image->scaleDown(width: 1200);
                 $encoded = $image->toWebp(quality: 75);
 
@@ -292,6 +299,74 @@ class OrderProduksiController extends Controller
                 'error'    => $e->getMessage(),
             ]);
             return redirect()->back()->with('error', 'Gagal menyimpan ulasan: ' . $e->getMessage());
+        }
+    }
+
+    public function storeHandler(Request $request, OrderProduksi $order)
+    {
+        $user = Auth::user();
+
+        $produksi = Produksi::whereHas('userRole', function ($q) use ($user) {
+            $q->where('id_user', $user->id_user);
+        })->first();
+
+        if (!$produksi || $order->id_dapur !== $produksi->id_dapur) {
+            abort(403, 'Unauthorized');
+        }
+
+        $request->validate([
+            'id_template_item' => 'required|exists:template_items,id_template_item',
+            'jenis' => 'required|in:kelebihan,kekurangan',
+            'jumlah' => 'required|numeric|min:0.01',
+            'catatan' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $existingHandler = ProduksiHandlerBahan::where('id_order', $order->id_order)
+                ->where('id_template_item', $request->id_template_item)
+                ->where('status', 'pending')
+                ->first();
+
+            $namaPengaju = $produksi->nama_lengkap ?? $user->nama;
+            $catatanText = $request->catatan;
+            if ($catatanText) {
+                if (strpos($catatanText, '[' . $namaPengaju . ']:') !== 0) {
+                    $catatanText = "[" . $namaPengaju . "]: " . $catatanText;
+                }
+            } else {
+                $catatanText = "[" . $namaPengaju . "]";
+            }
+
+            if ($existingHandler) {
+                $existingHandler->update([
+                    'jenis' => $request->jenis,
+                    'jumlah' => $request->jumlah,
+                    'catatan' => $catatanText,
+                ]);
+            } else {
+                ProduksiHandlerBahan::create([
+                    'id_order' => $order->id_order,
+                    'id_template_item' => $request->id_template_item,
+                    'jenis' => $request->jenis,
+                    'jumlah' => $request->jumlah,
+                    'catatan' => $catatanText,
+                    'status' => 'pending',
+                ]);
+            }
+
+            DB::commit();
+
+            $jenisLabel = $request->jenis === 'kelebihan' ? 'Kelebihan' : 'Kekurangan';
+            return redirect()->back()->with('success', "Data Handler $jenisLabel Bahan berhasil disimpan.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to submit handler bahan', [
+                'id_order' => $order->id_order,
+                'error'    => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Gagal menyimpan data handler: ' . $e->getMessage());
         }
     }
 }

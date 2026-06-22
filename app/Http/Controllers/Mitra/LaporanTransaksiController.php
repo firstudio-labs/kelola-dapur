@@ -22,7 +22,7 @@ class LaporanTransaksiController extends Controller
         }
 
         $mitra = $user->mitra;
-        $approvedDapurIds = $mitra->dapurApproved()->pluck('dapur.id_dapur'); // The pivot uses id_dapur
+        $approvedDapurIds = $mitra->dapurApproved()->pluck('dapur.id_dapur'); 
 
         $query = ApprovalTransaksi::whereHas('transaksiDapur', function ($q) use ($approvedDapurIds) {
             $q->whereIn('id_dapur', $approvedDapurIds);
@@ -118,7 +118,6 @@ class LaporanTransaksiController extends Controller
 
         $approvals = $query->paginate(10)->appends($request->query());
 
-        // For Dapur filter dropdown
         $dapurs = $mitra->dapurApproved;
 
         $stats = [
@@ -235,8 +234,6 @@ class LaporanTransaksiController extends Controller
         $stockCheck['snapshot_created_at'] = $hasSnapshots ? $approval->created_at : null;
 
         if ($hasSnapshots) {
-            // Fetch current physical stock amounts if needed, though mostly for Kepala Dapur approval.
-            // For historical view, rely heavily on snapshot 'available'
             $currentStocks = StockItem::where('id_dapur', $dapur->id_dapur)
                 ->whereIn('id_template_item', $snapshots->keys())
                 ->pluck('jumlah', 'id_template_item');

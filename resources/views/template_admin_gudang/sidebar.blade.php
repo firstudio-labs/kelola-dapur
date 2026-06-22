@@ -3,9 +3,9 @@
         $isSubscriptionActive = session('is_subscription_active', false);
         $subscriptionStatus = session('subscription_status', null);
         $idDapur = session('id_dapur', $dapur->id_dapur ?? ($dapur ?? null));
-    @endphp    
+    @endphp
     <div class="app-brand demo d-flex align-items-center justify-content-between px-3 py-2">
-        
+
         <a href="/" class="app-brand-link d-flex align-items-center text-decoration-none">
             <span class="app-brand-logo demo">
                 <img src="{{ asset('logo_kelola_dapur_black.png') }}" alt="Logo" style="height: 45px; width: auto" />
@@ -14,7 +14,7 @@
     </div>
 
     <div class="menu-container d-flex flex-column h-100">
-        
+
         <div class="user-profile-section mt-3 px-3 pb-3">
             <div class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center w-100 p-2 rounded"
@@ -28,7 +28,8 @@
                     onmouseout="this.style.background='rgba(255,255,255,0.15)'">
                     <div class="avatar avatar-online me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
                         <img src="{{ auth()->user()->adminGudang && auth()->user()->adminGudang->foto_diri ? Storage::url(auth()->user()->adminGudang->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
-                            alt class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
+                            alt class="rounded-circle"
+                            style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                     </div>
                     <div class="flex-grow-1 text-start user-info">
                         <div class="fw-semibold text-black">
@@ -57,9 +58,11 @@
                         <a class="dropdown-item" href="#">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                    <div class="avatar avatar-online"
+                                        style="width: 40px; height: 40px; flex-shrink: 0;">
                                         <img src="{{ auth()->user()->adminGudang && auth()->user()->adminGudang->foto_diri ? Storage::url(auth()->user()->adminGudang->foto_diri) : asset('admin/assets/img/avatars/1.png') }}"
-                                            alt class="rounded-circle" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
+                                            alt class="rounded-circle"
+                                            style="width: 100% !important; height: 100% !important; object-fit: cover !important;" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
@@ -86,7 +89,8 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="{{ route('admin-gudang.profile.edit', ['dapur' => $idDapur]) }}">
+                        <a class="dropdown-item"
+                            href="{{ route('admin-gudang.profile.edit', ['dapur' => $idDapur]) }}">
                             <i class="bx bx-edit me-2"></i>
                             <span class="align-middle">Edit Profil</span>
                         </a>
@@ -134,7 +138,7 @@
         @endif
 
         <ul class="menu-inner py-1 flex-grow-1">
-            
+
             <li class="menu-item {{ request()->routeIs('admin-gudang.dashboard') ? 'active' : '' }}">
                 <a href="{{ route('admin-gudang.dashboard', ['dapur' => $idDapur]) }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -143,35 +147,47 @@
             </li>
 
             @if ($isSubscriptionActive)
-                
+
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text">Admin Gudang</span>
                 </li>
 
-                <li class="menu-item {{ request()->routeIs('admin-gudang.stock.*') ? 'active open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <li class="menu-item {{ request()->routeIs('admin-gudang.stock.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin-gudang.stock.index', ['dapur' => $idDapur]) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-package"></i>
-                        <div data-i18n="Kelola Stok">Kelola Stok</div>
+                        <div data-i18n="Daftar Stok">Daftar Stok</div>
                     </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin-gudang.stock.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin-gudang.stock.index', ['dapur' => $idDapur]) }}" class="menu-link">
-                                <div data-i18n="Daftar Stok">Daftar Stok</div>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('admin-gudang.laporan-kekurangan.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin-gudang.laporan-kekurangan.index', ['dapur' => $idDapur]) }}" class="menu-link">
+                    <a href="{{ route('admin-gudang.laporan-kekurangan.index', ['dapur' => $idDapur]) }}"
+                        class="menu-link">
                         <i class="menu-icon tf-icons bx bx-error"></i>
-                        <div data-i18n="Laporan Kekurangan Stok">
-                            Laporan Kekurangan Stok
+                        <div data-i18n="Kebutuhan Stok">
+                            Kebutuhan Stok
                         </div>
+                        @if (isset($pendingShortageCount) && $pendingShortageCount > 0)
+                            <span class="badge bg-danger ms-2">
+                                {{ $pendingShortageCount }}
+                            </span>
+                        @endif
+                    </a>
+                </li>
+
+                <li class="menu-item {{ request()->routeIs('admin-gudang.laporan-stok.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin-gudang.laporan-stok.index', ['dapur' => $idDapur]) }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-file"></i>
+                        <div data-i18n="Laporan Stok">
+                            Laporan Stok
+                        </div>
+                        @if (isset($pendingLaporanStokCount) && $pendingLaporanStokCount > 0)
+                            <span class="badge bg-danger ms-2">
+                                {{ $pendingLaporanStokCount }}
+                            </span>
+                        @endif
                     </a>
                 </li>
             @else
-                
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text text-warning">
                         Limited Access
@@ -180,7 +196,7 @@
 
                 @php
                     $disabledMenus = [
-                        'Kelola Stok' => 'bx-package',
+                        'Daftar Stok' => 'bx-package',
                         'Laporan Kekurangan' => 'bx-error',
                     ];
                 @endphp
@@ -205,56 +221,77 @@
     <div class="bottom-nav-container">
         @php
             $mainMenus = [];
-            
-            // Menu Akun (selalu ada)
+
             $akunSubmenu = [
                 ['type' => 'link', 'label' => 'Edit', 'url' => '#'],
                 ['type' => 'logout', 'label' => 'Logout', 'url' => route('logout'), 'method' => 'POST'],
             ];
-            
+
             if ($isSubscriptionActive) {
                 $mainMenus = [
                     ['icon' => 'bx-user', 'label' => 'Akun', 'hasSubmenu' => true, 'submenu' => $akunSubmenu],
-                    ['route' => 'admin-gudang.dashboard', 'icon' => 'bx-home-circle', 'label' => 'Dashboard', 'param' => ['dapur' => $idDapur]],
-                    ['route' => 'admin-gudang.stock.index', 'icon' => 'bx-package', 'label' => 'Stok', 'param' => ['dapur' => $idDapur], 'hasSubmenu' => true, 'submenu' => [
-                        ['type' => 'link', 'label' => 'Daftar Stok', 'url' => route('admin-gudang.stock.index', ['dapur' => $idDapur])],
-                    ]],
-                    ['route' => 'admin-gudang.laporan-kekurangan.index', 'icon' => 'bx-error', 'label' => 'Laporan Kekurangan', 'param' => ['dapur' => $idDapur]],
+                    [
+                        'route' => 'admin-gudang.dashboard',
+                        'icon' => 'bx-home-circle',
+                        'label' => 'Dashboard',
+                        'param' => ['dapur' => $idDapur],
+                    ],
+                    [
+                        'route' => 'admin-gudang.stock.index',
+                        'icon' => 'bx-package',
+                        'label' => 'Daftar Stok',
+                        'param' => ['dapur' => $idDapur],
+                    ],
+                    [
+                        'route' => 'admin-gudang.laporan-kekurangan.index',
+                        'icon' => 'bx-error',
+                        'label' => 'Kebutuhan Stok',
+                        'param' => ['dapur' => $idDapur],
+                    ],
+                    [
+                        'route' => 'admin-gudang.laporan-stok.index',
+                        'icon' => 'bx-file',
+                        'label' => 'Laporan Stok',
+                        'param' => ['dapur' => $idDapur],
+                    ],
                 ];
             } else {
                 $mainMenus = [
                     ['icon' => 'bx-user', 'label' => 'Akun', 'hasSubmenu' => true, 'submenu' => $akunSubmenu],
-                    ['route' => 'admin-gudang.dashboard', 'icon' => 'bx-home-circle', 'label' => 'Dashboard', 'param' => ['dapur' => $idDapur]],
+                    [
+                        'route' => 'admin-gudang.dashboard',
+                        'icon' => 'bx-home-circle',
+                        'label' => 'Dashboard',
+                        'param' => ['dapur' => $idDapur],
+                    ],
                 ];
             }
         @endphp
 
         @foreach ($mainMenus as $menu)
-            @if(isset($menu['hasSubmenu']) && $menu['hasSubmenu'])
+            @if (isset($menu['hasSubmenu']) && $menu['hasSubmenu'])
                 @php
-                    // Build submenu with full URLs
                     $submenuWithUrls = [];
-                    foreach($menu['submenu'] as $sub) {
+                    foreach ($menu['submenu'] as $sub) {
                         $submenuWithUrls[] = [
                             'label' => $sub['label'],
                             'url' => $sub['url'],
                             'type' => $sub['type'] ?? 'link',
                             'method' => $sub['method'] ?? 'GET',
-                            'isActive' => isset($sub['url']) && $sub['url'] !== '#' && request()->url() === $sub['url']
+                            'isActive' => isset($sub['url']) && $sub['url'] !== '#' && request()->url() === $sub['url'],
                         ];
                     }
                 @endphp
-                <a href="javascript:void(0);" 
-                   class="bottom-nav-item {{ (isset($menu['route']) && request()->routeIs($menu['route'] . '*')) ? 'active' : '' }}"
-                   data-submenu-popup="true"
-                   data-menu-label="{{ $menu['label'] }}"
-                   data-submenu='@json($submenuWithUrls)'>
+                <a href="javascript:void(0);"
+                    class="bottom-nav-item {{ isset($menu['route']) && request()->routeIs($menu['route'] . '*') ? 'active' : '' }}"
+                    data-submenu-popup="true" data-menu-label="{{ $menu['label'] }}"
+                    data-submenu='@json($submenuWithUrls)'>
                     <i class="bx {{ $menu['icon'] }}"></i>
                     <span class="bottom-nav-label">{{ $menu['label'] }}</span>
                 </a>
             @else
-                <a href="{{ route($menu['route'], $menu['param']) }}" 
-                   class="bottom-nav-item {{ request()->routeIs($menu['route'] . '*') ? 'active' : '' }}">
+                <a href="{{ route($menu['route'], $menu['param']) }}"
+                    class="bottom-nav-item {{ request()->routeIs($menu['route'] . '*') ? 'active' : '' }}">
                     <i class="bx {{ $menu['icon'] }}"></i>
                     <span class="bottom-nav-label">{{ $menu['label'] }}</span>
                 </a>
@@ -407,7 +444,8 @@
 
         .layout-page {
             padding-left: 0 !important;
-            padding-bottom: 70px !important; /* Space untuk bottom nav */
+            padding-bottom: 70px !important;
+            /* Space untuk bottom nav */
         }
 
         /* Bottom Navigation Styles */
@@ -725,7 +763,6 @@
         const sidebarToggle = document.getElementById('sidebarToggle');
         const layoutPage = document.querySelector('.layout-page') || document.body;
 
-        // Initialize tooltips for disabled menu items
         if (typeof bootstrap !== 'undefined') {
             const tooltipTriggerList = [].slice.call(
                 document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -735,7 +772,6 @@
             });
         }
 
-        // Desktop toggle functionality
         if (sidebarToggle) {
             sidebarToggle.addEventListener('click', function() {
                 sidebar.classList.toggle('collapsed');
@@ -752,16 +788,12 @@
             });
         }
 
-        // Mobile bottom navigation - tidak perlu toggle karena selalu visible
-
-        // Restore sidebar state - Start expanded by default on desktop
         if (window.innerWidth >= 992) {
             sidebar.classList.remove('collapsed');
             layoutPage.classList.remove('sidebar-collapsed');
             localStorage.setItem('sidebarCollapsed', 'false');
         }
 
-        // Handle submenu toggles
         document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
             toggle.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -794,7 +826,6 @@
             });
         });
 
-        // Handle disabled menu item clicks
         document.querySelectorAll('.menu-item.disabled .menu-link').forEach(function(link) {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -810,7 +841,6 @@
             });
         });
 
-        // Auto-show modal if completely expired
         const subscriptionStatus = '{{ $subscriptionStatus ?? '' }}';
         const isSubscriptionActive = {{ $isSubscriptionActive ? 'true' : 'false' }};
 
@@ -826,18 +856,14 @@
             }, 3000);
         }
 
-        // Handle window resize
         window.addEventListener('resize', function() {
             if (window.innerWidth >= 992) {
-                // Desktop mode - restore sidebar
                 sidebar.style.display = 'block';
             } else {
-                // Mobile mode - hide sidebar, show bottom nav
                 sidebar.style.display = 'none';
             }
         });
 
-        // Handle submenu popup
         document.querySelectorAll('[data-submenu-popup="true"]').forEach(function(item) {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -847,15 +873,12 @@
             });
         });
 
-        // Function to show submenu popup
         function showSubmenuPopup(title, submenuItems) {
-            // Remove existing popup if any
             const existingPopup = document.getElementById('submenuPopup');
             if (existingPopup) {
                 existingPopup.remove();
             }
 
-            // Create overlay
             const overlay = document.createElement('div');
             overlay.className = 'submenu-overlay';
             overlay.id = 'submenuOverlay';
@@ -863,12 +886,10 @@
                 closeSubmenuPopup();
             });
 
-            // Create popup
             const popup = document.createElement('div');
             popup.className = 'submenu-popup';
             popup.id = 'submenuPopup';
 
-            // Create header
             const header = document.createElement('div');
             header.className = 'submenu-popup-header';
             header.innerHTML = `
@@ -878,39 +899,38 @@
                 </button>
             `;
 
-            // Create body
             const body = document.createElement('div');
             body.className = 'submenu-popup-body';
-            
+
             submenuItems.forEach(function(submenu) {
                 const submenuItem = document.createElement(submenu.type === 'logout' ? 'button' : 'a');
                 submenuItem.className = 'submenu-item';
-                
+
                 if (submenu.type === 'logout') {
                     submenuItem.type = 'button';
                     submenuItem.textContent = submenu.label;
                     submenuItem.addEventListener('click', function(e) {
                         e.preventDefault();
                         closeSubmenuPopup();
-                        
-                        // Create and submit logout form
+
                         const form = document.createElement('form');
                         form.method = 'POST';
                         form.action = submenu.url;
-                        
+
                         const csrfToken = document.createElement('input');
                         csrfToken.type = 'hidden';
                         csrfToken.name = '_token';
-                        csrfToken.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        csrfToken.value = document.querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content') || '';
                         form.appendChild(csrfToken);
-                        
+
                         document.body.appendChild(form);
                         form.submit();
                     });
                 } else {
                     submenuItem.href = submenu.url;
                     submenuItem.textContent = submenu.label;
-                    
+
                     if (submenu.isActive) {
                         submenuItem.classList.add('active');
                     }
@@ -922,7 +942,6 @@
                             return;
                         }
                         closeSubmenuPopup();
-                        // Navigation will happen via href
                     });
                 }
 
@@ -934,22 +953,20 @@
             document.body.appendChild(overlay);
             document.body.appendChild(popup);
 
-            // Trigger animation
             setTimeout(function() {
                 overlay.classList.add('show');
                 popup.classList.add('show');
             }, 10);
         }
 
-        // Function to close submenu popup
         function closeSubmenuPopup() {
             const popup = document.getElementById('submenuPopup');
             const overlay = document.getElementById('submenuOverlay');
-            
+
             if (popup) {
                 popup.classList.remove('show');
                 if (overlay) overlay.classList.remove('show');
-                
+
                 setTimeout(function() {
                     if (popup) popup.remove();
                     if (overlay) overlay.remove();
@@ -957,10 +974,8 @@
             }
         }
 
-        // Make function globally available
         window.closeSubmenuPopup = closeSubmenuPopup;
 
-        // Initialize subscription features
         initializeSubscriptionFeatures();
     });
 
@@ -993,7 +1008,6 @@
 
     window.showSubscriptionNotification = showSubscriptionNotification;
 
-    // Subscription expiration warning
     document.addEventListener('DOMContentLoaded', function() {
         const subscriptionStatus = '{{ $subscriptionStatus ?? '' }}';
         const daysLeft = {{ session('subscription_days_left', 0) }};

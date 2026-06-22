@@ -82,7 +82,7 @@
                                     <i class="bx bx-reset d-block d-sm-none"></i>
                                     <span class="d-none d-sm-block">Reset</span>
                                 </button>
-                                <p class="text-muted mb-0">Format: JPG, PNG, WEBP. Maks: 2MB</p>
+                                <p class="text-muted mb-0">Format: JPG, PNG, WEBP. Maks: 10MB</p>
                             </div>
                         </div>
                         @error('foto_bangunan')

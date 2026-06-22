@@ -93,7 +93,6 @@ class DokumentasiController extends Controller
             'fotos.*' => 'image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-        // Process deleted photos first
         if ($request->has('deleted_photo_ids')) {
             $deletedIds = explode(',', $request->deleted_photo_ids[0] ?? '');
             $deletedIds = array_filter(array_map('trim', $deletedIds));

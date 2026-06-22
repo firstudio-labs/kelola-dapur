@@ -17,7 +17,6 @@ class DashboardController extends Controller
             return redirect()->route('login')->with('error', 'Data mitra tidak ditemukan.');
         }
 
-        // Ambil statistik untuk dashboard
         $stats = [
             'total' => $mitra->mitraDapur()->count(),
             'approved' => $mitra->mitraDapur()->where('status', 'approved')->count(),
@@ -25,7 +24,6 @@ class DashboardController extends Controller
             'rejected' => $mitra->mitraDapur()->where('status', 'rejected')->count(),
         ];
 
-        // Aktivitas terbaru (optional, let's just get 5 latest dapur interactions)
         $recentActivities = $mitra->mitraDapur()->with('dapur')->latest()->limit(5)->get();
 
         return view('mitra.dashboard.index', compact('stats', 'recentActivities'));

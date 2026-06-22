@@ -70,4 +70,93 @@ class OrderProduksi extends Model
     {
         return $this->hasOne(OrderDistribusi::class, 'id_order', 'id_order');
     }
+
+    public function deductAdjustedStockForProduction(): array
+    {
+        $result = [
+            'success'   => false,
+            'message'   => '',
+        ];
+
+        $transaksi = $this->transaksiDapur;
+        if (!$transaksi) {
+            $result['message'] = 'Transaksi Dapur tidak ditemukan';
+            return $result;
+        }
+
+        $baseIngredients = [];
+        foreach ($transaksi->detailTransaksiDapur as $detail) {
+            $reqs = $detail->getRequiredIngredients();
+            foreach ($reqs as $ing) {
+                $id = $ing['id_template_item'];
+                if (!isset($baseIngredients[$id])) {
+                    $baseIngredients[$id] = [
+                        'id_template_item' => $id,
+                        'nama_bahan' => $ing['nama_bahan'],
+                        'amount' => 0,
+                    ];
+                }
+                $amountToReduce = isset($ing['is_bahan_basah']) && $ing['is_bahan_basah']
+                    ? $ing['total_berat_basah']
+                    : $ing['total_needed'];
+                $baseIngredients[$id]['amount'] += $amountToReduce;
+            }
+        }
+
+        $handlers = \App\Models\ProduksiHandlerBahan::where('id_order', $this->id_order)
+            ->whereIn('status', ['approved', 'resolved'])
+            ->get();
+
+        foreach ($handlers as $h) {
+            $id = $h->id_template_item;
+            if (!isset($baseIngredients[$id])) {
+                $baseIngredients[$id] = [
+                    'id_template_item' => $id,
+                    'nama_bahan' => 'Bahan Tambahan',
+                    'amount' => 0,
+                ];
+            }
+            if ($h->jenis === 'kekurangan') {
+                $baseIngredients[$id]['amount'] += (float)$h->jumlah;
+            } else if ($h->jenis === 'kelebihan') {
+                $baseIngredients[$id]['amount'] -= (float)$h->jumlah;
+            }
+        }
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            foreach ($baseIngredients as $id => $data) {
+                if ($data['amount'] <= 0) continue;
+
+                $stockItem = \App\Models\StockItem::where('id_dapur', $this->id_dapur)
+                    ->where('id_template_item', $id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($stockItem) {
+                    $amountToReduce = $data['amount'];
+                    $actual = (float) $stockItem->jumlah;
+                    
+                    $deduct = min($actual, $amountToReduce);
+                    if ($deduct > 0) {
+                        $stockItem->jumlah -= $deduct;
+                        $stockItem->save();
+                    }
+                }
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+            $result['success'] = true;
+            $result['message'] = 'Stok berhasil dikurangkan sesuai dengan perhitungan terbaru.';
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Stock adjusted reduction failed for order', [
+                'id_order' => $this->id_order,
+                'error'    => $e->getMessage(),
+            ]);
+            $result['message'] = 'Gagal mengurangi stok: ' . $e->getMessage();
+        }
+
+        return $result;
+    }
 }

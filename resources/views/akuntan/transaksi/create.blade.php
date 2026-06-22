@@ -106,7 +106,10 @@
                                     <option value="">-- Pilih Transaksi Dapur --</option>
                                 </select>
                             </div>
-                            <div class="table-responsive" id="shortage-table-container" style="display: none;">
+                            
+                            {{-- Table 1: Normal Shortages --}}
+                            <div class="table-responsive mb-4" id="shortage-table-container" style="display: none;">
+                                <div class="fw-bold mb-2 text-secondary" id="normal-table-title" style="display: none;">Detail Kekurangan Stok Utama</div>
                                 <table class="table table-bordered table-sm align-middle">
                                     <thead class="table-light text-center">
                                         <tr>
@@ -119,10 +122,38 @@
                                     </thead>
                                     <tbody id="shortage-table-body">
                                     </tbody>
+                                    <tfoot class="table-light" id="normal-table-foot">
+                                        <tr>
+                                            <th colspan="4" class="text-end align-middle">Total Nominal Utama</th>
+                                            <th id="shortage-total-nominal" class="text-end fw-bold">Rp 0</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            {{-- Table 2: Handler Shortages --}}
+                            <div class="table-responsive" id="handler-table-container" style="display: none;">
+                                <div class="fw-bold mb-2 text-secondary">Detail Handler Kekurangan Stok</div>
+                                <table class="table table-bordered table-sm align-middle">
+                                    <thead class="table-light text-center">
+                                        <tr>
+                                            <th style="width: 20%;">Bahan Baku</th>
+                                            <th style="width: 14%;">Kekurangan</th>
+                                            <th style="width: 22%;">Harga Satuan (Rp)</th>
+                                            <th style="width: 22%;">Jml Dibeli</th>
+                                            <th style="width: 22%;">Total (Rp)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="handler-table-body">
+                                    </tbody>
                                     <tfoot class="table-light">
                                         <tr>
-                                            <th colspan="4" class="text-end align-middle">Total Nominal</th>
-                                            <th id="shortage-total-nominal" class="text-end fw-bold">Rp 0</th>
+                                            <th colspan="4" class="text-end align-middle">Total Nominal Pengajuan Handler</th>
+                                            <th id="handler-total-pengajuan" class="text-end fw-bold">Rp 0</th>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="4" class="text-end align-middle">Total Nominal Handler</th>
+                                            <th id="handler-total-nominal" class="text-end fw-bold">Rp 0</th>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -204,6 +235,12 @@
             </div>
         </div>
     </div>
+
+    <style>
+    .table-info-subtle {
+        background-color: rgba(13, 202, 240, 0.08) !important;
+    }
+    </style>
 
     <script>
         let currentBalance = 0;
@@ -352,6 +389,9 @@
                 creditFld.readOnly = false;
                 document.getElementById('shortage-table-body').innerHTML = '';
                 document.getElementById('shortage-table-container').style.display = 'none';
+                document.getElementById('handler-table-body').innerHTML = '';
+                document.getElementById('handler-table-container').style.display = 'none';
+                document.getElementById('normal-table-title').style.display = 'none';
                 document.getElementById('shortage-transaksi-select').innerHTML = '<option value="">-- Pilih Transaksi Dapur --</option>';
             }
 
@@ -388,14 +428,81 @@
             }
         }
 
+        function setupShortageRowListeners(tr, prefix) {
+            const hargaInput = tr.querySelector('.' + prefix + '-harga');
+            const qtyInput = tr.querySelector('.' + prefix + '-qty');
+            const nominalInput = tr.querySelector('.' + prefix + '-nominal');
+
+            if (!hargaInput || !qtyInput || !nominalInput) return;
+
+            const updateNominal = () => {
+                const rawHarga = hargaInput.value.replace(/\./g, "");
+                const harga = parseFloat(rawHarga) || 0;
+                const qty = parseFormattedDecimal(qtyInput.value);
+                const total = harga * qty;
+                nominalInput.value = new Intl.NumberFormat('id-ID').format(Math.round(total));
+            };
+
+            qtyInput.addEventListener('keypress', function(e) {
+                if (e.key === '.') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    const text = this.value;
+                    this.value = text.substring(0, start) + ',' + text.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 1;
+                    this.dispatchEvent(new Event('input'));
+                }
+            });
+
+            const onInput = function() {
+                if (this === hargaInput) {
+                    formatInputThousands(this);
+                } else {
+                    formatInputDecimal(this);
+                }
+                updateNominal();
+                calculateShortageTotal();
+            };
+
+            hargaInput.addEventListener('input', onInput);
+            qtyInput.addEventListener('input', onInput);
+
+            const onFocus = function() {
+                if (this.value === '0') {
+                    this.value = '';
+                }
+            };
+
+            hargaInput.addEventListener('focus', onFocus);
+            qtyInput.addEventListener('focus', onFocus);
+
+            const onBlur = function() {
+                if (this.value === '') {
+                    this.value = '0';
+                    updateNominal();
+                    calculateShortageTotal();
+                }
+            };
+
+            hargaInput.addEventListener('blur', onBlur);
+            qtyInput.addEventListener('blur', onBlur);
+        }
+
         document.getElementById('shortage-transaksi-select').addEventListener('change', async function() {
             const transaksiId = this.value;
             const tableCont = document.getElementById('shortage-table-container');
             const tbody = document.getElementById('shortage-table-body');
+            const handlerCont = document.getElementById('handler-table-container');
+            const handlerTbody = document.getElementById('handler-table-body');
+            const normalTitle = document.getElementById('normal-table-title');
             
             if (!transaksiId) {
                 tableCont.style.display = 'none';
                 tbody.innerHTML = '';
+                handlerCont.style.display = 'none';
+                handlerTbody.innerHTML = '';
+                normalTitle.style.display = 'none';
                 calculateShortageTotal();
                 return;
             }
@@ -405,103 +512,172 @@
                 const data = await response.json();
                 
                 tbody.innerHTML = '';
-                data.forEach((item, index) => {
+                handlerTbody.innerHTML = '';
+
+                const handlerShortages = data.filter(item => item.id_handler !== null);
+                const normalShortages = data.filter(item => item.id_handler === null);
+                const hasHandler = handlerShortages.length > 0;
+
+                if (hasHandler) {
+                    normalTitle.style.display = 'block';
+                    handlerCont.style.display = 'block';
+                } else {
+                    normalTitle.style.display = 'none';
+                    handlerCont.style.display = 'none';
+                }
+
+                // Populate Table 1: Normal Shortages
+                normalShortages.forEach((item, index) => {
                     const tr = document.createElement('tr');
                     tr.dataset.laporanId = item.id_laporan;
                     tr.dataset.satuan = item.satuan;
+                    tr.dataset.namaBahan = item.nama_bahan;
+                    tr.dataset.alreadyPurchased = item.already_purchased ? 'true' : 'false';
+
+                    const isReadonly = item.already_purchased;
+                    const priceVal = item.already_purchased ? item.harga_satuan : 0;
+                    const qtyVal = item.already_purchased ? item.qty_dibeli : item.jumlah_kurang;
+                    const nominalVal = item.already_purchased ? item.nominal : 0;
+
                     tr.innerHTML = `
-                        <td>
-                            ${item.nama_bahan}
-                        </td>
+                        <td>${item.nama_bahan}</td>
                         <td class="text-center">${formatNumberIndonesian(item.jumlah_kurang)} ${item.satuan}</td>
                         <td>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">Rp</span>
-                                <input type="text" class="form-control shortage-harga text-end" data-idx="${index}" value="0">
+                                <input type="text" class="form-control shortage-harga text-end" value="${formatNumberIndonesian(priceVal)}" ${isReadonly ? 'readonly style="background-color: #f3f4f6;"' : ''}>
                             </div>
                         </td>
                         <td>
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control shortage-qty text-end" data-idx="${index}" value="${formatNumberIndonesian(item.jumlah_kurang)}">
+                                <input type="text" class="form-control shortage-qty text-end" value="${formatNumberIndonesian(qtyVal)}" ${isReadonly ? 'readonly style="background-color: #f3f4f6;"' : ''}>
                                 <span class="input-group-text">${item.satuan}</span>
                             </div>
                         </td>
                         <td>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">Rp</span>
-                                <input type="text" class="form-control shortage-nominal text-end" data-idx="${index}" value="0" readonly style="background-color: #f3f4f6;">
+                                <input type="text" class="form-control shortage-nominal text-end" value="${formatNumberIndonesian(nominalVal)}" readonly style="background-color: #f3f4f6;">
                             </div>
                         </td>
                     `;
                     tbody.appendChild(tr);
-                });
-                tableCont.style.display = 'block';
-                
-                // Add event listeners to new inputs
-                document.querySelectorAll('.shortage-harga, .shortage-qty').forEach(input => {
-                    if (input.classList.contains('shortage-qty')) {
-                        input.addEventListener('keypress', function(e) {
-                            if (e.key === '.') {
-                                e.preventDefault();
-                                const start = this.selectionStart;
-                                const end = this.selectionEnd;
-                                const text = this.value;
-                                this.value = text.substring(0, start) + ',' + text.substring(end);
-                                this.selectionStart = this.selectionEnd = start + 1;
-                                this.dispatchEvent(new Event('input'));
-                            }
-                        });
-                    }
-
-                    input.addEventListener('input', function() {
-                        if (this.classList.contains('shortage-harga')) {
-                            formatInputThousands(this);
-                        } else {
-                            formatInputDecimal(this);
-                        }
+                    if (!isReadonly) {
+                        setupShortageRowListeners(tr, 'shortage');
                         
-                        const tr = this.closest('tr');
-                        const hargaInput = tr.querySelector('.shortage-harga');
-                        const qtyInput = tr.querySelector('.shortage-qty');
-                        const nominalInput = tr.querySelector('.shortage-nominal');
-
-                        if (hargaInput && qtyInput && nominalInput) {
-                            const rawHarga = hargaInput.value.replace(/\./g, "");
-                            const harga = parseFloat(rawHarga) || 0;
-                            const qty = parseFormattedDecimal(qtyInput.value);
-                            const total = harga * qty;
-                            nominalInput.value = new Intl.NumberFormat('id-ID').format(Math.round(total));
-                        }
-                        calculateShortageTotal();
-                    });
-
-                    input.addEventListener('focus', function() {
-                        if (this.value === '0') {
-                            this.value = '';
-                        }
-                    });
-
-                    input.addEventListener('blur', function() {
-                        if (this.value === '') {
-                            this.value = '0';
-                            
-                            const tr = this.closest('tr');
+                        // When normal harga changes, sync handler row price if hasHandler
+                        if (hasHandler) {
                             const hargaInput = tr.querySelector('.shortage-harga');
-                            const qtyInput = tr.querySelector('.shortage-qty');
-                            const nominalInput = tr.querySelector('.shortage-nominal');
-
-                            if (hargaInput && qtyInput && nominalInput) {
-                                const rawHarga = hargaInput.value.replace(/\./g, "");
-                                const harga = parseFloat(rawHarga) || 0;
-                                const qty = parseFormattedDecimal(qtyInput.value);
-                                const total = harga * qty;
-                                nominalInput.value = new Intl.NumberFormat('id-ID').format(Math.round(total));
+                            if (hargaInput) {
+                                hargaInput.addEventListener('input', function() {
+                                    // Find handler row with same nama_bahan
+                                    const rows = document.querySelectorAll('#handler-table-body tr');
+                                    rows.forEach(handlerRow => {
+                                        if (handlerRow.dataset.namaBahan === item.nama_bahan && handlerRow.dataset.alreadyPurchased !== 'true') {
+                                            const handlerHarga = handlerRow.querySelector('.handler-harga');
+                                            const handlerQty = handlerRow.querySelector('.handler-qty');
+                                            const handlerNominal = handlerRow.querySelector('.handler-nominal');
+                                            if (handlerHarga && handlerQty && handlerNominal) {
+                                                handlerHarga.value = this.value;
+                                                const rawHarga = this.value.replace(/\./g, '');
+                                                const harga = parseFloat(rawHarga) || 0;
+                                                const qty = parseFormattedDecimal(handlerQty.value);
+                                                const total = harga * qty;
+                                                handlerNominal.value = new Intl.NumberFormat('id-ID').format(Math.round(total));
+                                                calculateShortageTotal();
+                                            }
+                                        }
+                                    });
+                                });
                             }
-                            calculateShortageTotal();
                         }
-                    });
+                    }
                 });
 
+                // Populate Table 2: Handler Shortages
+                if (hasHandler) {
+                    handlerShortages.forEach((item, index) => {
+                        const tr = document.createElement('tr');
+                        tr.dataset.laporanId = item.id_laporan;
+                        tr.dataset.satuan = item.satuan;
+                        tr.dataset.namaBahan = item.nama_bahan;
+                        tr.dataset.alreadyPurchased = item.already_purchased ? 'true' : 'false';
+
+                        // Find corresponding price from normalShortages (if already purchased, use stored price; else mirror table 1 dynamically)
+                        const corresponding = normalShortages.find(n => n.nama_bahan === item.nama_bahan);
+                        const basePrice = corresponding ? (corresponding.already_purchased ? corresponding.harga_satuan : 0) : 0;
+                        
+                        const priceVal = item.already_purchased ? item.harga_satuan : basePrice;
+                        const qtyVal = item.already_purchased ? item.qty_dibeli : item.jumlah_kurang;
+                        const nominalVal = item.already_purchased ? item.nominal : (priceVal * qtyVal);
+
+                        const isQtyReadonly = item.already_purchased;
+
+                        tr.innerHTML = `
+                            <td>${item.nama_bahan} - Handler</td>
+                            <td class="text-center">${formatNumberIndonesian(item.jumlah_kurang)} ${item.satuan}</td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="text" class="form-control handler-harga text-end" value="${formatNumberIndonesian(priceVal)}" readonly style="background-color: #f3f4f6;">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control handler-qty text-end" value="${formatNumberIndonesian(qtyVal)}" ${isQtyReadonly ? 'readonly style="background-color: #f3f4f6;"' : ''}>
+                                    <span class="input-group-text">${item.satuan}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="text" class="form-control handler-nominal text-end" value="${formatNumberIndonesian(nominalVal)}" readonly style="background-color: #f3f4f6;">
+                                </div>
+                            </td>
+                        `;
+                        handlerTbody.appendChild(tr);
+                        if (!isQtyReadonly) {
+                            // Only setup qty listener for handler (price is synced from normal, not user-typed)
+                            const qtyInput = tr.querySelector('.handler-qty');
+                            const nominalInput = tr.querySelector('.handler-nominal');
+                            if (qtyInput && nominalInput) {
+                                qtyInput.addEventListener('keypress', function(e) {
+                                    if (e.key === '.') {
+                                        e.preventDefault();
+                                        const start = this.selectionStart;
+                                        const end = this.selectionEnd;
+                                        const text = this.value;
+                                        this.value = text.substring(0, start) + ',' + text.substring(end);
+                                        this.selectionStart = this.selectionEnd = start + 1;
+                                        this.dispatchEvent(new Event('input'));
+                                    }
+                                });
+                                qtyInput.addEventListener('input', function() {
+                                    formatInputDecimal(this);
+                                    const handlerHarga = tr.querySelector('.handler-harga');
+                                    const rawHarga = handlerHarga ? handlerHarga.value.replace(/\./g, '') : '0';
+                                    const harga = parseFloat(rawHarga) || 0;
+                                    const qty = parseFormattedDecimal(this.value);
+                                    const total = harga * qty;
+                                    nominalInput.value = new Intl.NumberFormat('id-ID').format(Math.round(total));
+                                    calculateShortageTotal();
+                                });
+                                qtyInput.addEventListener('focus', function() {
+                                    if (this.value === '0') this.value = '';
+                                });
+                                qtyInput.addEventListener('blur', function() {
+                                    if (this.value === '') {
+                                        this.value = '0';
+                                        // Recalculate
+                                        qtyInput.dispatchEvent(new Event('input'));
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+
+                tableCont.style.display = 'block';
                 calculateShortageTotal();
                 
             } catch (error) {
@@ -511,12 +687,61 @@
 
         function calculateShortageTotal() {
             let total = 0;
-            document.querySelectorAll('.shortage-nominal').forEach(input => {
-                const rawVal = input.value.replace(/\./g, "");
-                total += parseFloat(rawVal) || 0;
+            // Sum newly purchased normal shortages
+            document.querySelectorAll('#shortage-table-body tr').forEach(row => {
+                if (row.dataset.alreadyPurchased !== 'true') {
+                    const nominalInput = row.querySelector('.shortage-nominal');
+                    if (nominalInput) {
+                        const rawVal = nominalInput.value.replace(/\./g, "");
+                        total += parseFloat(rawVal) || 0;
+                    }
+                }
             });
-            document.getElementById('shortage-total-nominal').textContent = formatIDR(total);
-            
+            // Sum newly purchased handler shortages
+            document.querySelectorAll('#handler-table-body tr').forEach(row => {
+                if (row.dataset.alreadyPurchased !== 'true') {
+                    const nominalInput = row.querySelector('.handler-nominal');
+                    if (nominalInput) {
+                        const rawVal = nominalInput.value.replace(/\./g, "");
+                        total += parseFloat(rawVal) || 0;
+                    }
+                }
+            });
+
+            // Calculate total for Table 1 display (all items in Table 1)
+            let table1Total = 0;
+            document.querySelectorAll('#shortage-table-body tr').forEach(row => {
+                const nominalInput = row.querySelector('.shortage-nominal');
+                if (nominalInput) {
+                    const rawVal = nominalInput.value.replace(/\./g, "");
+                    table1Total += parseFloat(rawVal) || 0;
+                }
+            });
+            document.getElementById('shortage-total-nominal').textContent = formatIDR(table1Total);
+
+            // Calculate total for Table 2 display (all items in Table 2)
+            let table2Total = 0;
+            let table2Pengajuan = 0;
+            document.querySelectorAll('#handler-table-body tr').forEach(row => {
+                const nominalInput = row.querySelector('.handler-nominal');
+                if (nominalInput) {
+                    const rawVal = nominalInput.value.replace(/\./g, "");
+                    const val = parseFloat(rawVal) || 0;
+                    table2Total += val;
+                    if (row.dataset.alreadyPurchased !== 'true') {
+                        table2Pengajuan += val;
+                    }
+                }
+            });
+            const handlerTotalNominalEl = document.getElementById('handler-total-nominal');
+            if (handlerTotalNominalEl) {
+                handlerTotalNominalEl.textContent = formatIDR(table2Total);
+            }
+            const handlerTotalPengajuanEl = document.getElementById('handler-total-pengajuan');
+            if (handlerTotalPengajuanEl) {
+                handlerTotalPengajuanEl.textContent = formatIDR(table2Pengajuan);
+            }
+
             // Assign to Debit or Credit based on category type
             const opt = document.getElementById('category_select').options[document.getElementById('category_select').selectedIndex];
             const type = opt ? opt.dataset.type : '';
@@ -562,6 +787,8 @@
                     loadPendingShortages();
                     document.getElementById('shortage-table-container').style.display = 'none';
                     document.getElementById('shortage-table-body').innerHTML = '';
+                    document.getElementById('handler-table-container').style.display = 'none';
+                    document.getElementById('handler-table-body').innerHTML = '';
                     calculateShortageTotal();
                 } else {
                     showWarningModal('Periode dikosongkan. Kategori Pembelian Bahan Baku direset.');
@@ -617,10 +844,11 @@
             dField.value = dField.value.replace(/\./g, "");
             cField.value = cField.value.replace(/\./g, "");
 
-            const rows = document.querySelectorAll('#shortage-table-body tr');
-            if (rows.length > 0) {
-                const shortages = [];
-                rows.forEach(row => {
+            const shortages = [];
+
+            // Collect normal shortages (if not already purchased)
+            document.querySelectorAll('#shortage-table-body tr').forEach(row => {
+                if (row.dataset.alreadyPurchased !== 'true') {
                     const laporanId = row.dataset.laporanId;
                     const hargaInput = row.querySelector('.shortage-harga');
                     const qtyInput = row.querySelector('.shortage-qty');
@@ -636,8 +864,34 @@
                             nominal: rawNominal
                         });
                     }
-                });
+                }
+            });
+
+            // Collect handler shortages (if not already purchased)
+            document.querySelectorAll('#handler-table-body tr').forEach(row => {
+                if (row.dataset.alreadyPurchased !== 'true') {
+                    const laporanId = row.dataset.laporanId;
+                    const hargaInput = row.querySelector('.handler-harga');
+                    const qtyInput = row.querySelector('.handler-qty');
+                    const nominalInput = row.querySelector('.handler-nominal');
+                    if (laporanId && qtyInput && nominalInput) {
+                        const rawHarga = hargaInput ? hargaInput.value.replace(/\./g, "") : 0;
+                        const rawNominal = nominalInput.value.replace(/\./g, "");
+                        const rawQty = parseFormattedDecimal(qtyInput.value);
+                        shortages.push({
+                            laporan_id: laporanId,
+                            harga_satuan: rawHarga,
+                            qty: rawQty,
+                            nominal: rawNominal
+                        });
+                    }
+                }
+            });
+
+            if (shortages.length > 0) {
                 document.getElementById('shortages_json').value = JSON.stringify(shortages);
+            } else {
+                document.getElementById('shortages_json').value = "[]";
             }
         });
     </script>

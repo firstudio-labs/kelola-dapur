@@ -1,13 +1,16 @@
-@extends("template_ahli_gizi.layout")
+@extends('template_ahli_gizi.layout')
 
-@section("content")
+@section('content')
     @php
         if (!function_exists('formatIndonesianNumber')) {
-            function formatIndonesianNumber($value) {
-                if ($value === null || $value === '' || $value === 0 || $value === 0.0) return '0';
-                $num = (float)$value;
-                $parts = explode('.', (string)$num);
-                $formattedInt = number_format((float)$parts[0], 0, '', '.');
+            function formatIndonesianNumber($value)
+            {
+                if ($value === null || $value === '' || $value === 0 || $value === 0.0) {
+                    return '0';
+                }
+                $num = (float) $value;
+                $parts = explode('.', (string) $num);
+                $formattedInt = number_format((float) $parts[0], 0, '', '.');
                 if (isset($parts[1])) {
                     $decimals = rtrim($parts[1], '0');
                     if (strlen($decimals) > 0) {
@@ -24,14 +27,10 @@
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <div
-                            class="d-flex align-items-center justify-content-between"
-                        >
+                        <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
                                 <div class="avatar avatar-md me-3">
-                                    <span
-                                        class="avatar-initial rounded-circle bg-label-primary"
-                                    >
+                                    <span class="avatar-initial rounded-circle bg-label-primary">
                                         <i class="bx bx-show"></i>
                                     </span>
                                 </div>
@@ -76,7 +75,7 @@
                                             Tanggal Transaksi:
                                         </td>
                                         <td>
-                                            {{ $transaksi->tanggal_transaksi->format("d F Y") }}
+                                            {{ $transaksi->tanggal_transaksi->format('d F Y') }}
                                         </td>
                                     </tr>
                                     <tr>
@@ -88,30 +87,29 @@
                                     <tr>
                                         <td class="fw-semibold">Ahli Gizi:</td>
                                         <td>
-                                            {{ $transaksi->createdBy->nama ?? "N/A" }}
+                                            {{ $transaksi->createdBy->nama ?? 'N/A' }}
                                         </td>
                                     </tr>
                                 </table>
                             </div>
                             <div class="col-md-6">
                                 @php
-                                    $totalPorsiBesar = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()?->jumlah_porsi ?? 0;
-                                    $totalPorsiKecil = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()?->jumlah_porsi ?? 0;
+                                    $totalPorsiBesar =
+                                        $transaksi->detailTransaksiDapur->where('tipe_porsi', 'besar')->first()
+                                            ?->jumlah_porsi ?? 0;
+                                    $totalPorsiKecil =
+                                        $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil')->first()
+                                            ?->jumlah_porsi ?? 0;
                                     $totalKeseluruhan = $totalPorsiBesar;
                                 @endphp
 
                                 <table class="table table-borderless mb-0">
                                     <tr>
-                                        <td
-                                            class="fw-semibold"
-                                            style="width: 40%"
-                                        >
+                                        <td class="fw-semibold" style="width: 40%">
                                             Total Porsi Besar:
                                         </td>
                                         <td>
-                                            <span
-                                                class="badge bg-label-success"
-                                            >
+                                            <span class="badge bg-label-success">
                                                 {{ formatIndonesianNumber($totalPorsiBesar) }} Porsi
                                             </span>
                                         </td>
@@ -121,9 +119,7 @@
                                             Total Porsi Kecil:
                                         </td>
                                         <td>
-                                            <span
-                                                class="badge bg-label-warning"
-                                            >
+                                            <span class="badge bg-label-warning">
                                                 {{ formatIndonesianNumber($totalPorsiKecil) }} Porsi
                                             </span>
                                         </td>
@@ -133,9 +129,7 @@
                                             Total Keseluruhan:
                                         </td>
                                         <td>
-                                            <span
-                                                class="badge bg-label-primary"
-                                            >
+                                            <span class="badge bg-label-primary">
                                                 {{ formatIndonesianNumber($totalKeseluruhan) }} Porsi
                                             </span>
                                         </td>
@@ -172,55 +166,71 @@
                                 $porsiKecilDetails = $transaksi->detailTransaksiDapur->where('tipe_porsi', 'kecil');
                             @endphp
 
-                            @if($porsiBesarDetails->count() > 0)
+                            @if ($porsiBesarDetails->count() > 0)
                                 <div class="col-12">
-                                    <h6 class="text-success mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Besar : {{ formatIndonesianNumber($totalPorsiBesar) }} Porsi</h6>
+                                    <h6 class="text-success mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Besar :
+                                        {{ formatIndonesianNumber($totalPorsiBesar) }} Porsi</h6>
                                 </div>
-                                @foreach($porsiBesarDetails as $detail)
+                                @foreach ($porsiBesarDetails as $detail)
                                     <div class="col-md-6 col-lg-4">
                                         <div class="border rounded p-3 h-100 bg-light-success">
                                             <div class="d-flex align-items-center mb-3">
                                                 <div class="avatar avatar-sm me-2">
-                                                    @if($detail->menuMakanan->gambar_url)
-                                                        <img src="{{ $detail->menuMakanan->gambar_url }}" class="rounded" style="object-fit: cover;">
+                                                    @if ($detail->menuMakanan->gambar_url)
+                                                        <img src="{{ $detail->menuMakanan->gambar_url }}" class="rounded"
+                                                            style="object-fit: cover;">
                                                     @else
-                                                        <span class="avatar-initial rounded bg-label-success"><i class="bx bx-dish"></i></span>
+                                                        <span class="avatar-initial rounded bg-label-success"><i
+                                                                class="bx bx-dish"></i></span>
                                                     @endif
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}</h6>
+                                                    <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}
+                                                    </h6>
                                                     <span class="badge bg-label-success" style="font-size: 0.6rem;">
                                                         Besar - {{ formatIndonesianNumber($detail->jumlah_porsi) }} Porsi
                                                     </span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="table-responsive">
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
-                                                        @foreach($detail->menuMakanan->bahanMenu as $bahanMenu)
+                                                        @foreach ($detail->menuMakanan->bahanMenu as $bahanMenu)
                                                             @php
                                                                 $idTemplate = $bahanMenu->id_template_item;
                                                                 $namaBahan = $bahanMenu->templateItem->nama_bahan;
                                                                 $satuan = $bahanMenu->templateItem->satuan;
                                                                 $kebutuhanPerPorsi = $bahanMenu->jumlah_per_porsi;
-                                                                $totalButuhMenu = $kebutuhanPerPorsi * $detail->jumlah_porsi;
-                                                                
-                                                                $stockItem = isset($stockItems) ? $stockItems->get($idTemplate) : null;
+                                                                $totalButuhMenu =
+                                                                    $kebutuhanPerPorsi * $detail->jumlah_porsi;
+
+                                                                $stockItem = isset($stockItems)
+                                                                    ? $stockItems->get($idTemplate)
+                                                                    : null;
                                                             @endphp
                                                             <tr>
                                                                 <td class="ps-0 py-1" style="font-size: 0.75rem;">
                                                                     <span class="text-dark">{{ $namaBahan }}</span>
                                                                 </td>
                                                                 <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
-                                                                    @if($stockItem && $stockItem->konversi_nilai > 0)
+                                                                    @if ($stockItem && $stockItem->konversi_nilai > 0)
                                                                         @php
-                                                                            $butuhKonversiMenu = $totalButuhMenu / $stockItem->konversi_nilai;
+                                                                            $butuhKonversiMenu =
+                                                                                $totalButuhMenu /
+                                                                                $stockItem->konversi_nilai;
                                                                         @endphp
-                                                                        <span class="fw-bold">{{ formatIndonesianNumber($butuhKonversiMenu) }} {{ $stockItem->konversi_satuan }}</span>
-                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ formatIndonesianNumber($totalButuhMenu) }} {{ $satuan }})</div>
+                                                                        <span
+                                                                            class="fw-bold">{{ formatIndonesianNumber($butuhKonversiMenu) }}
+                                                                            {{ $stockItem->konversi_satuan }}</span>
+                                                                        <div class="text-muted mt-1"
+                                                                            style="font-size: 0.65rem;">
+                                                                            ({{ formatIndonesianNumber($totalButuhMenu) }}
+                                                                            {{ $satuan }})</div>
                                                                     @else
-                                                                        <span class="fw-bold">{{ formatIndonesianNumber($totalButuhMenu) }}</span> <span class="text-muted">{{ $satuan }}</span>
+                                                                        <span
+                                                                            class="fw-bold">{{ formatIndonesianNumber($totalButuhMenu) }}</span>
+                                                                        <span class="text-muted">{{ $satuan }}</span>
                                                                     @endif
                                                                 </td>
                                                             </tr>
@@ -233,55 +243,72 @@
                                 @endforeach
                             @endif
 
-                            @if($porsiKecilDetails->count() > 0)
+                            @if ($porsiKecilDetails->count() > 0)
                                 <div class="col-12 mt-4">
-                                    <h6 class="text-warning mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Kecil : {{ formatIndonesianNumber($totalPorsiKecil) }} Porsi</h6>
+                                    <h6 class="text-warning mb-0 fw-bold"><i class="bx bx-chevron-right"></i> Porsi Kecil :
+                                        {{ formatIndonesianNumber($totalPorsiKecil) }} Porsi</h6>
                                 </div>
-                                @foreach($porsiKecilDetails as $detail)
+                                @foreach ($porsiKecilDetails as $detail)
                                     <div class="col-md-6 col-lg-4">
                                         <div class="border rounded p-3 h-100 bg-light-warning">
                                             <div class="d-flex align-items-center mb-3">
                                                 <div class="avatar avatar-sm me-2">
-                                                    @if($detail->menuMakanan->gambar_url)
-                                                        <img src="{{ $detail->menuMakanan->gambar_url }}" class="rounded" style="object-fit: cover;">
+                                                    @if ($detail->menuMakanan->gambar_url)
+                                                        <img src="{{ $detail->menuMakanan->gambar_url }}" class="rounded"
+                                                            style="object-fit: cover;">
                                                     @else
-                                                        <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-dish"></i></span>
+                                                        <span class="avatar-initial rounded bg-label-warning"><i
+                                                                class="bx bx-dish"></i></span>
                                                     @endif
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}</h6>
+                                                    <h6 class="mb-0 fw-bold small">{{ $detail->menuMakanan->nama_menu }}
+                                                    </h6>
                                                     <span class="badge bg-label-warning" style="font-size: 0.6rem;">
                                                         Kecil - {{ formatIndonesianNumber($detail->jumlah_porsi) }} Porsi
                                                     </span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="table-responsive">
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
-                                                        @foreach($detail->menuMakanan->bahanMenu as $bahanMenu)
+                                                        @foreach ($detail->menuMakanan->bahanMenu as $bahanMenu)
                                                             @php
                                                                 $idTemplate = $bahanMenu->id_template_item;
                                                                 $namaBahan = $bahanMenu->templateItem->nama_bahan;
                                                                 $satuan = $bahanMenu->templateItem->satuan;
                                                                 $kebutuhanPerPorsi = $bahanMenu->jumlah_per_porsi;
-                                                                $totalButuhMenu = $kebutuhanPerPorsi * $detail->jumlah_porsi;
-                                                                
-                                                                $stockItem = isset($stockItems) ? $stockItems->get($idTemplate) : null;
+                                                                $totalButuhMenu =
+                                                                    $kebutuhanPerPorsi * $detail->jumlah_porsi;
+
+                                                                $stockItem = isset($stockItems)
+                                                                    ? $stockItems->get($idTemplate)
+                                                                    : null;
                                                             @endphp
                                                             <tr>
                                                                 <td class="ps-0 py-1" style="font-size: 0.75rem;">
                                                                     <span class="text-dark">{{ $namaBahan }}</span>
                                                                 </td>
                                                                 <td class="pe-0 py-1 text-end" style="font-size: 0.75rem;">
-                                                                    @if($stockItem && $stockItem->konversi_nilai > 0)
+                                                                    @if ($stockItem && $stockItem->konversi_nilai > 0)
                                                                         @php
-                                                                            $butuhKonversiMenu = $totalButuhMenu / $stockItem->konversi_nilai;
+                                                                            $butuhKonversiMenu =
+                                                                                $totalButuhMenu /
+                                                                                $stockItem->konversi_nilai;
                                                                         @endphp
-                                                                        <span class="fw-bold">{{ formatIndonesianNumber($butuhKonversiMenu) }} {{ $stockItem->konversi_satuan }}</span>
-                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">({{ formatIndonesianNumber($totalButuhMenu) }} {{ $satuan }})</div>
+                                                                        <span
+                                                                            class="fw-bold">{{ formatIndonesianNumber($butuhKonversiMenu) }}
+                                                                            {{ $stockItem->konversi_satuan }}</span>
+                                                                        <div class="text-muted mt-1"
+                                                                            style="font-size: 0.65rem;">
+                                                                            ({{ formatIndonesianNumber($totalButuhMenu) }}
+                                                                            {{ $satuan }})</div>
                                                                     @else
-                                                                        <span class="fw-bold">{{ formatIndonesianNumber($totalButuhMenu) }}</span> <span class="text-muted">{{ $satuan }}</span>
+                                                                        <span
+                                                                            class="fw-bold">{{ formatIndonesianNumber($totalButuhMenu) }}</span>
+                                                                        <span
+                                                                            class="text-muted">{{ $satuan }}</span>
                                                                     @endif
                                                                 </td>
                                                             </tr>
@@ -299,48 +326,46 @@
             </div>
         </div>
 
-        @if (! empty($bahanKebutuhan))
+        @if (!empty($bahanKebutuhan))
             @php
-                // Pisahkan kebutuhan bahan per tipe porsi
                 $bahanBesar = [];
                 $bahanKecil = [];
                 $totalKebutuhan = [];
 
                 foreach ($bahanKebutuhan as $idTemplate => $bahan) {
-                    foreach ($bahan["detail_penggunaan"] as $detail) {
-                        if ($detail["tipe_porsi"] == "besar") {
-                            if (! isset($bahanBesar[$idTemplate])) {
+                    foreach ($bahan['detail_penggunaan'] as $detail) {
+                        if ($detail['tipe_porsi'] == 'besar') {
+                            if (!isset($bahanBesar[$idTemplate])) {
                                 $bahanBesar[$idTemplate] = [
-                                    "nama_bahan" => $bahan["nama_bahan"],
-                                    "satuan" => $bahan["satuan"],
-                                    "total_kebutuhan" => 0,
+                                    'nama_bahan' => $bahan['nama_bahan'],
+                                    'satuan' => $bahan['satuan'],
+                                    'total_kebutuhan' => 0,
                                 ];
                             }
-                            $bahanBesar[$idTemplate]["total_kebutuhan"] += $detail["total_kebutuhan"];
-                        } elseif ($detail["tipe_porsi"] == "kecil") {
-                            if (! isset($bahanKecil[$idTemplate])) {
+                            $bahanBesar[$idTemplate]['total_kebutuhan'] += $detail['total_kebutuhan'];
+                        } elseif ($detail['tipe_porsi'] == 'kecil') {
+                            if (!isset($bahanKecil[$idTemplate])) {
                                 $bahanKecil[$idTemplate] = [
-                                    "nama_bahan" => $bahan["nama_bahan"],
-                                    "satuan" => $bahan["satuan"],
-                                    "total_kebutuhan" => 0,
+                                    'nama_bahan' => $bahan['nama_bahan'],
+                                    'satuan' => $bahan['satuan'],
+                                    'total_kebutuhan' => 0,
                                 ];
                             }
-                            $bahanKecil[$idTemplate]["total_kebutuhan"] += $detail["total_kebutuhan"];
+                            $bahanKecil[$idTemplate]['total_kebutuhan'] += $detail['total_kebutuhan'];
                         }
 
-                        // Total kebutuhan
-                        if (! isset($totalKebutuhan[$idTemplate])) {
+                        if (!isset($totalKebutuhan[$idTemplate])) {
                             $totalKebutuhan[$idTemplate] = [
-                                "nama_bahan" => $bahan["nama_bahan"],
-                                "satuan" => $bahan["satuan"],
-                                "total_kebutuhan" => 0,
+                                'nama_bahan' => $bahan['nama_bahan'],
+                                'satuan' => $bahan['satuan'],
+                                'total_kebutuhan' => 0,
                             ];
                         }
-                        $totalKebutuhan[$idTemplate]["total_kebutuhan"] += $detail["total_kebutuhan"];
+                        $totalKebutuhan[$idTemplate]['total_kebutuhan'] += $detail['total_kebutuhan'];
                     }
                 }
             @endphp
-            @if (! empty($bahanBesar))
+            @if (!empty($bahanBesar))
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="card">
@@ -367,43 +392,31 @@
                                             @foreach ($bahanBesar as $idTemplate => $bahan)
                                                 <tr>
                                                     <td>
-                                                        {{ $bahan["nama_bahan"] }}
+                                                        {{ $bahan['nama_bahan'] }}
                                                     </td>
                                                     <td>
                                                         <span class="total-kebutuhan-besar-display-{{ $idTemplate }}">
-                                                            {{ formatIndonesianNumber($bahan["total_kebutuhan"]) }}
-                                                            {{ $bahan["satuan"] }}
+                                                            {{ formatIndonesianNumber($bahan['total_kebutuhan']) }}
+                                                            {{ $bahan['satuan'] }}
                                                         </span>
                                                     </td>
-                                                    <td
-                                                        class="stock-available-besar-{{ $idTemplate }}"
-                                                    >
+                                                    <td class="stock-available-besar-{{ $idTemplate }}">
                                                         <span class="text-muted">
                                                             Memuat...
                                                         </span>
                                                     </td>
-                                                    <td
-                                                        class="stock-estimate-besar-{{ $idTemplate }}"
-                                                    >
+                                                    <td class="stock-estimate-besar-{{ $idTemplate }}">
                                                         <span class="text-muted">
                                                             Memuat...
                                                         </span>
                                                     </td>
-                                                    <td
-                                                        class="stock-comparison-besar-{{ $idTemplate }}"
-                                                    >
-                                                        <span
-                                                            class="text-muted"
-                                                        >
+                                                    <td class="stock-comparison-besar-{{ $idTemplate }}">
+                                                        <span class="text-muted">
                                                             Memuat...
                                                         </span>
                                                     </td>
-                                                    <td
-                                                        class="stock-status-besar-{{ $idTemplate }}"
-                                                    >
-                                                        <span
-                                                            class="badge bg-secondary"
-                                                        >
+                                                    <td class="stock-status-besar-{{ $idTemplate }}">
+                                                        <span class="badge bg-secondary">
                                                             Memuat...
                                                         </span>
                                                     </td>
@@ -417,7 +430,7 @@
                     </div>
                 </div>
             @endif
-            @if (! empty($bahanKecil))
+            @if (!empty($bahanKecil))
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="card">
@@ -444,43 +457,31 @@
                                             @foreach ($bahanKecil as $idTemplate => $bahan)
                                                 <tr>
                                                     <td>
-                                                        {{ $bahan["nama_bahan"] }}
+                                                        {{ $bahan['nama_bahan'] }}
                                                     </td>
                                                     <td>
                                                         <span class="total-kebutuhan-kecil-display-{{ $idTemplate }}">
-                                                            {{ formatIndonesianNumber($bahan["total_kebutuhan"]) }}
-                                                            {{ $bahan["satuan"] }}
+                                                            {{ formatIndonesianNumber($bahan['total_kebutuhan']) }}
+                                                            {{ $bahan['satuan'] }}
                                                         </span>
                                                     </td>
-                                                    <td
-                                                        class="stock-available-kecil-{{ $idTemplate }}"
-                                                    >
+                                                    <td class="stock-available-kecil-{{ $idTemplate }}">
                                                         <span class="text-muted">
                                                             Memuat...
                                                         </span>
                                                     </td>
-                                                    <td
-                                                        class="stock-estimate-kecil-{{ $idTemplate }}"
-                                                    >
+                                                    <td class="stock-estimate-kecil-{{ $idTemplate }}">
                                                         <span class="text-muted">
                                                             Memuat...
                                                         </span>
                                                     </td>
-                                                    <td
-                                                        class="stock-comparison-kecil-{{ $idTemplate }}"
-                                                    >
-                                                        <span
-                                                            class="text-muted"
-                                                        >
+                                                    <td class="stock-comparison-kecil-{{ $idTemplate }}">
+                                                        <span class="text-muted">
                                                             Memuat...
                                                         </span>
                                                     </td>
-                                                    <td
-                                                        class="stock-status-kecil-{{ $idTemplate }}"
-                                                    >
-                                                        <span
-                                                            class="badge bg-secondary"
-                                                        >
+                                                    <td class="stock-status-kecil-{{ $idTemplate }}">
+                                                        <span class="badge bg-secondary">
                                                             Memuat...
                                                         </span>
                                                     </td>
@@ -497,18 +498,12 @@
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
-                        <div
-                            class="card-header d-flex justify-content-between align-items-center text-white"
-                        >
+                        <div class="card-header d-flex justify-content-between align-items-center text-white">
                             <h6 class="mb-0">
                                 <i class="bx bx-package me-2"></i>
                                 Total Kebutuhan Bahan
                             </h6>
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-light"
-                                id="checkStockBtn"
-                            >
+                            <button type="button" class="btn btn-sm btn-outline-light" id="checkStockBtn">
                                 <i class="bx bx-refresh me-1"></i>
                                 Periksa Stock
                             </button>
@@ -531,133 +526,85 @@
                                         @foreach ($bahanKebutuhan as $idTemplate => $bahan)
                                             <tr>
                                                 <td>
-                                                    <div
-                                                        class="d-flex align-items-center"
-                                                    >
-                                                        <div
-                                                            class="avatar avatar-sm me-3"
-                                                        >
-                                                            <span
-                                                                class="avatar-initial rounded bg-label-secondary"
-                                                            >
-                                                                <i
-                                                                    class="bx bx-package"
-                                                                ></i>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar avatar-sm me-3">
+                                                            <span class="avatar-initial rounded bg-label-secondary">
+                                                                <i class="bx bx-package"></i>
                                                             </span>
                                                         </div>
-                                                        <span
-                                                            class="fw-semibold"
-                                                        >
-                                                            {{ $bahan["nama_bahan"] }}
+                                                        <span class="fw-semibold">
+                                                            {{ $bahan['nama_bahan'] }}
                                                         </span>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <span
-                                                        class="fw-semibold text-primary total-kebutuhan-total-display-{{ $idTemplate }}"
-                                                    >
-                                                        {{ formatIndonesianNumber($bahan["total_kebutuhan"]) }}
-                                                        {{ $bahan["satuan"] }}
+                                                        class="fw-semibold text-primary total-kebutuhan-total-display-{{ $idTemplate }}">
+                                                        {{ formatIndonesianNumber($bahan['total_kebutuhan']) }}
+                                                        {{ $bahan['satuan'] }}
                                                     </span>
                                                 </td>
-                                                <td
-                                                    class="stock-available-total-{{ $idTemplate }}"
-                                                >
+                                                <td class="stock-available-total-{{ $idTemplate }}">
                                                     <span class="text-muted">
                                                         Memuat...
                                                     </span>
                                                 </td>
-                                                <td
-                                                    class="stock-estimate-total-{{ $idTemplate }}"
-                                                >
+                                                <td class="stock-estimate-total-{{ $idTemplate }}">
                                                     <span class="text-muted">
                                                         Memuat...
                                                     </span>
                                                 </td>
-                                                <td
-                                                    class="stock-comparison-total-{{ $idTemplate }}"
-                                                >
+                                                <td class="stock-comparison-total-{{ $idTemplate }}">
                                                     <span class="text-muted">
                                                         Memuat...
                                                     </span>
                                                 </td>
-                                                <td
-                                                    class="stock-status-total-{{ $idTemplate }}"
-                                                >
-                                                    <span
-                                                        class="badge bg-secondary"
-                                                    >
+                                                <td class="stock-status-total-{{ $idTemplate }}">
+                                                    <span class="badge bg-secondary">
                                                         Memuat...
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-sm btn-outline-info"
-                                                        data-bs-toggle="collapse"
-                                                        data-bs-target="#detail-{{ $idTemplate }}"
-                                                        aria-expanded="false"
-                                                    >
-                                                        <i
-                                                            class="bx bx-info-circle"
-                                                        ></i>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-info detail-toggle-btn"
+                                                        data-target="detail-{{ $idTemplate }}">
+                                                        <i class="bx bx-info-circle"></i>
                                                     </button>
                                                 </td>
                                             </tr>
-                                            <tr
-                                                class="collapse"
-                                                id="detail-{{ $idTemplate }}"
-                                            >
-                                                <td
-                                                    colspan="7"
-                                                    class="bg-light"
-                                                >
+                                            <tr class="detail-row" id="detail-{{ $idTemplate }}"
+                                                style="display: none;">
+                                                <td colspan="7" class="bg-light">
                                                     <div class="p-3">
                                                         <h6 class="mb-2">
                                                             Detail Penggunaan:
                                                         </h6>
                                                         <div class="row">
-                                                            @foreach ($bahan["detail_penggunaan"] as $penggunaan)
-                                                                <div
-                                                                    class="col-md-6 mb-2"
-                                                                >
-                                                                    <div
-                                                                        class="border rounded p-2"
-                                                                    >
-                                                                        <div
-                                                                            class="d-flex justify-content-between"
-                                                                        >
+                                                            @foreach ($bahan['detail_penggunaan'] as $penggunaan)
+                                                                <div class="col-md-6 mb-2">
+                                                                    <div class="border rounded p-2">
+                                                                        <div class="d-flex justify-content-between">
                                                                             <div>
-                                                                                <small
-                                                                                    class="fw-semibold"
-                                                                                >
-                                                                                    {{ $penggunaan["menu"] }}
+                                                                                <small class="fw-semibold">
+                                                                                    {{ $penggunaan['menu'] }}
                                                                                 </small>
                                                                                 <br />
-                                                                                <small
-                                                                                    class="text-muted"
-                                                                                >
-                                                                                    {{ ucfirst($penggunaan["tipe_porsi"]) }}
+                                                                                <small class="text-muted">
+                                                                                    {{ ucfirst($penggunaan['tipe_porsi']) }}
                                                                                     -
-                                                                                    {{ $penggunaan["jumlah_porsi"] }}
+                                                                                    {{ $penggunaan['jumlah_porsi'] }}
                                                                                     porsi
                                                                                 </small>
                                                                             </div>
-                                                                            <div
-                                                                                class="text-end"
-                                                                            >
-                                                                                <small
-                                                                                    class="fw-semibold text-primary"
-                                                                                >
-                                                                                    {{ formatIndonesianNumber($penggunaan["total_kebutuhan"]) }}
-                                                                                    {{ $bahan["satuan"] }}
+                                                                            <div class="text-end">
+                                                                                <small class="fw-semibold text-primary">
+                                                                                    {{ formatIndonesianNumber($penggunaan['total_kebutuhan']) }}
+                                                                                    {{ $bahan['satuan'] }}
                                                                                 </small>
                                                                                 <br />
-                                                                                <small
-                                                                                    class="text-muted"
-                                                                                >
+                                                                                <small class="text-muted">
                                                                                     @
-                                                                                    {{ formatIndonesianNumber($penggunaan["kebutuhan_per_porsi"]) }}/porsi
+                                                                                    {{ formatIndonesianNumber($penggunaan['kebutuhan_per_porsi']) }}/porsi
                                                                                 </small>
                                                                             </div>
                                                                         </div>
@@ -723,12 +670,7 @@
                     Walaupun Laporan Stok Sudah Terbuat
                 </li>
             </ul>
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         @if ($transaksi->laporanKekuranganStock->count() > 0)
             <div class="row mb-4">
@@ -776,16 +718,12 @@
                                                     {{ $laporan->satuan }}
                                                 </td>
                                                 <td>
-                                                    @if ($laporan->status === "pending")
-                                                        <span
-                                                            class="badge bg-warning"
-                                                        >
+                                                    @if ($laporan->status === 'pending')
+                                                        <span class="badge bg-warning">
                                                             Menunggu
                                                         </span>
-                                                    @elseif ($laporan->status === "resolved")
-                                                        <span
-                                                            class="badge bg-success"
-                                                        >
+                                                    @elseif ($laporan->status === 'resolved')
+                                                        <span class="badge bg-success">
                                                             Diselesaikan
                                                         </span>
                                                     @endif
@@ -814,12 +752,7 @@
                             <label for="keterangan_pengajuan" class="form-label">
                                 Keterangan <span class="text-muted">(Opsional)</span>
                             </label>
-                            <textarea
-                                class="form-control"
-                                id="keterangan_pengajuan"
-                                rows="3"
-                                placeholder="Tambahkan catatan khusus..."
-                            ></textarea>
+                            <textarea class="form-control" id="keterangan_pengajuan" rows="3" placeholder="Tambahkan catatan khusus..."></textarea>
                         </div>
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <a href="{{ route('ahli-gizi.transaksi.edit-porsi-besar', $transaksi) }}"
@@ -830,7 +763,8 @@
                                 <form action="{{ route('ahli-gizi.transaksi.submit-approval', $transaksi) }}"
                                     method="POST" id="submitForm">
                                     @csrf
-                                    <input type="hidden" name="keterangan_pengajuan" id="keterangan_pengajuan_approval" value="">
+                                    <input type="hidden" name="keterangan_pengajuan" id="keterangan_pengajuan_approval"
+                                        value="">
                                     <button type="submit" class="btn btn-success d-none" id="submitApprovalBtn">
                                         <i class="bx bx-check me-1"></i> Ajukan Persetujuan
                                     </button>
@@ -838,7 +772,8 @@
                                 <form action="{{ route('ahli-gizi.transaksi.create-transaction-now', $transaksi) }}"
                                     method="POST" id="createTransactionNowForm">
                                     @csrf
-                                    <input type="hidden" name="keterangan_pengajuan" id="keterangan_pengajuan_hidden" value="">
+                                    <input type="hidden" name="keterangan_pengajuan" id="keterangan_pengajuan_hidden"
+                                        value="">
                                     <button type="submit" class="btn btn-primary" id="createTransactionNowBtn">
                                         <i class="bx bx-check-circle me-1"></i> Buat Transaksi Sekarang
                                     </button>
@@ -854,6 +789,24 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            document.querySelectorAll('.detail-toggle-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const targetId = this.getAttribute('data-target');
+                    const row = document.getElementById(targetId);
+                    if (row) {
+                        if (row.style.display === 'none' || row.style.display === '') {
+                            row.style.display = 'table-row';
+                            this.classList.add('active');
+                        } else {
+                            row.style.display = 'none';
+                            this.classList.remove('active');
+                        }
+                    }
+                });
+            });
 
             checkStock();
 
@@ -878,7 +831,9 @@
 
                 const stockAlert = document.getElementById('stockAlert');
                 if (stockAlert && stockAlert.style.display !== 'none') {
-                    if (!confirm('Stok tidak mencukupi. Laporan kekurangan akan dikirim ke Kepala Dapur. Transaksi tetap akan dibuat. Lanjutkan?')) {
+                    if (!confirm(
+                            'Stok tidak mencukupi. Laporan kekurangan akan dikirim ke Kepala Dapur. Transaksi tetap akan dibuat. Lanjutkan?'
+                            )) {
                         e.preventDefault();
                     }
                 }
@@ -892,94 +847,96 @@
                 checkBtn.disabled = true;
                 checkBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Memeriksa...';
 
-                // Fetch stock data
-                fetch('{{ route("ahli-gizi.transaksi.check-stock-api", $transaksi) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('API Response Full:', data);
-                    console.log('Debug id_dapur:', data.debug_id_dapur);
-                    console.log('Stock Data Details:', Object.keys(data.stock_data).map(id => ({
-                        id_template: id,
-                        nama_bahan: data.stock_data[id].nama_bahan,
-                        stock_tersedia: data.stock_data[id].stock_tersedia,
-                        satuan: data.stock_data[id].satuan_stok,
-                        debug: data.stock_data[id].debug
-                    })));
+                fetch('{{ route('ahli-gizi.transaksi.check-stock-api', $transaksi) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('API Response Full:', data);
+                        console.log('Debug id_dapur:', data.debug_id_dapur);
+                        console.log('Stock Data Details:', Object.keys(data.stock_data).map(id => ({
+                            id_template: id,
+                            nama_bahan: data.stock_data[id].nama_bahan,
+                            stock_tersedia: data.stock_data[id].stock_tersedia,
+                            satuan: data.stock_data[id].satuan_stok,
+                            debug: data.stock_data[id].debug
+                        })));
 
-                    if (data.success) {
-                        updateStockDisplay(data);
+                        if (data.success) {
+                            updateStockDisplay(data);
 
-                        // Atur visibilitas tombol berdasarkan kondisi stok
-                        if (!data.can_produce && data.shortages.length > 0) {
-                            showStockAlert(data.shortages);
-                            // Tampilkan Buat Transaksi Sekarang (dengan konfirmasi kekurangan)
-                            // Sembunyikan Ajukan Persetujuan
-                            createTransactionNowBtn.classList.remove('d-none');
-                            submitApprovalBtn.classList.add('d-none');
+                            if (!data.can_produce && data.shortages.length > 0) {
+                                showStockAlert(data.shortages);
+                                createTransactionNowBtn.classList.remove('d-none');
+                                submitApprovalBtn.classList.add('d-none');
+                            } else {
+                                hideStockAlert();
+                                createTransactionNowBtn.classList.remove('d-none');
+                                submitApprovalBtn.classList.add('d-none');
+                            }
                         } else {
-                            hideStockAlert();
-                            // Tampilkan tombol Buat Transaksi Sekarang, sembunyikan Ajukan Persetujuan
+                            console.error('Error:', data.message);
+                            showErrorMessage('Gagal memeriksa stock: ' + (data.message || 'Unknown error'));
                             createTransactionNowBtn.classList.remove('d-none');
                             submitApprovalBtn.classList.add('d-none');
                         }
-                    } else {
-                        console.error('Error:', data.message);
-                        showErrorMessage('Gagal memeriksa stock: ' + (data.message || 'Unknown error'));
-                        // Default: Tampilkan Buat Transaksi Sekarang
+                    })
+                    .catch(error => {
+                        console.error('Error checking stock:', error);
+                        showErrorMessage('Terjadi kesalahan saat memeriksa stock');
                         createTransactionNowBtn.classList.remove('d-none');
                         submitApprovalBtn.classList.add('d-none');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking stock:', error);
-                    showErrorMessage('Terjadi kesalahan saat memeriksa stock');
-                    // Default: Tampilkan Buat Transaksi Sekarang jika error
-                    createTransactionNowBtn.classList.remove('d-none');
-                    submitApprovalBtn.classList.add('d-none');
-                })
-                .finally(() => {
-                    checkBtn.disabled = false;
-                    checkBtn.innerHTML = '<i class="bx bx-refresh me-1"></i> Periksa Stock';
-                });
+                    })
+                    .finally(() => {
+                        checkBtn.disabled = false;
+                        checkBtn.innerHTML = '<i class="bx bx-refresh me-1"></i> Periksa Stock';
+                    });
             }
 
             function updateStockDisplay(data) {
-                @if(!empty($bahanKebutuhan))
-                    @foreach($bahanKebutuhan as $idTemplate => $bahan)
-                        updateSingleStockDisplay('{{ $idTemplate }}', data, {{ $bahan["total_kebutuhan"] }});
-                        @if(isset($bahanBesar[$idTemplate]))
-                            updateSingleStockDisplayForType('{{ $idTemplate }}', 'besar-', data, {{ $bahanBesar[$idTemplate]["total_kebutuhan"] }});
+                @if (!empty($bahanKebutuhan))
+                    @foreach ($bahanKebutuhan as $idTemplate => $bahan)
+                        updateSingleStockDisplay('{{ $idTemplate }}', data, {{ $bahan['total_kebutuhan'] }});
+                        @if (isset($bahanBesar[$idTemplate]))
+                            updateSingleStockDisplayForType('{{ $idTemplate }}', 'besar-', data,
+                                {{ $bahanBesar[$idTemplate]['total_kebutuhan'] }});
                         @endif
-                        @if(isset($bahanKecil[$idTemplate]))
-                            updateSingleStockDisplayForType('{{ $idTemplate }}', 'kecil-', data, {{ $bahanKecil[$idTemplate]["total_kebutuhan"] }});
+                        @if (isset($bahanKecil[$idTemplate]))
+                            updateSingleStockDisplayForType('{{ $idTemplate }}', 'kecil-', data,
+                                {{ $bahanKecil[$idTemplate]['total_kebutuhan'] }});
                         @endif
                     @endforeach
                 @endif
             }
 
             function updateSingleStockDisplay(templateId, data, kebutuhan) {
-                const stockInfo = data.stock_data[templateId] || { stock_tersedia: 0, sufficient: false, debug: 'unknown', satuan_stok: '', konversi_nilai: null, konversi_satuan: null };
-                
+                const stockInfo = data.stock_data[templateId] || {
+                    stock_tersedia: 0,
+                    sufficient: false,
+                    debug: 'unknown',
+                    satuan_stok: '',
+                    konversi_nilai: null,
+                    konversi_satuan: null
+                };
+
                 let stockTersediaReal = parseFloat(stockInfo.stock_tersedia) || 0.0;
                 let kebutuhanReal = parseFloat(kebutuhan) || 0;
                 let estimasiStokReal = stockTersediaReal - kebutuhanReal;
-                
+
                 let displayStock = stockTersediaReal;
                 let displayKebutuhan = kebutuhanReal;
                 let displayEstimasi = estimasiStokReal;
                 let displaySatuan = stockInfo.satuan_stok;
-                
+
                 const konversiInfo = parseFloat(stockInfo.konversi_nilai);
                 if (!isNaN(konversiInfo) && konversiInfo > 0) {
                     displayStock = stockTersediaReal / konversiInfo;
@@ -1010,7 +967,8 @@
 
                 const estimateEl = document.querySelector('.stock-estimate-total-' + templateId);
                 if (estimateEl) {
-                    const estimateClass = displayEstimasi < 0 ? 'text-danger' : (displayEstimasi == 0 ? 'text-warning' : 'text-success');
+                    const estimateClass = displayEstimasi < 0 ? 'text-danger' : (displayEstimasi == 0 ?
+                        'text-warning' : 'text-success');
                     estimateEl.innerHTML = `
                         <span class="${estimateClass}">
                             ${parseFloat(displayEstimasi.toFixed(2))} ${displaySatuan}
@@ -1033,17 +991,24 @@
             }
 
             function updateSingleStockDisplayForType(templateId, typePrefix, data, kebutuhan) {
-                const stockInfo = data.stock_data[templateId] || { stock_tersedia: 0, sufficient: false, debug: 'unknown', satuan_stok: '', konversi_nilai: null, konversi_satuan: null };
-                
+                const stockInfo = data.stock_data[templateId] || {
+                    stock_tersedia: 0,
+                    sufficient: false,
+                    debug: 'unknown',
+                    satuan_stok: '',
+                    konversi_nilai: null,
+                    konversi_satuan: null
+                };
+
                 let stockTersediaReal = parseFloat(stockInfo.stock_tersedia) || 0.0;
                 let kebutuhanReal = parseFloat(kebutuhan) || 0;
                 let estimasiStokReal = stockTersediaReal - kebutuhanReal;
-                
+
                 let displayStock = stockTersediaReal;
                 let displayKebutuhan = kebutuhanReal;
                 let displayEstimasi = estimasiStokReal;
                 let displaySatuan = stockInfo.satuan_stok;
-                
+
                 const konversiInfo = parseFloat(stockInfo.konversi_nilai);
                 if (!isNaN(konversiInfo) && konversiInfo > 0) {
                     displayStock = stockTersediaReal / konversiInfo;
@@ -1052,7 +1017,8 @@
                     displaySatuan = stockInfo.konversi_satuan || displaySatuan;
                 }
 
-                const kebutuhanDisplayEl = document.querySelector('.total-kebutuhan-' + typePrefix + 'display-' + templateId);
+                const kebutuhanDisplayEl = document.querySelector('.total-kebutuhan-' + typePrefix + 'display-' +
+                    templateId);
                 if (kebutuhanDisplayEl) {
                     kebutuhanDisplayEl.innerHTML = `${parseFloat(displayKebutuhan.toFixed(2))} ${displaySatuan}`;
                 }
@@ -1074,7 +1040,8 @@
 
                 const estimateEl = document.querySelector('.stock-estimate-' + typePrefix + templateId);
                 if (estimateEl) {
-                    const estimateClass = displayEstimasi < 0 ? 'text-danger' : (displayEstimasi == 0 ? 'text-warning' : 'text-success');
+                    const estimateClass = displayEstimasi < 0 ? 'text-danger' : (displayEstimasi == 0 ?
+                        'text-warning' : 'text-success');
                     estimateEl.innerHTML = `
                         <span class="${estimateClass}">
                             ${parseFloat(displayEstimasi.toFixed(2))} ${displaySatuan}

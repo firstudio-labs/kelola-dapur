@@ -574,14 +574,15 @@
                             <div class="mb-3">
                                 <label class="form-label">Nilai Konversi</label>
                                 <input
-                                    type="number"
-                                    step="0.001"
-                                    min="0.001"
-                                    name="konversi_nilai"
+                                    type="text"
+                                    id="konversiNilaiDisplay"
                                     class="form-control"
-                                    placeholder="Contoh: 10"
-                                    value="{{ $stockItem->konversi_nilai ? (float)$stockItem->konversi_nilai : '' }}"
+                                    placeholder="Contoh: 1.000,5"
+                                    value="{{ $stockItem->konversi_nilai ? formatIndonesianNumber((float)$stockItem->konversi_nilai) : '' }}"
+                                    inputmode="decimal"
+                                    autocomplete="off"
                                 >
+                                <input type="hidden" name="konversi_nilai" id="konversiNilaiRaw">
                                 <div class="form-text">Berapa {{ $stockItem->satuan }} per 1 satuan baru?</div>
                             </div>
                             <div class="mb-3">
@@ -639,13 +640,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize Bootstrap tooltips
             const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
             const tooltipList = [...tooltipTriggerList].map(
                 tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl)
             );
 
-            // Auto-hide alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert-dismissible');
             alerts.forEach(alert => {
                 setTimeout(() => {
@@ -653,13 +652,83 @@
                     bsAlert.close();
                 }, 5000);
             });
-            
-            // Cleanup any stuck modal backdrops on page load
+
             const backdrops = document.querySelectorAll('.modal-backdrop');
             backdrops.forEach(backdrop => backdrop.remove());
             document.body.classList.remove('modal-open');
             document.body.style.overflow = '';
             document.body.style.paddingRight = '';
+
+            // Indonesian number formatting for konversi_nilai
+            const displayInput = document.getElementById('konversiNilaiDisplay');
+            const rawInput    = document.getElementById('konversiNilaiRaw');
+
+            function parseIndonesian(val) {
+                // Remove thousand separators (.) then replace decimal comma with dot
+                return val.replace(/\./g, '').replace(',', '.');
+            }
+
+            function formatIndonesian(val) {
+                if (val === '' || val === null) return '';
+                const parts = String(val).split('.');
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                return parts.length > 1 ? parts[0] + ',' + parts[1] : parts[0];
+            }
+
+            function syncRaw() {
+                const raw = parseIndonesian(displayInput.value);
+                rawInput.value = raw !== '' && !isNaN(parseFloat(raw)) ? raw : '';
+            }
+
+            displayInput.addEventListener('input', function () {
+                const raw        = parseIndonesian(this.value);
+                const cursorPos  = this.selectionStart;
+                const oldLen     = this.value.length;
+
+                // Allow only digits, one comma, leading minus
+                let cleaned = this.value.replace(/[^0-9,]/g, '');
+                const commaIdx = cleaned.indexOf(',');
+                if (commaIdx !== -1) {
+                    cleaned = cleaned.slice(0, commaIdx + 1) + cleaned.slice(commaIdx + 1).replace(/,/g, '');
+                }
+
+                const intPart     = commaIdx !== -1 ? cleaned.slice(0, commaIdx) : cleaned;
+                const decPart     = commaIdx !== -1 ? cleaned.slice(commaIdx)    : '';
+                const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                this.value = formattedInt + decPart;
+
+                const newLen  = this.value.length;
+                const newCursor = cursorPos + (newLen - oldLen);
+                this.setSelectionRange(newCursor, newCursor);
+
+                syncRaw();
+            });
+
+            displayInput.addEventListener('blur', function () {
+                const raw = parseIndonesian(this.value);
+                const num = parseFloat(raw);
+                if (!isNaN(num)) {
+                    this.value = formatIndonesian(num % 1 === 0 ? num.toFixed(0) : num.toString());
+                }
+                syncRaw();
+            });
+
+            // Sync raw on modal open (in case value already filled)
+            const konversiModal = document.getElementById('konversiModal');
+            if (konversiModal) {
+                konversiModal.addEventListener('show.bs.modal', function () {
+                    syncRaw();
+                });
+            }
+
+            // Convert display value to raw before form submit
+            const konversiForm = konversiModal ? konversiModal.querySelector('form') : null;
+            if (konversiForm) {
+                konversiForm.addEventListener('submit', function () {
+                    syncRaw();
+                    displayInput.removeAttribute('name');
+                });
+            }
         });
 
         // Function to show approval stock detail modal

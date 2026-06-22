@@ -190,7 +190,6 @@ class ApprovalTransaksiController extends Controller
             $summarySisa['sent_besar'] = $distOrder->details->where('status', 'sudah_dikirim')->sum('porsi_besar');
             $summarySisa['sent_kecil'] = $distOrder->details->where('status', 'sudah_dikirim')->sum('porsi_kecil');
             
-            // Sisa Penerimaan hanya dihitung untuk detail yang sudah dikonfirmasi (diterima/ditolak)
             $confirmedDetails = $distOrder->details->where('status_penerimaan', '!=', \App\Models\OrderDistribusiDetail::STATUS_PENERIMAAN_MENUNGGU);
             
             $summarySisa['received_besar'] = $confirmedDetails->sum('porsi_besar_diterima');
@@ -208,6 +207,7 @@ class ApprovalTransaksiController extends Controller
 
         $headDistributor = null;
         $headProduksi = null;
+        $handlers = collect();
         if ($approval->transaksiDapur->orderProduksi) {
             $headProduksi = \App\Models\Produksi::where('id_dapur', $dapur->id_dapur)
                 ->where('jabatan', 'Penanggung jawab')
@@ -218,7 +218,13 @@ class ApprovalTransaksiController extends Controller
                     ->where('jabatan', 'Penanggung jawab')
                     ->first() ?? \App\Models\Distributor::where('id_dapur', $dapur->id_dapur)->first();
             }
+
+            $handlers = \App\Models\ProduksiHandlerBahan::where('id_order', $approval->transaksiDapur->orderProduksi->id_order)
+                ->with('templateItem')
+                ->get();
         }
+
+        $stockItems = \App\Models\StockItem::where('id_dapur', $dapur->id_dapur)->get()->keyBy('id_template_item');
 
         return view('kepaladapur.approval-transaksi.show', compact(
             'approval',
@@ -227,7 +233,9 @@ class ApprovalTransaksiController extends Controller
             'menuDetails',
             'summarySisa',
             'headDistributor',
-            'headProduksi'
+            'headProduksi',
+            'handlers',
+            'stockItems'
         ));
     }
 

@@ -148,9 +148,14 @@
             </div>
         </div>
 
+        @php
+            $normalLaporan = $laporan->filter(fn($item) => is_null($item->id_handler));
+            $handlerLaporan = $laporan->filter(fn($item) => !is_null($item->id_handler));
+        @endphp
+
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Detail Kekurangan Stok</h5>
+                <h5 class="mb-0"><i class="bx bx-package me-1"></i>Detail Kekurangan Stok</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -167,7 +172,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($laporan as $item)
+                            @forelse ($normalLaporan as $item)
                                 <tr
                                     class="{{ $item->status === "pending" ? "table-warning-subtle" : "" }}"
                                 >
@@ -190,7 +195,7 @@
                                         @endif
                                         @if ($item->isPurchasedByAkuntan())
                                             <small class="text-muted d-block mt-1">
-                                                <i class="bx bx-wallet-alt text-primary me-1"></i>Akuntan
+                                                <i class="bx bx-wallet-alt me-1"></i>Akuntan
                                             </small>
                                         @endif
                                     </td>
@@ -213,23 +218,23 @@
                 </div>
                 
                 @php
-                    $accountingTransactions = collect();
-                    foreach ($laporan as $item) {
+                    $accountingTransactionsNormal = collect();
+                    foreach ($normalLaporan as $item) {
                         foreach ($item->accountingTransactionShortages as $sh) {
                             if ($sh->transaction) {
-                                $accountingTransactions->put($sh->transaction->id, $sh->transaction);
+                                $accountingTransactionsNormal->put($sh->transaction->id, $sh->transaction);
                             }
                         }
                     }
                 @endphp
 
-                @if ($accountingTransactions->isNotEmpty())
+                @if ($accountingTransactionsNormal->isNotEmpty())
                     <hr class="my-4">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-primary"><i class="bx bx-wallet-alt me-1"></i> Realisasi Transaksi Oleh Akuntan</label>
+                        <label class="form-label fw-semibold"><i class="bx bx-wallet-alt me-1"></i> Realisasi Transaksi Oleh Akuntan</label>
                         <p class="text-muted small mb-0">Rincian data transaksi pembelian yang dicatat oleh Akuntan untuk menyelesaikan kekurangan stok ini:</p>
                     </div>
-                    @foreach ($accountingTransactions as $tx)
+                    @foreach ($accountingTransactionsNormal as $tx)
                         <div class="p-3 border rounded mb-3 bg-light">
                             <div class="row g-3 mb-3">
                                 <div class="col-6 col-md-3">
@@ -283,6 +288,135 @@
                 @endif
             </div>
         </div>
+
+        @if($handlerLaporan->isNotEmpty())
+        <div class="card mt-4">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bx bx-transfer me-1"></i>Detail Handler Kekurangan Stok</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nama Bahan</th>
+                                <th>Jumlah Dibutuhkan</th>
+                                <th>Jumlah Tersedia</th>
+                                <th>Jumlah Kurang</th>
+                                <th>Satuan</th>
+                                <th>Status</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($handlerLaporan as $item)
+                                <tr
+                                    class="{{ $item->status === "pending" ? "table-warning-subtle" : "" }}"
+                                >
+                                    <td>
+                                        {{ $item->templateItem->nama_bahan }} - Handler
+                                    </td>
+                                    <td>@formatNumber($item->jumlah_dibutuhkan)</td>
+                                    <td>@formatNumber($item->jumlah_tersedia)</td>
+                                    <td>@formatNumber($item->jumlah_kurang)</td>
+                                    <td>{{ $item->satuan }}</td>
+                                    <td>
+                                        @if ($item->status === "pending")
+                                            <span class="badge bg-warning">
+                                                Pending
+                                            </span>
+                                        @else
+                                            <span class="badge bg-success">
+                                                Resolved
+                                            </span>
+                                        @endif
+                                        @if ($item->isPurchasedByAkuntan())
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="bx bx-wallet-alt me-1"></i>Akuntan
+                                            </small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        {{ $item->keterangan_resolve ?? "-" }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                
+                @php
+                    $accountingTransactionsHandler = collect();
+                    foreach ($handlerLaporan as $item) {
+                        foreach ($item->accountingTransactionShortages as $sh) {
+                            if ($sh->transaction) {
+                                $accountingTransactionsHandler->put($sh->transaction->id, $sh->transaction);
+                            }
+                        }
+                    }
+                @endphp
+
+                @if ($accountingTransactionsHandler->isNotEmpty())
+                    <hr class="my-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="bx bx-wallet-alt me-1"></i> Realisasi Transaksi Oleh Akuntan (Handler)</label>
+                        <p class="text-muted small mb-0">Rincian data transaksi pembelian yang dicatat oleh Akuntan untuk menyelesaikan kekurangan stok ini:</p>
+                    </div>
+                    @foreach ($accountingTransactionsHandler as $tx)
+                        <div class="p-3 border rounded mb-3 bg-light">
+                            <div class="row g-3 mb-3">
+                                <div class="col-6 col-md-3">
+                                    <span class="text-muted small d-block">No. Bukti / Voucher</span>
+                                    <span class="fw-bold text-dark">{{ $tx->no_bukti ?? 'Tanpa No. Bukti' }}</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="text-muted small d-block">Tanggal Transaksi</span>
+                                    <span class="fw-bold text-dark">{{ $tx->date->format('d M Y') }}</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="text-muted small d-block">Metode Kas / Rekening</span>
+                                    <span class="fw-bold text-dark">{{ $tx->cashAccount->name ?? '-' }}</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="text-muted small d-block">Total Nominal Transaksi</span>
+                                    <span class="fw-bold text-danger">@rupiah($tx->credit)</span>
+                                </div>
+                                <div class="col-12">
+                                    <span class="text-muted small d-block">Uraian / Deskripsi</span>
+                                    <span class="text-dark">{{ $tx->description ?? '-' }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm align-middle bg-white mb-0" style="font-size: 0.85rem;">
+                                    <thead class="table-light text-center">
+                                        <tr>
+                                            <th style="width: 20%;">Bahan Baku</th>
+                                            <th style="width: 14%;">Kekurangan</th>
+                                            <th style="width: 22%;">Harga Satuan</th>
+                                            <th style="width: 22%;">Jumlah Dibeli</th>
+                                            <th style="width: 22%;">Nominal Pembelian</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($tx->shortages as $sh)
+                                            <tr>
+                                                <td>{{ $sh->laporanKekurangan->templateItem->nama_bahan ?? '-' }}</td>
+                                                <td class="text-center">{{ isset($sh->laporanKekurangan->jumlah_kurang) ? formatIndonesianNumber($sh->laporanKekurangan->jumlah_kurang) : '-' }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                                <td class="text-end">@rupiah($sh->harga_satuan)</td>
+                                                <td class="text-center">{{ formatIndonesianNumber($sh->qty_dibeli) }} {{ $sh->laporanKekurangan->satuan ?? '' }}</td>
+                                                <td class="text-end fw-semibold">@rupiah($sh->nominal)</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+        @endif
 
         <div
             class="modal fade"
@@ -419,6 +553,9 @@
         }
         .table-warning-subtle {
             background-color: rgba(255, 243, 205, 0.3) !important;
+        }
+        .table-info-subtle {
+            background-color: rgba(13, 202, 240, 0.08) !important;
         }
         .pulse {
             animation: pulse 2s infinite;

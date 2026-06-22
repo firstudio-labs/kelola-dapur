@@ -37,7 +37,6 @@ class CashAccount extends Model
 
     public function getCurrentBalanceAttribute(): float
     {
-        // Get the latest open period balance or the most recent one
         $activePeriod = AccountingPeriod::forDapur($this->id_dapur)->where('status', 'open')->first() 
                       ?? AccountingPeriod::forDapur($this->id_dapur)->orderByDesc('end_date')->first();
         

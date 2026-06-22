@@ -43,7 +43,18 @@ class MenuMakananController extends Controller
 
         $menuQuery = clone $baseQuery;
         $menuQuery->with(['bahanMenu.templateItem', 'createdByDapur']);
-        $menus = $menuQuery->orderBy('nama_menu', 'asc')->paginate(15);
+        $menus = $menuQuery->orderBy('nama_menu', 'asc')->paginate(8);
+
+        if ($request->ajax()) {
+            $html = '';
+            foreach ($menus as $menu) {
+                $html .= view('ahligizi.menu_makanan.partials.menu_card', compact('menu'))->render();
+            }
+            return response()->json([
+                'html' => $html,
+                'hasMore' => $menus->hasMorePages(),
+            ]);
+        }
 
         $totalMenus = $baseQuery->count();
         $activeMenus = $baseQuery->clone()->where('is_active', true)->count();
@@ -339,6 +350,7 @@ class MenuMakananController extends Controller
     {
         $search = $request->get('search');
         $kategori = $request->get('kategori');
+        $dapurId = $request->get('dapur_id');
 
         $query = MenuMakanan::active();
 
@@ -350,9 +362,14 @@ class MenuMakananController extends Controller
             $query->where('kategori', $kategori);
         }
 
-        $menus = $query->select('id_menu', 'nama_menu', 'gambar_menu', 'deskripsi', 'kategori')
-            ->orderBy('nama_menu', 'asc')
-            ->limit(20)
+        if ($dapurId && $dapurId !== 'all' && $dapurId !== '') {
+            $query->where('created_by_dapur_id', $dapurId);
+        }
+
+        $menus = $query->select('id_menu', 'nama_menu', 'gambar_menu', 'deskripsi', 'kategori', 'created_by_dapur_id', 'created_at')
+            ->with(['createdByDapur:id_dapur,nama_dapur'])
+            ->orderBy('created_at', 'desc')
+            ->limit(100)
             ->get();
 
         $formattedMenus = $menus->map(function ($menu) {
@@ -361,7 +378,9 @@ class MenuMakananController extends Controller
                 'nama_menu' => $menu->nama_menu,
                 'gambar_url' => $menu->gambar_url,
                 'deskripsi' => $menu->deskripsi,
-                'kategori' => $menu->kategori
+                'kategori' => $menu->kategori,
+                'created_by_dapur_id' => $menu->created_by_dapur_id,
+                'nama_dapur' => $menu->createdByDapur?->nama_dapur ?? '-',
             ];
         });
 

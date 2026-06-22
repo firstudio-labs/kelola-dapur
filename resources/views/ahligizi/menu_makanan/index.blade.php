@@ -1,17 +1,14 @@
-@extends("template_ahli_gizi.layout")
+@extends('template_ahli_gizi.layout')
 
-@section("content")
+@section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        
+
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <nav class="d-flex align-items-center mb-2">
-                            <a
-                                href="{{ route("ahli-gizi.dashboard") }}"
-                                class="text-muted me-2"
-                            >
+                            <a href="{{ route('ahli-gizi.dashboard') }}" class="text-muted me-2">
                                 <i class="bx bx-home-alt me-1"></i>
                                 Dashboard
                             </a>
@@ -23,10 +20,7 @@
                             Kelola semua menu makanan dalam sistem
                         </p>
                     </div>
-                    <a
-                        href="{{ route("ahli-gizi.menu-makanan.create") }}"
-                        class="btn btn-primary btn-sm"
-                    >
+                    <a href="{{ route('ahli-gizi.menu-makanan.create') }}" class="btn btn-primary btn-sm">
                         <i class="bx bx-plus me-1"></i>
                         Tambah Menu
                     </a>
@@ -34,58 +28,32 @@
             </div>
         </div>
 
-        @if (session("success"))
-            <div
-                class="alert alert-success alert-dismissible mb-4"
-                role="alert"
-            >
-                {{ session("success") }}
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"
-                ></button>
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible mb-4" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
-        @if (session("error"))
+        @if (session('error'))
             <div class="alert alert-danger alert-dismissible mb-4" role="alert">
-                {{ session("error") }}
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"
-                ></button>
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
         <div class="card mb-4">
             <div class="card-body">
-                <form
-                    method="GET"
-                    action="{{ route("ahli-gizi.menu-makanan.index") }}"
-                    class="row g-3"
-                >
+                <form method="GET" action="{{ route('ahli-gizi.menu-makanan.index') }}" class="row g-3">
                     <div class="col-md-3">
                         <label for="search-input" class="form-label">
                             Cari Menu
                         </label>
                         <div class="input-group">
-                            <input
-                                type="text"
-                                name="search"
-                                id="search-input"
-                                value="{{ request("search") }}"
-                                class="form-control"
-                                placeholder="Cari nama menu..."
-                            />
-                            <button
-                                type="button"
-                                class="btn btn-outline-secondary"
-                                onclick="document.getElementById('search-input').value='';this.form.submit();"
-                            >
+                            <input type="text" name="search" id="search-input" value="{{ request('search') }}"
+                                class="form-control" placeholder="Cari nama menu..." />
+                            <button type="button" class="btn btn-outline-secondary"
+                                onclick="document.getElementById('search-input').value='';this.form.submit();">
                                 <i class="bx bx-x"></i>
                             </button>
                         </div>
@@ -94,27 +62,14 @@
                         <label for="status-filter" class="form-label">
                             Filter Status
                         </label>
-                        <select
-                            name="status"
-                            id="status-filter"
-                            class="choices-select form-select"
-                        >
-                            <option
-                                value="all"
-                                {{ request("status") === "all" ? "selected" : "" }}
-                            >
+                        <select name="status" id="status-filter" class="choices-select form-select">
+                            <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>
                                 Semua Status
                             </option>
-                            <option
-                                value="1"
-                                {{ request("status") === "1" ? "selected" : "" }}
-                            >
+                            <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>
                                 Active
                             </option>
-                            <option
-                                value="0"
-                                {{ request("status") === "0" ? "selected" : "" }}
-                            >
+                            <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>
                                 Inactive
                             </option>
                         </select>
@@ -123,23 +78,14 @@
                         <label for="dapur-filter" class="form-label">
                             Filter Dapur
                         </label>
-                        <select
-                            name="dapur"
-                            id="dapur-filter"
-                            class="choices-select form-select"
-                        >
-                            <option
-                                value="all"
-                                {{ request("dapur") === "all" ? "selected" : "" }}
-                            >
+                        <select name="dapur" id="dapur-filter" class="choices-select form-select">
+                            <option value="all" {{ request('dapur') === 'all' ? 'selected' : '' }}>
                                 Semua Dapur
                             </option>
 
                             @foreach ($dapurs as $dapur)
-                                <option
-                                    value="{{ $dapur->id_dapur }}"
-                                    {{ request("dapur") == $dapur->id_dapur ? "selected" : "" }}
-                                >
+                                <option value="{{ $dapur->id_dapur }}"
+                                    {{ request('dapur') == $dapur->id_dapur ? 'selected' : '' }}>
                                     {{ $dapur->nama_dapur }}
                                 </option>
                             @endforeach
@@ -149,49 +95,27 @@
                         <label for="kategori-filter" class="form-label">
                             Filter Kategori
                         </label>
-                        <select
-                            name="kategori"
-                            id="kategori-filter"
-                            class="choices-select form-select"
-                        >
-                            <option
-                                value="all"
-                                {{ request("kategori") === "all" ? "selected" : "" }}
-                            >
+                        <select name="kategori" id="kategori-filter" class="choices-select form-select">
+                            <option value="all" {{ request('kategori') === 'all' ? 'selected' : '' }}>
                                 Semua Kategori
                             </option>
-                            <option
-                                value="Karbohidrat"
-                                {{ request("kategori") === "Karbohidrat" ? "selected" : "" }}
-                            >
+                            <option value="Karbohidrat" {{ request('kategori') === 'Karbohidrat' ? 'selected' : '' }}>
                                 Karbohidrat
                             </option>
-                            <option
-                                value="Lauk"
-                                {{ request("kategori") === "Lauk" ? "selected" : "" }}
-                            >
+                            <option value="Lauk" {{ request('kategori') === 'Lauk' ? 'selected' : '' }}>
                                 Lauk
                             </option>
-                            <option
-                                value="Sayur"
-                                {{ request("kategori") === "Sayur" ? "selected" : "" }}
-                            >
+                            <option value="Sayur" {{ request('kategori') === 'Sayur' ? 'selected' : '' }}>
                                 Sayur
                             </option>
-                            <option
-                                value="Tambahan"
-                                {{ request("kategori") === "Tambahan" ? "selected" : "" }}
-                            >
+                            <option value="Tambahan" {{ request('kategori') === 'Tambahan' ? 'selected' : '' }}>
                                 Tambahan
                             </option>
                         </select>
                     </div>
                     <div class="col-12 d-flex justify-content-end gap-2 mt-3">
-                        @if (request()->hasAny(["search", "status", "dapur", "kategori"]))
-                            <a
-                                href="{{ route("ahli-gizi.menu-makanan.index") }}"
-                                class="btn btn-outline-secondary"
-                            >
+                        @if (request()->hasAny(['search', 'status', 'dapur', 'kategori']))
+                            <a href="{{ route('ahli-gizi.menu-makanan.index') }}" class="btn btn-outline-secondary">
                                 Reset Filter
                             </a>
                         @endif
@@ -209,9 +133,7 @@
                 <div class="card-body py-2 px-4">
                     <div class="row justify-content-center g-3">
                         <div class="col-md-2 text-center">
-                            <div
-                                class="d-flex align-items-center justify-content-center"
-                            >
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="badge bg-label-primary me-2">
                                     <i class="bx bx-restaurant"></i>
                                 </span>
@@ -222,9 +144,7 @@
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            <div
-                                class="d-flex align-items-center justify-content-center"
-                            >
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="badge bg-label-success me-2">
                                     <i class="bx bx-check-circle"></i>
                                 </span>
@@ -235,9 +155,7 @@
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            <div
-                                class="d-flex align-items-center justify-content-center"
-                            >
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="badge bg-label-danger me-2">
                                     <i class="bx bx-x-circle"></i>
                                 </span>
@@ -248,9 +166,7 @@
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            <div
-                                class="d-flex align-items-center justify-content-center"
-                            >
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="badge bg-label-primary me-2">
                                     <i class="bx bx-cake"></i>
                                 </span>
@@ -259,52 +175,46 @@
                                         Karbohidrat
                                     </small>
                                     <h6 class="mb-0">
-                                        {{ $kategoriStats["Karbohidrat"] }}
+                                        {{ $kategoriStats['Karbohidrat'] }}
                                     </h6>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            <div
-                                class="d-flex align-items-center justify-content-center"
-                            >
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="badge bg-label-success me-2">
                                     <i class="bx bx-leaf"></i>
                                 </span>
                                 <div>
                                     <small class="text-muted">Lauk</small>
                                     <h6 class="mb-0">
-                                        {{ $kategoriStats["Lauk"] }}
+                                        {{ $kategoriStats['Lauk'] }}
                                     </h6>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            <div
-                                class="d-flex align-items-center justify-content-center"
-                            >
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="badge bg-label-info me-2">
                                     <i class="bx bx-carrot"></i>
                                 </span>
                                 <div>
                                     <small class="text-muted">Sayur</small>
                                     <h6 class="mb-0">
-                                        {{ $kategoriStats["Sayur"] }}
+                                        {{ $kategoriStats['Sayur'] }}
                                     </h6>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            <div
-                                class="d-flex align-items-center justify-content-center"
-                            >
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="badge bg-label-warning me-2">
                                     <i class="bx bx-plus-circle"></i>
                                 </span>
                                 <div>
                                     <small class="text-muted">Tambahan</small>
                                     <h6 class="mb-0">
-                                        {{ $kategoriStats["Tambahan"] }}
+                                        {{ $kategoriStats['Tambahan'] }}
                                     </h6>
                                 </div>
                             </div>
@@ -317,161 +227,40 @@
         <div class="card mb-4">
             <div class="card-body">
                 @if ($menus->count() > 0)
-                    <div
-                        class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4"
-                        id="menu-cards-container"
-                    >
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="menu-cards-container">
                         @foreach ($menus as $menu)
-                            <div
-                                class="col menu-card-item"
-                                data-search="{{ strtolower($menu->nama_menu . " " . $menu->deskripsi . " " . $menu->kategori) }}"
-                                data-status="{{ $menu->is_active ? "1" : "0" }}"
-                                data-dapur="{{ $menu->created_by_dapur_id }}"
-                                data-kategori="{{ $menu->kategori }}"
-                            >
-                                <div
-                                    class="card menu-card h-100 d-flex flex-column"
-                                >
-                                    <div class="card-img-top-wrapper">
-                                        <img
-                                            src="{{ $menu->gambar_url }}"
-                                            alt="{{ $menu->nama_menu }}"
-                                            class="card-img-top menu-image"
-                                        />
-                                    </div>
-                                    <div
-                                        class="card-body d-flex flex-column p-3"
-                                    >
-                                        
-                                        <div
-                                            class="d-flex justify-content-end mb-2"
-                                        >
-                                            <span
-                                                class="badge bg-label-{{ $menu->is_active ? "success" : "danger" }} me-1"
-                                            >
-                                                {{ $menu->is_active ? "Active" : "Inactive" }}
-                                            </span>
-                                        </div>
-
-                                        <h6
-                                            class="card-title mb-2 text-truncate-2-lines"
-                                        >
-                                            {{ $menu->nama_menu }}
-                                        </h6>
-
-                                        <div class="mb-2">
-                                            <span
-                                                class="badge {{ $menu->getKategoriBadgeClass() }} me-1"
-                                            >
-                                                {{ $menu->kategori }}
-                                            </span>
-                                        </div>
-
-                                        <div class="mb-2">
-                                            <small class="text-muted">
-                                                <i
-                                                    class="bx bx-package me-1"
-                                                ></i>
-                                                {{ $menu->bahanMenu->count() }}
-                                                bahan
-                                            </small>
-                                        </div>
-
-                                        @if ($menu->created_at)
-                                            <div class="mb-1">
-                                                <small class="text-muted">
-                                                    <i class="bx bx-calendar me-1"></i>
-                                                    {{ $menu->created_at->format("d M Y") }}
-                                                </small>
-                                            </div>
-                                        @endif
-
-                                        <div class="mb-3">
-                                            <small class="text-muted">
-                                                <i class="bx bx-home-alt me-1"></i>
-                                                Dapur: {{ $menu->createdByDapur->nama_dapur ?? 'Semua Dapur' }}
-                                            </small>
-                                        </div>
-
-                                        <div class="mt-auto">
-                                            <div class="d-flex flex-wrap gap-1">
-                                                <a
-                                                    href="{{ route("ahli-gizi.menu-makanan.show", $menu) }}"
-                                                    class="btn btn-primary btn-sm flex-grow-1"
-                                                >
-                                                    <i
-                                                        class="bx bx-show me-1"
-                                                    ></i>
-                                                    Lihat Detail
-                                                </a>
-                                                @if ($menu->created_by_dapur_id == auth()->user()->userRole->id_dapur)
-                                                    <a
-                                                        href="{{ route("ahli-gizi.menu-makanan.edit", $menu) }}"
-                                                        class="btn btn-info btn-sm flex-grow-1"
-                                                    >
-                                                        <i
-                                                            class="bx bx-edit me-1"
-                                                        ></i>
-                                                        Edit
-                                                    </a>
-                                                    <form
-                                                        action="{{ route("ahli-gizi.menu-makanan.toggle-status", $menu) }}"
-                                                        method="POST"
-                                                        class="d-inline flex-grow-1"
-                                                    >
-                                                        @csrf
-                                                        @method("PATCH")
-                                                        <button
-                                                            type="submit"
-                                                            class="btn btn-sm btn-{{ $menu->is_active ? "danger" : "success" }} w-100"
-                                                        >
-                                                            <i
-                                                                class="bx {{ $menu->is_active ? "bx-block" : "bx-check-circle" }} me-1"
-                                                            ></i>
-                                                            {{ $menu->is_active ? "Nonaktifkan" : "Aktifkan" }}
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @include('ahligizi.menu_makanan.partials.menu_card', ['menu' => $menu])
                         @endforeach
                     </div>
 
-                    @if ($menus->hasPages())
-                        <div class="mt-4 d-flex justify-content-center">
-                            {{ $menus->appends(request()->query())->links("vendor.pagination.bootstrap-5") }}
+                    @if ($menus->hasMorePages())
+                        <div class="mt-4 text-center" id="menu-actions">
+                            <button id="btn-load-more" class="btn btn-outline-primary px-4 me-2" data-page="2">
+                                <i class="bx bx-chevron-down me-1"></i> Load More
+                            </button>
+                            <button id="btn-close-menus" class="btn btn-outline-secondary px-4 d-none">
+                                <i class="bx bx-chevron-up me-1"></i> Close
+                            </button>
                         </div>
                     @endif
                 @else
-                    
                     <div class="text-center py-6">
-                        @if (request()->hasAny(["search", "status", "dapur", "kategori"]))
+                        @if (request()->hasAny(['search', 'status', 'dapur', 'kategori']))
                             <i class="bx bx-search bx-lg text-muted mb-3"></i>
                             <h5 class="mb-1">Tidak ada hasil</h5>
                             <p class="text-muted mb-3">
                                 Tidak ada menu yang sesuai dengan filter.
                             </p>
-                            <a
-                                href="{{ route("ahli-gizi.menu-makanan.index") }}"
-                                class="btn btn-outline-primary"
-                            >
+                            <a href="{{ route('ahli-gizi.menu-makanan.index') }}" class="btn btn-outline-primary">
                                 Reset Filter
                             </a>
                         @else
-                            <i
-                                class="bx bx-restaurant bx-lg text-muted mb-3"
-                            ></i>
+                            <i class="bx bx-restaurant bx-lg text-muted mb-3"></i>
                             <h5 class="mb-1">Belum ada menu</h5>
                             <p class="text-muted mb-3">
                                 Mulai dengan membuat menu pertama.
                             </p>
-                            <a
-                                href="{{ route("ahli-gizi.menu-makanan.create") }}"
-                                class="btn btn-primary"
-                            >
+                            <a href="{{ route('ahli-gizi.menu-makanan.create') }}" class="btn btn-primary">
                                 <i class="bx bx-plus me-1"></i>
                                 Tambah Menu Pertama
                             </a>
@@ -482,10 +271,7 @@
         </div>
     </div>
 
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" />
 
     <style>
         .choices__inner {
@@ -495,17 +281,21 @@
             padding: 0.5rem;
             font-size: 0.875rem;
         }
+
         .choices__list--dropdown {
             border: 1px solid #dee2e6;
             border-radius: 0.375rem;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
+
         .choices__list--dropdown .choices__item--selectable.is-highlighted {
             background-color: #f8f9fa;
         }
+
         .choices[data-type*='select-one'] .choices__inner {
             padding-bottom: 0;
         }
+
         .choices.is-disabled .choices__inner {
             background-color: #f8f9fa;
         }
@@ -582,14 +372,13 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const statusFilter = document.getElementById('status-filter');
             const dapurFilter = document.getElementById('dapur-filter');
             const kategoriFilter = document.getElementById('kategori-filter');
             const searchInput = document.getElementById('search-input');
             const menuCards = document.querySelectorAll('.menu-card-item');
 
-            // Initialize Choices.js
             const statusChoices = new Choices(statusFilter, {
                 searchEnabled: false,
                 itemSelectText: '',
@@ -626,8 +415,7 @@
                     const kategoriData =
                         card.getAttribute('data-kategori') || '';
 
-                    const matchesSearch =
-                        !searchText || searchData.includes(searchText);
+                    const matchesSearch = !searchText || searchData.includes(searchText);
                     const matchesStatus =
                         statusValue === 'all' || statusData === statusValue;
                     const matchesDapur =
@@ -652,7 +440,6 @@
                     }
                 });
 
-                // Show/hide no results message if needed
                 const noResultsEl =
                     document.getElementById('no-results-message');
                 if (visibleCount === 0 && !noResultsEl) {
@@ -676,19 +463,84 @@
                 }
             }
 
-            // Add event listeners
             searchInput.addEventListener('input', filterCards);
             statusFilter.addEventListener('change', filterCards);
             dapurFilter.addEventListener('change', filterCards);
             kategoriFilter.addEventListener('change', filterCards);
 
-            // Initialize Bootstrap tooltips if needed
             const tooltipTriggerList = document.querySelectorAll(
                 '[data-bs-toggle="tooltip"]',
             );
             const tooltipList = [...tooltipTriggerList].map(
                 (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl),
             );
+
+            const btnLoadMore = document.getElementById('btn-load-more');
+            const btnCloseMenus = document.getElementById('btn-close-menus');
+            const menuContainer = document.getElementById('menu-cards-container');
+            const initialItemCount = menuContainer ? menuContainer.querySelectorAll('.menu-card-item').length : 0;
+
+            if (btnLoadMore) {
+                btnLoadMore.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    const originalText = this.innerHTML;
+
+                    this.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Loading...';
+                    this.disabled = true;
+
+                    const currentParams = new URLSearchParams(window.location.search);
+                    currentParams.set('page', page);
+
+                    fetch(`?${currentParams.toString()}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            menuContainer.insertAdjacentHTML('beforeend', data.html);
+
+                            if (btnCloseMenus) {
+                                btnCloseMenus.classList.remove('d-none');
+                            }
+
+                            if (data.hasMore) {
+                                this.setAttribute('data-page', parseInt(page) + 1);
+                                this.innerHTML = originalText;
+                                this.disabled = false;
+                            } else {
+                                this.classList.add('d-none');
+                                this.innerHTML = originalText;
+                                this.disabled = false;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            this.innerHTML = originalText;
+                            this.disabled = false;
+                        });
+                });
+            }
+
+            if (btnCloseMenus) {
+                btnCloseMenus.addEventListener('click', function() {
+                    const items = Array.from(menuContainer.querySelectorAll('.menu-card-item'));
+                    if (items.length > initialItemCount) {
+                        for (let i = initialItemCount; i < items.length; i++) {
+                            items[i].remove();
+                        }
+                    }
+
+                    if (btnLoadMore) {
+                        btnLoadMore.setAttribute('data-page', '2');
+                        btnLoadMore.classList.remove('d-none');
+                    }
+
+                    this.classList.add('d-none');
+                });
+            }
         });
     </script>
 @endsection

@@ -109,7 +109,6 @@ class TransaksiController extends Controller
         $debit  = (float) ($validated['debit']  ?? 0);
         $credit = (float) ($validated['credit'] ?? 0);
 
-        // Validation rules
         if ($debit > 0 && $credit > 0) {
             throw ValidationException::withMessages([
                 'debit' => 'Debit dan kredit tidak boleh diisi bersamaan.',
@@ -154,12 +153,15 @@ class TransaksiController extends Controller
             if (is_array($shortagesData) && count($shortagesData) > 0) {
                 foreach ($shortagesData as $shortage) {
                     if (!empty($shortage['laporan_id']) && isset($shortage['qty']) && isset($shortage['nominal'])) {
-                        $transaction->shortages()->create([
-                            'laporan_kekurangan_id' => $shortage['laporan_id'],
-                            'harga_satuan'          => $shortage['harga_satuan'] ?? 0,
-                            'qty_dibeli'            => $shortage['qty'],
-                            'nominal'               => $shortage['nominal'],
-                        ]);
+                        $exists = AccountingTransactionShortage::where('laporan_kekurangan_id', $shortage['laporan_id'])->exists();
+                        if (!$exists) {
+                            $transaction->shortages()->create([
+                                'laporan_kekurangan_id' => $shortage['laporan_id'],
+                                'harga_satuan'          => $shortage['harga_satuan'] ?? 0,
+                                'qty_dibeli'            => $shortage['qty'],
+                                'nominal'               => $shortage['nominal'],
+                            ]);
+                        }
                     }
                 }
             }
@@ -316,16 +318,22 @@ class TransaksiController extends Controller
         if ($transaksiId) {
             $transaksi = TransaksiDapur::where('id_dapur', $dapurId)
                 ->with(['laporanKekuranganStock' => function ($q) {
-                    $q->doesntHave('accountingTransactionShortages')->with('templateItem');
+                    $q->with(['templateItem', 'accountingTransactionShortages.transaction.creator']);
                 }])
                 ->findOrFail($transaksiId);
 
             $shortages = $transaksi->laporanKekuranganStock->map(function ($item) {
+                $purchased = $item->accountingTransactionShortages->first();
                 return [
                     'id_laporan' => $item->id_laporan,
                     'nama_bahan' => $item->templateItem->nama_bahan,
-                    'jumlah_kurang' => $item->jumlah_kurang,
+                    'jumlah_kurang' => (float)$item->jumlah_kurang,
                     'satuan' => $item->satuan,
+                    'id_handler' => $item->id_handler,
+                    'already_purchased' => $item->accountingTransactionShortages->isNotEmpty(),
+                    'harga_satuan' => $purchased ? (float)$purchased->harga_satuan : 0,
+                    'qty_dibeli' => $purchased ? (float)$purchased->qty_dibeli : 0,
+                    'nominal' => $purchased ? (float)$purchased->nominal : 0,
                 ];
             });
 

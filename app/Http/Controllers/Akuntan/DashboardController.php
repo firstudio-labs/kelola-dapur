@@ -17,10 +17,8 @@ class DashboardController extends Controller
         $dapur = $user->userRole->dapur;
         $dapurId = $dapur->id_dapur;
 
-        // All periods for this dapur
         $periods = AccountingPeriod::forDapur($dapurId)->orderByDesc('year')->orderByDesc('start_date')->get();
 
-        // Determine active period (selected or default open)
         $selectedPeriodId = $request->get('period_id');
         $activePeriod = $selectedPeriodId
             ? $periods->firstWhere('id', $selectedPeriodId)
@@ -50,7 +48,6 @@ class DashboardController extends Controller
                 'total_transaksi' => (int) ($agg->total_transaksi ?? 0),
             ];
 
-            // Breakdown by account
             $accounts = \App\Models\CashAccount::forDapur($dapurId)->get();
             foreach ($accounts as $account) {
                 $opening = (float) AccountingBalance::where('period_id', $activePeriod->id)

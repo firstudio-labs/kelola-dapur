@@ -13,7 +13,6 @@ class OrderController extends Controller
         $user = Auth::user();
         $dapur = $user->userRole->dapur;
         
-        // Dummy data for consistency with Produksi UI
         $orders = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         $stats = [
             'belum_dibuat' => 0,
@@ -27,7 +26,6 @@ class OrderController extends Controller
 
     public function show($id)
     {
-        // Placeholder
         return redirect()->back();
     }
 }

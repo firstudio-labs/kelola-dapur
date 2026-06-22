@@ -55,7 +55,6 @@ class BukuKasController extends Controller
                 $balanceQuery->where('cash_account_id', $selectedAccountId);
             }
             
-            // If no specific account selected, opening balance is sum of all accounts in that period
             $openingBalance = (float) $balanceQuery->sum('opening_balance');
 
             $query = AccountingTransaction::with(['category', 'cashAccount'])

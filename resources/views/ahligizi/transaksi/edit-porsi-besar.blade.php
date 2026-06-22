@@ -88,17 +88,26 @@
                             <div class="mb-4 p-3 border rounded bg-light">
                                 <div class="row align-items-end">
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold">Jumlah Porsi Besar</label>
-                                        <input
-                                            type="number"
-                                            name="jumlah_porsi"
-                                            id="jumlahPorsiInput"
-                                            class="form-control"
-                                            min="1"
-                                            max="1000000"
-                                            value="{{ $porsiBesar->first()?->jumlah_porsi ?? ($totalPorsiPenerima > 0 ? $totalPorsiPenerima : 1) }}"
-                                            required
-                                        />
+                                        <div class="d-flex align-items-center mb-2">
+                                            <label class="form-label fw-semibold mb-0">Jumlah Porsi Besar</label>
+                                            @if($totalPorsiPenerima > 0)
+                                                <button type="button" class="btn btn-link p-0 ms-2 text-info" data-bs-toggle="modal" data-bs-target="#detailPenerimaModal" title="Detail Penerima">
+                                                    <i class="bx bx-info-circle fs-5"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                name="jumlah_porsi"
+                                                id="jumlahPorsiInput"
+                                                class="form-control"
+                                                min="1"
+                                                max="1000000"
+                                                value="{{ $porsiBesar->first()?->jumlah_porsi ?? ($totalPorsiPenerima > 0 ? $totalPorsiPenerima : 1) }}"
+                                                required
+                                            />
+                                        </div>
                                         <small class="text-muted">Berlaku untuk semua menu dalam porsi besar</small>
                                     </div>
                                 </div>
@@ -277,16 +286,26 @@
                                         </div>
                                         <div class="modal-body">
                                             <div class="row mb-3">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4 mb-2 mb-md-0">
                                                     <input type="text" class="form-control" id="menuSearch" placeholder="Cari menu..." />
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-4 mb-2 mb-md-0">
                                                     <select class="form-control" id="kategoriFilter">
                                                         <option value="all">Semua Kategori</option>
                                                         <option value="Karbohidrat">Karbohidrat</option>
                                                         <option value="Lauk">Lauk</option>
                                                         <option value="Sayur">Sayur</option>
                                                         <option value="Tambahan">Tambahan</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <select class="form-control" id="dapurFilter">
+                                                        <option value="all">Semua Dapur</option>
+                                                        @foreach($dapurs as $d)
+                                                            <option value="{{ $d->id_dapur }}" {{ $d->id_dapur == $ahliGizi->id_dapur ? 'selected' : '' }}>
+                                                                Dapur: {{ $d->nama_dapur }}
+                                                            </option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                             </div>
@@ -343,6 +362,69 @@
                 </div>
             </div>
         </div>
+
+        @if($totalPorsiPenerima > 0 && isset($detailPenerima) && $detailPenerima->count() > 0)
+        <div class="modal fade" id="detailPenerimaModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Detail Kebutuhan Porsi Dapur</h5>
+                        <button
+                            type="button"
+                            class="btn btn-sm"
+                            style="background: white; color: black; border: 1px solid #ddd; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span style="font-size: 18px; font-weight: bold;">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Penerima</th>
+                                        <th>Wilayah/Desa</th>
+                                        <th>Kebutuhan Porsi</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($detailPenerima as $penerima)
+                                        <tr>
+                                            <td>
+                                                <span class="fw-semibold">{{ $penerima->userRole->user->nama ?? $penerima->penanggung_jawab }}</span>
+                                            </td>
+                                            <td>{{ $penerima->village_name ?? '-' }}</td>
+                                            <td>
+                                                <span class="badge bg-label-info">{{ formatIndonesianNumber($penerima->jumlah_porsi) }} Porsi</span>
+                                            </td>
+                                            <td>
+                                                @if($penerima->link_gmaps)
+                                                    <a href="{{ $penerima->link_gmaps }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bx bx-map me-1"></i> Google Maps
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted small">Tidak ada link</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-center mt-3">
+                            {{ $detailPenerima->links() }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 @endsection
 
@@ -368,6 +450,10 @@
                 fetchMenus($('#menuSearch').val(), $(this).val());
             });
 
+            $('#dapurFilter').on('change', function () {
+                fetchMenus($('#menuSearch').val(), $('#kategoriFilter').val());
+            });
+
             $('#jumlahPorsiInput').on('input', function () {
                 updateAllTotalKebutuhan();
             });
@@ -379,17 +465,20 @@
             currentMenuIndex = index;
             $('#menuSearch').val('');
             $('#kategoriFilter').val('all');
-            fetchMenus('', 'all');
+            $('#dapurFilter').val('{{ $ahliGizi->id_dapur }}');
+            fetchMenus('', 'all', '{{ $ahliGizi->id_dapur }}');
             $('#menuModal').modal('show');
         }
 
-        function fetchMenus(searchTerm, kategori) {
+        function fetchMenus(searchTerm, kategori, dapurId) {
+            const currentDapurId = dapurId !== undefined ? dapurId : ($('#dapurFilter').val() || 'all');
             $.ajax({
                 url: '{{ route("ahli-gizi.menu-makanan.active-menus") }}',
                 method: 'GET',
                 data: {
                     search: searchTerm || '',
                     kategori: kategori || 'all',
+                    dapur_id: currentDapurId
                 },
                 success: function (response) {
                     renderMenuList(response);
@@ -412,6 +501,7 @@
                     'Tambahan': 'bg-label-warning',
                 }[menu.kategori] || 'bg-label-secondary';
 
+                const isMyDapur = menu.created_by_dapur_id == '{{ $ahliGizi->id_dapur }}';
                 const menuHtml = `
                     <div class="col-md-6 mb-3 menu-item" data-id="${menu.id_menu}" data-name="${menu.nama_menu}">
                         <div class="card menu-card h-100 ${isSelected ? 'border-primary' : ''}" style="cursor: pointer">
@@ -425,8 +515,13 @@
                                             <h6 class="mb-0">${menu.nama_menu}</h6>
                                             ${menu.kategori ? `<span class="badge ${kategoriBadgeClass}">${menu.kategori}</span>` : ''}
                                         </div>
-                                        <p class="text-muted small mb-2">${menu.deskripsi ? menu.deskripsi.substring(0, 50) : ''}</p>
-                                        <div class="mt-2">
+                                        <p class="text-muted small mb-1">${menu.deskripsi ? menu.deskripsi.substring(0, 50) : ''}</p>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bx bx-store-alt me-1 text-muted" style="font-size:12px"></i>
+                                            <small class="text-muted me-1">${menu.nama_dapur || '-'}</small>
+                                            ${isMyDapur ? '<span class="badge bg-label-success" style="font-size:10px">Dapur Anda</span>' : ''}
+                                        </div>
+                                        <div class="mt-1">
                                             <small class="text-muted">Bahan:</small>
                                             <div class="mt-1" id="bahan-${menu.id_menu}"></div>
                                         </div>
@@ -438,6 +533,16 @@
                 menuList.append(menuHtml);
                 fetchMenuBahan(menu.id_menu);
             });
+            if (menus.length === 0) {
+                menuList.html(`
+                    <div class="col-12 text-center py-4">
+                        <div class="avatar avatar-lg mx-auto mb-3">
+                            <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-food-menu"></i></span>
+                        </div>
+                        <p class="text-muted mb-0">Tidak ada menu ditemukan.</p>
+                        <small class="text-muted">Coba ubah kata kunci pencarian atau filter dapur.</small>
+                    </div>`);
+            }
         }
 
         function fetchMenuBahan(menuId) {

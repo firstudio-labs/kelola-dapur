@@ -63,7 +63,6 @@ class DokumenController extends Controller
             abort(404);
         }
 
-        // Preview renders the raw document HTML in browser
         return view($view, compact('setting', 'activePeriod', 'transactions', 'openingBalance', 'dapur'));
     }
 

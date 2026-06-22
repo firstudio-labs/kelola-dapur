@@ -122,9 +122,14 @@
             </div>
         </div>
 
+        @php
+            $normalLaporan = $laporan->filter(fn($item) => is_null($item->id_handler));
+            $handlerLaporan = $laporan->filter(fn($item) => !is_null($item->id_handler));
+        @endphp
+
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Detail Kekurangan Stok</h5>
+                <h5 class="mb-0"><i class="bx bx-package me-1"></i>Detail Kekurangan Stok</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -143,7 +148,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($laporan as $item)
+                            @forelse ($normalLaporan as $item)
                                 <tr class="{{ $item->status === 'pending' ? 'table-warning-subtle' : '' }}">
                                     @php
                                         $stockItem = \App\Models\StockItem::where('id_dapur', $dapur->id_dapur)
@@ -173,14 +178,30 @@
                                             <span class="badge bg-warning">
                                                 Pending
                                             </span>
+                                        @elseif ($item->status === 'handler_stok')
+                                            <span class="badge bg-info">
+                                                Dibuatkan PR
+                                            </span>
                                         @else
                                             <span class="badge bg-success">
                                                 Resolved
                                             </span>
                                         @endif
+                                        @if ($item->isPurchasedByAkuntan())
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="bx bx-wallet-alt me-1"></i>Akuntan
+                                            </small>
+                                        @endif
                                     </td>
                                     <td>
                                         {{ $item->keterangan_resolve ?? '-' }}
+                                        @if ($item->status === 'handler_stok' && $item->id_approval_stock_item)
+                                            <br>
+                                            <small class="text-info">
+                                                <i class="bx bx-file me-1"></i>
+                                                PR #{{ $item->id_approval_stock_item }}
+                                            </small>
+                                        @endif
                                     </td>
                                     <td class="text-center">
                                         @if ($item->status === 'pending')
@@ -201,7 +222,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted">
+                                    <td colspan="9" class="text-center text-muted">
                                         Tidak ada data kekurangan stok ditemukan
                                     </td>
                                 </tr>
@@ -211,6 +232,108 @@
                 </div>
             </div>
         </div>
+
+        @if($handlerLaporan->isNotEmpty())
+        <div class="card mt-4">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bx bx-transfer me-1"></i>Detail Handler Kekurangan Stok</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nama Bahan</th>
+                                <th>Jumlah Dibutuhkan</th>
+                                <th>Jumlah Tersedia</th>
+                                <th>Jumlah Kurang</th>
+                                <th>Satuan Asli</th>
+                                <th>Konversi (Kekurangan)</th>
+                                <th>Status</th>
+                                <th>Keterangan</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($handlerLaporan as $item)
+                                <tr class="{{ $item->status === 'pending' ? 'table-warning-subtle' : '' }}">
+                                    @php
+                                        $stockItem = \App\Models\StockItem::where('id_dapur', $dapur->id_dapur)
+                                            ->where('id_template_item', $item->id_template_item)
+                                            ->first();
+                                    @endphp
+                                    <td>
+                                        {{ $item->templateItem->nama_bahan }} - Handler
+                                    </td>
+                                    <td>{{ formatIndonesianNumber($item->jumlah_dibutuhkan) }}
+                                    </td>
+                                    <td>{{ formatIndonesianNumber($item->jumlah_tersedia) }}
+                                    </td>
+                                    <td>{{ formatIndonesianNumber($item->jumlah_kurang) }}
+                                    </td>
+                                    <td>{{ $item->satuan }}</td>
+                                    <td>
+                                        @if ($stockItem && $stockItem->konversi_nilai > 0)
+                                            {{ formatIndonesianNumber($item->jumlah_kurang / $stockItem->konversi_nilai) }}
+                                            {{ $stockItem->konversi_satuan }}
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($item->status === 'pending')
+                                            <span class="badge bg-warning">
+                                                Pending
+                                            </span>
+                                        @elseif ($item->status === 'handler_stok')
+                                            <span class="badge bg-info">
+                                                Dibuatkan PR
+                                            </span>
+                                        @else
+                                            <span class="badge bg-success">
+                                                Resolved
+                                            </span>
+                                        @endif
+                                        @if ($item->isPurchasedByAkuntan())
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="bx bx-wallet-alt me-1"></i>Akuntan
+                                            </small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        {{ $item->keterangan_resolve ?? '-' }}
+                                        @if ($item->status === 'handler_stok' && $item->id_approval_stock_item)
+                                            <br>
+                                            <small class="text-info">
+                                                <i class="bx bx-file me-1"></i>
+                                                PR #{{ $item->id_approval_stock_item }}
+                                            </small>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @if ($item->status === 'pending')
+                                            @if ($stockItem)
+                                                <button type="button" class="btn btn-icon text-success action-btn pulse"
+                                                    onclick="window.updateRequestStockModal({{ $stockItem->id_stock_item }}, '{{ $item->templateItem->nama_bahan }}', {{ $stockItem->jumlah }}, '{{ $item->satuan }}', {{ $item->jumlah_kurang }}, {{ $stockItem->konversi_nilai ?? 0 }}, '{{ $stockItem->konversi_satuan ?? '' }}')"
+                                                    data-bs-toggle="modal" data-bs-target="#requestStockModal"
+                                                    data-bs-placement="top" title="Tambah Stok">
+                                                    <i class="bx bx-plus-circle fs-4"></i>
+                                                </button>
+                                            @else
+                                                <span class="text-muted fst-italic">Master Stok Tidak Ditemukan</span>
+                                            @endif
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <div class="modal fade" id="resolveModal" tabindex="-1" aria-labelledby="resolveModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -314,6 +437,9 @@
         .table-warning-subtle {
             background-color: rgba(255, 243, 205, 0.3) !important;
         }
+        .table-info-subtle {
+            background-color: rgba(13, 202, 240, 0.08) !important;
+        }
 
         .pulse {
             animation: pulse 2s infinite;
@@ -338,7 +464,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Choices.js
             const selects = document.querySelectorAll('.choices-select');
             selects.forEach((select) => {
                 new Choices(select, {
@@ -348,7 +473,6 @@
                 });
             });
 
-            // Initialize Bootstrap tooltips
             const tooltipTriggerList = document.querySelectorAll(
                 '[data-bs-toggle="tooltip"]',
             );
@@ -356,7 +480,6 @@
                 (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl),
             );
 
-            // Auto-hide alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert-dismissible');
             alerts.forEach((alert) => {
                 setTimeout(() => {

@@ -135,17 +135,17 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-danger">
-                                    <i class="bx bx-x-circle"></i>
+                                <span class="avatar-initial rounded bg-label-info">
+                                    <i class="bx bx-package"></i>
                                 </span>
                             </div>
                             <div>
                                 <small class="text-muted d-block">
-                                    Total Kekurangan Bahan
+                                    Dibuatkan PR Otomatis
                                 </small>
                                 <div class="d-flex align-items-center">
                                     <h6 class="mb-0 me-1">
-                                        @formatNumber($stats['total_kekurangan_bahan'])
+                                        @formatNumber($stats['handler_stok'])
                                     </h6>
                                 </div>
                             </div>
@@ -186,6 +186,9 @@
                             </option>
                             <option value="resolved" {{ request('status') === 'resolved' ? 'selected' : '' }}>
                                 Diselesaikan
+                            </option>
+                            <option value="handler_stok" {{ request('status') === 'handler_stok' ? 'selected' : '' }}>
+                                Dibuatkan PR
                             </option>
                         </select>
                     </div>
@@ -332,16 +335,22 @@
                                         </td>
                                         <td>
                                             @php
-                                                $statusClass = $transaksiItem->laporanKekuranganStock
+                                                $hasPending = $transaksiItem->laporanKekuranganStock
                                                     ->where('status', 'pending')
-                                                    ->isNotEmpty()
+                                                    ->isNotEmpty();
+                                                $hasHandlerStok = $transaksiItem->laporanKekuranganStock
+                                                    ->where('status', 'handler_stok')
+                                                    ->isNotEmpty();
+                                                $statusClass = $hasPending
                                                     ? 'bg-label-warning'
-                                                    : 'bg-label-success';
-                                                $statusText = $transaksiItem->laporanKekuranganStock
-                                                    ->where('status', 'pending')
-                                                    ->isNotEmpty()
+                                                    : ($hasHandlerStok
+                                                        ? 'bg-label-info'
+                                                        : 'bg-label-success');
+                                                $statusText = $hasPending
                                                     ? 'Menunggu'
-                                                    : 'Diselesaikan';
+                                                    : ($hasHandlerStok
+                                                        ? 'Ada PR Otomatis'
+                                                        : 'Diselesaikan');
                                             @endphp
                                             <span class="badge {{ $statusClass }}">
                                                 {{ $statusText }}
@@ -349,6 +358,13 @@
                                             @if ($transaksiItem->laporanKekuranganStock->where('status', 'resolved')->isNotEmpty())
                                                 <small class="text-muted d-block">
                                                     {{ $transaksiItem->laporanKekuranganStock->where('status', 'resolved')->first()->updated_at->format('d/m/Y H:i') }}
+                                                </small>
+                                            @endif
+                                            @if ($hasHandlerStok)
+                                                <small class="text-info d-block">
+                                                    <i class="bx bx-package me-1"></i>
+                                                    {{ $transaksiItem->laporanKekuranganStock->where('status', 'handler_stok')->count() }}
+                                                    item dibuatkan PR
                                                 </small>
                                             @endif
                                         </td>
@@ -621,7 +637,6 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Initialize Choices.js
                 const selects = document.querySelectorAll('.choices-select');
                 selects.forEach((select) => {
                     new Choices(select, {
@@ -631,7 +646,6 @@
                     });
                 });
 
-                // Initialize Bootstrap tooltips
                 const tooltipTriggerList = document.querySelectorAll(
                     '[data-bs-toggle="tooltip"]',
                 );
@@ -639,7 +653,6 @@
                     (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl),
                 );
 
-                // Handle resolve modal
                 const resolveModal = document.getElementById('resolveModal');
                 if (resolveModal) {
                     resolveModal.addEventListener('show.bs.modal', function(event) {
@@ -650,11 +663,9 @@
                         document.getElementById('resolveCreatedBy').value = createdBy;
 
                         const form = document.getElementById('resolveForm');
-                        // Remove existing laporan_ids inputs
                         const existingInputs = form.querySelectorAll('input[name="laporan_ids[]"]');
                         existingInputs.forEach(input => input.remove());
 
-                        // Add new laporan_ids inputs
                         laporanIds.forEach(id => {
                             const input = document.createElement('input');
                             input.type = 'hidden';
@@ -663,12 +674,10 @@
                             form.appendChild(input);
                         });
 
-                        // Reset textarea
                         document.getElementById('keterangan_resolve').value = '';
                     });
                 }
 
-                // Handle bulk actions
                 const selectAllCheckbox = document.getElementById('select-all');
                 const bulkCheckboxes = document.querySelectorAll('.bulk-checkbox');
                 const selectedCountSpan = document.getElementById('selected-count');
@@ -702,7 +711,6 @@
                             'Pilih transaksi dari tabel terlebih dahulu.';
                     }
 
-                    // Update hidden inputs with laporan_ids
                     const existingInputs = bulkActionForm.querySelectorAll('input[name="laporan_ids[]"]');
                     existingInputs.forEach(input => input.remove());
 
@@ -728,7 +736,6 @@
                     checkbox.addEventListener('change', updateBulkSelection);
                 });
 
-                // Auto-hide alerts after 5 seconds
                 const alerts = document.querySelectorAll('.alert-dismissible');
                 alerts.forEach((alert) => {
                     setTimeout(() => {

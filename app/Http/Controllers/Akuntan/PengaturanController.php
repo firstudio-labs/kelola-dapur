@@ -18,8 +18,6 @@ class PengaturanController extends Controller
         return Auth::user()->userRole->id_dapur;
     }
 
-    // ─── Settings (Identitas Lembaga) ───
-
     public function index()
     {
         $dapurId = $this->getDapurId();
@@ -29,18 +27,14 @@ class PengaturanController extends Controller
         $categories   = AccountingCategory::forDapur($dapurId)->orderBy('group')->orderBy('name')->get();
         $cashAccounts = CashAccount::forDapur($dapurId)->orderBy('name')->get();
 
-        // ── Periode baru: hitung saldo awal yang disarankan dari periode closed terakhir ──
         $openPeriod   = $periods->firstWhere('status', 'open');
         $canCreateNewPeriod = $openPeriod === null;
 
-        // Periode closed paling baru (sebagai sumber carry-over)
         $lastClosedPeriod = $periods->where('status', 'closed')->first(); // already ordered desc
 
-        // suggested opening balances per cash_account_id
         $suggestedOpeningBalances = [];
         if ($lastClosedPeriod) {
             foreach ($lastClosedPeriod->balances as $bal) {
-                // closing_balance bisa null jika periode lama belum di-compute; fallback ke 0
                 $suggestedOpeningBalances[$bal->cash_account_id] = (float) ($bal->closing_balance ?? 0);
             }
         }
@@ -70,13 +64,10 @@ class PengaturanController extends Controller
         return back()->with('success', 'Data identitas lembaga berhasil disimpan.');
     }
 
-    // ─── Periode ───
-
     public function storePeriode(Request $request)
     {
         $dapurId = $this->getDapurId();
 
-        // Aturan 1: tidak boleh ada periode OPEN terlebih dahulu
         $existingOpen = AccountingPeriod::forDapur($dapurId)->where('status', 'open')->first();
         if ($existingOpen) {
             return back()
@@ -94,7 +85,6 @@ class PengaturanController extends Controller
         $openingBalances = $request->input('opening_balances', []);
         $cashAccounts    = CashAccount::forDapur($dapurId)->get();
 
-        // Validasi: opening balance tidak boleh kurang dari saldo akhir periode sebelumnya
         $lastClosedPeriod = AccountingPeriod::latestClosed($dapurId)->first();
         if ($lastClosedPeriod) {
             foreach ($cashAccounts as $ca) {
@@ -119,7 +109,6 @@ class PengaturanController extends Controller
             'status'     => 'open',
         ]);
 
-        // Simpan opening_balance per akun kas
         foreach ($cashAccounts as $ca) {
             $amount = isset($openingBalances[$ca->id]) ? (float) $openingBalances[$ca->id] : 0;
             AccountingBalance::create([
@@ -144,7 +133,6 @@ class PengaturanController extends Controller
             'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
 
-        // Validasi: opening balance tidak boleh kurang dari saldo akhir bawaan periode sebelumnya
         if ($periode->isOpen()) {
             $balancesInput = $request->input('opening_balances', []);
             $prevPeriod = $periode->getPreviousPeriod();
@@ -170,7 +158,6 @@ class PengaturanController extends Controller
             'end_date'   => $validated['end_date'],
         ]);
 
-        // Update opening balances (hanya untuk periode yang masih open – periode closed tidak boleh diubah)
         if ($periode->isOpen()) {
             $balances = $request->input('opening_balances', []);
             foreach ($balances as $cashAccountId => $amount) {
@@ -196,10 +183,7 @@ class PengaturanController extends Controller
             return back()->withErrors(['error' => 'Periode sudah ditutup.']);
         }
 
-        // Hitung dan simpan closing_balance per akun kas
         $closingBalances = $periode->computeAndSaveClosingBalances();
-
-        // Ubah status menjadi closed
         $periode->update(['status' => 'closed']);
 
         $totalClosing = array_sum($closingBalances);
@@ -215,7 +199,6 @@ class PengaturanController extends Controller
         $dapurId = $this->getDapurId();
         if ($periode->id_dapur != $dapurId) abort(403);
 
-        // Tidak bisa buka kembali jika ada periode lain yang sudah dibuat setelahnya
         $newerPeriod = AccountingPeriod::forDapur($dapurId)
             ->where('start_date', '>', $periode->end_date)
             ->exists();
@@ -226,7 +209,6 @@ class PengaturanController extends Controller
             ]);
         }
 
-        // Hapus closing_balance agar saldo bersih kembali terhitung dari transaksi
         foreach ($periode->balances as $bal) {
             $bal->update(['closing_balance' => null]);
         }
@@ -246,7 +228,6 @@ class PengaturanController extends Controller
         return back()->with('success', 'Periode berhasil dihapus.');
     }
 
-    // ─── Kategori ───
 
     public function storeKategori(Request $request)
     {
@@ -300,8 +281,6 @@ class PengaturanController extends Controller
         return back()->with('success', 'Kategori berhasil dihapus.');
     }
 
-    // ─── Akun Kas ───
-
     public function storeKas(Request $request)
     {
         $dapurId = $this->getDapurId();
@@ -312,7 +291,6 @@ class PengaturanController extends Controller
         $validated['id_dapur'] = $dapurId;
         $cashAccount = CashAccount::create($validated);
 
-        // Add opening balance for existing open periods
         $openPeriods = AccountingPeriod::forDapur($dapurId)->where('status', 'open')->get();
         foreach ($openPeriods as $period) {
             AccountingBalance::firstOrCreate(

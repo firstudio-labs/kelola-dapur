@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminGudang\AdminGudangController;
 use App\Http\Controllers\AdminGudang\StockItemController as AdminGudangStockItemController;
 use App\Http\Controllers\AdminGudang\ProfileController as AdminGudangProfileController;
 use App\Http\Controllers\AdminGudang\LaporanKekuranganStockController as AdminGudangLaporanKekuranganStockController;
+use App\Http\Controllers\AdminGudang\LaporanStokController as AdminGudangLaporanStokController;
 use App\Http\Controllers\AhliGizi\AhliGiziController;
 use App\Http\Controllers\AhliGizi\MenuMakananController as AhliGiziMenuMakananController;
 use App\Http\Controllers\AhliGizi\TransaksiDapurController as AhliGiziTransaksiDapurController;
@@ -484,6 +485,12 @@ Route::middleware(['auth', 'dapur.access:admin_gudang', 'check.subscription'])
             Route::get('/{transaksi}/export/pdf', [AdminGudangLaporanKekuranganStockController::class, 'exportKekuranganPdf'])->name('export-pdf');
             Route::get('/{transaksi}/export/csv', [AdminGudangLaporanKekuranganStockController::class, 'exportKekuranganCsv'])->name('export-csv');
         });
+
+        // Laporan Stok
+        Route::prefix('laporan-stok')->name('laporan-stok.')->group(function () {
+            Route::get('/', [AdminGudangLaporanStokController::class, 'index'])->name('index');
+            Route::post('/{laporan}/resolve', [AdminGudangLaporanStokController::class, 'resolve'])->name('resolve');
+        });
     });
 
 
@@ -662,6 +669,7 @@ Route::middleware(['auth', 'role:mitra'])
         // Manajemen Dapur
         Route::get('/dapur', [\App\Http\Controllers\Mitra\DapurController::class, 'index'])->name('dapur.index');
         Route::post('/dapur', [\App\Http\Controllers\Mitra\DapurController::class, 'store'])->name('dapur.store');
+        Route::get('/dapur/{mitraDapur}', [\App\Http\Controllers\Mitra\DapurController::class, 'show'])->name('dapur.show');
         Route::delete('/dapur/{mitraDapur}', [\App\Http\Controllers\Mitra\DapurController::class, 'destroy'])->name('dapur.destroy');
         
         // Profile
@@ -743,6 +751,10 @@ Route::middleware(['auth', 'role:produksi', 'check.subscription'])
                     ProduksiOrderProduksiController::class,
                     "submitUlasan",
                 ])->name("ulasan");
+                Route::post("/{order}/handler-bahan", [
+                    ProduksiOrderProduksiController::class,
+                    "storeHandler",
+                ])->name("handler-bahan");
             });
     });
 

@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\LaporanKekuranganStock;
 use App\Models\AdminGudang;
 use App\Models\TransaksiDapur;
+use App\Models\StockItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Dapur;
@@ -84,9 +86,9 @@ class LaporanKekuranganStockController extends Controller
                 ->whereHas('laporanKekuranganStock', function ($q) {
                     $q->where('status', 'resolved');
                 })->count(),
-            'total_kekurangan_bahan' => LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($id_dapur) {
+            'handler_stok' => LaporanKekuranganStock::whereHas('transaksiDapur', function ($q) use ($id_dapur) {
                 $q->where('id_dapur', $id_dapur);
-            })->count()
+            })->where('status', 'handler_stok')->count(),
         ];
 
         $currentDapur = $adminGudang;
@@ -282,6 +284,7 @@ class LaporanKekuranganStockController extends Controller
         $transaksi->load([
             'detailTransaksiDapur.menuMakanan.bahanMenu.templateItem',
             'laporanKekuranganStock.templateItem',
+            'laporanKekuranganStock.approvalStockItem',
             'createdBy'
         ]);
 
@@ -314,15 +317,43 @@ class LaporanKekuranganStockController extends Controller
             'catatan' => 'nullable|string|max:500'
         ]);
 
-        if ($laporan->resolve()) {
-            if ($request->filled('catatan')) {
-                $laporan->update(['keterangan_resolve' => $request->catatan]);
+        try {
+            DB::beginTransaction();
+
+            $stockItem = StockItem::where('id_dapur', $dapur->id_dapur)
+                ->where('id_template_item', $laporan->id_template_item)
+                ->first();
+
+            $order = null;
+            if ($laporan->id_handler) {
+                $handlerBahan = \App\Models\ProduksiHandlerBahan::find($laporan->id_handler);
+                if ($handlerBahan) {
+                    $order = $handlerBahan->orderProduksi;
+                }
             }
 
-            return redirect()->back()->with('success', 'Laporan kekurangan berhasil diselesaikan.');
-        }
+            $isActiveProduction = false;
+            if ($order && in_array($order->status, ['sedang_dibuat', 'selesai'])) {
+                $isActiveProduction = true;
+            }
 
-        return redirect()->back()->with('error', 'Gagal menyelesaikan laporan kekurangan.');
+            if ($stockItem && !$isActiveProduction) {
+                $stockItem->addStock((float) $laporan->jumlah_kurang);
+            }
+
+            $laporan->status = 'resolved';
+            if ($request->filled('catatan')) {
+                $laporan->keterangan_resolve = $request->catatan;
+            }
+            $laporan->save();
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Laporan kekurangan berhasil diselesaikan dan stok telah ditambahkan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to resolve laporan kekurangan', ['id_laporan' => $laporan->id_laporan, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Gagal menyelesaikan laporan kekurangan.');
+        }
     }
 
     public function bulkResolve(Request $request, Dapur $dapur)

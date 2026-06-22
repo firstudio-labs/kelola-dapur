@@ -19,7 +19,10 @@ class LaporanKekuranganStock extends Model
         'jumlah_tersedia',
         'jumlah_kurang',
         'satuan',
-        'status'
+        'status',
+        'keterangan_resolve',
+        'id_approval_stock_item',
+        'id_handler',
     ];
 
     protected $casts = [
@@ -51,6 +54,16 @@ class LaporanKekuranganStock extends Model
         ]);
     }
 
+    public function approvalStockItem()
+    {
+        return $this->belongsTo(ApprovalStockItem::class, 'id_approval_stock_item', 'id_approval_stock_item');
+    }
+
+    public function produksiHandlerBahan()
+    {
+        return $this->belongsTo(ProduksiHandlerBahan::class, 'id_handler', 'id_handler');
+    }
+
     public function resolve(): bool
     {
         $this->status = 'resolved';
@@ -67,11 +80,17 @@ class LaporanKekuranganStock extends Model
         return $this->status === 'resolved';
     }
 
+    public function isHandlerStok(): bool
+    {
+        return $this->status === 'handler_stok';
+    }
+
     public function getStatusBadgeClass(): string
     {
         return match ($this->status) {
             'pending' => 'bg-label-warning',
             'resolved' => 'bg-label-success',
+            'handler_stok' => 'bg-label-info',
             default => 'bg-label-secondary'
         };
     }

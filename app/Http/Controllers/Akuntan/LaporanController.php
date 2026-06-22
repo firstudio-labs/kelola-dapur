@@ -30,7 +30,6 @@ class LaporanController extends Controller
             : ($periods->firstWhere('status', 'open') ?? $periods->first());
     }
 
-    // 5.1 Resume Penerimaan & Pengeluaran
     public function resume(Request $request)
     {
         $dapurId = $this->getDapurId();
@@ -58,7 +57,6 @@ class LaporanController extends Controller
         if ($activePeriod) {
             $periodId = $activePeriod->id;
 
-            // Dynamic Incomes (including taxes)
             $incomes = AccountingTransaction::where('period_id', $periodId)
                 ->whereHas('category', function($q) {
                     $q->where('type', 'income')->orWhere('is_tax', true);
@@ -72,7 +70,6 @@ class LaporanController extends Controller
             
             $totalPenerimaan = $incomes->sum('total');
 
-            // Dynamic Expenses (credit)
             $expenses = AccountingTransaction::where('period_id', $periodId)
                 ->whereHas('category', function($q) {
                     $q->where('type', 'expense')->where('is_tax', false);
@@ -86,7 +83,6 @@ class LaporanController extends Controller
 
             $totalPengeluaran = $expenses->sum('total');
 
-            // Calculate balance per cash account dynamically
             $cashAccountBalances = \App\Models\CashAccount::forDapur($dapurId)->get()->map(function ($acc) use ($periodId) {
                 $opening = (float) AccountingBalance::where('period_id', $periodId)
                     ->where('cash_account_id', $acc->id)
@@ -114,7 +110,6 @@ class LaporanController extends Controller
         ));
     }
 
-    // 5.2 Laporan Penggunaan Anggaran
     public function anggaran(Request $request)
     {
         $dapurId = $this->getDapurId();
@@ -134,7 +129,7 @@ class LaporanController extends Controller
             ]
         );
 
-        $nomor = '...'; // Bisa di-generate atau di-set statis sementara
+        $nomor = '...'; 
 
         $bahanBakuMasuk = 0;
         $operasionalMasuk = 0;
@@ -147,7 +142,6 @@ class LaporanController extends Controller
         if ($activePeriod) {
             $periodId = $activePeriod->id;
 
-            // MASUK (Dana Diajukan: Total Debit per kategori)
             $bahanBakuMasuk = AccountingTransaction::where('period_id', $periodId)
                 ->whereHas('category', fn($q) => $q->where('group', 'dana_bahan_baku'))
                 ->sum('debit');
@@ -160,7 +154,6 @@ class LaporanController extends Controller
                 ->whereHas('category', fn($q) => $q->where('group', 'dana_insentif_fasilitas'))
                 ->sum('debit');
 
-            // KELUAR (Dana Terealisasi: Total Credit per kategori)
             $bahanBakuKeluar = AccountingTransaction::where('period_id', $periodId)
                 ->whereHas('category', fn($q) => $q->where('group', 'biaya_bahan_baku'))
                 ->sum('credit');
@@ -174,12 +167,9 @@ class LaporanController extends Controller
                 ->sum('credit');
         }
 
-        // SISA PER KATEGORI
         $sisaBahanBaku = $bahanBakuMasuk - $bahanBakuKeluar;
         $sisaOperasional = $operasionalMasuk - $operasionalKeluar;
         $sisaFasilitas = $fasilitasMasuk - $fasilitasKeluar;
-
-        // TOTAL
         $totalMasuk = $bahanBakuMasuk + $operasionalMasuk + $fasilitasMasuk;
         $totalKeluar = $bahanBakuKeluar + $operasionalKeluar + $fasilitasKeluar;
         $totalSisa = $totalMasuk - $totalKeluar;
@@ -193,7 +183,6 @@ class LaporanController extends Controller
         ));
     }
 
-    // 5.3 Catatan Pengeluaran Bulanan
     public function bulanan(Request $request)
     {
         $dapurId = $this->getDapurId();

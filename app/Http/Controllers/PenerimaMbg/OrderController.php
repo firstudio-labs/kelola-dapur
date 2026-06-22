@@ -35,7 +35,6 @@ class OrderController extends Controller
         $query = OrderDistribusiDetail::where('id_penerima', $penerima->id_penerima)
             ->where('status', OrderDistribusiDetail::STATUS_SUDAH_DIKIRIM);
 
-        // Search Filter
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -48,12 +47,9 @@ class OrderController extends Controller
             });
         }
 
-        // Status Filter
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status_penerimaan', $request->status);
         }
-
-        // Date Filter
         if ($request->filled('date_from')) {
             $query->whereDate('tanggal_dikirim', '>=', $request->date_from);
         }
@@ -61,11 +57,6 @@ class OrderController extends Controller
             $query->whereDate('tanggal_dikirim', '<=', $request->date_to);
         }
 
-        // Stats (calculate before searching to keep them consistent, or after if you want them to reflect search)
-        // Usually stats reflect the total for the user, but sometimes they reflect the filter.
-        // Let's keep them as the total for the context, but the user might expect them to reflect filters.
-        // The distributor's view seems to show overall totals (filtered by status in some cases).
-        // Let's follow the distributor pattern: show totals for the whole set of 'Sudah Dikirim'.
         $baseQuery = OrderDistribusiDetail::where('id_penerima', $penerima->id_penerima)
             ->where('status', OrderDistribusiDetail::STATUS_SUDAH_DIKIRIM);
 

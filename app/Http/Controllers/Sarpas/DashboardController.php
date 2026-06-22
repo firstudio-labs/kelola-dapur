@@ -15,7 +15,6 @@ class DashboardController extends Controller
             $user = auth()->user();
             $dapur = $request->current_dapur;
             
-            // Similar to Ahli Gizi's dashboard setup.
             return view('sarpas.dashboard', compact('user', 'dapur'));
         } catch (Exception $e) {
             Log::error('Dashboard Error', ['message' => $e->getMessage()]);

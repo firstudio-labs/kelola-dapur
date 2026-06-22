@@ -24,7 +24,7 @@ class PengaturanDapurController extends Controller
             'no_registrasi_sppg' => 'nullable|string|max:100',
             'nik_pemilik' => 'nullable|string|max:16',
             'tag_lokasi' => 'nullable|string',
-            'foto_bangunan' => 'nullable|image|max:2048',
+            'foto_bangunan' => 'nullable|image|max:10240',
             'provinsi' => 'required|string|max:255',
             'kabupaten_kota' => 'required|string|max:255',
             'kecamatan' => 'required|string|max:255',
@@ -42,7 +42,7 @@ class PengaturanDapurController extends Controller
             'alamat.max' => 'Alamat maksimal 500 karakter',
             'telepon.regex' => 'Format nomor telepon tidak valid',
             'foto_bangunan.image' => 'File harus berupa gambar',
-            'foto_bangunan.max' => 'Ukuran gambar maksimal 2MB',
+            'foto_bangunan.max' => 'Ukuran gambar maksimal 10MB',
         ]);
 
         try {

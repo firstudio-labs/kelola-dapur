@@ -22,7 +22,6 @@ class MitraApprovalController extends Controller
 
         $id_dapur = $dapur->id_dapur;
 
-        // Ambil semua request dari mitra ke dapur ini
         $mitraDapurList = MitraDapur::where('id_dapur', $id_dapur)
             ->with('mitra')
             ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")

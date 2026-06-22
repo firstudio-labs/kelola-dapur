@@ -401,7 +401,7 @@ class TransaksiDapur extends Model
 
         $approvalStatus = $autoApprove ? 'approved' : 'pending';
 
-        ApprovalTransaksi::create([
+        $approval = ApprovalTransaksi::create([
             'id_transaksi'  => $this->id_transaksi,
             'id_ahli_gizi'  => $ahliGiziId,
             'id_kepala_dapur' => $kepalaDapurId,
@@ -409,6 +409,8 @@ class TransaksiDapur extends Model
             'status'        => $approvalStatus,
             'approved_at'   => $autoApprove ? now() : null,
         ]);
+
+        $this->createStockSnapshots($approval->id_approval_transaksi);
 
         if ($autoApprove) {
             $this->status = 'processing';
@@ -437,7 +439,7 @@ class TransaksiDapur extends Model
 
         $stockCheck = $this->checkStockWithReservations();
 
-        ApprovalTransaksi::create([
+        $approval = ApprovalTransaksi::create([
             'id_transaksi'    => $this->id_transaksi,
             'id_ahli_gizi'    => $ahliGiziId,
             'id_kepala_dapur' => $kepalaDapurId,
@@ -445,6 +447,8 @@ class TransaksiDapur extends Model
             'status'          => 'approved',
             'approved_at'     => now(),
         ]);
+
+        $this->createStockSnapshots($approval->id_approval_transaksi);
 
         $this->status = 'completed';
         $this->save();

@@ -460,6 +460,154 @@
                         </div>
                     </div>
                 @endif
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bx bx-package me-2"></i>
+                            Ketersediaan Stock
+                            @if ($stockCheck['has_snapshots'])
+                                <small class="text-muted">
+                                    (berdasarkan snapshot saat approval)
+                                </small>
+                            @endif
+                        </h5>
+                        @if (!$stockCheck['can_produce'])
+                            <span class="badge bg-danger">
+                                Laporan Kekurangan Stok
+                            </span>
+                        @else
+                            <span class="badge bg-success">
+                                Stock Mencukupi
+                            </span>
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        @if (!$stockCheck['can_produce'])
+                            <div class="alert alert-danger mb-4">
+                                <i class="bx bx-error-circle me-2"></i>
+                                <strong>Peringatan:</strong>
+                                Kekurangan stok di bawah merupakan laporan kekurangan stok pada saat pertama kali diajukan.
+                            </div>
+                        @endif
+
+                        @if ($stockCheck['has_snapshots'])
+                            <div class="alert alert-info mb-4">
+                                <i class="bx bx-camera me-2"></i>
+                                <strong>Info:</strong>
+                                Data stock yang ditampilkan adalah snapshot saat
+                                approval transaksi dibuat pada
+                                {{ $approval->created_at->format('d M Y, H:i') }}.
+                            </div>
+                        @endif
+
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Bahan</th>
+                                        <th>Diperlukan</th>
+                                        <th>Snapshot Stock</th>
+                                        @if ($stockCheck['has_snapshots'] && isset($stockCheck['ingredients_summary'][0]['current_available']))
+                                            <th>Stock Saat Ini</th>
+                                        @endif
+
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($stockCheck['ingredients_summary'] as $ingredient)
+                                        @php
+                                            $neededAmount = $ingredient['needed'];
+                                            $isSufficient = $ingredient['sufficient'];
+                                            $isBahanBasah = isset($ingredient['is_bahan_basah'])
+                                                ? $ingredient['is_bahan_basah']
+                                                : false;
+                                        @endphp
+
+                                        <tr class="{{ !$isSufficient ? 'table-danger-subtle' : '' }}">
+                                            <td>
+                                                <div class="fw-medium">
+                                                    {{ $ingredient['nama_bahan'] }}
+                                                </div>
+                                                <small class="text-muted">
+                                                    {{ $ingredient['satuan'] }}
+                                                    @if ($isBahanBasah)
+                                                        <span class="text-info">
+                                                            (Bahan Basah +7%)
+                                                        </span>
+                                                    @endif
+                                                </small>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $itemHandlers = isset($handlers) ? $handlers->where('id_template_item', $ingredient['id_template_item'])->whereIn('status', ['approved', 'resolved']) : collect();
+                                                    $hasHandlers = $itemHandlers->count() > 0;
+                                                    
+                                                    $stockItem = isset($stockItems) ? $stockItems->get($ingredient['id_template_item']) : null;
+                                                    $hasKonversi = $stockItem && isset($stockItem->konversi_nilai) && $stockItem->konversi_nilai > 0;
+                                                    $nk = $hasKonversi ? $stockItem->konversi_nilai : 1;
+                                                    $sk = $hasKonversi ? $stockItem->konversi_satuan : '';
+                                                @endphp
+                                                
+                                                @if($hasHandlers)
+                                                    @php
+                                                        $calcStr = formatIndonesianNumber($neededAmount);
+                                                        $calcStrKonv = formatIndonesianNumber($neededAmount / $nk);
+                                                        $akhir = $neededAmount;
+                                                        
+                                                        foreach($itemHandlers as $h) {
+                                                            $sign = $h->jenis === 'kelebihan' ? '-' : '+';
+                                                            $calcStr .= ' ' . $sign . ' ' . formatIndonesianNumber($h->jumlah);
+                                                            $calcStrKonv .= ' ' . $sign . ' ' . formatIndonesianNumber($h->jumlah / $nk);
+                                                            
+                                                            if ($h->jenis === 'kelebihan') {
+                                                                $akhir -= $h->jumlah;
+                                                            } else {
+                                                                $akhir += $h->jumlah;
+                                                            }
+                                                        }
+                                                        
+                                                        $calcStr .= ' = ' . formatIndonesianNumber($akhir) . ' ' . strtoupper($ingredient['satuan']);
+                                                        $calcStrKonv .= ' = ' . formatIndonesianNumber($akhir / $nk) . ' ' . strtolower($sk);
+                                                    @endphp
+                                                    
+                                                    <div class="fw-medium text-dark">{{ $calcStr }}</div>
+                                                    @if($hasKonversi)
+                                                        <div class="text-muted" style="font-size: 0.8rem;">({{ $calcStrKonv }})</div>
+                                                    @endif
+                                                @else
+                                                    {{ formatIndonesianNumber($neededAmount) }}
+                                                @endif
+                                            </td>
+                                            <td>
+                                                {{ formatIndonesianNumber($ingredient['available']) }}
+
+                                            </td>
+                                            @if ($stockCheck['has_snapshots'] && isset($ingredient['current_available']))
+                                                <td>
+                                                    {{ formatIndonesianNumber($ingredient['current_available']) }}
+                                                </td>
+                                            @endif
+
+                                            <td>
+                                                @if ($isSufficient)
+                                                    <span class="badge bg-success">
+                                                        Cukup
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-danger">
+                                                        Kurang
+                                                        {{ formatIndonesianNumber($neededAmount - $ingredient['available']) }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="col-lg-4">
@@ -568,108 +716,62 @@
                     </div>
                 </div>
 
-                <div class="card">
+
+                @if(isset($handlers) && $handlers->count() > 0)
+                <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
-                            <i class="bx bx-package me-2"></i>
-                            Ketersediaan Stock
-                            @if ($stockCheck['has_snapshots'])
-                                <small class="text-muted">
-                                    (berdasarkan snapshot saat approval)
-                                </small>
-                            @endif
+                            <i class="bx bx-list-check me-2"></i>
+                            Handler Stok (Kelebihan/Kekurangan)
                         </h5>
-                        @if (!$stockCheck['can_produce'])
-                            <span class="badge bg-danger">
-                                Laporan Kekurangan Stok
-                            </span>
-                        @else
-                            <span class="badge bg-success">
-                                Stock Mencukupi
-                            </span>
-                        @endif
                     </div>
                     <div class="card-body">
-                        @if (!$stockCheck['can_produce'])
-                            <div class="alert alert-danger mb-4">
-                                <i class="bx bx-error-circle me-2"></i>
-                                <strong>Peringatan:</strong>
-                                Kekurangan stok di bawah merupakan laporan kekurangan stok pada saat pertama kali diajukan.
-                            </div>
-                        @endif
-
-                        @if ($stockCheck['has_snapshots'])
-                            <div class="alert alert-info mb-4">
-                                <i class="bx bx-camera me-2"></i>
-                                <strong>Info:</strong>
-                                Data stock yang ditampilkan adalah snapshot saat
-                                approval transaksi dibuat pada
-                                {{ $approval->created_at->format('d M Y, H:i') }}.
-                            </div>
-                        @endif
-
                         <div class="table-responsive">
-                            <table class="table table-sm">
+                            <table class="table table-sm" style="font-size: 0.85rem;">
                                 <thead>
                                     <tr>
                                         <th>Bahan</th>
-                                        <th>Diperlukan</th>
-                                        <th>Snapshot Stock</th>
-                                        @if ($stockCheck['has_snapshots'] && isset($stockCheck['ingredients_summary'][0]['current_available']))
-                                            <th>Stock Saat Ini</th>
-                                        @endif
-
+                                        <th>Jenis</th>
+                                        <th>Jumlah</th>
+                                        <th>Catatan</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($stockCheck['ingredients_summary'] as $ingredient)
-                                        @php
-                                            $neededAmount = $ingredient['needed'];
-                                            $isSufficient = $ingredient['sufficient'];
-                                            $isBahanBasah = isset($ingredient['is_bahan_basah'])
-                                                ? $ingredient['is_bahan_basah']
-                                                : false;
-                                        @endphp
-
-                                        <tr class="{{ !$isSufficient ? 'table-danger-subtle' : '' }}">
+                                    @foreach($handlers as $handler)
+                                        <tr>
                                             <td>
-                                                <div class="fw-medium">
-                                                    {{ $ingredient['nama_bahan'] }}
-                                                </div>
-                                                <small class="text-muted">
-                                                    {{ $ingredient['satuan'] }}
-                                                    @if ($isBahanBasah)
-                                                        <span class="text-info">
-                                                            (Bahan Basah +7%)
-                                                        </span>
-                                                    @endif
-                                                </small>
+                                                <div class="fw-medium">{{ $handler->templateItem->nama_bahan ?? '-' }}</div>
                                             </td>
                                             <td>
-                                                {{ formatIndonesianNumber($neededAmount) }}
-                                            </td>
-                                            <td>
-                                                {{ formatIndonesianNumber($ingredient['available']) }}
-
-                                            </td>
-                                            @if ($stockCheck['has_snapshots'] && isset($ingredient['current_available']))
-                                                <td>
-                                                    {{ formatIndonesianNumber($ingredient['current_available']) }}
-                                                </td>
-                                            @endif
-
-                                            <td>
-                                                @if ($isSufficient)
-                                                    <span class="badge bg-success">
-                                                        Cukup
-                                                    </span>
+                                                @if ($handler->jenis === 'kelebihan')
+                                                    <span class="badge bg-label-success" style="font-size: 0.75rem;"><i class="bx bx-plus"></i> Kelebihan</span>
                                                 @else
-                                                    <span class="badge bg-danger">
-                                                        Kurang
-                                                        {{ formatIndonesianNumber($neededAmount - $ingredient['available']) }}
-                                                    </span>
+                                                    <span class="badge bg-label-danger" style="font-size: 0.75rem;"><i class="bx bx-minus"></i> Kekurangan</span>
                                                 @endif
+                                            </td>
+                                            <td>
+                                                {{ formatIndonesianNumber($handler->jumlah) }} {{ $handler->templateItem->satuan ?? '' }}
+                                            </td>
+                                            <td>
+                                                <div style="white-space: pre-wrap; word-break: break-word; min-width: 150px;">{{ $handler->catatan ?? '-' }}</div>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $statusClass = 'bg-label-secondary';
+                                                    $statusText = 'Unknown';
+                                                    if ($handler->status === 'pending') {
+                                                        $statusClass = 'bg-label-warning';
+                                                        $statusText = 'Menunggu';
+                                                    } elseif ($handler->status === 'resolved' || $handler->status === 'approved') {
+                                                        $statusClass = 'bg-label-success';
+                                                        $statusText = 'Disetujui';
+                                                    } elseif ($handler->status === 'rejected') {
+                                                        $statusClass = 'bg-label-danger';
+                                                        $statusText = 'Ditolak';
+                                                    }
+                                                @endphp
+                                                <span class="badge {{ $statusClass }}" style="font-size: 0.75rem;">{{ $statusText }}</span>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -678,6 +780,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 @if ($approval->isPending())
                     <div class="card">
